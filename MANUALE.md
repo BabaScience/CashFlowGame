@@ -362,6 +362,32 @@ questa versione, ma rispettano le fasce di prezzo e i rendimenti del gioco vero.
 **Il tabellone.** 24 caselle nella Corsa dei Topi e 48 sulla Corsia Veloce,
 con la stessa alternanza del tabellone originale.
 
+**Il dado.** Un generatore casuale uniforme, tirato sul server: nessun
+giocatore può influenzarlo. Sulla Corsia Veloce si tirano due dadi separati,
+quindi il 7 esce sei volte più spesso del 2, come coi dadi veri.
+
+**Cosa è stato semplificato.** Tre regole del gioco da tavolo non sono state
+riportate, ed è giusto saperlo:
+
+- **Rivendere una carta Opportunità a un altro giocatore.** Nel gioco vero,
+  quando la carta lo consente, puoi cedere a un altro giocatore il diritto di
+  fare quell'affare, a un prezzo che contrattate fra voi. Qui la carta la
+  gioca solo chi l'ha pescata: la contrattazione libera richiederebbe una
+  trattativa che il turno online non gestisce.
+- **I prestiti per le spese obbligatorie sono automatici.** Il regolamento
+  dice che *puoi* chiedere un prestito per pagare una Spesa Extra; qui, se non
+  hai contanti, il prestito viene acceso da solo (a multipli di $1.000, con la
+  sua rata). Serve a non lasciare mai i contanti sotto zero, che sul tabellone
+  vero non può succedere perché i soldi sono fisici.
+- **Gli affari della Corsia Veloce che richiedono un tiro di dado.** Alcune
+  caselle verdi originali si conquistano solo riuscendo un tiro, e restano
+  disponibili finché qualcuno non ci riesce. Qui si comprano direttamente
+  pagando l'acconto.
+
+Tutto il resto — Giorno di Paga, Opportunità, Mercato, Spese Extra,
+Beneficenza, Figli, Licenziamento, prestiti, estinzione debiti, bancarotta,
+uscita dalla corsa e le due vittorie — segue il regolamento alla lettera.
+
 **Il banchiere.** Nel gioco da tavolo serve una persona che tenga la cassa.
 Qui i conti li fa il server: nessuno può sbagliare una somma o barare.
 
