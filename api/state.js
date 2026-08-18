@@ -6,12 +6,13 @@
  * leggendo dal database il solo campo `versione`.
  * Solo quando qualcosa è cambiato viene letto e spedito lo stato completo.
  */
-import { stanze, configurato } from "./_lib/db.js";
+import { stanze, statoConfigurazione } from "./_lib/db.js";
 import { json, errore, normalizzaCodice } from "./_lib/http.js";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") return errore(res, 405, "Metodo non consentito.");
-  if (!configurato()) return errore(res, 503, "Database non configurato: manca MONGODB_URI.");
+  const config = statoConfigurazione();
+  if (!config.ok) return errore(res, 503, config.errore);
 
   const codice = normalizzaCodice(req.query.codice);
   if (!codice) return errore(res, 400, "Codice stanza mancante.");

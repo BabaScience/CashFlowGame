@@ -1,0 +1,5 @@
+# Le pagine di gioco sono tutte dietro un codice stanza: non c'è nulla da
+# indicizzare oltre alla schermata iniziale.
+User-agent: *
+Allow: /
+Disallow: /api/

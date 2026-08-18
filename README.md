@@ -11,6 +11,7 @@ Da 2 a 6 giocatori, ognuno dal proprio telefono, con un codice stanza di 4 lette
 - Entrambe le condizioni di vittoria: comprare il proprio sogno, o +$50.000 di flusso
 - Interfaccia pensata per il telefono, con animazioni di dadi, carte e pedine
 - Manuale completo delle regole dentro l'app → [MANUALE.md](MANUALE.md)
+- Installabile sul telefono, con icone e anteprima del link già pronte
 
 ---
 
@@ -32,9 +33,12 @@ due `localStorage` diversi, altrimenti sei sempre lo stesso giocatore.
 npm test
 ```
 
-Esegue 30 verifiche puntuali sul regolamento (ognuna cita la pagina del manuale
-ufficiale) e simula 60 partite complete con giocatori automatici, controllando
-che il motore non si blocchi mai e che nessuno finisca coi contanti negativi.
+Esegue 17 verifiche sulla stringa di connessione, 30 verifiche puntuali sul
+regolamento (ognuna cita la pagina del manuale ufficiale) e simula 60 partite
+complete con giocatori automatici, controllando che il motore non si blocchi
+mai e che nessuno finisca coi contanti negativi.
+
+Singolarmente: `npm run test:uri`, `npm run test:regole`, `npm run test:simula`.
 
 ---
 
@@ -44,9 +48,25 @@ che il motore non si blocchi mai e che nessuno finisca coi contanti negativi.
 
 1. Crea un account su [mongodb.com/atlas](https://www.mongodb.com/atlas) e un
    cluster **M0** (gratuito, 512 MB).
-2. *Database Access* → crea un utente con password.
-3. *Network Access* → aggiungi `0.0.0.0/0` (Vercel non ha indirizzi IP fissi).
-4. *Database* → **Connect** → **Drivers** → copia la stringa di connessione.
+2. *Database Access* → **Add New Database User**: scegli un nome utente e una
+   password. Sono questi che andranno in `MONGODB_USERNAME` e
+   `MONGODB_PASSWORD` — **non** l'account con cui entri nel sito di Atlas.
+3. *Network Access* → **Add IP Address** → `0.0.0.0/0`.
+   Serve perché le funzioni di Vercel non hanno indirizzi IP fissi.
+4. *Database* → **Connect** → **Drivers** → copia la stringa.
+   Puoi lasciarci dentro i segnaposto `<db_username>` e `<db_password>`:
+   vengono sostituiti in automatico.
+
+Prova le credenziali **prima** di mettere online:
+
+```bash
+cp .env.example .env    # poi riempi .env
+npm run db:prova
+```
+
+Lo script si connette, crea gli indici, scrive e cancella un documento di
+prova e ti dice quanto spazio stai occupando. Se qualcosa non va, spiega cosa
+controllare (password sbagliata, cluster irraggiungibile, IP non ammesso).
 
 ### 2. Il repository
 
@@ -59,18 +79,62 @@ git push -u origin main
 
 1. Su [vercel.com](https://vercel.com) → **Add New** → **Project** → importa il repository.
 2. Il framework viene riconosciuto da solo (Vite). Non toccare i comandi di build.
-3. In **Environment Variables** aggiungi:
+3. In **Settings → Environment Variables** aggiungi:
 
-   | Nome | Valore |
-   |---|---|
-   | `MONGODB_URI` | la stringa di connessione di Atlas |
-   | `MONGODB_DB` | `cashflow` (facoltativo) |
-   | `CRON_SECRET` | una stringa a caso, per proteggere la pulizia automatica |
+   | Variabile | Obbligatoria | Cos'è |
+   |---|:---:|---|
+   | `MONGODB_URI` | sì | La stringa copiata da Atlas. I segnaposto `<db_username>` / `<db_password>` possono restare. |
+   | `MONGODB_USERNAME` | sì | Utente del database (Atlas → Database Access). |
+   | `MONGODB_PASSWORD` | sì | La sua password. Può contenere `@ / : # %`: viene codificata da sola. |
+   | `MONGODB_DB` | no | Nome del database. Predefinito: `cashflow`. |
+   | `CRON_SECRET` | consigliata | Stringa a caso che protegge `/api/cleanup`. |
+   | `VITE_SITE_URL` | no | Solo con un dominio tuo, per l'anteprima dei link. Su `.vercel.app` si ricava da sola. |
 
 4. **Deploy**.
 
-Il file [vercel.json](vercel.json) registra già il *cron* giornaliero che ripulisce
-il database.
+Il file [vercel.json](vercel.json) registra già il *cron* giornaliero di pulizia,
+le intestazioni di cache e l'instradamento.
+
+> **Perché utente e password separati dalla URI?** Perché così la password
+> viene codificata correttamente. Le password Atlas contengono spesso `@`, `/`
+> o `#`, caratteri che dentro una URI hanno un significato loro: incollate a
+> mano producono un errore di schema oppure un'autenticazione che fallisce
+> senza dire perché. Inoltre la password finisce meno facilmente in un log o in
+> uno screenshot. La composizione è in [api/_lib/uri.js](api/_lib/uri.js) e ha
+> 17 test dedicati (`npm run test:uri`).
+
+---
+
+## Come appare quando condividi il link
+
+In `public/` ci sono tutte le immagini del progetto:
+
+| File | A cosa serve |
+|---|---|
+| `og-banner.png` | L'immagine 1200×630 che appare su WhatsApp, Telegram, Facebook, Slack, iMessage, X |
+| `favicon.svg` | Icona della scheda del browser, nitida a ogni dimensione |
+| `favicon.ico`, `favicon-16/32.png` | Ripiego per i browser più vecchi |
+| `apple-touch-icon.png` | Icona quando si aggiunge alla schermata Home su iPhone |
+| `icona-192/512.png` | Icone per l'installazione su Android |
+| `icona-maskable-512.png` | Versione con margini, per il ritaglio circolare di Android |
+| `manifest.webmanifest` | Fa sì che l'app si possa installare e si apra a schermo intero |
+
+Le immagini sono generate da uno script, così restano rigenerabili identiche se
+un giorno cambi colori o scritte:
+
+```bash
+pip install pillow
+python3 scripts/genera-immagini.py
+```
+
+Disegna il tabellone vero — gli stessi 24 e 48 settori, con i colori presi da
+`globale.css` — e usa gli stessi caratteri dell'applicazione (Archivo Black e
+Barlow, in licenza SIL Open Font, in `scripts/font/`).
+
+L'anteprima ha bisogno di un indirizzo **assoluto**: un percorso relativo viene
+ignorato da quasi tutti i servizi e l'immagine non compare. L'indirizzo viene
+calcolato in fase di compilazione da `VITE_SITE_URL`, oppure dalle variabili
+che Vercel imposta da sé.
 
 ---
 
@@ -130,9 +194,14 @@ src/components/       tabellone SVG, dadi, carte, scheda, registro, manuale
 src/screens/          ingresso, sala d'attesa, partita
 src/hooks/useStanza.js sincronizzazione col server
 
+public/               icone, banner per le anteprime, manifest
+
 scripts/
+  prova-uri.mjs       verifiche sulla stringa di connessione
   prova-regole.mjs    verifiche sul regolamento
+  prova-connessione.mjs prova le credenziali contro Atlas vero
   simula.mjs          simulatore di partite complete
+  genera-immagini.py  rigenera icone e banner
   api-locale.js       API in memoria per lo sviluppo
 ```
 

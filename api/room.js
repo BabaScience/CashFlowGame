@@ -10,7 +10,7 @@
  * La concorrenza è gestita con un controllo di versione ottimistico:
  * si riscrive il documento solo se nel frattempo nessun altro l'ha toccato.
  */
-import { stanze, configurato, scadenza } from "./_lib/db.js";
+import { stanze, statoConfigurazione, scadenza } from "./_lib/db.js";
 import { json, errore, corpo, normalizzaCodice, validoId } from "./_lib/http.js";
 import { creaStanza, codiceStanza, applicaAzione } from "../src/game/motore.js";
 
@@ -18,7 +18,8 @@ const MAX_TENTATIVI = 5;
 
 export default async function handler(req, res) {
   if (req.method !== "POST") return errore(res, 405, "Metodo non consentito.");
-  if (!configurato()) return errore(res, 503, "Database non configurato: manca MONGODB_URI.");
+  const config = statoConfigurazione();
+  if (!config.ok) return errore(res, 503, config.errore);
 
   const body = await corpo(req);
   const { op } = body;

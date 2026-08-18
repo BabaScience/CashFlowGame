@@ -3,15 +3,58 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1" />
-    <meta name="theme-color" content="#12211f" />
-    <meta name="description" content="CASHFLOW online: esci dalla Corsa dei Topi e conquista la Corsia Veloce. Gioco da tavolo multigiocatore fino a 6 persone." />
+
     <title>CASHFLOW · Esci dalla Corsa dei Topi</title>
+    <meta name="description" content="Il gioco da tavolo CASHFLOW, online e multigiocatore. Da 2 a 6 giocatori con un codice stanza: Corsa dei Topi, Corsia Veloce, regole complete e schede finanziarie automatiche." />
+    <meta name="author" content="CASHFLOW online" />
+    <link rel="canonical" href="%SITE_URL%/" />
+
+    <!-- Icone -->
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+
+    <!-- Colori dell'interfaccia di sistema -->
+    <meta name="theme-color" content="#10201b" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CASHFLOW" />
+
+    <!-- Anteprima quando si condivide il link (WhatsApp, Telegram, Facebook, iMessage, Slack…) -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="CASHFLOW online" />
+    <meta property="og:locale" content="it_IT" />
+    <meta property="og:title" content="CASHFLOW · Esci dalla Corsa dei Topi" />
+    <meta property="og:description" content="Il gioco da tavolo CASHFLOW, online e multigiocatore. Da 2 a 6 giocatori con un codice stanza." />
+    <meta property="og:url" content="%SITE_URL%/" />
+    <meta property="og:image" content="%SITE_URL%/og-banner.png" />
+    <meta property="og:image:secure_url" content="%SITE_URL%/og-banner.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Il tabellone di CASHFLOW: due anelli colorati attorno a un rombo dorato." />
+
+    <!-- X / Twitter -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="CASHFLOW · Esci dalla Corsa dei Topi" />
+    <meta name="twitter:description" content="Il gioco da tavolo CASHFLOW, online e multigiocatore. Da 2 a 6 giocatori con un codice stanza." />
+    <meta name="twitter:image" content="%SITE_URL%/og-banner.png" />
+    <meta name="twitter:image:alt" content="Il tabellone di CASHFLOW: due anelli colorati attorno a un rombo dorato." />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      <div style="padding:24px;font-family:system-ui,sans-serif;color:#F4F1E6">
+        CASHFLOW ha bisogno di JavaScript attivo per funzionare.
+      </div>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>

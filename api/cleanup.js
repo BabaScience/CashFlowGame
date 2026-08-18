@@ -5,11 +5,12 @@
  * sicurezza: rimuove le stanze rimaste senza scadenza valida, quelle mai
  * avviate e quelle finite da un pezzo, così il piano gratuito non si riempie.
  */
-import { stanze, configurato, TTL_ATTESA_MS, TTL_FINITA_MS, TTL_ATTIVA_MS } from "./_lib/db.js";
+import { stanze, statoConfigurazione, TTL_ATTESA_MS, TTL_FINITA_MS, TTL_ATTIVA_MS } from "./_lib/db.js";
 import { json, errore } from "./_lib/http.js";
 
 export default async function handler(req, res) {
-  if (!configurato()) return errore(res, 503, "Database non configurato.");
+  const config = statoConfigurazione();
+  if (!config.ok) return errore(res, 503, config.errore);
 
   // Vercel Cron manda un header di autorizzazione se CRON_SECRET è impostato.
   const atteso = process.env.CRON_SECRET;

@@ -11,9 +11,24 @@
  *  - il polling legge solo il campo `versione` finché non cambia nulla.
  */
 import { MongoClient } from "mongodb";
+import { componiUri, uriOscurata } from "./uri.js";
 
-const URI = process.env.MONGODB_URI;
 const NOME_DB = process.env.MONGODB_DB || "cashflow";
+
+/**
+ * Le credenziali arrivano da tre variabili separate:
+ *   MONGODB_USERNAME · MONGODB_PASSWORD · MONGODB_URI
+ * La composizione (e la codifica della password) è in uri.js.
+ * Viene calcolata una volta sola per avvio a freddo della funzione.
+ */
+const { uri: URI, errore: ERRORE_CONFIG } = componiUri(
+  process.env.MONGODB_URI,
+  process.env.MONGODB_USERNAME,
+  process.env.MONGODB_PASSWORD
+);
+
+if (ERRORE_CONFIG) console.error("Configurazione MongoDB:", ERRORE_CONFIG);
+else console.log("MongoDB:", uriOscurata(URI), "· database:", NOME_DB);
 
 /** Quanto vive una stanza dopo l'ultima mossa. */
 export const TTL_ATTIVA_MS = 48 * 60 * 60 * 1000;   // 48 ore
@@ -25,12 +40,17 @@ export const TTL_ATTESA_MS = 6 * 60 * 60 * 1000;    // 6 ore
 let cached = global.__cashflowMongo;
 if (!cached) cached = global.__cashflowMongo = { client: null, promise: null, indici: false };
 
-export function configurato() {
-  return Boolean(URI);
+/**
+ * Stato della configurazione, con un messaggio utile da mostrare
+ * invece del solito "errore 500" quando manca una variabile.
+ */
+export function statoConfigurazione() {
+  return { ok: Boolean(URI), errore: ERRORE_CONFIG };
 }
 
+
 async function client() {
-  if (!URI) throw new Error("MONGODB_URI non è configurata.");
+  if (!URI) throw new Error(ERRORE_CONFIG || "MongoDB non è configurato.");
   if (cached.client) return cached.client;
   if (!cached.promise) {
     cached.promise = new MongoClient(URI, {

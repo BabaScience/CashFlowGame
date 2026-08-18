@@ -1,0 +1,20 @@
+{
+  "name": "CASHFLOW · Esci dalla Corsa dei Topi",
+  "short_name": "CASHFLOW",
+  "description": "Il gioco da tavolo CASHFLOW, online e multigiocatore. Da 2 a 6 giocatori, regole complete, Corsa dei Topi e Corsia Veloce.",
+  "lang": "it",
+  "dir": "ltr",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#10201b",
+  "theme_color": "#10201b",
+  "categories": ["games", "education", "finance"],
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "/icona-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icona-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/icona-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
