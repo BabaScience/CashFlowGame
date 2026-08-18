@@ -66,18 +66,33 @@ function analizza(md) {
       out.push({ t: "cit", testo: blocco.join(" ") });
       continue;
     }
-    if (/^\s*[-*]\s/.test(r)) {
+    // Elenchi puntati e numerati.
+    // Le righe rientrate che seguono una voce ne fanno parte: senza questo
+    // controllo un elenco numerato con testo di continuazione si spezzerebbe
+    // in due elenchi e la numerazione ripartirebbe da 1.
+    const nuovaVoce = (riga, ordinato) =>
+      ({ principale: riga.replace(ordinato ? /^\s*\d+\.\s*/ : /^\s*[-*]\s/, ""), sotto: [] });
+
+    const raccogliElenco = (ordinato) => {
+      const inizioVoce = ordinato ? /^\s*\d+\.\s/ : /^\s*[-*]\s/;
       const voci = [];
-      while (i < righe.length && /^\s*[-*]\s/.test(righe[i])) { voci.push(righe[i].replace(/^\s*[-*]\s/, "")); i++; }
-      out.push({ t: "ul", voci });
-      continue;
-    }
-    if (/^\s*\d+\.\s/.test(r)) {
-      const voci = [];
-      while (i < righe.length && /^\s*\d+\.\s/.test(righe[i])) { voci.push(righe[i].replace(/^\s*\d+\.\s*/, "")); i++; }
-      out.push({ t: "ol", voci });
-      continue;
-    }
+      while (i < righe.length) {
+        if (inizioVoce.test(righe[i]) && !/^\s{2,}/.test(righe[i])) {
+          voci.push(nuovaVoce(righe[i], ordinato));
+          i++;
+        } else if (/^\s{2,}\S/.test(righe[i]) && voci.length) {
+          const cont = righe[i].trim();
+          const ultima = voci[voci.length - 1];
+          if (/^[-*]\s/.test(cont)) ultima.sotto.push(cont.replace(/^[-*]\s/, ""));
+          else ultima.principale += " " + cont;
+          i++;
+        } else break;
+      }
+      return voci;
+    };
+
+    if (/^\s*[-*]\s/.test(r)) { out.push({ t: "ul", voci: raccogliElenco(false) }); continue; }
+    if (/^\s*\d+\.\s/.test(r)) { out.push({ t: "ol", voci: raccogliElenco(true) }); continue; }
     if (r.trim() === "") { i++; continue; }
 
     const par = [];
@@ -132,7 +147,18 @@ export default function Manuale() {
           const Tag = b.t === "ul" ? "ul" : "ol";
           return (
             <Tag key={k} style={{ paddingLeft: 20, margin: "10px 0", fontSize: 14.5 }}>
-              {b.voci.map((v, j) => <li key={j} style={{ marginBottom: 5 }}>{inline(v, `${k}-${j}`)}</li>)}
+              {b.voci.map((v, j) => (
+                <li key={j} style={{ marginBottom: 5 }}>
+                  {inline(v.principale, `${k}-${j}`)}
+                  {v.sotto.length > 0 && (
+                    <ul style={{ paddingLeft: 18, margin: "5px 0 0" }}>
+                      {v.sotto.map((sv, l) => (
+                        <li key={l} style={{ marginBottom: 3 }}>{inline(sv, `${k}-${j}-${l}`)}</li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              ))}
             </Tag>
           );
         }
