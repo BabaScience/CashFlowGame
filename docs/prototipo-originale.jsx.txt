@@ -1,0 +1,787 @@
+import React, { useState, useEffect, useRef, useMemo, useCallback } from "react";
+
+/* ═══ Palette ═══════════════════════════════════════════════════════ */
+const C = {
+  paper: "#F2F5EF", grid: "#DCE4DC", ink: "#16242B", mute: "#6C7B80", line: "#C9D4CB",
+  deal: "#5E9E3E", market: "#2E6FA8", extra: "#B23A2E", payday: "#C4671F",
+  charity: "#5B3E8E", baby: "#3E8E86", down: "#7A5230", gold: "#C9A227",
+};
+const PCOL = ["#B23A2E", "#2E6FA8", "#5E9E3E", "#C4671F", "#5B3E8E", "#3E8E86"];
+
+const FONTS = `@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;600&display=swap');
+*{-webkit-tap-highlight-color:transparent;box-sizing:border-box}
+input,select,button,textarea{font-size:16px}
+::-webkit-scrollbar{display:none}`;
+const fD = "'Archivo Black',system-ui,sans-serif";
+const fB = "'Barlow',system-ui,sans-serif";
+const fM = "'IBM Plex Mono',ui-monospace,monospace";
+
+const money = (n) => "$" + Math.round(n || 0).toLocaleString("it-IT");
+const uid = () => Math.random().toString(36).slice(2, 9);
+const code4 = () => Array.from({ length: 4 }, () => "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]).join("");
+const shuffle = (n) => { const a = [...Array(n).keys()]; for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+
+/* ═══ Professioni (originali) ═══════════════════════════════════════ */
+const PROF = [
+  { n: "Meccanico", sal: 2000, e: { tasse: 280, mutuo: 300, studio: 0, auto: 60, carte: 60, dettaglio: 50, altre: 450 }, l: { mutuo: 38000, studio: 0, auto: 3000, carte: 2000, dettaglio: 1000 }, kid: 140, cash: 710 },
+  { n: "Insegnante", sal: 3300, e: { tasse: 630, mutuo: 500, studio: 60, auto: 120, carte: 90, dettaglio: 50, altre: 760 }, l: { mutuo: 62000, studio: 12000, auto: 6000, carte: 3000, dettaglio: 1000 }, kid: 180, cash: 400 },
+  { n: "Infermiere", sal: 3100, e: { tasse: 600, mutuo: 700, studio: 80, auto: 100, carte: 60, dettaglio: 50, altre: 690 }, l: { mutuo: 75000, studio: 15000, auto: 5000, carte: 2000, dettaglio: 1000 }, kid: 170, cash: 760 },
+  { n: "Sviluppatore", sal: 4900, e: { tasse: 1050, mutuo: 1100, studio: 150, auto: 220, carte: 130, dettaglio: 50, altre: 900 }, l: { mutuo: 122000, studio: 28000, auto: 11000, carte: 4000, dettaglio: 1000 }, kid: 220, cash: 900 },
+  { n: "Avvocato", sal: 7500, e: { tasse: 1830, mutuo: 1330, studio: 300, auto: 380, carte: 270, dettaglio: 50, altre: 1300 }, l: { mutuo: 150000, studio: 60000, auto: 19000, carte: 9000, dettaglio: 1000 }, kid: 380, cash: 400 },
+  { n: "Pilota", sal: 9500, e: { tasse: 2350, mutuo: 1330, studio: 750, auto: 380, carte: 270, dettaglio: 50, altre: 1400 }, l: { mutuo: 202000, studio: 150000, auto: 19000, carte: 9000, dettaglio: 1000 }, kid: 480, cash: 400 },
+];
+
+/* ═══ Mazzi (contenuto originale) ═══════════════════════════════════ */
+// stock: azioni  ·  re: immobile  ·  biz: attività  ·  cost: uscita secca
+const SMALL = [
+  { t: "stock", sym: "NVL", price: 5, div: 0, note: "Titolo volatile: oscilla tra $1 e $40." },
+  { t: "stock", sym: "NVL", price: 20, div: 0, note: "Il titolo è salito. Compri o aspetti?" },
+  { t: "stock", sym: "ORT", price: 10, div: 0.1, note: "Paga $0,10 per azione al mese." },
+  { t: "stock", sym: "ORT", price: 30, div: 0.1, note: "Prezzo alto, dividendo invariato." },
+  { t: "stock", sym: "BIOS", price: 15, div: 0, note: "Biotech in fase clinica." },
+  { t: "stock", sym: "SOLE", price: 25, div: 0.2, note: "Utility solare, dividendo stabile." },
+  { t: "re", tag: "casa2", n: "Bilocale in periferia", cost: 45000, down: 5000, mort: 40000, cf: 160 },
+  { t: "re", tag: "casa3", n: "Trilocale vicino alla stazione", cost: 65000, down: 6000, mort: 59000, cf: 220 },
+  { t: "re", tag: "casa2", n: "Bilocale da ristrutturare", cost: 38000, down: 4000, mort: 34000, cf: 130 },
+  { t: "re", tag: "casa3", n: "Villetta a schiera", cost: 90000, down: 9000, mort: 81000, cf: 300 },
+  { t: "re", tag: "terreno", n: "10 ettari di terreno agricolo", cost: 12000, down: 12000, mort: 0, cf: 0, note: "Nessun affitto: guadagni solo alla rivendita." },
+  { t: "re", tag: "casa2", n: "Monolocale all'asta", cost: 30000, down: 3000, mort: 27000, cf: 140 },
+  { t: "biz", tag: "biz", n: "Distributori automatici", cost: 5000, down: 5000, mort: 0, cf: 100 },
+  { t: "biz", tag: "biz", n: "Lavaggio auto self-service", cost: 15000, down: 4000, mort: 11000, cf: 120 },
+  { t: "biz", tag: "biz", n: "Micro-SaaS per idraulici", cost: 8000, down: 2000, mort: 6000, cf: 180, note: "MRR basso ma margine alto." },
+  { t: "biz", tag: "biz", n: "Corso online registrato", cost: 3000, down: 3000, mort: 0, cf: 90 },
+  { t: "cost", n: "Il tetto del tuo immobile perde", amount: 2000, note: "Solo se possiedi un immobile." },
+  { t: "cost", n: "Un amico ti chiede un prestito", amount: 1000, note: "Puoi rifiutare senza penalità." },
+  { t: "re", tag: "condo", n: "Quadrilocale con inquilino", cost: 100000, down: 10000, mort: 90000, cf: 380 },
+  { t: "biz", tag: "biz", n: "Chiosco street food", cost: 12000, down: 3000, mort: 9000, cf: 110 },
+];
+const BIG = [
+  { t: "re", tag: "palazzina", n: "Palazzina 8 appartamenti", cost: 240000, down: 30000, mort: 210000, cf: 1200 },
+  { t: "re", tag: "palazzina", n: "Palazzina 12 appartamenti", cost: 350000, down: 45000, mort: 305000, cf: 1700 },
+  { t: "re", tag: "palazzina", n: "Residence 20 unità", cost: 600000, down: 80000, mort: 520000, cf: 2900 },
+  { t: "biz", tag: "biz", n: "Autolavaggio in franchising", cost: 130000, down: 20000, mort: 110000, cf: 800 },
+  { t: "biz", tag: "biz", n: "Piattaforma SaaS B2B", cost: 90000, down: 25000, mort: 65000, cf: 1400, note: "Alto margine, richiede il tuo tempo." },
+  { t: "biz", tag: "biz", n: "Catena di lavanderie", cost: 200000, down: 35000, mort: 165000, cf: 1000 },
+  { t: "re", tag: "commerciale", n: "Locale commerciale su strada", cost: 280000, down: 40000, mort: 240000, cf: 1300 },
+  { t: "biz", tag: "biz", n: "Studio di sviluppo app", cost: 150000, down: 30000, mort: 120000, cf: 1100 },
+  { t: "re", tag: "palazzina", n: "Immobile pignorato, 6 unità", cost: 150000, down: 15000, mort: 135000, cf: 900, note: "Occasione: prezzo sotto mercato." },
+  { t: "biz", tag: "biz", n: "Impianto fotovoltaico in affitto", cost: 220000, down: 50000, mort: 170000, cf: 1500 },
+  { t: "biz", tag: "biz", n: "Deposito self-storage", cost: 320000, down: 60000, mort: 260000, cf: 2100 },
+  { t: "re", tag: "commerciale", n: "Capannone logistico", cost: 400000, down: 70000, mort: 330000, cf: 2400 },
+];
+const MARKET = [
+  { t: "buy", tag: "casa2", n: "Cerco bilocale", offer: 60000, note: "Un acquirente offre per ogni bilocale." },
+  { t: "buy", tag: "casa3", n: "Famiglia cerca trilocale", offer: 95000 },
+  { t: "buy", tag: "condo", n: "Investitore cerca quadrilocale", offer: 135000 },
+  { t: "buy", tag: "palazzina", n: "Fondo compra palazzine", offer: 0, mult: 1.35, note: "Offre il 135% del costo." },
+  { t: "buy", tag: "commerciale", n: "Catena cerca locali", offer: 0, mult: 1.3 },
+  { t: "buy", tag: "terreno", n: "Il comune rezona i terreni", offer: 40000 },
+  { t: "buy", tag: "biz", n: "Concorrente vuole comprarti", offer: 0, mult: 1.5, note: "Exit al 150% del costo." },
+  { t: "px", sym: "NVL", price: 40, note: "Boom: il titolo vola." },
+  { t: "px", sym: "NVL", price: 1, note: "Crollo: puoi comprare a $1." },
+  { t: "px", sym: "ORT", price: 35, note: "Offerta pubblica di acquisto." },
+  { t: "px", sym: "BIOS", price: 50, note: "Trial di fase 3 superato." },
+  { t: "px", sym: "SOLE", price: 5, note: "Tagli agli incentivi." },
+  { t: "ev", n: "Inquilino moroso", amount: 500, note: "Paghi $500 per ogni immobile residenziale." , per: "res" },
+  { t: "ev", n: "Nuova linea metro", amount: 0, note: "Nessun effetto immediato: il quartiere si rivaluta." },
+];
+const DOODAD = [
+  { n: "Nuovo telefono top di gamma", a: 1200 },
+  { n: "Weekend last minute", a: 800 },
+  { n: "Multa e punti della patente", a: 300 },
+  { n: "Il cane dal veterinario", a: 500 },
+  { n: "Lavatrice da sostituire", a: 700 },
+  { n: "Cena importante e regalo", a: 400 },
+  { n: "Corso online che non finirai", a: 250 },
+  { n: "Bici elettrica", a: 1500 },
+  { n: "Gomme nuove per l'auto", a: 900 },
+  { n: "Attrezzatura da palestra a casa", a: 1100 },
+  { n: "Scarpe per i figli", a: 200, perKid: true },
+  { n: "Campo estivo dei figli", a: 350, perKid: true },
+  { n: "Impianto audio", a: 2000 },
+  { n: "Vacanza in famiglia", a: 2500 },
+];
+const FTBIZ = [
+  { n: "Franchising di caffetterie", cost: 250000, cf: 30000 },
+  { n: "Rete di data center", cost: 500000, cf: 60000 },
+  { n: "Cliniche veterinarie", cost: 180000, cf: 20000 },
+  { n: "Piattaforma logistica", cost: 400000, cf: 45000 },
+  { n: "Catena di palestre", cost: 300000, cf: 35000 },
+  { n: "Portafoglio SaaS", cost: 350000, cf: 40000 },
+  { n: "Parco eolico", cost: 600000, cf: 70000 },
+  { n: "Hotel boutique", cost: 220000, cf: 25000 },
+  { n: "Studio di produzione video", cost: 150000, cf: 15000 },
+  { n: "Fondo immobiliare urbano", cost: 450000, cf: 50000 },
+];
+const DREAMS = [
+  { n: "Fare il giro del mondo", cost: 150000 },
+  { n: "Costruire una scuola", cost: 200000 },
+  { n: "Casa sul mare", cost: 300000 },
+  { n: "Fondare una no-profit", cost: 250000 },
+  { n: "Un anno sabbatico per la famiglia", cost: 100000 },
+  { n: "Finanziare 10 startup", cost: 400000 },
+  { n: "Studio di registrazione tuo", cost: 120000 },
+  { n: "Rifugio di montagna", cost: 180000 },
+];
+
+/* ═══ Tabellone ═════════════════════════════════════════════════════ */
+const RAT = ["deal", "payday", "deal", "market", "deal", "doodad", "deal", "charity", "deal", "payday", "deal", "market", "deal", "doodad", "baby", "deal", "payday", "deal", "market", "deal", "doodad", "downsize", "deal", "doodad"];
+const FAST = ["cfday", "ftbiz", "dream", "ftbiz", "audit", "ftbiz", "dream", "cfday", "ftbiz", "charityF", "ftbiz", "dream", "cfday", "ftbiz", "doodadF", "dream"];
+const SPACE = {
+  deal: ["Affari", C.deal], payday: ["Giorno di paga", C.payday], market: ["Mercato", C.market],
+  doodad: ["Extra", C.extra], charity: ["Beneficenza", C.charity], baby: ["Figlio", C.baby],
+  downsize: ["Licenziamento", C.down], cfday: ["Cashflow day", C.payday], ftbiz: ["Business", C.deal],
+  dream: ["Sogno", C.gold], audit: ["Verifica fiscale", C.extra], charityF: ["Beneficenza", C.charity], doodadF: ["Spesa extra", C.extra],
+};
+
+/* ═══ Calcoli ═══════════════════════════════════════════════════════ */
+function derive(p) {
+  const div = p.stocks.reduce((s, a) => s + (a.shares * (a.div || 0)), 0);
+  const reCf = p.re.reduce((s, a) => s + a.cf, 0);
+  const bizCf = p.biz.reduce((s, a) => s + a.cf, 0);
+  const passive = Math.round(div + reCf + bizCf);
+  const income = p.sal + passive;
+  const loanPay = Math.round(p.loan * 0.1);
+  const kids = p.kids * p.kid;
+  const exp = Object.values(p.e).reduce((s, v) => s + v, 0) + kids + loanPay;
+  const debt = Object.values(p.l).reduce((s, v) => s + v, 0) + p.loan +
+    p.re.reduce((s, a) => s + a.mort, 0) + p.biz.reduce((s, a) => s + a.mort, 0);
+  return { div, reCf, bizCf, passive, income, loanPay, kids, exp, debt, cf: income - exp, ratio: exp ? passive / exp : 0, free: exp > 0 && passive >= exp };
+}
+const ftPay = (p) => p.ftIncome + p.ftCf;
+
+const mkPlayer = (id, name, prof, dream, ci) => {
+  const P = PROF[prof];
+  return {
+    id, name, color: PCOL[ci % 6], prof, dream, ready: false,
+    pos: 0, track: "rat", cash: P.cash, sal: P.sal, e: { ...P.e }, l: { ...P.l }, kid: P.kid, kids: 0,
+    loan: 0, stocks: [], re: [], biz: [], charity: 0, skip: 0,
+    ftIncome: 0, ftCf: 0, ftBiz: [], won: false,
+  };
+};
+
+/* ═══ UI di base ════════════════════════════════════════════════════ */
+const Btn = ({ children, onClick, color = C.ink, ghost, disabled, wide }) => (
+  <button onClick={onClick} disabled={disabled}
+    className={`rounded-xl px-4 ${wide ? "w-full" : ""}`}
+    style={{
+      height: 52, fontFamily: fD, fontSize: 13, letterSpacing: 0.5,
+      background: disabled ? "#D6DCD6" : ghost ? "transparent" : color,
+      color: disabled ? "#9AA6A0" : ghost ? color : "#fff",
+      border: ghost ? `1px solid ${color}` : "none",
+    }}>{children}</button>
+);
+const Card = ({ children, style }) => (
+  <div className="rounded-2xl p-4 mb-3" style={{ background: "#fff", border: `1px solid ${C.line}`, ...style }}>{children}</div>
+);
+const KV = ({ k, v, color }) => (
+  <div className="flex justify-between" style={{ minHeight: 34 }}>
+    <span style={{ fontSize: 15, color: C.mute }}>{k}</span>
+    <span style={{ fontFamily: fM, fontSize: 15, color: color || C.ink }}>{v}</span>
+  </div>
+);
+
+/* ── Tabellone SVG ── */
+function Board({ game }) {
+  const S = 320, c = S / 2, Rout = 148, Rin = 104;
+  const seg = (i, n, R, w, col, key) => {
+    const a0 = (i / n) * 2 * Math.PI - Math.PI / 2, a1 = ((i + 0.86) / n) * 2 * Math.PI - Math.PI / 2;
+    const p = (a, r) => `${c + Math.cos(a) * r},${c + Math.sin(a) * r}`;
+    return <path key={key} d={`M ${p(a0, R - w / 2)} A ${R - w / 2} ${R - w / 2} 0 0 1 ${p(a1, R - w / 2)} L ${p(a1, R + w / 2)} A ${R + w / 2} ${R + w / 2} 0 0 0 ${p(a0, R + w / 2)} Z`} fill={col} />;
+  };
+  const dot = (pl, idx, n, R) => {
+    const a = ((idx + 0.43) / n) * 2 * Math.PI - Math.PI / 2;
+    return <circle key={pl.id} cx={c + Math.cos(a) * R} cy={c + Math.sin(a) * R} r="7" fill={pl.color} stroke="#fff" strokeWidth="2" />;
+  };
+  return (
+    <svg viewBox={`0 0 ${S} ${S}`} style={{ width: "100%", maxWidth: 360 }}>
+      {FAST.map((t, i) => seg(i, FAST.length, Rout, 20, SPACE[t][1], "f" + i))}
+      {RAT.map((t, i) => seg(i, RAT.length, Rin, 18, SPACE[t][1], "r" + i))}
+      {game.players.filter((p) => p.track === "rat").map((p) => dot(p, p.pos, RAT.length, Rin - 16))}
+      {game.players.filter((p) => p.track === "fast").map((p) => dot(p, p.pos, FAST.length, Rout + 18))}
+      <text x={c} y={c - 6} textAnchor="middle" style={{ fontFamily: fD, fontSize: 15, fill: C.ink }}>CORSA</text>
+      <text x={c} y={c + 12} textAnchor="middle" style={{ fontFamily: fD, fontSize: 15, fill: C.ink }}>DEI TOPI</text>
+      <text x={c} y={c + 30} textAnchor="middle" style={{ fontFamily: fM, fontSize: 9, fill: C.mute }}>anello esterno = fast track</text>
+    </svg>
+  );
+}
+
+/* ═══ App ═══════════════════════════════════════════════════════════ */
+const GK = (code) => `cfgame:${code}`;
+const LK = "cfgame:me";
+
+export default function CashflowOnline() {
+  const [me, setMe] = useState(null);        // { id, code }
+  const [game, setGame] = useState(null);
+  const [tab, setTab] = useState("tavolo");
+  const [ready, setReady] = useState(false);
+  const [toast, setToast] = useState("");
+  const [joinCode, setJoinCode] = useState("");
+  const [name, setName] = useState("");
+  const [prof, setProf] = useState(1);
+  const [dream, setDream] = useState(0);
+  const [qty, setQty] = useState("");
+  const [loanAmt, setLoanAmt] = useState("");
+  const busy = useRef(false);
+
+  const say = (m) => { setToast(m); setTimeout(() => setToast(""), 2200); };
+
+  /* boot */
+  useEffect(() => {
+    (async () => {
+      try { const r = await window.storage.get(LK); setMe(JSON.parse(r.value)); }
+      catch { setMe({ id: uid(), code: null }); }
+      setReady(true);
+    })();
+  }, []);
+  useEffect(() => { if (me) window.storage.set(LK, JSON.stringify(me)).catch(() => { }); }, [me]);
+
+  /* polling */
+  const pull = useCallback(async () => {
+    if (!me?.code || busy.current) return;
+    try { const r = await window.storage.get(GK(me.code), true); setGame(JSON.parse(r.value)); } catch { }
+  }, [me?.code]);
+  useEffect(() => {
+    if (!me?.code) { setGame(null); return; }
+    pull();
+    const i = setInterval(pull, 2500);
+    return () => clearInterval(i);
+  }, [me?.code, pull]);
+
+  /* commit: leggi → modifica → scrivi */
+  const commit = async (fn) => {
+    if (!me?.code) return;
+    busy.current = true;
+    try {
+      const r = await window.storage.get(GK(me.code), true);
+      const g = JSON.parse(r.value);
+      const next = fn(g);
+      if (next) { await window.storage.set(GK(me.code), JSON.stringify(next), true); setGame(next); }
+    } catch (e) { say("Sincronizzazione non riuscita, riprova"); }
+    busy.current = false;
+  };
+
+  const P = game?.players.find((x) => x.id === me?.id) || null;
+  const D = useMemo(() => (P ? derive(P) : null), [P]);
+  const turnId = game?.players[game?.turn]?.id;
+  const myTurn = turnId === me?.id;
+  const log = (g, text) => ({ ...g, log: [{ id: uid(), text, t: Date.now() }, ...g.log].slice(0, 200) });
+  const patch = (g, fn) => ({ ...g, players: g.players.map((x) => (x.id === me.id ? fn({ ...x }) : x)) });
+
+  if (!ready) return <div className="p-6" style={{ fontFamily: fB, color: C.mute }}>Carico…</div>;
+
+  /* ══ LOBBY: nessuna stanza ══ */
+  if (!me.code || !game) {
+    const create = async () => {
+      const code = code4();
+      const g = {
+        code, phase: "lobby", host: me.id, turn: 0, players: [], log: [],
+        deck: { small: shuffle(SMALL.length), big: shuffle(BIG.length), market: shuffle(MARKET.length), doodad: shuffle(DOODAD.length), ft: shuffle(FTBIZ.length) },
+        ptr: { small: 0, big: 0, market: 0, doodad: 0, ft: 0 },
+        dice: null, pending: null,
+      };
+      g.players.push(mkPlayer(me.id, name || "Io", prof, dream, 0));
+      try { await window.storage.set(GK(code), JSON.stringify(g), true); setMe({ ...me, code }); setGame(g); }
+      catch { say("Non riesco a creare la stanza"); }
+    };
+    const join = async () => {
+      const code = joinCode.trim().toUpperCase();
+      if (code.length < 3) return say("Inserisci il codice");
+      try {
+        const r = await window.storage.get(GK(code), true);
+        const g = JSON.parse(r.value);
+        if (g.phase !== "lobby") return say("Partita già iniziata");
+        if (!g.players.find((x) => x.id === me.id)) g.players.push(mkPlayer(me.id, name || "Ospite", prof, dream, g.players.length));
+        await window.storage.set(GK(code), JSON.stringify(g), true);
+        setMe({ ...me, code }); setGame(g);
+      } catch { say("Stanza non trovata"); }
+    };
+    return (
+      <div className="min-h-screen p-5" style={{ background: C.paper, fontFamily: fB }}>
+        <style>{FONTS}</style>
+        <h1 style={{ fontFamily: fD, fontSize: 30, color: C.ink, lineHeight: 1.05 }}>ESCI DALLA<br />CORSA DEI TOPI</h1>
+        <p className="mt-2 mb-5" style={{ color: C.mute, fontSize: 15 }}>Gioco da tavolo online: reddito passivo &gt; spese totali e passi al fast track.</p>
+        <Card>
+          <label style={{ fontSize: 13, color: C.mute }}>Il tuo nome</label>
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Bamba"
+            className="w-full rounded-lg px-3 mt-1 mb-3" style={{ height: 48, border: `1px solid ${C.line}`, background: C.paper }} />
+          <label style={{ fontSize: 13, color: C.mute }}>Professione</label>
+          <select value={prof} onChange={(e) => setProf(+e.target.value)} className="w-full rounded-lg px-3 mt-1 mb-3" style={{ height: 48, border: `1px solid ${C.line}`, background: C.paper }}>
+            {PROF.map((p, i) => <option key={i} value={i}>{p.n} · {money(p.sal)}/mese</option>)}
+          </select>
+          <label style={{ fontSize: 13, color: C.mute }}>Il tuo sogno</label>
+          <select value={dream} onChange={(e) => setDream(+e.target.value)} className="w-full rounded-lg px-3 mt-1" style={{ height: 48, border: `1px solid ${C.line}`, background: C.paper }}>
+            {DREAMS.map((d, i) => <option key={i} value={i}>{d.n} · {money(d.cost)}</option>)}
+          </select>
+        </Card>
+        <Btn wide color={C.deal} onClick={create}>CREA STANZA</Btn>
+        <div className="flex gap-2 mt-3">
+          <input value={joinCode} onChange={(e) => setJoinCode(e.target.value.toUpperCase())} placeholder="CODICE"
+            className="flex-1 rounded-xl px-3 text-center" style={{ fontFamily: fM, fontSize: 20, letterSpacing: 4, height: 52, border: `1px solid ${C.line}`, background: "#fff" }} />
+          <Btn onClick={join}>ENTRA</Btn>
+        </div>
+        <p className="mt-4" style={{ fontSize: 12, color: C.mute }}>La partita è condivisa: chi ha il codice vede il tavolo e le schede di tutti.</p>
+        {toast && <div className="fixed left-4 right-4 bottom-6 rounded-xl px-4 py-3 text-center" style={{ background: C.ink, color: "#fff", fontSize: 14 }}>{toast}</div>}
+      </div>
+    );
+  }
+
+  /* ══ LOBBY: dentro la stanza ══ */
+  if (game.phase === "lobby") {
+    const start = () => commit((g) => {
+      if (g.players.length < 1) return g;
+      return log({ ...g, phase: "play", turn: 0 }, "Partita iniziata");
+    });
+    const leave = () => commit((g) => ({ ...g, players: g.players.filter((x) => x.id !== me.id) })).then(() => setMe({ ...me, code: null }));
+    return (
+      <div className="min-h-screen p-5" style={{ background: C.paper, fontFamily: fB }}>
+        <style>{FONTS}</style>
+        <div className="rounded-2xl px-4 py-3 mb-4" style={{ background: C.ink }}>
+          <div style={{ fontFamily: fM, fontSize: 9, color: "#7E9298", letterSpacing: 1 }}>CODICE STANZA</div>
+          <div style={{ fontFamily: fD, fontSize: 30, color: "#fff", letterSpacing: 8 }}>{game.code}</div>
+        </div>
+        <Card>
+          <div style={{ fontFamily: fD, fontSize: 12, marginBottom: 8 }}>AL TAVOLO ({game.players.length})</div>
+          {game.players.map((x) => (
+            <div key={x.id} className="flex items-center gap-3 py-2">
+              <span className="rounded-full" style={{ width: 12, height: 12, background: x.color }} />
+              <div className="flex-1">
+                <div style={{ fontSize: 16, fontWeight: 600 }}>{x.name}{x.id === me.id ? " · tu" : ""}</div>
+                <div style={{ fontFamily: fM, fontSize: 11, color: C.mute }}>{PROF[x.prof].n} · sogno: {DREAMS[x.dream].n}</div>
+              </div>
+            </div>
+          ))}
+        </Card>
+        {game.host === me.id
+          ? <Btn wide color={C.deal} onClick={start}>INIZIA LA PARTITA</Btn>
+          : <p style={{ color: C.mute, fontSize: 15 }}>Aspetta che l'host faccia partire la partita. Aggiornamento ogni 2,5 secondi.</p>}
+        <div className="mt-3"><Btn wide ghost color={C.extra} onClick={leave}>Esci dalla stanza</Btn></div>
+        {toast && <div className="fixed left-4 right-4 bottom-6 rounded-xl px-4 py-3 text-center" style={{ background: C.ink, color: "#fff", fontSize: 14 }}>{toast}</div>}
+      </div>
+    );
+  }
+
+  /* ══ MOTORE DI GIOCO ══ */
+  const draw = (g, deckName, arr) => {
+    const i = g.ptr[deckName] % g.deck[deckName].length;
+    g.ptr = { ...g.ptr, [deckName]: g.ptr[deckName] + 1 };
+    return arr[g.deck[deckName][i]];
+  };
+
+  const roll = (dice) => {
+    if (!myTurn) return;
+    commit((g) => {
+      let pl = g.players.find((x) => x.id === me.id);
+      if (pl.skip > 0) {
+        pl = { ...pl, skip: pl.skip - 1 };
+        let g2 = { ...g, players: g.players.map((x) => x.id === me.id ? pl : x) };
+        return log({ ...g2, turn: (g.turn + 1) % g.players.length }, `${pl.name} salta il turno (${pl.skip} rimasti)`);
+      }
+      const d1 = 1 + Math.floor(Math.random() * 6);
+      const d2 = dice === 2 ? 1 + Math.floor(Math.random() * 6) : 0;
+      const steps = d1 + d2;
+      const track = pl.track === "fast" ? FAST : RAT;
+      let pos = pl.pos, gained = 0;
+      for (let s = 0; s < steps; s++) {
+        pos = (pos + 1) % track.length;
+        if (s < steps - 1) {
+          if (track[pos] === "payday") { gained += derive(pl).cf; }
+          if (track[pos] === "cfday") { gained += ftPay(pl); }
+        }
+      }
+      pl = { ...pl, pos, cash: pl.cash + gained, charity: Math.max(0, pl.charity - 1) };
+      const type = track[pos];
+      let g2 = { ...g, players: g.players.map((x) => x.id === me.id ? pl : x), dice: { d1, d2, by: pl.name } };
+      if (gained) g2 = log(g2, `${pl.name} passa dal giorno di paga: +${money(gained)}`);
+      g2 = log(g2, `${pl.name} tira ${steps} e finisce su ${SPACE[type][0]}`);
+
+      /* risoluzione casella */
+      if (type === "payday" || type === "cfday") {
+        const amt = type === "payday" ? derive(pl).cf : ftPay(pl);
+        g2.players = g2.players.map((x) => x.id === me.id ? { ...x, cash: x.cash + amt } : x);
+        return endTurn(log(g2, `${pl.name} incassa ${money(amt)}`));
+      }
+      if (type === "deal") { g2.pending = { k: "chooseDeal", who: me.id }; return g2; }
+      if (type === "market") { const card = draw(g2, "market", MARKET); g2.pending = { k: "market", card, who: me.id }; return g2; }
+      if (type === "doodad") { const card = draw(g2, "doodad", DOODAD); g2.pending = { k: "doodad", card, who: me.id }; return g2; }
+      if (type === "charity" || type === "charityF") { g2.pending = { k: "charity", who: me.id }; return g2; }
+      if (type === "baby") {
+        const kids = Math.min(3, pl.kids + 1);
+        g2.players = g2.players.map((x) => x.id === me.id ? { ...x, kids } : x);
+        return endTurn(log(g2, `${pl.name}: nuovo figlio (${kids}/3)`));
+      }
+      if (type === "downsize") {
+        const e = derive(pl).exp;
+        g2.players = g2.players.map((x) => x.id === me.id ? { ...x, cash: x.cash - e, skip: 2 } : x);
+        return endTurn(log(g2, `${pl.name} licenziato: paga ${money(e)} e salta 2 turni`));
+      }
+      if (type === "ftbiz") { const card = draw(g2, "ft", FTBIZ); g2.pending = { k: "ftbiz", card, who: me.id }; return g2; }
+      if (type === "dream") { g2.pending = { k: "dream", who: me.id }; return g2; }
+      if (type === "audit") {
+        g2.players = g2.players.map((x) => x.id === me.id ? { ...x, cash: Math.round(x.cash / 2) } : x);
+        return endTurn(log(g2, `${pl.name}: verifica fiscale, perde metà dei contanti`));
+      }
+      if (type === "doodadF") {
+        const amt = 50000;
+        g2.players = g2.players.map((x) => x.id === me.id ? { ...x, cash: x.cash - amt } : x);
+        return endTurn(log(g2, `${pl.name}: spesa da fast track ${money(amt)}`));
+      }
+      return endTurn(g2);
+    });
+  };
+
+  const endTurn = (g) => ({ ...g, pending: null, turn: (g.turn + 1) % g.players.length });
+  const resolve = (fn) => commit((g) => endTurn(fn(g)));
+
+  const buyDeal = (card, deckName) => resolve((g) => {
+    let pl = g.players.find((x) => x.id === me.id);
+    if (card.t === "stock") {
+      const q = Math.max(0, +qty || 0), tot = q * card.price;
+      if (tot > pl.cash) { say("Contanti insufficienti"); return g; }
+      const ex = pl.stocks.find((s) => s.sym === card.sym);
+      const stocks = ex
+        ? pl.stocks.map((s) => s.sym === card.sym ? { ...s, shares: s.shares + q, cost: card.price, div: card.div } : s)
+        : [...pl.stocks, { id: uid(), sym: card.sym, shares: q, cost: card.price, div: card.div }];
+      pl = { ...pl, cash: pl.cash - tot, stocks };
+      g = log(g, `${pl.name} compra ${q} ${card.sym} a ${money(card.price)}`);
+    } else if (card.t === "cost") {
+      pl = { ...pl, cash: pl.cash - card.amount };
+      g = log(g, `${pl.name} paga ${money(card.amount)} — ${card.n}`);
+    } else {
+      if (card.down > pl.cash) { say("Contanti insufficienti: prendi un prestito"); return g; }
+      const item = { id: uid(), n: card.n, tag: card.tag, cost: card.cost, down: card.down, mort: card.mort, cf: card.cf };
+      pl = card.t === "re" ? { ...pl, cash: pl.cash - card.down, re: [...pl.re, item] } : { ...pl, cash: pl.cash - card.down, biz: [...pl.biz, item] };
+      g = log(g, `${pl.name} compra ${card.n} · CF ${money(card.cf)}/mese`);
+    }
+    setQty("");
+    return { ...g, players: g.players.map((x) => x.id === me.id ? pl : x) };
+  });
+
+  const sellAsset = (a, price) => commit((g) => {
+    let pl = g.players.find((x) => x.id === me.id);
+    const net = price - (a.mort || 0);
+    const key = pl.re.find((x) => x.id === a.id) ? "re" : "biz";
+    pl = { ...pl, cash: pl.cash + net, [key]: pl[key].filter((x) => x.id !== a.id) };
+    return { ...log(g, `${pl.name} vende ${a.n} · netto ${money(net)}`), players: g.players.map((x) => x.id === me.id ? pl : x) };
+  });
+
+  const sellStock = (sym, price, q) => commit((g) => {
+    let pl = g.players.find((x) => x.id === me.id);
+    const s = pl.stocks.find((x) => x.sym === sym);
+    if (!s) return g;
+    const n = Math.min(q || s.shares, s.shares);
+    const stocks = n >= s.shares ? pl.stocks.filter((x) => x.sym !== sym) : pl.stocks.map((x) => x.sym === sym ? { ...x, shares: x.shares - n } : x);
+    pl = { ...pl, cash: pl.cash + n * price, stocks };
+    return { ...log(g, `${pl.name} vende ${n} ${sym} a ${money(price)}`), players: g.players.map((x) => x.id === me.id ? pl : x) };
+  });
+
+  const takeLoan = (amt) => commit((g) => patch(log(g, `${P.name} prende un prestito di ${money(amt)}`), (x) => ({ ...x, cash: x.cash + amt, loan: x.loan + amt })));
+  const repayLoan = (amt) => commit((g) => patch(log(g, `${P.name} rimborsa ${money(amt)}`), (x) => ({ ...x, cash: x.cash - amt, loan: Math.max(0, x.loan - amt) })));
+
+  const escape = () => commit((g) => {
+    const d = derive(P);
+    const g2 = patch(g, (x) => ({ ...x, track: "fast", pos: 0, ftIncome: d.passive * 100, ftCf: 0 }));
+    return log(g2, `${P.name} esce dalla corsa dei topi! Reddito fast track ${money(d.passive * 100)}`);
+  });
+
+  const pend = game.pending;
+  const pendMine = pend && pend.who === me.id;
+
+  /* ── modale carta ── */
+  const Modal = () => {
+    if (!pend) return null;
+    const card = pend.card;
+    const close = (g) => endTurn(g);
+    return (
+      <div className="fixed inset-0 z-40 flex items-end" style={{ background: "rgba(11,20,24,.55)" }}>
+        <div className="w-full rounded-t-3xl p-5" style={{ background: "#fff", maxHeight: "88vh", overflowY: "auto" }}>
+          {!pendMine && (
+            <>
+              <div style={{ fontFamily: fD, fontSize: 14 }}>TURNO DI {game.players.find(x => x.id === pend.who)?.name.toUpperCase()}</div>
+              <p className="mt-2" style={{ color: C.mute, fontSize: 15 }}>Sta risolvendo la sua casella. Aggiorno tra qualche secondo.</p>
+            </>
+          )}
+
+          {pendMine && pend.k === "chooseDeal" && (<>
+            <div style={{ fontFamily: fD, fontSize: 14, color: C.deal }}>AFFARI</div>
+            <p className="mt-2 mb-4" style={{ color: C.mute, fontSize: 15 }}>Piccolo affare: acconto fino a $5.000. Grande affare: da $6.000 in su.</p>
+            <div className="flex gap-2">
+              <Btn wide color={C.deal} onClick={() => commit((g) => ({ ...g, pending: { k: "deal", deck: "small", card: draw(g, "small", SMALL), who: me.id } }))}>PICCOLO</Btn>
+              <Btn wide color={C.ink} onClick={() => commit((g) => ({ ...g, pending: { k: "deal", deck: "big", card: draw(g, "big", BIG), who: me.id } }))}>GRANDE</Btn>
+            </div>
+          </>)}
+
+          {pendMine && pend.k === "deal" && (<>
+            <div style={{ fontFamily: fD, fontSize: 14, color: C.deal }}>{pend.deck === "small" ? "PICCOLO AFFARE" : "GRANDE AFFARE"}</div>
+            <div className="mt-2" style={{ fontFamily: fB, fontSize: 20, fontWeight: 700 }}>{card.n || `${card.sym} · azioni`}</div>
+            {card.note && <p style={{ color: C.mute, fontSize: 14 }}>{card.note}</p>}
+            <div className="my-3">
+              {card.t === "stock" && <><KV k="Prezzo per azione" v={money(card.price)} /><KV k="Dividendo mensile" v={card.div ? `$${card.div}/azione` : "nessuno"} /></>}
+              {(card.t === "re" || card.t === "biz") && (<>
+                <KV k="Costo" v={money(card.cost)} /><KV k="Acconto" v={money(card.down)} color={C.extra} />
+                <KV k="Mutuo / debito" v={money(card.mort)} /><KV k="Cashflow mensile" v={money(card.cf)} color={C.deal} />
+              </>)}
+              {card.t === "cost" && <KV k="Costo" v={money(card.amount)} color={C.extra} />}
+            </div>
+            {card.t === "stock" && (
+              <input value={qty} onChange={(e) => setQty(e.target.value.replace(/\D/g, ""))} placeholder="quante azioni"
+                className="w-full rounded-lg px-3 mb-3" style={{ height: 48, border: `1px solid ${C.line}`, background: C.paper, fontFamily: fM }} />
+            )}
+            <div className="flex gap-2">
+              <Btn wide color={C.deal} onClick={() => buyDeal(card, pend.deck)}>{card.t === "cost" ? "PAGA" : "COMPRA"}</Btn>
+              <Btn ghost color={C.mute} onClick={() => resolve((g) => log(g, `${P.name} passa l'affare`))}>Passa</Btn>
+            </div>
+          </>)}
+
+          {pendMine && pend.k === "market" && (<>
+            <div style={{ fontFamily: fD, fontSize: 14, color: C.market }}>MERCATO</div>
+            <div className="mt-2" style={{ fontSize: 20, fontWeight: 700 }}>{card.n || `${card.sym} a ${money(card.price)}`}</div>
+            {card.note && <p style={{ color: C.mute, fontSize: 14 }}>{card.note}</p>}
+            <div className="my-3">
+              {card.t === "buy" && [...P.re, ...P.biz].filter((a) => a.tag === card.tag).map((a) => {
+                const price = card.mult ? Math.round(a.cost * card.mult) : card.offer;
+                return <div key={a.id} className="flex items-center justify-between py-2">
+                  <div><div style={{ fontSize: 15 }}>{a.n}</div><div style={{ fontFamily: fM, fontSize: 11, color: C.mute }}>netto {money(price - a.mort)}</div></div>
+                  <Btn color={C.market} onClick={() => sellAsset(a, price)}>Vendi</Btn>
+                </div>;
+              })}
+              {card.t === "buy" && ![...P.re, ...P.biz].some((a) => a.tag === card.tag) && <p style={{ color: C.mute, fontSize: 15 }}>Non hai attività di questo tipo.</p>}
+              {card.t === "px" && (P.stocks.find((s) => s.sym === card.sym)
+                ? <div className="flex items-center justify-between py-2">
+                  <div><div style={{ fontSize: 15 }}>{card.sym} × {P.stocks.find((s) => s.sym === card.sym).shares}</div>
+                    <div style={{ fontFamily: fM, fontSize: 11, color: C.mute }}>incasso {money(P.stocks.find((s) => s.sym === card.sym).shares * card.price)}</div></div>
+                  <Btn color={C.market} onClick={() => sellStock(card.sym, card.price)}>Vendi tutto</Btn>
+                </div>
+                : <p style={{ color: C.mute, fontSize: 15 }}>Non possiedi {card.sym}.</p>)}
+              {card.t === "ev" && <p style={{ fontSize: 15 }}>{card.amount ? `Paghi ${money(card.amount)} per ogni immobile residenziale.` : "Nessun effetto."}</p>}
+            </div>
+            <Btn wide onClick={() => resolve((g) => {
+              if (card.t === "ev" && card.amount) {
+                const n = P.re.filter((a) => ["casa2", "casa3", "condo"].includes(a.tag)).length;
+                return patch(log(g, `${P.name} paga ${money(card.amount * n)} — ${card.n}`), (x) => ({ ...x, cash: x.cash - card.amount * n }));
+              }
+              return g;
+            })}>CHIUDI IL TURNO</Btn>
+          </>)}
+
+          {pendMine && pend.k === "doodad" && (<>
+            <div style={{ fontFamily: fD, fontSize: 14, color: C.extra }}>EXTRA</div>
+            <div className="mt-2" style={{ fontSize: 20, fontWeight: 700 }}>{card.n}</div>
+            <p className="mb-3" style={{ color: C.mute, fontSize: 14 }}>
+              {card.perKid ? `${money(card.a)} per ogni figlio — hai ${P.kids}.` : "Spesa obbligatoria."}
+            </p>
+            <KV k="Totale" v={money(card.perKid ? card.a * P.kids : card.a)} color={C.extra} />
+            <div className="mt-3">
+              <Btn wide color={C.extra} onClick={() => resolve((g) => {
+                const amt = card.perKid ? card.a * P.kids : card.a;
+                return patch(log(g, `${P.name} paga ${money(amt)} — ${card.n}`), (x) => ({ ...x, cash: x.cash - amt }));
+              })}>PAGA</Btn>
+            </div>
+          </>)}
+
+          {pendMine && pend.k === "charity" && (<>
+            <div style={{ fontFamily: fD, fontSize: 14, color: C.charity }}>BENEFICENZA</div>
+            <p className="mt-2 mb-3" style={{ color: C.mute, fontSize: 15 }}>
+              Doni il 10% del tuo reddito totale ({money(Math.round(D.income * 0.1))}) e per i 3 turni successivi puoi tirare 1 o 2 dadi.
+            </p>
+            <div className="flex gap-2">
+              <Btn wide color={C.charity} onClick={() => resolve((g) => patch(log(g, `${P.name} dona ${money(Math.round(D.income * 0.1))}`), (x) => ({ ...x, cash: x.cash - Math.round(D.income * 0.1), charity: 3 })))}>DONA</Btn>
+              <Btn ghost color={C.mute} onClick={() => resolve((g) => g)}>Passa</Btn>
+            </div>
+          </>)}
+
+          {pendMine && pend.k === "ftbiz" && (<>
+            <div style={{ fontFamily: fD, fontSize: 14, color: C.deal }}>BUSINESS FAST TRACK</div>
+            <div className="mt-2" style={{ fontSize: 20, fontWeight: 700 }}>{card.n}</div>
+            <KV k="Costo" v={money(card.cost)} /><KV k="Cashflow mensile" v={money(card.cf)} color={C.deal} />
+            <div className="flex gap-2 mt-3">
+              <Btn wide color={C.deal} disabled={P.cash < card.cost} onClick={() => resolve((g) => {
+                const g2 = patch(g, (x) => ({ ...x, cash: x.cash - card.cost, ftCf: x.ftCf + card.cf, ftBiz: [...x.ftBiz, { id: uid(), n: card.n, cf: card.cf }] }));
+                const nc = P.ftCf + card.cf;
+                return log(nc >= 50000 ? { ...g2, phase: "end", winner: P.name, howWon: "cashflow" } : g2,
+                  `${P.name} compra ${card.n} · +${money(card.cf)}/mese`);
+              })}>COMPRA</Btn>
+              <Btn ghost color={C.mute} onClick={() => resolve((g) => g)}>Passa</Btn>
+            </div>
+          </>)}
+
+          {pendMine && pend.k === "dream" && (<>
+            <div style={{ fontFamily: fD, fontSize: 14, color: C.gold }}>IL TUO SOGNO</div>
+            <div className="mt-2" style={{ fontSize: 20, fontWeight: 700 }}>{DREAMS[P.dream].n}</div>
+            <KV k="Costo" v={money(DREAMS[P.dream].cost)} />
+            <div className="flex gap-2 mt-3">
+              <Btn wide color={C.gold} disabled={P.cash < DREAMS[P.dream].cost} onClick={() => resolve((g) => ({
+                ...log(g, `${P.name} realizza il suo sogno e vince!`), phase: "end", winner: P.name, howWon: "sogno",
+              }))}>COMPRA IL SOGNO</Btn>
+              <Btn ghost color={C.mute} onClick={() => resolve((g) => g)}>Passa</Btn>
+            </div>
+          </>)}
+        </div>
+      </div>
+    );
+  };
+
+  /* ── vittoria ── */
+  if (game.phase === "end") {
+    return (
+      <div className="min-h-screen p-6 flex flex-col justify-center" style={{ background: C.ink, fontFamily: fB }}>
+        <style>{FONTS}</style>
+        <div style={{ fontFamily: fD, fontSize: 34, color: C.gold, lineHeight: 1.05 }}>{game.winner}<br />HA VINTO</div>
+        <p className="mt-3" style={{ color: "#9FB3B8", fontSize: 16 }}>
+          {game.howWon === "sogno" ? "Ha comprato il suo sogno sul fast track." : "Ha superato i $50.000 di cashflow mensile sul fast track."}
+        </p>
+        <div className="mt-6"><Btn wide color={C.deal} onClick={() => setMe({ ...me, code: null })}>NUOVA PARTITA</Btn></div>
+      </div>
+    );
+  }
+
+  /* ── schermate ── */
+  const cur = game.players[game.turn];
+  return (
+    <div className="min-h-screen" style={{
+      background: C.paper, fontFamily: fB, paddingBottom: 150,
+      backgroundImage: `linear-gradient(${C.grid} 1px,transparent 1px),linear-gradient(90deg,${C.grid} 1px,transparent 1px)`, backgroundSize: "24px 24px",
+    }}>
+      <style>{FONTS}</style>
+
+      <div className="sticky top-0 z-20 px-4 flex items-center justify-between" style={{ background: C.ink, height: 58 }}>
+        <div>
+          <div style={{ fontFamily: fD, fontSize: 13, color: "#fff" }}>{P.name} · {PROF[P.prof].n}</div>
+          <div style={{ fontFamily: fM, fontSize: 10, color: "#7E9298" }}>stanza {game.code} · turno di {cur.name}</div>
+        </div>
+        <div className="text-right">
+          <div style={{ fontFamily: fM, fontSize: 9, color: "#7E9298" }}>CONTANTI</div>
+          <div style={{ fontFamily: fM, fontSize: 18, color: P.cash < 0 ? "#FF8A7A" : "#fff" }}>{money(P.cash)}</div>
+        </div>
+      </div>
+
+      <div className="px-4 pt-3">
+        {tab === "tavolo" && (<>
+          <div className="flex justify-center"><Board game={game} /></div>
+          <div className="flex justify-center gap-2 flex-wrap mb-3">
+            {game.players.map((x, i) => (
+              <div key={x.id} className="flex items-center gap-2 rounded-full px-3 py-1"
+                style={{ background: i === game.turn ? C.ink : "#fff", border: `1px solid ${i === game.turn ? C.ink : C.line}` }}>
+                <span className="rounded-full" style={{ width: 10, height: 10, background: x.color }} />
+                <span style={{ fontSize: 13, color: i === game.turn ? "#fff" : C.ink }}>{x.name}</span>
+                <span style={{ fontFamily: fM, fontSize: 11, color: i === game.turn ? "#9FB3B8" : C.mute }}>{Math.round(derive(x).ratio * 100)}%</span>
+              </div>
+            ))}
+          </div>
+          {game.dice && (
+            <Card><div className="flex items-center justify-between">
+              <span style={{ fontSize: 15, color: C.mute }}>Ultimo tiro · {game.dice.by}</span>
+              <span style={{ fontFamily: fD, fontSize: 26 }}>{game.dice.d1}{game.dice.d2 ? ` + ${game.dice.d2}` : ""}</span>
+            </div></Card>
+          )}
+          {D.free && P.track === "rat" && (
+            <Card style={{ borderColor: C.gold }}>
+              <div style={{ fontFamily: fD, fontSize: 13, color: C.gold }}>PUOI USCIRE DALLA CORSA DEI TOPI</div>
+              <p className="my-2" style={{ fontSize: 15, color: C.mute }}>Reddito passivo {money(D.passive)} ≥ spese {money(D.exp)}. Entri nel fast track con {money(D.passive * 100)} di reddito mensile.</p>
+              <Btn wide color={C.gold} onClick={escape}>ESCI DALLA CORSA</Btn>
+            </Card>
+          )}
+        </>)}
+
+        {tab === "scheda" && (<>
+          <Card>
+            <div style={{ fontFamily: fD, fontSize: 12, color: C.deal, marginBottom: 6 }}>REDDITO</div>
+            <KV k="Stipendio" v={money(P.sal)} /><KV k="Dividendi" v={money(D.div)} />
+            <KV k="Immobili" v={money(D.reCf)} /><KV k="Attività" v={money(D.bizCf)} />
+            <div style={{ borderTop: `1px solid ${C.line}`, marginTop: 6, paddingTop: 6 }}>
+              <KV k="Totale" v={money(D.income)} /><KV k="Reddito passivo" v={money(D.passive)} color={C.deal} />
+            </div>
+          </Card>
+          <Card>
+            <div style={{ fontFamily: fD, fontSize: 12, color: C.extra, marginBottom: 6 }}>SPESE</div>
+            {Object.entries(P.e).map(([k, v]) => <KV key={k} k={k[0].toUpperCase() + k.slice(1)} v={money(v)} />)}
+            <KV k={`Figli (${P.kids})`} v={money(D.kids)} /><KV k="Rata prestito 10%" v={money(D.loanPay)} />
+            <div style={{ borderTop: `1px solid ${C.line}`, marginTop: 6, paddingTop: 6 }}>
+              <KV k="Totale spese" v={money(D.exp)} color={C.extra} />
+              <KV k="Cashflow mensile" v={money(D.cf)} color={D.cf >= 0 ? C.deal : C.extra} />
+            </div>
+          </Card>
+          <Card>
+            <div style={{ fontFamily: fD, fontSize: 12, color: C.market, marginBottom: 6 }}>ATTIVITÀ</div>
+            {P.stocks.map((s) => <KV key={s.id} k={`${s.sym} × ${s.shares}`} v={s.div ? `+${money(s.shares * s.div)}/mese` : "capital gain"} />)}
+            {[...P.re, ...P.biz].map((a) => <KV key={a.id} k={a.n} v={`+${money(a.cf)}`} color={C.deal} />)}
+            {P.ftBiz.map((a) => <KV key={a.id} k={`${a.n} (FT)`} v={`+${money(a.cf)}`} color={C.gold} />)}
+            {!P.stocks.length && !P.re.length && !P.biz.length && <p style={{ fontSize: 15, color: C.mute }}>Nessuna. Punta a un affare che generi cashflow.</p>}
+          </Card>
+          <Card>
+            <div style={{ fontFamily: fD, fontSize: 12, marginBottom: 6 }}>BANCA</div>
+            <KV k="Debiti totali" v={money(D.debt)} /><KV k="Prestito bancario" v={money(P.loan)} />
+            <input value={loanAmt} onChange={(e) => setLoanAmt(e.target.value.replace(/\D/g, ""))} placeholder="importo (multipli di 1000)"
+              className="w-full rounded-lg px-3 my-2" style={{ height: 48, border: `1px solid ${C.line}`, background: C.paper, fontFamily: fM }} />
+            <div className="flex gap-2">
+              <Btn wide onClick={() => { const a = Math.round((+loanAmt || 0) / 1000) * 1000; if (a > 0) { takeLoan(a); setLoanAmt(""); } }}>PRENDI</Btn>
+              <Btn wide ghost color={C.ink} onClick={() => { const a = Math.round((+loanAmt || 0) / 1000) * 1000; if (a > 0) { repayLoan(a); setLoanAmt(""); } }}>RIMBORSA</Btn>
+            </div>
+          </Card>
+          {P.track === "fast" && (
+            <Card style={{ borderColor: C.gold }}>
+              <div style={{ fontFamily: fD, fontSize: 12, color: C.gold, marginBottom: 6 }}>FAST TRACK</div>
+              <KV k="Reddito cashflow day" v={money(P.ftIncome)} />
+              <KV k="Cashflow da business" v={money(P.ftCf)} color={C.gold} />
+              <KV k="Obiettivo" v={`${money(P.ftCf)} / ${money(50000)}`} />
+              <KV k="Il tuo sogno" v={`${DREAMS[P.dream].n} · ${money(DREAMS[P.dream].cost)}`} />
+            </Card>
+          )}
+        </>)}
+
+        {tab === "regole" && (
+          <div className="mb-4">
+            {[
+              ["L'obiettivo", "Due fasi. Nella corsa dei topi (anello interno) devi portare il reddito passivo sopra le spese totali. Da lì passi al fast track (anello esterno), dove vinci comprando il tuo sogno oppure accumulando 50.000 $ al mese di cashflow dai business."],
+              ["Il turno", "Tiri un dado nella corsa dei topi, due sul fast track, e muovi in senso orario. Risolvi la casella su cui ti fermi. Se passi da una casella Giorno di paga senza fermartici, incassi comunque il tuo cashflow mensile."],
+              ["Affari", "Scegli tra piccolo affare (acconto fino a 5.000 $) e grande affare (da 6.000 $ in su). La carta mostra costo, acconto, debito e cashflow mensile. Puoi sempre rifiutare. Se non hai contanti puoi prendere un prestito prima di comprare."],
+              ["Mercato", "Qualcuno vuole comprare: se possiedi un'attività di quel tipo puoi venderla al prezzo offerto e incassi la differenza tra prezzo e debito residuo. Le carte sui titoli fissano un prezzo a cui puoi liquidare le tue azioni."],
+              ["Extra", "Spese che non producono nulla: le paghi e basta. Alcune si moltiplicano per il numero di figli."],
+              ["Beneficenza", "Doni il 10% del reddito totale e per i 3 turni successivi puoi scegliere se tirare uno o due dadi. Più controllo su dove atterri."],
+              ["Figlio e licenziamento", "Figlio: aggiunge il costo mensile per figlio, massimo tre. Licenziamento: paghi tutte le spese del mese in contanti e salti due turni."],
+              ["Prestiti", "Puoi chiedere alla banca in qualsiasi momento, a multipli di 1.000 $. Ogni 1.000 $ di prestito costa 100 $ al mese di rata: il debito peggiora il cashflow finché non lo rimborsi."],
+              ["Uscire dalla corsa", "Quando il reddito passivo eguaglia o supera le spese totali compare il pulsante per uscire. Entri nel fast track con un reddito mensile pari a 100 volte il tuo reddito passivo."],
+              ["Fast track", "Caselle business: le compri in contanti e aggiungono cashflow mensile. Cashflow day: incassi reddito più cashflow. Verifica fiscale: perdi metà dei contanti. Sogno: se hai i contanti lo compri e vinci."],
+              ["Come si vince", "Primo che compra il proprio sogno, oppure primo che arriva a 50.000 $ di cashflow mensile sul fast track."],
+            ].map(([t, x]) => (
+              <Card key={t}>
+                <div style={{ fontFamily: fD, fontSize: 12, color: C.ink, marginBottom: 6 }}>{t.toUpperCase()}</div>
+                <p style={{ fontSize: 15, color: C.mute, lineHeight: 1.5 }}>{x}</p>
+              </Card>
+            ))}
+          </div>
+        )}
+
+        {tab === "registro" && (
+          <Card>
+            {game.log.length === 0 && <p style={{ color: C.mute, fontSize: 15 }}>Nessuna mossa ancora.</p>}
+            {game.log.map((l) => (
+              <div key={l.id} className="py-2" style={{ borderBottom: `1px solid ${C.line}`, fontSize: 15 }}>{l.text}</div>
+            ))}
+          </Card>
+        )}
+      </div>
+
+      {toast && <div className="fixed left-4 right-4 z-30 rounded-xl px-4 py-3 text-center" style={{ bottom: 156, background: C.ink, color: "#fff", fontSize: 14 }}>{toast}</div>}
+
+      <div className="fixed bottom-0 left-0 right-0 z-20" style={{ background: C.paper, borderTop: `1px solid ${C.line}` }}>
+        <div className="px-4 pt-3 pb-2 flex gap-2">
+          <Btn wide color={C.payday} disabled={!myTurn || !!pend} onClick={() => roll(P.track === "fast" ? 2 : 1)}>
+            {myTurn ? (pend ? "RISOLVI LA CARTA" : P.skip > 0 ? `SALTA IL TURNO (${P.skip})` : "TIRA IL DADO") : `TOCCA A ${cur.name.toUpperCase()}`}
+          </Btn>
+          {myTurn && P.charity > 0 && P.track === "rat" && !pend && <Btn color={C.charity} onClick={() => roll(2)}>2 DADI</Btn>}
+        </div>
+        <div className="flex">
+          {[["tavolo", "Tavolo"], ["scheda", "Scheda"], ["regole", "Regole"], ["registro", "Registro"]].map(([k, l]) => (
+            <button key={k} onClick={() => setTab(k)} className="flex-1 pb-3 pt-1"
+              style={{ fontFamily: fB, fontSize: 12, fontWeight: tab === k ? 700 : 400, color: tab === k ? C.ink : C.mute }}>
+              <div className="mx-auto mb-1 rounded-full" style={{ width: 22, height: 3, background: tab === k ? C.ink : "transparent" }} />{l}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <Modal />
+    </div>
+  );
+}

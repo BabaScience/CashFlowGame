@@ -1,0 +1,401 @@
+/* ══════════════════════════════════════════════════════════════
+   CASHFLOW — foglio di stile unico.
+   Impostazione "gioco da tavolo": tavolo verde, carte di carta,
+   inchiostro scuro, oro per gli accenti. Pensato prima per il
+   telefono, poi allargato per schermi grandi.
+   ══════════════════════════════════════════════════════════════ */
+
+:root {
+  --tavolo:      #10201b;
+  --tavolo-alto: #172c24;
+  --feltro:      #1d3a2f;
+  --carta:       #F4F1E6;
+  --carta-scura: #E6E1D2;
+  --inchiostro:  #16211d;
+  --tenue:       #6E7B74;
+  --linea:       #D3CDBC;
+
+  --oro:         #C9A227;
+  --oro-chiaro:  #E3C55A;
+  --verde:       #4E8B3D;
+  --blu:         #2E6FA8;
+  --rosso:       #B23A2E;
+  --arancio:     #D98324;
+  --viola:       #7B4FA8;
+  --acqua:       #2F8F86;
+  --rosa:        #C2557A;
+
+  --f-titolo: "Archivo Black", system-ui, sans-serif;
+  --f-testo:  "Barlow", system-ui, -apple-system, sans-serif;
+  --f-numeri: "IBM Plex Mono", ui-monospace, monospace;
+
+  --r-s: 10px;
+  --r-m: 16px;
+  --r-l: 22px;
+
+  --ombra-carta: 0 2px 0 rgba(0,0,0,.06), 0 8px 24px rgba(0,0,0,.16);
+  --ombra-alta:  0 18px 50px rgba(0,0,0,.45);
+
+  --barra-basso: calc(64px + env(safe-area-inset-bottom));
+}
+
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: var(--f-testo);
+  color: var(--carta);
+  background: var(--tavolo);
+  background-image:
+    radial-gradient(120% 80% at 50% 0%, #1e4034 0%, transparent 60%),
+    radial-gradient(90% 60% at 50% 100%, #16302700 0%, #0c1814 100%);
+  background-attachment: fixed;
+  overscroll-behavior-y: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+input, select, button, textarea { font: inherit; font-size: 16px; }
+button { cursor: pointer; border: none; background: none; color: inherit; }
+::-webkit-scrollbar { width: 0; height: 0; }
+* { scrollbar-width: none; }
+
+/* ── tipografia ── */
+.titolo   { font-family: var(--f-titolo); letter-spacing: .3px; line-height: 1.05; }
+.numeri   { font-family: var(--f-numeri); font-variant-numeric: tabular-nums; }
+.tenue    { color: var(--tenue); }
+.maiusc   { text-transform: uppercase; letter-spacing: .12em; font-weight: 700; font-size: 11px; }
+
+/* ══ struttura ══ */
+.schermo {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-bottom: var(--barra-basso);
+}
+.contenuto {
+  flex: 1;
+  padding: 14px;
+  max-width: 560px;
+  width: 100%;
+  margin: 0 auto;
+}
+@media (min-width: 900px) {
+  .contenuto { max-width: 1120px; padding: 22px; }
+  .schermo { padding-bottom: 0; }
+}
+
+/* ══ carte di carta ══ */
+.carta {
+  background: var(--carta);
+  color: var(--inchiostro);
+  border-radius: var(--r-m);
+  padding: 16px;
+  box-shadow: var(--ombra-carta);
+  border: 1px solid var(--linea);
+}
+.carta + .carta { margin-top: 12px; }
+.carta-scura {
+  background: linear-gradient(180deg, var(--tavolo-alto), #12241e);
+  color: var(--carta);
+  border: 1px solid rgba(255,255,255,.08);
+  border-radius: var(--r-m);
+  padding: 16px;
+}
+
+/* ══ bottoni ══ */
+.btn {
+  height: 52px;
+  padding: 0 20px;
+  border-radius: 14px;
+  font-family: var(--f-titolo);
+  font-size: 13px;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  background: var(--inchiostro);
+  color: var(--carta);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform .12s ease, filter .12s ease, opacity .12s;
+  box-shadow: 0 3px 0 rgba(0,0,0,.25);
+  width: 100%;
+}
+.btn:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,.25); }
+.btn:disabled { opacity: .38; cursor: not-allowed; box-shadow: none; }
+.btn-oro     { background: linear-gradient(180deg, var(--oro-chiaro), var(--oro)); color: #2A2205; }
+.btn-verde   { background: linear-gradient(180deg, #5DA24A, var(--verde)); }
+.btn-rosso   { background: linear-gradient(180deg, #C9503F, var(--rosso)); }
+.btn-blu     { background: linear-gradient(180deg, #3B84C2, var(--blu)); }
+.btn-fantasma {
+  background: transparent;
+  color: var(--inchiostro);
+  border: 1.5px solid currentColor;
+  box-shadow: none;
+}
+.btn-chiaro { background: rgba(255,255,255,.1); color: var(--carta); box-shadow: none; border: 1px solid rgba(255,255,255,.14); }
+.btn-piccolo { height: 40px; font-size: 11px; padding: 0 14px; width: auto; }
+.riga-btn { display: flex; gap: 10px; }
+.riga-btn > * { flex: 1; }
+
+/* ══ campi ══ */
+.campo {
+  width: 100%;
+  height: 50px;
+  border-radius: 12px;
+  border: 1.5px solid var(--linea);
+  background: #fff;
+  color: var(--inchiostro);
+  padding: 0 14px;
+  outline: none;
+}
+.campo:focus { border-color: var(--oro); }
+.etichetta { display: block; font-size: 12px; font-weight: 700; color: var(--tenue); margin: 0 0 6px; text-transform: uppercase; letter-spacing: .08em; }
+.gruppo-campo + .gruppo-campo { margin-top: 14px; }
+
+/* ══ riga chiave/valore del conto economico ══ */
+.kv { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 7px 0; }
+.kv + .kv { border-top: 1px dashed var(--linea); }
+.kv-k { font-size: 14.5px; color: #4A554F; }
+.kv-v { font-family: var(--f-numeri); font-size: 14.5px; font-weight: 600; }
+.kv-forte .kv-k { font-weight: 700; color: var(--inchiostro); }
+.kv-forte .kv-v { font-size: 16px; font-weight: 600; }
+.pos { color: var(--verde); }
+.neg { color: var(--rosso); }
+
+/* ══ intestazione di sezione ══ */
+.sezione-tit {
+  font-family: var(--f-titolo);
+  font-size: 12px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--tenue);
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.sezione-tit::after { content: ""; flex: 1; height: 1px; background: var(--linea); }
+
+/* ══ barra di avanzamento verso la libertà ══ */
+.barra { height: 9px; border-radius: 99px; background: rgba(0,0,0,.12); overflow: hidden; }
+.barra-int { height: 100%; border-radius: 99px; background: linear-gradient(90deg, var(--verde), var(--oro-chiaro)); }
+.barra-scura { background: rgba(255,255,255,.12); }
+
+/* ══ gettoni giocatore ══ */
+.gettone {
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  display: grid; place-items: center;
+  font-family: var(--f-titolo);
+  font-size: 13px;
+  color: #fff;
+  border: 2px solid rgba(255,255,255,.85);
+  box-shadow: 0 2px 6px rgba(0,0,0,.35);
+  flex: none;
+}
+.gettone-p { width: 26px; height: 26px; font-size: 11px; }
+
+/* ══ barra di navigazione in basso ══ */
+.navbar {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: var(--barra-basso);
+  padding-bottom: env(safe-area-inset-bottom);
+  display: flex;
+  background: rgba(10,20,17,.92);
+  backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(255,255,255,.09);
+  z-index: 40;
+}
+.navbar button {
+  flex: 1;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 3px;
+  color: rgba(244,241,230,.5);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  position: relative;
+}
+.navbar button[data-attivo="true"] { color: var(--oro-chiaro); }
+.navbar .punto {
+  position: absolute; top: 8px; right: 50%;
+  transform: translateX(20px);
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--rosso);
+  border: 2px solid #0a1411;
+}
+.navbar .icona { font-size: 19px; line-height: 1; }
+@media (min-width: 900px) { .navbar { display: none; } }
+
+/* ══ griglia da scrivania ══ */
+.scrivania { display: block; }
+@media (min-width: 900px) {
+  .scrivania { display: grid; grid-template-columns: 1fr 380px; gap: 22px; align-items: start; }
+  .scrivania-lato { position: sticky; top: 22px; max-height: calc(100vh - 44px); overflow-y: auto; }
+}
+
+/* ══ finestra modale ══
+   Le animazioni d'ingresso sono in CSS e non in JavaScript di proposito:
+   lo stato "senza animazione" è già quello finale, cioè visibile e al posto
+   giusto. Un'animazione gestita a fotogrammi può restare congelata sul suo
+   stato iniziale se il browser sospende il rendering (scheda in secondo piano,
+   risparmio energetico), e in quel caso la finestra resterebbe trasparente o
+   fuori schermo: inaccettabile, perché è da lì che si gioca. */
+@keyframes veloEntra { from { opacity: 0; } }
+@keyframes modaleEntra { from { transform: translateY(100%); opacity: .5; } }
+@keyframes modaleEntraCentro { from { transform: translateY(28px); opacity: 0; } }
+
+.velo {
+  position: fixed; inset: 0;
+  background: rgba(6,12,10,.78);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: flex-end; justify-content: center;
+  z-index: 60;
+  padding: 0;
+  animation: veloEntra .2s ease-out;
+}
+@media (min-width: 700px) { .velo { align-items: center; padding: 24px; } }
+.modale {
+  width: 100%; max-width: 460px;
+  background: var(--carta);
+  color: var(--inchiostro);
+  border-radius: var(--r-l) var(--r-l) 0 0;
+  padding: 20px 18px calc(20px + env(safe-area-inset-bottom));
+  box-shadow: var(--ombra-alta);
+  max-height: 92vh; overflow-y: auto;
+  animation: modaleEntra .34s cubic-bezier(.22,.8,.3,1);
+}
+.modale-centro { animation: modaleEntraCentro .34s cubic-bezier(.22,.8,.3,1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .velo, .modale, .modale-centro { animation: none; }
+}
+@media (min-width: 700px) { .modale { border-radius: var(--r-l); padding-bottom: 20px; } }
+.maniglia { width: 42px; height: 4px; border-radius: 99px; background: var(--linea); margin: 0 auto 14px; }
+
+/* ══ carta da gioco (fronte/retro) ══ */
+.scena { perspective: 1200px; }
+.gioco-carta { position: relative; border-radius: var(--r-m); }
+.faccia { border-radius: var(--r-m); padding: 18px; }
+/* Dorso della carta: sta SOPRA il fronte e scompare da solo.
+   Il fronte resta sempre disegnato sotto, così la carta è leggibile
+   anche se l'animazione non parte. */
+.copertura {
+  position: absolute; inset: 0;
+  z-index: 2;
+  transform-origin: left center;
+  display: grid; place-items: center;
+  background:
+    repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 8px, transparent 8px 16px),
+    linear-gradient(160deg, #2b5c4a, #15332a);
+  border: 2px solid rgba(255,255,255,.14);
+  color: var(--oro-chiaro);
+  box-shadow: var(--ombra-carta);
+  pointer-events: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .copertura { display: none; }
+}
+
+/* colori per tipo di carta */
+.c-piccoli  { background: linear-gradient(165deg, #F2F7EE, #E2EFDC); border-top: 5px solid var(--verde); }
+.c-grandi   { background: linear-gradient(165deg, #EEF4F9, #DCE9F3); border-top: 5px solid var(--blu); }
+.c-mercato  { background: linear-gradient(165deg, #EDF3F8, #D9E7F1); border-top: 5px solid var(--blu); }
+.c-extra    { background: linear-gradient(165deg, #FBEFED, #F3DAD5); border-top: 5px solid var(--rosso); }
+.c-benef    { background: linear-gradient(165deg, #F4EFFA, #E7DBF4); border-top: 5px solid var(--viola); }
+.c-figlio   { background: linear-gradient(165deg, #EAF6F4, #D6EDE9); border-top: 5px solid var(--acqua); }
+.c-licenz   { background: linear-gradient(165deg, #F5F0E9, #E8DCCB); border-top: 5px solid #6B4423; }
+.c-veloce   { background: linear-gradient(165deg, #FBF4E4, #F3E6C6); border-top: 5px solid var(--oro); }
+.c-sogno    { background: linear-gradient(165deg, #FBEDF2, #F4D9E3); border-top: 5px solid var(--rosa); }
+.c-banca    { background: linear-gradient(165deg, #FBEDEB, #F2D6D1); border-top: 5px solid var(--rosso); }
+
+/* ══ dadi ══ */
+.dado {
+  width: 54px; height: 54px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #FFFDF6, #E4DFCE);
+  box-shadow: 0 4px 0 #B8B2A0, 0 10px 22px rgba(0,0,0,.4);
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  padding: 8px;
+  flex: none;
+}
+.pip { width: 9px; height: 9px; border-radius: 50%; background: var(--inchiostro); align-self: center; justify-self: center; }
+
+/* ══ registro eventi ══ */
+.riga-log {
+  display: flex; gap: 9px;
+  padding: 9px 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  border-bottom: 1px solid rgba(255,255,255,.07);
+}
+.riga-log .bollo { width: 7px; height: 7px; border-radius: 50%; margin-top: 6px; flex: none; }
+
+/* ══ etichette ══ */
+.tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 9px;
+  border-radius: 99px;
+  font-size: 10.5px;
+  font-weight: 800;
+  letter-spacing: .07em;
+  text-transform: uppercase;
+}
+.tag-verde { background: rgba(78,139,61,.16); color: #35662A; }
+.tag-oro   { background: rgba(201,162,39,.2);  color: #7A6110; }
+.tag-rosso { background: rgba(178,58,46,.14);  color: #8E2C22; }
+.tag-blu   { background: rgba(46,111,168,.14); color: #23557F; }
+.tag-scuro { background: rgba(255,255,255,.1); color: var(--carta); }
+
+/* ══ avviso fugace ══ */
+.avviso {
+  position: fixed;
+  left: 14px; right: 14px;
+  bottom: calc(var(--barra-basso) + 14px);
+  z-index: 80;
+  background: var(--inchiostro);
+  color: var(--carta);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 14px;
+  padding: 13px 16px;
+  font-size: 14px;
+  text-align: center;
+  box-shadow: var(--ombra-alta);
+  max-width: 520px; margin: 0 auto;
+}
+
+/* ══ tabellone ══ */
+.tabellone { width: 100%; display: block; touch-action: manipulation; }
+.tab-etichetta { font-family: var(--f-titolo); fill: var(--carta); }
+
+/* ══ pannello avversari ══ */
+.riga-giocatore {
+  display: flex; align-items: center; gap: 11px;
+  padding: 11px 0;
+}
+.riga-giocatore + .riga-giocatore { border-top: 1px solid rgba(255,255,255,.08); }
+
+/* ══ coriandoli ══ */
+.coriandolo { position: absolute; width: 9px; height: 14px; border-radius: 2px; top: -20px; }
+
+/* ══ utilità ══ */
+.flex { display: flex; }
+.tra  { justify-content: space-between; }
+.cen  { align-items: center; }
+.col  { flex-direction: column; }
+.g4 { gap: 4px; } .g6 { gap: 6px; } .g8 { gap: 8px; } .g12 { gap: 12px; }
+.mt4{margin-top:4px}.mt8{margin-top:8px}.mt12{margin-top:12px}.mt16{margin-top:16px}.mt20{margin-top:20px}
+.mb4{margin-bottom:4px}.mb8{margin-bottom:8px}.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}
+.p0 { padding: 0; } .ta-c { text-align: center; } .ta-r { text-align: right; }
+.f11{font-size:11px}.f12{font-size:12px}.f13{font-size:13px}.f14{font-size:14px}.f16{font-size:16px}.f18{font-size:18px}.f22{font-size:22px}.f28{font-size:28px}
+.grassetto { font-weight: 700; }
+.pieno { width: 100%; }
+.scorri-x { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }

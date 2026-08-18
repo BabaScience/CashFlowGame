@@ -1,0 +1,28 @@
+{
+  "name": "cashflow-online",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "CASHFLOW - il gioco da tavolo, online e multigiocatore",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "test": "node scripts/prova-regole.mjs && node scripts/simula.mjs 60",
+    "test:regole": "node scripts/prova-regole.mjs",
+    "test:simula": "node scripts/simula.mjs"
+  },
+  "dependencies": {
+    "framer-motion": "^11.15.0",
+    "mongodb": "^6.12.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.4",
+    "vite": "^6.0.7"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
