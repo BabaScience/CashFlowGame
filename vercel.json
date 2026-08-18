@@ -4,33 +4,51 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "crons": [
-    { "path": "/api/cleanup", "schedule": "0 3 * * *" }
+    {
+      "path": "/api/cleanup",
+      "schedule": "0 3 * * *"
+    }
   ],
   "functions": {
-    "api/**/*.js": { "maxDuration": 10 }
+    "api/*.js": {
+      "maxDuration": 10
+    }
   },
   "headers": [
     {
       "source": "/(favicon.svg|favicon.ico|favicon-16.png|favicon-32.png|apple-touch-icon.png|icona-192.png|icona-512.png|icona-maskable-512.png|og-banner.png)",
       "headers": [
-        { "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=604800" }
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
       ]
     },
     {
       "source": "/manifest.webmanifest",
       "headers": [
-        { "key": "Content-Type", "value": "application/manifest+json; charset=utf-8" },
-        { "key": "Cache-Control", "value": "public, max-age=3600" }
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json; charset=utf-8"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        }
       ]
     },
     {
       "source": "/api/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
     }
   ],
   "rewrites": [
     {
-      "comment": "Instrada verso l'applicazione solo i percorsi senza estensione: le API e i file statici (immagini, manifest, robots) restano intatti.",
       "source": "/((?!api/|.*\\.[a-zA-Z0-9]+$).*)",
       "destination": "/index.html"
     }

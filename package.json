@@ -8,11 +8,12 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node scripts/prova-uri.mjs && node scripts/prova-regole.mjs && node scripts/simula.mjs 60",
+    "test": "node scripts/prova-vercel.mjs && node scripts/prova-uri.mjs && node scripts/prova-regole.mjs && node scripts/simula.mjs 60",
     "test:regole": "node scripts/prova-regole.mjs",
     "test:simula": "node scripts/simula.mjs",
     "test:uri": "node scripts/prova-uri.mjs",
-    "db:prova": "node --env-file=.env scripts/prova-connessione.mjs"
+    "db:prova": "node --env-file=.env scripts/prova-connessione.mjs",
+    "test:vercel": "node scripts/prova-vercel.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.15.0",
