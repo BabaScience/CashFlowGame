@@ -40,6 +40,7 @@ export default {
     codiceCorto: "Il codice è di 4 lettere.",
     partiteAperte: "Le tue partite",
     dimentica: "Togli dall'elenco",
+    livello: "Quanto realismo",
     lingua: "Lingua",
   },
 

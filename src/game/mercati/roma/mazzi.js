@@ -20,7 +20,7 @@
  * Non è una concessione al divertimento: è semplicemente vero, ed è la
  * lezione più utile che questo mazzo possa dare a chi vive a Roma.
  */
-import { immobile, attivita } from "./derivazione.js";
+import { immobile, attivita, conCanone } from "./derivazione.js";
 
 export const CATEGORIE = {
   posto: "Posto o box auto",
@@ -36,14 +36,14 @@ export const CATEGORIE = {
 /* ═══════════════════ PICCOLI AFFARI ═══════════════════ */
 export const PICCOLI_AFFARI = [
   /* ── Box e posti auto: il rendimento più alto di Roma, e il più ignorato ── */
-  { tipo: "immobile", categoria: "posto", nome: "Posto auto a Tuscolano", costo: 18000, acconto: 5500, mutuo: 13000, flusso: 62,
-    testo: "Scoperto, in un cortile condominiale. Nessuna manutenzione, nessun inquilino da inseguire." },
-  { tipo: "immobile", categoria: "posto", nome: "Box auto a Montesacro", costo: 32000, acconto: 9500, mutuo: 23000, flusso: 95,
-    testo: "Chiuso, con serranda elettrica. In zona i box si affittano prima delle case." },
-  { tipo: "immobile", categoria: "posto", nome: "Box auto a Prati", costo: 62000, acconto: 18000, mutuo: 45000, flusso: 150,
-    testo: "Dove parcheggiare è impossibile, un box vale quanto una stanza." },
-  { tipo: "immobile", categoria: "posto", nome: "Due posti auto a Ostia", costo: 24000, acconto: 7000, mutuo: 18000, flusso: 78,
-    testo: "Affittati entrambi a residenti. D'estate si potrebbero rivalutare." },
+  conCanone({ tipo: "immobile", categoria: "posto", nome: "Posto auto a Tuscolano", costo: 18000, acconto: 5500, mutuo: 13000, flusso: 62,
+    testo: "Scoperto, in un cortile condominiale. Nessuna manutenzione, nessun inquilino da inseguire." }),
+  conCanone({ tipo: "immobile", categoria: "posto", nome: "Box auto a Montesacro", costo: 32000, acconto: 9500, mutuo: 23000, flusso: 95,
+    testo: "Chiuso, con serranda elettrica. In zona i box si affittano prima delle case." }),
+  conCanone({ tipo: "immobile", categoria: "posto", nome: "Box auto a Prati", costo: 62000, acconto: 18000, mutuo: 45000, flusso: 150,
+    testo: "Dove parcheggiare è impossibile, un box vale quanto una stanza." }),
+  conCanone({ tipo: "immobile", categoria: "posto", nome: "Due posti auto a Ostia", costo: 24000, acconto: 7000, mutuo: 18000, flusso: 78,
+    testo: "Affittati entrambi a residenti. D'estate si potrebbero rivalutare." }),
 
   /* ── Bilocali in periferia: dove i conti tornano ── */
   immobile({ zonaId: "torbella", mq: 45, categoria: "bilocale", nome: "Bilocale a Tor Bella Monaca",

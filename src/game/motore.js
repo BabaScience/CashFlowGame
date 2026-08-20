@@ -8,6 +8,7 @@
 
 import { PERCORSO_RUOTA, PERCORSO_LARGO, N_RUOTA, N_LARGO, MAX_GIOCATORI, COLORI } from "./tabellone.js";
 import { getPacchetto, pacchettoDi, versioneCorrente, MERCATO_PREDEFINITO } from "./mercati/indice.js";
+import { flussoAlLivello, LIVELLO_PREDEFINITO } from "./regole/livelli.js";
 import {
   redditoPassivo, redditoTotale, speseTotali, flussoMensile,
   fuoriDallaCorsa, riepilogo, arrotonda, soldi, MAX_FIGLI,
@@ -124,6 +125,11 @@ export function creaStanza(codice, hostId, opzioni = {}) {
     hostId,
     mercatoId,
     versioneDati,
+    /* Quanto del fisco vero si vede. Il mercato senza `fisco` resta al
+       livello base: non ha un paese, quindi non ha imposte da mostrare. */
+    livello: getPacchetto(mercatoId, versioneDati).fisco
+      ? (opzioni.livello || LIVELLO_PREDEFINITO)
+      : LIVELLO_PREDEFINITO,
     solitaria: Boolean(opzioni.solitaria),
     // Il caso della partita, ricostruibile a ogni lettura dal database.
     seme: (opzioni.seme ?? semeCasuale()) >>> 0,
@@ -1012,9 +1018,14 @@ function compraCarta(s, g, c, azione) {
   if (c.tipo === "immobile") {
     if (g.contanti < c.acconto) return "Contanti insufficienti per l'acconto.";
     g.contanti -= c.acconto;
+    /* Il flusso non è quello stampato sulla carta: è quello che risulta al
+       livello di realismo della stanza. Al Livello 2 lo stesso bilocale può
+       passare da +113 a -49 al mese, ed è tutto il punto dell'esercizio. */
+    const flussoReale = flussoAlLivello(c, s.livello, pacchettoDi(s).fisco);
     g.immobili.push({
       rid: idBreve(s), categoria: c.categoria, nome: c.nome,
-      costo: c.costo, acconto: c.acconto, mutuo: c.mutuo, flusso: c.flusso,
+      costo: c.costo, acconto: c.acconto, mutuo: c.mutuo, flusso: flussoReale,
+      canone: c.canone, rata: c.rata,
     });
     nota(s, `${g.nome} compra "${c.nome}" (acconto ${den(s, c.acconto)}, flusso +${den(s, c.flusso)}/mese).`, "carta", g.id);
     return null;

@@ -46,6 +46,7 @@ export default {
     codiceCorto: "The code is 4 letters.",
     partiteAperte: "Your games",
     dimentica: "Remove from list",
+    livello: "How much realism",
     lingua: "Language",
   },
 

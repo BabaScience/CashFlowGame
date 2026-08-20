@@ -48,6 +48,10 @@ export default Object.freeze({
 
   tassoPrestito: 0.1,
 
+  /* Nessun fisco: "classico" è un'economia di equilibrio, non un paese.
+     Si gioca solo al Livello 1, e il selettore lo rispetta. */
+  fisco: null,
+
   professioni: PROFESSIONI,
   etichetteSpese: ETICHETTE_SPESE,
   etichettePassivita: ETICHETTE_PASSIVITA,

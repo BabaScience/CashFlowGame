@@ -70,13 +70,24 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
 
 ## 3 · Roma su dati veri
 
-- [~] **3.1 Livelli di realismo**
-      Livello 1 **fatto**, ma come dato e non come meccanica: imposte, IMU,
-      condominio, manutenzione e sfitto sono una trattenuta unica del 28% sul
-      canone, applicata quando si costruisce la carta (`derivazione.js`).
-      Restano da fare il Livello 2 (ogni voce separata e visibile, cedolare
-      secca al 21% o al 10% col canone concordato) e il Livello 3 (IRPEF,
-      plusvalenze, forfettario). Quelli sì richiedono agganci nel motore.
+- [x] **3.1 Livelli di realismo** — Livello 1 e **Livello 2** fatti, come
+      meccanica e non come dato. Al Livello 2 la trattenuta unica si apre in
+      cedolare secca, IMU, condominio, manutenzione e sfitto, ognuna col suo
+      nome; compare la scelta fra canone libero al 21% e concordato al 10%,
+      e un test verifica che **nessuna delle due vinca sempre** — altrimenti
+      non sarebbe una scelta. Lo stesso bilocale a Torpignattara rende
+      **+113 € al mese al Livello 1 e −49 € al Livello 2**: è la lezione
+      centrale del gioco, resa giocabile. Il cancello verifica ogni livello
+      separatamente; entrambi reggono.
+      **Trovato per strada:** box e posti auto non portavano un canone e al
+      Livello 2 risultavano esenti da imposte. Un box si affitta e l'affitto
+      si tassa.
+
+- [ ] **3.1b Livello 3 (esperto)** — IRPEF a scaglioni, plusvalenze,
+      regime forfettario per le attività. Serve anche a chiudere un buco
+      del Livello 2: le **attività** non sono tassate, perché la
+      tassazione d'impresa in Italia è un regime a parte e non si può
+      liquidare con un'aliquota unica.
 
 - [x] **3.2 Pacchetto Roma 2026**
       Professioni su fasce ISTAT/JobPricing al netto, immobili su quotazioni

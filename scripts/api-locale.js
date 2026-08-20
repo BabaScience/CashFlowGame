@@ -67,7 +67,7 @@ export default function apiLocale() {
             if (op === "crea") {
               let codice;
               do { codice = codiceStanza(); } while (stanze.has(codice));
-              const r = applicaAzione(creaStanza(codice, giocatoreId, { mercatoId: b.mercatoId }), {
+              const r = applicaAzione(creaStanza(codice, giocatoreId, { mercatoId: b.mercatoId, livello: Number(b.livello) || undefined }), {
                 tipo: "entra", giocatoreId, nome: b.nome,
                 professioneId: b.professioneId, sognoId: b.sognoId,
               });

@@ -188,8 +188,8 @@ function mossa(s) {
 
 /* ═══════════════ una partita ═══════════════ */
 
-function partita({ mercatoId, professioneId, giocatori = 3, seme, maxAzioni = 12000 }) {
-  let s = creaStanza(codiceStanza(), "p0", { seme, mercatoId });
+function partita({ mercatoId, livello, professioneId, giocatori = 3, seme, maxAzioni = 12000 }) {
+  let s = creaStanza(codiceStanza(), "p0", { seme, mercatoId, livello });
   for (let i = 0; i < giocatori; i++) {
     const r = applicaAzione(s, {
       tipo: "entra", giocatoreId: "p" + i, nome: "Bot" + i,
@@ -256,13 +256,23 @@ const lpad = (t, n) => String(t).padStart(n);
 
 let mercatiRotti = 0;
 
+/* Ogni livello di realismo è un gioco diverso e va verificato da solo: il
+   Livello 2 toglie a un immobile buona parte del flusso, e un mercato
+   giocabile al base può diventare impossibile al reale. */
+const COMBINAZIONI = [];
 for (const mercatoId of DA_VERIFICARE) {
+  const p = getPacchetto(mercatoId);
+  COMBINAZIONI.push({ mercatoId, livello: 1 });
+  if (p.fisco) COMBINAZIONI.push({ mercatoId, livello: 2 });
+}
+
+for (const { mercatoId, livello } of COMBINAZIONI) {
   const pacchetto = getPacchetto(mercatoId);
   const professioni = pacchetto.professioni;
   const den = (n) => soldi(n, pacchetto.valuta);
 
   console.log(`\n${"═".repeat(66)}`);
-  console.log(`MERCATO "${pacchetto.nome}" v${pacchetto.versione} · ${PER_PROFESSIONE} partite × ${professioni.length} professioni`);
+  console.log(`MERCATO "${pacchetto.nome}" v${pacchetto.versione} · LIVELLO ${livello} · ${PER_PROFESSIONE} partite × ${professioni.length} professioni`);
   console.log("═".repeat(66));
 
   const righe = [];
@@ -276,7 +286,7 @@ for (const mercatoId of DA_VERIFICARE) {
 
     for (let i = 0; i < PER_PROFESSIONE; i++) {
       const seme = (0x5bf03635 ^ (prof.id.length * 2654435761) ^ (i * 40503) ^ mercatoId.length) >>> 0;
-      const { s, uscita, completata, azioni } = partita({ mercatoId, professioneId: prof.id, seme });
+      const { s, uscita, completata, azioni } = partita({ mercatoId, livello, professioneId: prof.id, seme });
 
       partiteTotali++;
       giocatoriTot += s.giocatori.length;
@@ -363,9 +373,9 @@ for (const mercatoId of DA_VERIFICARE) {
   const falliti = esiti.filter((e) => !e.ok);
   if (falliti.length) {
     mercatiRotti++;
-    console.error(`\n  ❌ "${pacchetto.nome}" non è pubblicabile: ${falliti.length} verifica/he non superata/e.`);
+    console.error(`\n  ❌ "${pacchetto.nome}" livello ${livello} non è pubblicabile: ${falliti.length} verifica/he non superata/e.`);
   } else {
-    console.log(`\n  ✅ "${pacchetto.nome}" regge: vincibile da tutte e ${professioni.length} le professioni.`);
+    console.log(`\n  ✅ "${pacchetto.nome}" livello ${livello} regge: vincibile da tutte e ${professioni.length} le professioni.`);
   }
 }
 

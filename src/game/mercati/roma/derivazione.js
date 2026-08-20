@@ -72,6 +72,11 @@ export function immobile({ zonaId, mq, nome, testo, categoria, sconto = 0, ltv =
     acconto,
     mutuo,
     flusso,
+    /* Gli ingredienti, non solo il risultato: il Livello 2 apre la
+       trattenuta unica nelle sue voci vere, e per farlo gli servono il
+       canone lordo e la rata separati. */
+    canone: Math.round(canone),
+    rata: Math.round(rataMutuo(mutuo)),
     testo,
     /* Tenuti per il pannello didattico e per i test. */
     rendimentoLordo: Number(((canone * 12) / costo * 100).toFixed(1)),
@@ -90,4 +95,22 @@ export function attivita({ nome, costo, acconto, flusso, testo, categoria = "att
     flusso,
     testo,
   };
+}
+
+/**
+ * Completa una carta immobiliare scritta a mano.
+ *
+ * Le carte derivate dalle zone portano già canone e rata; quelle scritte a
+ * mano — box auto, posti auto — portavano solo il flusso, e al Livello 2
+ * risultavano quindi **esenti da imposte**. Un box si affitta e l'affitto si
+ * tassa come qualunque altro: l'esenzione era un difetto, non una scelta.
+ *
+ * Il canone si ricava all'indietro dal flusso dichiarato, così il Livello 1
+ * resta identico a prima e il Livello 2 diventa finalmente vero.
+ */
+export function conCanone(carta) {
+  if (carta.canone || !carta.flusso) return carta;
+  const rata = Math.round(rataMutuo(carta.mutuo || 0));
+  const canone = Math.round((carta.flusso + rata) / (1 - QUOTA_COSTI_L1));
+  return { ...carta, canone, rata };
 }

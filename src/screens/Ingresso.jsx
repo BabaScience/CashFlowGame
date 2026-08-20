@@ -174,6 +174,21 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
             </p>
           </div>
 
+          {haFisco && (
+            <div className="gruppo-campo">
+              <label className="etichetta" htmlFor="campo-livello">{t("ingresso.livello")}</label>
+              <select id="campo-livello" className="campo" value={livello}
+                onChange={(e) => setLivello(Number(e.target.value))}>
+                {LIVELLI.map((l) => (
+                  <option key={l.id} value={l.id}>{l.nome} — {l.sommario}</option>
+                ))}
+              </select>
+              <p className="f12 tenue" style={{ margin: "6px 0 0", lineHeight: 1.45 }}>
+                {LIVELLI.find((l) => l.id === livello)?.descrizione}
+              </p>
+            </div>
+          )}
+
           <div className="gruppo-campo">
             <label className="etichetta" htmlFor="campo-professione">{t("ingresso.professione")}</label>
             <select id="campo-professione" className="campo" value={professioneId} onChange={(e) => setProfessione(e.target.value)}>

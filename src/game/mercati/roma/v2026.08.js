@@ -51,6 +51,19 @@ export default Object.freeze({
 
   tassoPrestito: 0.012,
 
+  /* I parametri del Livello 2. Al Livello 1 conta solo `quotaCostiL1`,
+     che li riassume tutti in una trattenuta sola. */
+  fisco: {
+    quotaCostiL1: 0.28,
+    cedolare: 0.21,             // aliquota ordinaria
+    cedolareConcordata: 0.10,   // canone concordato
+    scontoConcordato: 0.85,     // il concordato sta sotto il libero
+    imuAnnuaSuValore: 0.0075,   // stima sulla seconda casa
+    quotaCondominio: 0.08,
+    quotaManutenzione: 0.05,
+    quotaSfitto: 0.05,
+  },
+
   professioni: PROFESSIONI,
   etichetteSpese: ETICHETTE_SPESE,
   etichettePassivita: ETICHETTE_PASSIVITA,
