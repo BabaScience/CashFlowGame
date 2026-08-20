@@ -33,7 +33,7 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       Serve anche: limite di frequenza per giocatore, e un interruttore per
       spegnerla (obbligatorio per l'uso in classe).
 
-- [ ] **1.2 Suoni**
+- [x] **1.2 Suoni**
       Dado, carta, incasso, esborso, tocca-a-te, vittoria. Sbloccare il contesto
       audio al primo tocco, interruttore persistente, rispettare
       `prefers-reduced-motion`. Solo campioni CC0, con un file di licenze nel

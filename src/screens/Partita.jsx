@@ -12,6 +12,8 @@ import { Bottone, NumeroAnimato, Barra } from "../components/Base.jsx";
 import { soldi, riepilogo, fuoriDallaCorsa } from "../game/finanze.js";
 import { PERCORSO_RUOTA, CASELLE_RUOTA, PERCORSO_LARGO, CASELLE_LARGO } from "../game/data/tabellone.js";
 import { useSchermoLargo } from "../hooks/useSchermo.js";
+import { useSuoni } from "../hooks/useSuoni.js";
+import { audioAcceso, impostaAudio, sbloccaAudio } from "../lib/suoni.js";
 
 /* Il tabellone non è più una scheda fra le altre: resta sempre a schermo,
    quindi le linguette servono solo per ciò che gli sta sotto. */
@@ -167,6 +169,15 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
 
 export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci }) {
   const [scheda, setScheda] = useState("scheda");
+  const [audio, setAudio] = useState(audioAcceso);
+  useSuoni(stato, mioId);
+
+  // I browser aprono l'audio solo dentro un gesto: il primo tocco basta.
+  useEffect(() => {
+    const apri = () => sbloccaAudio();
+    window.addEventListener("pointerdown", apri, { once: true });
+    return () => window.removeEventListener("pointerdown", apri);
+  }, []);
   const largo = useSchermoLargo(1000);
   const io = stato.giocatori.find((g) => g.id === mioId);
   const diTurno = stato.giocatori[stato.turno];
@@ -234,9 +245,20 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
           {casella.emoji} {casella.nome}
         </div>
       </div>
-      <div className="ta-r">
-        <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>Contanti</div>
-        <div className="numeri grassetto f16"><NumeroAnimato valore={io.contanti} /></div>
+      <div className="flex cen g12">
+        <button
+          onClick={() => setAudio(impostaAudio(!audio))}
+          aria-label={audio ? "Spegni i suoni" : "Accendi i suoni"}
+          aria-pressed={audio}
+          title={audio ? "Suoni accesi" : "Suoni spenti"}
+          style={{ fontSize: 17, lineHeight: 1, opacity: audio ? 0.85 : 0.35, padding: 4 }}
+        >
+          {audio ? "\u{1F50A}" : "\u{1F507}"}
+        </button>
+        <div className="ta-r">
+          <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>Contanti</div>
+          <div className="numeri grassetto f16"><NumeroAnimato valore={io.contanti} /></div>
+        </div>
       </div>
     </div>
   );
