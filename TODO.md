@@ -134,10 +134,14 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
 
 ## 5 · Imparare
 
-- [ ] **5.1 Lezioni e quesiti** — spiegare che cosa sono le cose e che cosa
-      significano: un ETF, la cedolare secca, l'ammortamento. Il meccanismo,
-      mai il consiglio su uno strumento preciso: in Italia è attività riservata
-      (art. 166 TUF). Avvertenza fissa su ogni lezione.
+- [x] **5.1 Lezioni e quesiti** — dieci lezioni e dieci quesiti, con gli
+      esempi calcolati sui dati veri del mercato (la lezione sul centro
+      contro la periferia dimostra il 3,4% del Centro Storico contro l'8,1%
+      di Tor Bella Monaca usando le quotazioni vere). Avvertenza fissa e non
+      chiudibile. **Sedici verifiche presidiano il confine dell'art. 166
+      TUF**: nessuna esortazione a comprare, nessuno strumento reale
+      nominato, e dove si parla di ETF si spiega il meccanismo e ci si ferma
+      dichiarando perché.
 
 ## 6 · Prima di incassare un euro
 
@@ -154,6 +158,13 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       EUIPO.
 
 ## 6bis · Emerso costruendo
+
+- [x] **`vite build` non vede i nomi non importati** — due volte di seguito,
+      spostando pezzi di `Ingresso.jsx`, una modifica ha perso la riga di
+      import: la compilazione passava e la schermata si rompeva solo aprendola.
+      Aggiunto `scripts/prova-import.mjs`, che raccoglie i nomi esportati dai
+      nostri moduli e pretende che chi li usa li importi. Verificato che morda:
+      togliendo un import, fallisce.
 
 - [x] **Un NaN azzerava le spese** — la bancarotta dimezzava un elenco di
       voci scritto a mano con le chiavi del mercato "classico". Su Roma, che

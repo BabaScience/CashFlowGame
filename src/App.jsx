@@ -3,6 +3,7 @@ import { useStanza } from "./hooks/useStanza.js";
 import { Avviso, Bottone } from "./components/Base.jsx";
 import Ingresso from "./screens/Ingresso.jsx";
 import Sfida from "./screens/Sfida.jsx";
+import Impara from "./screens/Impara.jsx";
 import Attesa from "./screens/Attesa.jsx";
 import Partita from "./screens/Partita.jsx";
 import Vittoria from "./components/Vittoria.jsx";
@@ -29,6 +30,7 @@ function Applicazione() {
   });
   const [avviso, setAvviso] = useState("");
   const [sfida, setSfida] = useState(false);
+  const [impara, setImpara] = useState(false);
 
   const avvisa = useCallback((t) => {
     setAvviso(t);
@@ -98,16 +100,16 @@ function Applicazione() {
   }, [codice, avvisa]);
 
   /* ── Nessuna stanza: schermata d'ingresso ── */
-  /* La sfida del giorno non ha stanza: gira tutta nel browser. */
-  if (sfida) {
-    return <Sfida suEsci={() => setSfida(false)} />;
-  }
+  /* Sfida e lezioni non hanno stanza: girano tutte nel browser. */
+  if (sfida) return <Sfida suEsci={() => setSfida(false)} />;
+  if (impara) return <Impara suEsci={() => setImpara(false)} />;
 
   if (!codice) {
     return (
       <MercatoProvider stato={stato}>
         <div className="schermo" style={{ paddingBottom: 24 }}>
-          <Ingresso suEntrato={setCodice} avvisa={avvisa} suSfida={() => setSfida(true)} />
+          <Ingresso suEntrato={setCodice} avvisa={avvisa}
+            suSfida={() => setSfida(true)} suImpara={() => setImpara(true)} />
           <Avviso testo={avviso} />
         </div>
       </MercatoProvider>

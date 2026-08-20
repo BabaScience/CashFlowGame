@@ -145,6 +145,18 @@ export default {
     },
   },
 
+  impara: {
+    titolo: "Impara",
+    lezioni: "Lezioni",
+    quesiti: "Quesiti",
+    minuti: "min",
+    giusto: "Giusto.",
+    sbagliato: "Non ci siamo.",
+    prossimo: "Prossimo quesito",
+    richiamo: "Impara",
+    richiamoSotto: "Lezioni brevi e quesiti da trenta secondi.",
+  },
+
   mercati: {
     classico: {
       nome: "Classico",

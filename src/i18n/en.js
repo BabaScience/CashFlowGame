@@ -151,6 +151,18 @@ export default {
     },
   },
 
+  impara: {
+    titolo: "Learn",
+    lezioni: "Lessons",
+    quesiti: "Puzzles",
+    minuti: "min",
+    giusto: "Correct.",
+    sbagliato: "Not quite.",
+    prossimo: "Next puzzle",
+    richiamo: "Learn",
+    richiamoSotto: "Short lessons and thirty-second puzzles.",
+  },
+
   mercati: {
     classico: {
       nome: "Classic",

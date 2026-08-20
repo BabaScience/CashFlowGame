@@ -6,6 +6,7 @@ import { MERCATI, MERCATO_PREDEFINITO } from "../game/mercati/indice.js";
 import { soldi } from "../game/finanze.js";
 import * as api from "../lib/api.js";
 import { traccia } from "../lib/traccia.js";
+import { partiteAperte, dimenticaPartita } from "../lib/partite.js";
 import { useLingua } from "../Lingua.jsx";
 
 /**
@@ -17,19 +18,22 @@ import { useLingua } from "../Lingua.jsx";
  * piedi a chi l'ha appena letta. Chi entra con un codice non sceglie nulla:
  * il mercato è quello della stanza, uno per tavolo.
  */
-export default function Ingresso({ suEntrato, avvisa, suSfida }) {
+export default function Ingresso({ suEntrato, avvisa, suSfida, suImpara }) {
   const [mercatoId, setMercato] = useState(
     () => localStorage.getItem("quotazero:mercato") || MERCATO_PREDEFINITO
   );
   return (
     <MercatoProvider mercatoId={mercatoId}>
-      <Modulo suEntrato={suEntrato} avvisa={avvisa} suSfida={suSfida}
+      <Modulo suEntrato={suEntrato} avvisa={avvisa} suSfida={suSfida} suImpara={suImpara}
         mercatoId={mercatoId} setMercato={setMercato} />
     </MercatoProvider>
   );
 }
 
-function Modulo({ suEntrato, avvisa, suSfida, mercatoId, setMercato }) {
+function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato }) {
+  /* Le partite lasciate a metà. Il gioco a turni distanziati serve a poco
+     se poi non si ritrova la strada per tornarci. */
+  const [aperte, setAperte] = useState(() => partiteAperte());
   const { t, lingua, cambiaLingua, lingue } = useLingua();
   const { professioni, sogni } = useMercato();
   const [nome, setNome] = useState(localStorage.getItem("quotazero:nome") || "");
@@ -110,6 +114,17 @@ function Modulo({ suEntrato, avvisa, suSfida, mercatoId, setMercato }) {
                 </div>
               ))}
             </div>
+          )}
+
+          {suImpara && (
+            <button onClick={suImpara} className="richiamo-sfida" style={{ marginTop: 8 }}
+              aria-label={t("impara.richiamo")}>
+              <span>
+                <strong>{t("impara.richiamo")}</strong><br />
+                <span className="f12" style={{ color: "var(--tenue)" }}>{t("impara.richiamoSotto")}</span>
+              </span>
+              <span className="freccia" aria-hidden="true">→</span>
+            </button>
           )}
 
           {/* La lingua non è il mercato: si può giocare Roma in inglese. */}
