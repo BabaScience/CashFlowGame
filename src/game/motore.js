@@ -6,13 +6,8 @@
  * divergenza fra ciò che vede un giocatore e ciò che vede un altro.
  */
 
-import { PROFESSIONI, getProfessione, DEBITI_ESTINGUIBILI } from "./data/professioni.js";
-import { MAZZI, PICCOLI_AFFARI, GRANDI_AFFARI, MERCATO, EXTRA } from "./data/mazzi.js";
-import { AFFARI_LARGO, SOGNI, getSogno, getAffareVeloce } from "./data/largo.js";
-import {
-  PERCORSO_RUOTA, PERCORSO_LARGO, N_RUOTA, N_LARGO,
-  OBIETTIVO_RENDITA, MAX_GIOCATORI, COLORI,
-} from "./data/tabellone.js";
+import { PERCORSO_RUOTA, PERCORSO_LARGO, N_RUOTA, N_LARGO, MAX_GIOCATORI, COLORI } from "./tabellone.js";
+import { getPacchetto, pacchettoDi, versioneCorrente, MERCATO_PREDEFINITO } from "./mercati/indice.js";
 import {
   redditoPassivo, redditoTotale, speseTotali, flussoMensile,
   fuoriDallaCorsa, riepilogo, arrotonda, soldi, MAX_FIGLI,
@@ -20,6 +15,23 @@ import {
 import { semeCasuale, dado, idBreve, mescola } from "./caso.js";
 
 /* ═══════════════ utilità ═══════════════ */
+
+/* L'economia della partita vive nel pacchetto del mercato, ancorato alla
+   stanza. Queste scorciatoie evitano di ripetere ovunque `pacchettoDi(s)`. */
+const professioniDi = (s) => pacchettoDi(s).professioni;
+const getProfessione = (s, id) =>
+  professioniDi(s).find((p) => p.id === id) || professioniDi(s)[0];
+const mazziDi = (s) => pacchettoDi(s).mazzi;
+const sogniDi = (s) => pacchettoDi(s).sogni;
+const getSogno = (s, id) => sogniDi(s).find((x) => x.id === id) || sogniDi(s)[0];
+const affariLargoDi = (s) => pacchettoDi(s).affariLargo;
+const getAffareVeloce = (s, id) => affariLargoDi(s).find((a) => a.id === id);
+const obiettivoDi = (s) => pacchettoDi(s).obiettivoRendita;
+const debitiEstinguibiliDi = (s) => pacchettoDi(s).debitiEstinguibili;
+const valutaDi = (s) => pacchettoDi(s).valuta;
+/** Un importo nella valuta del mercato di questa partita. */
+const den = (s, n) => soldi(n, valutaDi(s));
+
 
 /**
  * Il caso della partita è deterministico e vive nello stato (seme + passi):
@@ -42,7 +54,7 @@ const attuale = (s) => s.giocatori[s.turno] || null;
 
 /** Pesca una carta dal mazzo indicato, rimescolando quando finisce. */
 function pesca(s, nomeMazzo) {
-  const mazzo = MAZZI[nomeMazzo];
+  const mazzo = mazziDi(s)[nomeMazzo];
   const stato = s.mazzi[nomeMazzo];
   if (stato.p >= stato.ordine.length) {
     stato.ordine = mescola(s, mazzo.length);
@@ -55,14 +67,14 @@ function pesca(s, nomeMazzo) {
 
 /* ═══════════════ creazione ═══════════════ */
 
-export function creaGiocatore(id, nome, professioneId, sognoId, indice) {
-  const p = getProfessione(professioneId);
+export function creaGiocatore(s, id, nome, professioneId, sognoId, indice) {
+  const p = getProfessione(s, professioneId);
   return {
     id,
     nome: (nome || "Giocatore").slice(0, 18),
     colore: COLORI[indice % COLORI.length],
     professioneId: p.id,
-    sognoId: sognoId || SOGNI[0].id,
+    sognoId: sognoId || sogniDi(s)[0].id,
     pronto: false,
 
     // Ruota
@@ -97,11 +109,20 @@ export function creaGiocatore(id, nome, professioneId, sognoId, indice) {
 }
 
 export function creaStanza(codice, hostId, opzioni = {}) {
+  /* Il mercato si sceglie qui e non cambia più: la stanza si ancora a una
+     versione precisa dei dati e rilegge sempre quella, anche se nel
+     frattempo ne esce una nuova. Vedi mercati/indice.js. */
+  const mercatoId = opzioni.mercatoId || MERCATO_PREDEFINITO;
+  const versioneDati = opzioni.versioneDati || versioneCorrente(mercatoId);
+  const { conteggi } = getPacchetto(mercatoId, versioneDati);
+
   const s = {
     codice,
     versione: 1,
     fase: "attesa", // attesa | inCorso | finita
     hostId,
+    mercatoId,
+    versioneDati,
     // Il caso della partita, ricostruibile a ogni lettura dal database.
     seme: (opzioni.seme ?? semeCasuale()) >>> 0,
     passi: 0,
@@ -124,10 +145,10 @@ export function creaStanza(codice, hostId, opzioni = {}) {
   };
 
   s.mazzi = {
-    piccoli: { ordine: mescola(s, PICCOLI_AFFARI.length), p: 0 },
-    grandi: { ordine: mescola(s, GRANDI_AFFARI.length), p: 0 },
-    mercato: { ordine: mescola(s, MERCATO.length), p: 0 },
-    extra: { ordine: mescola(s, EXTRA.length), p: 0 },
+    piccoli: { ordine: mescola(s, conteggi.piccoli), p: 0 },
+    grandi: { ordine: mescola(s, conteggi.grandi), p: 0 },
+    mercato: { ordine: mescola(s, conteggi.mercato), p: 0 },
+    extra: { ordine: mescola(s, conteggi.extra), p: 0 },
   };
   return s;
 }
@@ -191,7 +212,7 @@ function pagaObbligatorio(s, g, importo, motivo) {
     g.contanti += serve;
     nota(
       s,
-      `${g.nome} non ha contanti a sufficienza: la banca gli presta ${soldi(serve)} (rata +${soldi(serve / 10)}/mese) per pagare ${motivo}.`,
+      `${g.nome} non ha contanti a sufficienza: la banca gli presta ${den(s, serve)} (rata +${den(s, serve / 10)}/mese) per pagare ${motivo}.`,
       "prestito", g.id
     );
   }
@@ -207,13 +228,13 @@ function giornoDiPaga(s, g) {
   const f = flussoMensile(g);
   if (f >= 0) {
     g.contanti += f;
-    nota(s, `${g.nome} incassa il Giorno di Paga: +${soldi(f)}.`, "paga", g.id);
+    nota(s, `${g.nome} incassa il Giorno di Paga: +${den(s, f)}.`, "paga", g.id);
     return false;
   }
   const dovuto = -f;
   if (g.contanti >= dovuto) {
     g.contanti -= dovuto;
-    nota(s, `${g.nome} ha flusso negativo e paga ${soldi(dovuto)} alla banca.`, "paga", g.id);
+    nota(s, `${g.nome} ha flusso negativo e paga ${den(s, dovuto)} alla banca.`, "paga", g.id);
     return false;
   }
   nota(s, `${g.nome} non riesce a coprire il flusso negativo: BANCAROTTA.`, "bancarotta", g.id);
@@ -273,7 +294,7 @@ function risolviTopi(s, g) {
     const costo = arrotonda(redditoTotale(g) * 0.1);
     s.pending = {
       tipo: "beneficenza", giocatoreId: g.id, costo,
-      testo: `Puoi donare il 10% del tuo reddito totale (${soldi(costo)}) per tirare 2 dadi nei prossimi 3 turni.`,
+      testo: `Puoi donare il 10% del tuo reddito totale (${den(s, costo)}) per tirare 2 dadi nei prossimi 3 turni.`,
     };
     return;
   }
@@ -337,14 +358,14 @@ function applicaEventoMercato(s, carta) {
       if (n > 0) {
         const tot = n * carta.importo;
         pagaObbligatorio(s, p, tot, `"${carta.nome}"`);
-        nota(s, `${p.nome} paga ${soldi(tot)} (${n} immobili).`, "mercato", p.id);
+        nota(s, `${p.nome} paga ${den(s, tot)} (${n} immobili).`, "mercato", p.id);
       }
     } else if (carta.effetto === "incassoPerAttivita") {
       const n = p.attivita.length;
       if (n > 0) {
         const tot = n * carta.importo;
         p.contanti += tot;
-        nota(s, `${p.nome} incassa ${soldi(tot)} (${n} attività).`, "mercato", p.id);
+        nota(s, `${p.nome} incassa ${den(s, tot)} (${n} attività).`, "mercato", p.id);
       }
     }
   }
@@ -356,7 +377,7 @@ function risolviVeloce(s, g) {
   if (casella.tipo === "rendita") return prossimoTurno(s);
 
   if (casella.tipo === "affare") {
-    const affare = getAffareVeloce(casella.rif);
+    const affare = getAffareVeloce(s, casella.rif);
     const proprietario = s.affariVenduti[casella.rif];
     if (proprietario) {
       nota(s, `${g.nome} trova "${affare.nome}" già acquistato.`, "veloce", g.id);
@@ -367,7 +388,7 @@ function risolviVeloce(s, g) {
   }
 
   if (casella.tipo === "sogno") {
-    const sogno = getSogno(casella.rif);
+    const sogno = getSogno(s, casella.rif);
     const mio = g.sognoId === casella.rif;
 
     if (mio) {
@@ -384,7 +405,7 @@ function risolviVeloce(s, g) {
       v.segnaliniSogno += 1;
       nota(
         s,
-        `${g.nome} atterra sul sogno di ${v.nome}: ora costa ${soldi(sogno.costo * (1 + v.segnaliniSogno))}.`,
+        `${g.nome} atterra sul sogno di ${v.nome}: ora costa ${den(s, sogno.costo * (1 + v.segnaliniSogno))}.`,
         "sogno", v.id
       );
     }
@@ -401,7 +422,7 @@ function risolviVeloce(s, g) {
     const perso = Math.floor(g.contanti / 2);
     g.contanti -= perso;
     const nome = casella.tipo === "verificaFiscale" ? "Verifica fiscale" : "Causa legale";
-    nota(s, `${g.nome}: ${nome}. Perde metà dei contanti (${soldi(perso)}).`, "penalita", g.id);
+    nota(s, `${g.nome}: ${nome}. Perde metà dei contanti (${den(s, perso)}).`, "penalita", g.id);
     s.pending = { tipo: "penalitaVeloce", giocatoreId: g.id, nome, perso };
     return;
   }
@@ -409,7 +430,7 @@ function risolviVeloce(s, g) {
   if (casella.tipo === "divorzio") {
     const perso = g.contanti;
     g.contanti = 0;
-    nota(s, `${g.nome}: Divorzio. Perde tutti i contanti (${soldi(perso)}).`, "penalita", g.id);
+    nota(s, `${g.nome}: Divorzio. Perde tutti i contanti (${den(s, perso)}).`, "penalita", g.id);
     s.pending = { tipo: "penalitaVeloce", giocatoreId: g.id, nome: "Divorzio", perso };
     return;
   }
@@ -429,14 +450,14 @@ function controllaVittoria(s, g) {
   }
   if (
     g.tracciato === "veloce" &&
-    g.redditoRendita >= g.redditoInizialeVeloce + OBIETTIVO_RENDITA
+    g.redditoRendita >= g.redditoInizialeVeloce + obiettivoDi(s)
   ) {
     s.fase = "finita";
     s.vincitore = g.id;
     s.motivoVittoria = "rendita";
     nota(
       s,
-      `🏆 ${g.nome} raggiunge +${soldi(OBIETTIVO_RENDITA)} di flusso al Largo e vince!`,
+      `🏆 ${g.nome} raggiunge +${den(s, obiettivoDi(s))} di flusso al Largo e vince!`,
       "vittoria", g.id
     );
     return true;
@@ -466,7 +487,7 @@ export function applicaAzione(stato, azione) {
       g.nome = (azione.nome || g.nome).slice(0, 18);
       g.professioneId = azione.professioneId || g.professioneId;
       g.sognoId = azione.sognoId || g.sognoId;
-      const p = getProfessione(g.professioneId);
+      const p = getProfessione(s, g.professioneId);
       g.stipendio = p.stipendio;
       g.perFiglio = p.perFiglio;
       g.spese = { ...p.spese };
@@ -474,7 +495,7 @@ export function applicaAzione(stato, azione) {
       return ok();
     }
     if (s.giocatori.length >= MAX_GIOCATORI) return err(`Massimo ${MAX_GIOCATORI} giocatori.`);
-    const nuovo = creaGiocatore(giocatoreId, azione.nome, azione.professioneId, azione.sognoId, s.giocatori.length);
+    const nuovo = creaGiocatore(s, giocatoreId, azione.nome, azione.professioneId, azione.sognoId, s.giocatori.length);
     s.giocatori.push(nuovo);
     nota(s, `${nuovo.nome} entra nella stanza.`, "lobby", nuovo.id);
     return ok();
@@ -508,7 +529,7 @@ export function applicaAzione(stato, azione) {
 
     // Ognuno riceve il primo Giorno di Paga più i risparmi (regolamento pag. 2).
     for (const p of s.giocatori) {
-      const prof = getProfessione(p.professioneId);
+      const prof = getProfessione(s, p.professioneId);
       p.contanti = flussoMensile(p) + prof.risparmi;
     }
     // Ordine di gioco: si tira un dado, il più alto comincia.
@@ -585,7 +606,7 @@ export function applicaAzione(stato, azione) {
     if (imp > 500000) return err("Importo troppo alto.");
     g.passivita.prestitoBanca += imp;
     g.contanti += imp;
-    nota(s, `${g.nome} chiede un prestito di ${soldi(imp)} (rata +${soldi(imp / 10)}/mese).`, "prestito", g.id);
+    nota(s, `${g.nome} chiede un prestito di ${den(s, imp)} (rata +${den(s, imp / 10)}/mese).`, "prestito", g.id);
     return ok();
   }
 
@@ -598,10 +619,10 @@ export function applicaAzione(stato, azione) {
       if (imp > g.contanti) return err("Contanti insufficienti.");
       g.passivita.prestitoBanca -= imp;
       g.contanti -= imp;
-      nota(s, `${g.nome} rimborsa ${soldi(imp)} di prestito bancario.`, "prestito", g.id);
+      nota(s, `${g.nome} rimborsa ${den(s, imp)} di prestito bancario.`, "prestito", g.id);
       return ok();
     }
-    const debito = DEBITI_ESTINGUIBILI.find((d) => d.chiave === chiave);
+    const debito = debitiEstinguibiliDi(s).find((d) => d.chiave === chiave);
     if (!debito) return err("Questo debito non è estinguibile.");
     const dovuto = g.passivita[chiave];
     if (!dovuto) return err("Non hai questo debito.");
@@ -609,7 +630,7 @@ export function applicaAzione(stato, azione) {
     g.contanti -= dovuto;
     g.passivita[chiave] = 0;
     g.spese[debito.spesa] = 0;
-    nota(s, `${g.nome} estingue "${debito.nome}" (${soldi(dovuto)}): spese ridotte.`, "prestito", g.id);
+    nota(s, `${g.nome} estingue "${debito.nome}" (${den(s, dovuto)}): spese ridotte.`, "prestito", g.id);
     return ok();
   }
 
@@ -628,7 +649,7 @@ export function applicaAzione(stato, azione) {
     g.usciteDallaCorsa = g.turniGiocati;
     nota(
       s,
-      `🎉 ${g.nome} esce dalla Ruota! Liquidazione ${soldi(buyout)} (100 × ${soldi(passivo)} di reddito passivo). Obiettivo: ${soldi(buyout + OBIETTIVO_RENDITA)}.`,
+      `🎉 ${g.nome} esce dalla Ruota! Liquidazione ${den(s, buyout)} (100 × ${den(s, passivo)} di reddito passivo). Obiettivo: ${den(s, buyout + obiettivoDi(s))}.`,
       "liberta", g.id
     );
     return ok();
@@ -680,7 +701,7 @@ export function applicaAzione(stato, azione) {
       nota(s, `${g.nome} tira ${valori.join(" + ")} = ${passi}.`, "dado", g.id);
       for (let i = 0; i < giorni; i++) {
         g.contanti += g.redditoRendita;
-        nota(s, `${g.nome} incassa il Giorno di Rendita: +${soldi(g.redditoRendita)}.`, "paga", g.id);
+        nota(s, `${g.nome} incassa il Giorno di Rendita: +${den(s, g.redditoRendita)}.`, "paga", g.id);
       }
       risolviVeloce(s, g);
     }
@@ -716,7 +737,7 @@ export function applicaAzione(stato, azione) {
       const dovuto = c.condizione === "immobile" && g.immobili.length === 0 ? 0 : c.importo;
       if (dovuto > 0) {
         pagaObbligatorio(s, g, dovuto, `"${c.nome}"`);
-        nota(s, `${g.nome} paga ${soldi(dovuto)} per "${c.nome}".`, "carta", g.id);
+        nota(s, `${g.nome} paga ${den(s, dovuto)} per "${c.nome}".`, "carta", g.id);
       } else {
         nota(s, `${g.nome} non è colpito da "${c.nome}".`, "carta", g.id);
       }
@@ -732,7 +753,7 @@ export function applicaAzione(stato, azione) {
     const imp = s.pending.importo;
     if (imp > 0) {
       pagaObbligatorio(s, g, imp, `"${s.pending.carta.nome}"`);
-      nota(s, `${g.nome} spende ${soldi(imp)}: "${s.pending.carta.nome}".`, "extra", g.id);
+      nota(s, `${g.nome} spende ${den(s, imp)}: "${s.pending.carta.nome}".`, "extra", g.id);
     }
     prossimoTurno(s);
     return ok();
@@ -745,7 +766,7 @@ export function applicaAzione(stato, azione) {
       if (g.contanti < costo) return err("Contanti insufficienti per la donazione.");
       g.contanti -= costo;
       g.turniBeneficenza = 3;
-      nota(s, `${g.nome} dona ${soldi(costo)}: 2 dadi per i prossimi 3 turni.`, "beneficenza", g.id);
+      nota(s, `${g.nome} dona ${den(s, costo)}: 2 dadi per i prossimi 3 turni.`, "beneficenza", g.id);
     } else {
       nota(s, `${g.nome} non dona.`, "beneficenza", g.id);
     }
@@ -757,7 +778,7 @@ export function applicaAzione(stato, azione) {
     if (s.pending.tipo !== "figlio") return err("Azione non valida ora.");
     if (s.pending.nuovo) {
       g.figli += 1;
-      nota(s, `👶 ${g.nome} ha un figlio! Spese +${soldi(g.perFiglio)}/mese (figli: ${g.figli}).`, "figlio", g.id);
+      nota(s, `👶 ${g.nome} ha un figlio! Spese +${den(s, g.perFiglio)}/mese (figli: ${g.figli}).`, "figlio", g.id);
     }
     prossimoTurno(s);
     return ok();
@@ -769,7 +790,7 @@ export function applicaAzione(stato, azione) {
     pagaObbligatorio(s, g, costo, "il licenziamento");
     g.turniDaSaltare = 2;
     g.turniBeneficenza = 0;
-    nota(s, `📉 ${g.nome} è licenziato: paga ${soldi(costo)} e salta 2 turni.`, "licenziamento", g.id);
+    nota(s, `📉 ${g.nome} è licenziato: paga ${den(s, costo)} e salta 2 turni.`, "licenziamento", g.id);
     if (g.contanti < 0 && flussoMensile(g) < 0) {
       g.inBancarotta = true;
       apriBancarotta(s, g);
@@ -832,7 +853,7 @@ export function applicaAzione(stato, azione) {
       s.affariVenduti[affare.id] = g.id;
       nota(
         s,
-        `${g.nome} compra "${affare.nome}" per ${soldi(affare.acconto)}: flusso +${soldi(affare.flusso)}/mese (totale ${soldi(g.redditoRendita)}).`,
+        `${g.nome} compra "${affare.nome}" per ${den(s, affare.acconto)}: flusso +${den(s, affare.flusso)}/mese (totale ${den(s, g.redditoRendita)}).`,
         "veloce", g.id
       );
       if (controllaVittoria(s, g)) return ok();
@@ -851,7 +872,7 @@ export function applicaAzione(stato, azione) {
       if (g.contanti < costo) return err("Contanti insufficienti per il tuo sogno.");
       g.contanti -= costo;
       g.sognoComprato = true;
-      nota(s, `⭐ ${g.nome} compra il proprio sogno "${s.pending.sogno.nome}" per ${soldi(costo)}!`, "sogno", g.id);
+      nota(s, `⭐ ${g.nome} compra il proprio sogno "${s.pending.sogno.nome}" per ${den(s, costo)}!`, "sogno", g.id);
       if (controllaVittoria(s, g)) return ok();
     }
     prossimoTurno(s);
@@ -865,7 +886,7 @@ export function applicaAzione(stato, azione) {
       if (g.contanti < costo) return err("Contanti insufficienti.");
       g.contanti -= costo;
       g.beneficenzaVeloce = true;
-      nota(s, `${g.nome} dona ${soldi(costo)}: da ora può scegliere quanti dadi tirare (1, 2 o 3).`, "beneficenza", g.id);
+      nota(s, `${g.nome} dona ${den(s, costo)}: da ora può scegliere quanti dadi tirare (1, 2 o 3).`, "beneficenza", g.id);
     }
     prossimoTurno(s);
     return ok();
@@ -900,7 +921,7 @@ function compraCarta(s, g, c, azione) {
     } else {
       g.azioni.push({ simbolo: c.simbolo, quantita: q, prezzoAcquisto: c.prezzo, dividendo: c.dividendo || 0 });
     }
-    nota(s, `${g.nome} compra ${q} × ${c.simbolo} a ${c.prezzo}$ (${soldi(costo)}).`, "carta", g.id);
+    nota(s, `${g.nome} compra ${q} × ${c.simbolo} a ${c.prezzo}$ (${den(s, costo)}).`, "carta", g.id);
     return null;
   }
 
@@ -911,7 +932,7 @@ function compraCarta(s, g, c, azione) {
       rid: idBreve(s), categoria: c.categoria, nome: c.nome,
       costo: c.costo, acconto: c.acconto, mutuo: c.mutuo, flusso: c.flusso,
     });
-    nota(s, `${g.nome} compra "${c.nome}" (acconto ${soldi(c.acconto)}, flusso +${soldi(c.flusso)}/mese).`, "carta", g.id);
+    nota(s, `${g.nome} compra "${c.nome}" (acconto ${den(s, c.acconto)}, flusso +${den(s, c.flusso)}/mese).`, "carta", g.id);
     return null;
   }
 
@@ -922,14 +943,14 @@ function compraCarta(s, g, c, azione) {
       rid: idBreve(s), nome: c.nome, costo: c.costo,
       acconto: c.acconto, passivita: c.passivita || 0, flusso: c.flusso,
     });
-    nota(s, `${g.nome} compra "${c.nome}" (acconto ${soldi(c.acconto)}, flusso +${soldi(c.flusso)}/mese).`, "carta", g.id);
+    nota(s, `${g.nome} compra "${c.nome}" (acconto ${den(s, c.acconto)}, flusso +${den(s, c.flusso)}/mese).`, "carta", g.id);
     return null;
   }
 
   if (c.tipo === "spesa") {
     const dovuto = c.condizione === "immobile" && g.immobili.length === 0 ? 0 : c.importo;
     pagaObbligatorio(s, g, dovuto, `"${c.nome}"`);
-    nota(s, `${g.nome} paga ${soldi(dovuto)}: "${c.nome}".`, "carta", g.id);
+    nota(s, `${g.nome} paga ${den(s, dovuto)}: "${c.nome}".`, "carta", g.id);
     return null;
   }
 
@@ -945,7 +966,7 @@ function vendiAlMercato(s, g, c, azione) {
       const netto = prezzo - (a.passivita || 0);
       g.contanti += netto;
       g.attivita = g.attivita.filter((x) => x.rid !== a.rid);
-      nota(s, `${g.nome} vende "${a.nome}" a ${soldi(prezzo)} (netto ${soldi(netto)}).`, "mercato", g.id);
+      nota(s, `${g.nome} vende "${a.nome}" a ${den(s, prezzo)} (netto ${den(s, netto)}).`, "mercato", g.id);
       return null;
     }
     const i = g.immobili.find((x) => x.rid === azione.rid);
@@ -957,7 +978,7 @@ function vendiAlMercato(s, g, c, azione) {
     g.immobili = g.immobili.filter((x) => x.rid !== i.rid);
     nota(
       s,
-      `${g.nome} vende "${i.nome}" a ${soldi(prezzo)} (meno ${soldi(i.mutuo)} di mutuo = ${soldi(netto)}).`,
+      `${g.nome} vende "${i.nome}" a ${den(s, prezzo)} (meno ${den(s, i.mutuo)} di mutuo = ${den(s, netto)}).`,
       "mercato", g.id
     );
     return null;
@@ -971,7 +992,7 @@ function vendiAlMercato(s, g, c, azione) {
     g.contanti += incasso;
     a.quantita -= q;
     if (a.quantita <= 0) g.azioni = g.azioni.filter((x) => x.simbolo !== c.simbolo);
-    nota(s, `${g.nome} vende ${q} × ${c.simbolo} a ${c.prezzo}$ (+${soldi(incasso)}).`, "mercato", g.id);
+    nota(s, `${g.nome} vende ${q} × ${c.simbolo} a ${c.prezzo}$ (+${den(s, incasso)}).`, "mercato", g.id);
     return null;
   }
 
@@ -986,7 +1007,7 @@ function vendiPerBancarotta(s, g, azione) {
     const incasso = meta(i.acconto);
     g.contanti += incasso;
     g.immobili = g.immobili.filter((x) => x.rid !== i.rid);
-    nota(s, `${g.nome} svende "${i.nome}" alla banca per ${soldi(incasso)}.`, "bancarotta", g.id);
+    nota(s, `${g.nome} svende "${i.nome}" alla banca per ${den(s, incasso)}.`, "bancarotta", g.id);
     return null;
   }
   if (azione.categoria === "attivita") {
@@ -995,7 +1016,7 @@ function vendiPerBancarotta(s, g, azione) {
     const incasso = meta(a.acconto);
     g.contanti += incasso;
     g.attivita = g.attivita.filter((x) => x.rid !== a.rid);
-    nota(s, `${g.nome} svende "${a.nome}" alla banca per ${soldi(incasso)}.`, "bancarotta", g.id);
+    nota(s, `${g.nome} svende "${a.nome}" alla banca per ${den(s, incasso)}.`, "bancarotta", g.id);
     return null;
   }
   if (azione.categoria === "azione") {
@@ -1004,11 +1025,11 @@ function vendiPerBancarotta(s, g, azione) {
     const incasso = meta(a.quantita * a.prezzoAcquisto);
     g.contanti += incasso;
     g.azioni = g.azioni.filter((x) => x.simbolo !== a.simbolo);
-    nota(s, `${g.nome} liquida ${a.simbolo} per ${soldi(incasso)}.`, "bancarotta", g.id);
+    nota(s, `${g.nome} liquida ${a.simbolo} per ${den(s, incasso)}.`, "bancarotta", g.id);
     return null;
   }
   if (azione.categoria === "debito") {
-    const d = DEBITI_ESTINGUIBILI.find((x) => x.chiave === azione.chiave);
+    const d = debitiEstinguibiliDi(s).find((x) => x.chiave === azione.chiave);
     if (!d) return "Debito non estinguibile.";
     const dovuto = g.passivita[d.chiave];
     if (!dovuto) return "Non hai questo debito.";
@@ -1026,7 +1047,7 @@ function vendiPerBancarotta(s, g, azione) {
     if (g.contanti < imp) return "Contanti insufficienti.";
     g.contanti -= imp;
     g.passivita.prestitoBanca -= imp;
-    nota(s, `${g.nome} rimborsa ${soldi(imp)} di prestito.`, "bancarotta", g.id);
+    nota(s, `${g.nome} rimborsa ${den(s, imp)} di prestito.`, "bancarotta", g.id);
     return null;
   }
   return "Categoria sconosciuta.";
@@ -1068,4 +1089,5 @@ export function classifica(s) {
     });
 }
 
-export { OBIETTIVO_RENDITA, MAX_GIOCATORI };
+export { MAX_GIOCATORI };
+export { getPacchetto, pacchettoDi, MERCATI, MERCATO_PREDEFINITO } from "./mercati/indice.js";

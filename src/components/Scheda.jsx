@@ -2,21 +2,20 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { KV, Bottone, Barra, Denaro } from "./Base.jsx";
 import { soldi, riepilogo } from "../game/finanze.js";
-import { ETICHETTE_SPESE, DEBITI_ESTINGUIBILI, getProfessione } from "../game/data/professioni.js";
-import { getSogno, getAffareVeloce } from "../game/data/largo.js";
-import { OBIETTIVO_RENDITA } from "../game/data/tabellone.js";
+import { useMercato } from "../Mercato.jsx";
 
 /**
  * La scheda finanziaria: Conto Economico e Stato Patrimoniale,
  * i due prospetti che chiunque abbia un mutuo dovrebbe saper leggere.
  */
 export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
+  const { etichetteSpese, debitiEstinguibili, trovaProfessione, trovaSogno, trovaAffare, obiettivo } = useMercato();
   const [apri, setApri] = useState("conto");
   const [prestito, setPrestito] = useState(5000);
   const [errore, setErrore] = useState("");
   const r = riepilogo(g);
-  const prof = getProfessione(g.professioneId);
-  const sogno = getSogno(g.sognoId);
+  const prof = trovaProfessione(g.professioneId);
+  const sogno = trovaSogno(g.sognoId);
 
   const fai = async (az) => {
     setErrore("");
@@ -93,7 +92,7 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
           <KV k="Reddito totale" v={soldi(r.redditoTotale)} forte />
 
           <div className="sezione-tit mt16">Uscite</div>
-          {Object.entries(ETICHETTE_SPESE).map(([k, et]) => (
+          {Object.entries(etichetteSpese).map(([k, et]) => (
             <KV key={k} k={et} v={soldi(g.spese[k])} />
           ))}
           <KV k={`Spese figli (${g.figli})`} v={soldi(r.speseFigli)} />
@@ -187,7 +186,7 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
             Estinguere un debito azzera la rata e alza il flusso mensile.
             Va pagato per intero. Tasse, Altre spese e Spese figli non si possono estinguere.
           </p>
-          {DEBITI_ESTINGUIBILI.filter((d) => g.passivita[d.chiave] > 0).map((d) => {
+          {debitiEstinguibili.filter((d) => g.passivita[d.chiave] > 0).map((d) => {
             const puoi = g.contanti >= g.passivita[d.chiave];
             return (
               <div key={d.chiave} className="flex tra cen" style={{ padding: "9px 0", borderTop: "1px dashed var(--linea)" }}>
@@ -214,9 +213,9 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
 
 /** Scheda ridotta per chi è già al Largo. */
 function SchedaVeloce({ giocatore: g }) {
-  const obiettivo = g.redditoInizialeVeloce + OBIETTIVO_RENDITA;
+  const obiettivo = g.redditoInizialeVeloce + obiettivo;
   const fatto = g.redditoRendita - g.redditoInizialeVeloce;
-  const sogno = getSogno(g.sognoId);
+  const sogno = trovaSogno(g.sognoId);
   return (
     <>
       <div className="carta" style={{ background: "linear-gradient(165deg,#FBF4E4,#F1E3BE)" }}>
@@ -228,10 +227,10 @@ function SchedaVeloce({ giocatore: g }) {
         <KV k="Obiettivo per vincere" v={soldi(obiettivo)} />
         <div className="mt12">
           <div className="flex tra f12 mb4">
-            <span className="tenue">Progresso verso +{soldi(OBIETTIVO_RENDITA)}</span>
+            <span className="tenue">Progresso verso +{soldi(obiettivo)}</span>
             <span className="numeri grassetto">{soldi(fatto)}</span>
           </div>
-          <Barra valore={fatto / OBIETTIVO_RENDITA} />
+          <Barra valore={fatto / obiettivo} />
         </div>
       </div>
 
@@ -261,7 +260,7 @@ function SchedaVeloce({ giocatore: g }) {
           </p>
         )}
         {g.affariVeloci.map((id) => {
-          const a = getAffareVeloce(id);
+          const a = trovaAffare(id);
           return (
             <div key={id} className="flex tra cen" style={{ padding: "7px 0", borderTop: "1px dashed var(--linea)" }}>
               <span className="f14">◆ {a?.nome || id}</span>

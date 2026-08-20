@@ -1,14 +1,14 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Bottone } from "../components/Base.jsx";
-import { PROFESSIONI } from "../game/data/professioni.js";
-import { SOGNI } from "../game/data/largo.js";
+import { useMercato } from "../Mercato.jsx";
 import { soldi } from "../game/finanze.js";
 import * as api from "../lib/api.js";
 import { traccia } from "../lib/traccia.js";
 
 /** Schermata iniziale: crea una stanza oppure entra con un codice. */
 export default function Ingresso({ suEntrato, avvisa }) {
+  const { professioni, sogni } = useMercato();
   const [nome, setNome] = useState(localStorage.getItem("quotazero:nome") || "");
   const [professioneId, setProfessione] = useState("insegnante");
   const [sognoId, setSogno] = useState("sg01");
@@ -16,7 +16,7 @@ export default function Ingresso({ suEntrato, avvisa }) {
   const [occupato, setOccupato] = useState(false);
   const [modo, setModo] = useState("crea");
 
-  const prof = PROFESSIONI.find((p) => p.id === professioneId);
+  const prof = professioni.find((p) => p.id === professioneId);
   const speseProf = Object.values(prof.spese).reduce((a, b) => a + b, 0);
   const flussoProf = prof.stipendio - speseProf;
 
@@ -72,7 +72,7 @@ export default function Ingresso({ suEntrato, avvisa }) {
           <div className="gruppo-campo">
             <label className="etichetta">Professione</label>
             <select className="campo" value={professioneId} onChange={(e) => setProfessione(e.target.value)}>
-              {PROFESSIONI.map((p) => (
+              {professioni.map((p) => (
                 <option key={p.id} value={p.id}>{p.emoji} {p.nome} — {soldi(p.stipendio)}/mese</option>
               ))}
             </select>
@@ -97,7 +97,7 @@ export default function Ingresso({ suEntrato, avvisa }) {
           <div className="gruppo-campo">
             <label className="etichetta">Il tuo sogno</label>
             <select className="campo" value={sognoId} onChange={(e) => setSogno(e.target.value)}>
-              {SOGNI.map((s) => (
+              {sogni.map((s) => (
                 <option key={s.id} value={s.id}>{s.emoji} {s.nome} — {soldi(s.costo)}</option>
               ))}
             </select>

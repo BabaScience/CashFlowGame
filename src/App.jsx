@@ -7,6 +7,7 @@ import Partita from "./screens/Partita.jsx";
 import Vittoria from "./components/Vittoria.jsx";
 import * as api from "./lib/api.js";
 import { traccia, tracciaSessione } from "./lib/traccia.js";
+import { MercatoProvider } from "./Mercato.jsx";
 
 const CHIAVE_STANZA = "quotazero:stanza";
 
@@ -90,41 +91,47 @@ export default function App() {
   /* ── Nessuna stanza: schermata d'ingresso ── */
   if (!codice) {
     return (
-      <div className="schermo" style={{ paddingBottom: 24 }}>
-        <Ingresso suEntrato={setCodice} avvisa={avvisa} />
-        <Avviso testo={avviso} />
-      </div>
+      <MercatoProvider stato={stato}>
+        <div className="schermo" style={{ paddingBottom: 24 }}>
+          <Ingresso suEntrato={setCodice} avvisa={avvisa} />
+          <Avviso testo={avviso} />
+        </div>
+      </MercatoProvider>
     );
   }
 
   /* ── Stanza non raggiungibile ── */
   if (errore && !stato) {
     return (
-      <div className="schermo" style={{ paddingBottom: 24 }}>
-        <div className="contenuto ta-c">
-          <div className="carta mt20">
-            <div style={{ fontSize: 30 }}>⚠️</div>
-            <h2 className="titolo f18 mt12" style={{ margin: "12px 0 8px" }}>{errore}</h2>
-            <p className="f13 tenue" style={{ margin: "0 0 16px", lineHeight: 1.5 }}>
-              Le stanze inattive vengono cancellate dopo 48 ore per non occupare spazio inutilmente.
-            </p>
-            <Bottone variante="btn-oro" onClick={() => setCodice(null)}>Torna all'inizio</Bottone>
+      <MercatoProvider stato={stato}>
+        <div className="schermo" style={{ paddingBottom: 24 }}>
+          <div className="contenuto ta-c">
+            <div className="carta mt20">
+              <div style={{ fontSize: 30 }}>⚠️</div>
+              <h2 className="titolo f18 mt12" style={{ margin: "12px 0 8px" }}>{errore}</h2>
+              <p className="f13 tenue" style={{ margin: "0 0 16px", lineHeight: 1.5 }}>
+                Le stanze inattive vengono cancellate dopo 48 ore per non occupare spazio inutilmente.
+              </p>
+              <Bottone variante="btn-oro" onClick={() => setCodice(null)}>Torna all'inizio</Bottone>
+            </div>
           </div>
+          <Avviso testo={avviso} />
         </div>
-        <Avviso testo={avviso} />
-      </div>
+      </MercatoProvider>
     );
   }
 
   /* ── Caricamento ── */
   if (caricamento && !stato) {
     return (
-      <div className="schermo" style={{ justifyContent: "center", alignItems: "center", paddingBottom: 0 }}>
-        <div className="ta-c">
-          <div style={{ fontSize: 28, color: "var(--oro-chiaro)" }}>◆</div>
-          <p className="f14 tenue mt12">Carico la stanza {codice}…</p>
+      <MercatoProvider stato={stato}>
+        <div className="schermo" style={{ justifyContent: "center", alignItems: "center", paddingBottom: 0 }}>
+          <div className="ta-c">
+            <div style={{ fontSize: 28, color: "var(--oro-chiaro)" }}>◆</div>
+            <p className="f14 tenue mt12">Carico la stanza {codice}…</p>
+          </div>
         </div>
-      </div>
+      </MercatoProvider>
     );
   }
 
@@ -133,28 +140,32 @@ export default function App() {
   /* ── Sala d'attesa ── */
   if (stato.fase === "attesa") {
     return (
-      <div className="schermo" style={{ paddingBottom: 24 }}>
-        <Attesa stato={stato} mioId={mioId} invia={invia} inAzione={inAzione}
-          avvisa={avvisa} suEsci={esci} />
-        <Avviso testo={avviso} />
-      </div>
+      <MercatoProvider stato={stato}>
+        <div className="schermo" style={{ paddingBottom: 24 }}>
+          <Attesa stato={stato} mioId={mioId} invia={invia} inAzione={inAzione}
+            avvisa={avvisa} suEsci={esci} />
+          <Avviso testo={avviso} />
+        </div>
+      </MercatoProvider>
     );
   }
 
   /* ── Partita ── */
   return (
-    <>
-      <Partita stato={stato} mioId={mioId} invia={invia} inAzione={inAzione}
-        avvisa={avvisa} suEsci={esci} />
-      {stato.fase === "finita" && (
-        <Vittoria
-          stato={stato} mioId={mioId}
-          sonoHost={stato.hostId === mioId}
-          suNuovaPartita={() => setCodice(null)}
-          suChiudi={chiudiStanza}
-        />
-      )}
-      <Avviso testo={avviso} />
-    </>
+    <MercatoProvider stato={stato}>
+      <>
+        <Partita stato={stato} mioId={mioId} invia={invia} inAzione={inAzione}
+          avvisa={avvisa} suEsci={esci} />
+        {stato.fase === "finita" && (
+          <Vittoria
+            stato={stato} mioId={mioId}
+            sonoHost={stato.hostId === mioId}
+            suNuovaPartita={() => setCodice(null)}
+            suChiudi={chiudiStanza}
+          />
+        )}
+        <Avviso testo={avviso} />
+      </>
+    </MercatoProvider>
   );
 }

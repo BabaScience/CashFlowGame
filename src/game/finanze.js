@@ -133,8 +133,50 @@ export function numero(n) {
   return seg + String(Math.abs(v)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
-/** Formattazione monetaria italiana: $1.234 (e -$1.234 per i negativi). */
-export function soldi(n) {
-  const v = Math.round(n || 0);
-  return (v < 0 ? "-$" : "$") + numero(Math.abs(v));
+/**
+ * La valuta di ripiego, quando non arriva dal mercato.
+ * Esiste solo perché una cifra senza simbolo è peggio di una cifra col
+ * simbolo sbagliato: nessuna schermata deve mai restare vuota.
+ */
+export const VALUTA_PREDEFINITA = { simbolo: "$", posizione: "prefisso", locale: "it-IT" };
+
+/**
+ * Formatta un importo nella valuta del mercato.
+ *
+ * `valuta` arriva dal pacchetto del mercato (vedi mercati/indice.js), perché
+ * il simbolo e la sua posizione cambiano da un mercato all'altro: 1.234 $ a
+ * Roma si scrive 1.234 €, e in francese il simbolo va dopo. Si accetta anche
+ * lo stato di una partita, così i componenti possono passare quello che hanno
+ * sottomano senza risalire al pacchetto.
+ */
+let valutaCorrente = VALUTA_PREDEFINITA;
+
+/**
+ * Dichiara la valuta del mercato che si sta guardando.
+ *
+ * La chiama il provider del mercato a ogni render (vedi Mercato.jsx). Serve
+ * perché `soldi()` è chiamato in un centinaio di punti dell'interfaccia,
+ * spesso da componenti di servizio che non hanno né lo stato né il contesto
+ * sottomano: passare la valuta a ognuno di loro significherebbe trascinarla
+ * per tutta l'applicazione.
+ *
+ * È una variabile di modulo, e va bene qui per una ragione precisa: sullo
+ * schermo c'è sempre e solo una partita, quindi una sola valuta. Il motore
+ * NON dipende da questa variabile — lì la valuta è sempre esplicita, presa
+ * dal pacchetto della stanza — quindi anche se andasse fuori sincrono
+ * potrebbe sbagliare un simbolo a schermo, mai un conto.
+ */
+export function impostaValutaCorrente(v) {
+  valutaCorrente = v || VALUTA_PREDEFINITA;
+}
+
+export function soldi(n, valuta) {
+  const v = valuta?.valuta || valuta || valutaCorrente;
+  const simbolo = v.simbolo ?? "$";
+  const importo = Math.round(n || 0);
+  const segno = importo < 0 ? "-" : "";
+  const cifre = numero(Math.abs(importo));
+  return v.posizione === "suffisso"
+    ? `${segno}${cifre} ${simbolo}`
+    : `${segno}${simbolo}${cifre}`;
 }

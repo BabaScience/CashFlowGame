@@ -2,10 +2,9 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Bottone, KV } from "./Base.jsx";
 import { soldi } from "../game/finanze.js";
-import { OBIETTIVO_RENDITA } from "../game/data/tabellone.js";
+
 import { classifica } from "../game/motore.js";
-import { getProfessione } from "../game/data/professioni.js";
-import { getSogno } from "../game/data/largo.js";
+import { useMercato } from "../Mercato.jsx";
 
 const COLORI = ["#C9A227", "#C4362B", "#2E6FA8", "#4E8B3D", "#D98324", "#7B4FA8"];
 
@@ -42,11 +41,12 @@ function Coriandoli() {
  * davvero qualcosa, quindi vale la pena mostrare tutti i numeri.
  */
 export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoHost }) {
+  const { trovaProfessione, trovaSogno, obiettivo } = useMercato();
   const tabella = useMemo(() => classifica(stato), [stato]);
   const vincitore = tabella.find((t) => t.vincitore);
   const motivo = {
     sogno: "ha realizzato il proprio sogno",
-    rendita: `ha raggiunto +${soldi(OBIETTIVO_RENDITA)} di rendita al Largo`,
+    rendita: `ha raggiunto +${soldi(obiettivo)} di rendita al Largo`,
     ultimo: "è l'ultimo giocatore rimasto in partita",
   }[stato.motivoVittoria] || "ha vinto";
 
@@ -74,10 +74,10 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
           {vincitore && (
             <div className="carta mb16" style={{ background: "linear-gradient(165deg,#FBF4E4,#F0DFB4)", borderColor: "#DFC27E" }}>
               <div className="flex cen g12 mb12">
-                <span style={{ fontSize: 26 }}>{getSogno(vincitore.sognoId).emoji}</span>
+                <span style={{ fontSize: 26 }}>{trovaSogno(vincitore.sognoId).emoji}</span>
                 <div>
-                  <div className="grassetto f16">{getSogno(vincitore.sognoId).nome}</div>
-                  <div className="f12 tenue">{getProfessione(vincitore.professioneId).nome}</div>
+                  <div className="grassetto f16">{trovaSogno(vincitore.sognoId).nome}</div>
+                  <div className="f12 tenue">{trovaProfessione(vincitore.professioneId).nome}</div>
                 </div>
               </div>
               <KV k="Contanti finali" v={soldi(vincitore.contanti)} />
@@ -114,7 +114,7 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
                     {t.id === mioId && <span className="tenue"> · tu</span>}
                   </div>
                   <div className="f12 tenue">
-                    {getProfessione(t.professioneId).nome}
+                    {trovaProfessione(t.professioneId).nome}
                     {" · "}
                     {t.eliminato ? "eliminato" : t.tracciato === "veloce" ? "Largo" : "Ruota"}
                     {t.usciteDallaCorsa ? ` · uscito dalla corsa al suo ${t.usciteDallaCorsa}° turno` : ""}

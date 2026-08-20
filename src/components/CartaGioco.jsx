@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { soldi } from "../game/finanze.js";
-import { CATEGORIE } from "../game/data/mazzi.js";
+import { useMercato } from "../Mercato.jsx";
 
 /**
  * Contenitore di una carta pescata: parte coperta e si gira.
@@ -9,6 +9,7 @@ import { CATEGORIE } from "../game/data/mazzi.js";
  * come quando qualcuno gira una carta sul tavolo.
  */
 export default function CartaGioco({ classe = "c-piccoli", etichetta, titolo, children, chiave }) {
+  const { categorie } = useMercato();
   // La copertura è puramente decorativa: il fronte della carta è SEMPRE
   // disegnato sotto. Se l'animazione non parte — scheda in secondo piano,
   // fotogrammi sospesi dal browser, "riduci animazioni" attivo — la carta
@@ -97,8 +98,8 @@ export function CorpoAffare({ carta }) {
   return (
     <>
       <p className="f14" style={{ margin: "0 0 12px", lineHeight: 1.45 }}>{carta.testo}</p>
-      {carta.categoria && CATEGORIE[carta.categoria] && (
-        <div className="tag tag-verde mb8">{CATEGORIE[carta.categoria]}</div>
+      {carta.categoria && categorie[carta.categoria] && (
+        <div className="tag tag-verde mb8">{categorie[carta.categoria]}</div>
       )}
       <Voce k="Costo totale" v={soldi(carta.costo)} />
       <Voce k="Acconto richiesto" v={soldi(carta.acconto)} />

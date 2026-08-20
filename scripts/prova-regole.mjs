@@ -4,9 +4,15 @@
  *   node scripts/prova-regole.mjs
  */
 import { creaStanza, applicaAzione, codiceStanza } from "../src/game/motore.js";
-import { getProfessione } from "../src/game/data/professioni.js";
+import { getPacchetto } from "../src/game/mercati/indice.js";
+
+/* Il pacchetto di riferimento delle prove: le regole si verificano contro
+   il mercato con cui il gioco è bilanciato, non contro dati che cambiano. */
+const PACCHETTO = getPacchetto();
+const getProfessione = (id) => PACCHETTO.professioni.find((p) => p.id === id) || PACCHETTO.professioni[0];
+const OBIETTIVO_RENDITA = PACCHETTO.obiettivoRendita;
 import { flussoMensile, speseTotali, redditoTotale, redditoPassivo, riepilogo } from "../src/game/finanze.js";
-import { OBIETTIVO_RENDITA } from "../src/game/data/tabellone.js";
+
 
 let passati = 0, falliti = 0;
 const test = (nome, fn) => {

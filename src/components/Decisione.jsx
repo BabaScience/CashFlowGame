@@ -2,8 +2,7 @@ import React, { useMemo, useState } from "react";
 import { Foglio, Bottone, Denaro } from "./Base.jsx";
 import CartaGioco, { CorpoAffare, Voce } from "./CartaGioco.jsx";
 import { soldi, flussoMensile, riepilogo } from "../game/finanze.js";
-import { CATEGORIE } from "../game/data/mazzi.js";
-import { DEBITI_ESTINGUIBILI } from "../game/data/professioni.js";
+import { useMercato } from "../Mercato.jsx";
 
 /**
  * Tutte le decisioni del gioco passano da qui.
@@ -11,6 +10,7 @@ import { DEBITI_ESTINGUIBILI } from "../game/data/professioni.js";
  * vedono la stessa carta nel riquadro "sul tavolo" della schermata di gioco.
  */
 export default function Decisione({ stato, mioId, invia, inAzione }) {
+  const { categorie, debitiEstinguibili } = useMercato();
   const p = stato.pending;
   const io = stato.giocatori.find((g) => g.id === mioId);
   const [quantita, setQuantita] = useState("");
@@ -182,7 +182,7 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
           <p className="f14" style={{ margin: 0, lineHeight: 1.45 }}>{c.testo}</p>
           {c.tipo === "offerta" && (
             <div className="mt12">
-              <Voce k="Cercano" v={CATEGORIE[c.categoria] || c.categoria} />
+              <Voce k="Cercano" v={categorie[c.categoria] || c.categoria} />
               <Voce k="Offerta" v={c.moltiplicatore ? `${Math.round(c.moltiplicatore * 100)}% del costo` : soldi(c.prezzo)} />
             </div>
           )}
@@ -412,7 +412,7 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
           </div>
         ))}
 
-        {DEBITI_ESTINGUIBILI.filter((d) => io.passivita[d.chiave] > 0 && io.contanti >= io.passivita[d.chiave]).map((d) => (
+        {debitiEstinguibili.filter((d) => io.passivita[d.chiave] > 0 && io.contanti >= io.passivita[d.chiave]).map((d) => (
           <div key={d.chiave} className="carta mb8" style={{ padding: 12 }}>
             <div className="grassetto f14 mb4">Estingui: {d.nome}</div>
             <div className="f12 tenue mb8">

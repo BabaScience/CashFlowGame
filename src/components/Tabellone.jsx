@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import {
   PERCORSO_RUOTA, PERCORSO_LARGO, CASELLE_RUOTA, CASELLE_LARGO,
   N_RUOTA, N_LARGO,
-} from "../game/data/tabellone.js";
+} from "../game/tabellone.js";
 
 /* ── geometria ─────────────────────────────────────────────── */
 const L = 400, CX = L / 2, CY = L / 2;

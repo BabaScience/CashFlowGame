@@ -47,14 +47,14 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
 
 ## 2 · Un mercato è un pacchetto
 
-- [ ] **2.1 Registro dei mercati e pacchetti immutabili**
+- [x] **2.1 Registro dei mercati e pacchetti immutabili**
       `src/game/mercati/<citta>/v<AAAA.MM>.js`. La stanza salva
       `{ mercatoId, versioneDati }` e li rilegge a ogni azione. Un aggiornamento
       pubblica un file nuovo, non ne modifica uno vecchio: la stanza conserva
       indici dentro i mazzi, e cambiare i dati sotto una partita in corso la
       rompe. Le stanze vivono fino a 48 ore, quindi prima o poi capiterebbe.
 
-- [ ] **2.2 La valuta esce dal pacchetto**
+- [x] **2.2 La valuta esce dal pacchetto**
       `finanze.js` scrive `$` a mano sopra a cifre raggruppate all'italiana.
       Deve prendere simbolo, posizione e lingua dal mercato.
 

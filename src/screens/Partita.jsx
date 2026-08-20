@@ -10,7 +10,7 @@ import Chat from "../components/Chat.jsx";
 import Decisione from "../components/Decisione.jsx";
 import { Bottone, NumeroAnimato, Barra } from "../components/Base.jsx";
 import { soldi, riepilogo, fuoriDallaCorsa } from "../game/finanze.js";
-import { PERCORSO_RUOTA, CASELLE_RUOTA, PERCORSO_LARGO, CASELLE_LARGO } from "../game/data/tabellone.js";
+import { PERCORSO_RUOTA, CASELLE_RUOTA, PERCORSO_LARGO, CASELLE_LARGO } from "../game/tabellone.js";
 import { useSchermoLargo } from "../hooks/useSchermo.js";
 import { useSuoni } from "../hooks/useSuoni.js";
 import { audioAcceso, impostaAudio, sbloccaAudio } from "../lib/suoni.js";

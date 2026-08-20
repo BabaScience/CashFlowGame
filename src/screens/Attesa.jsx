@@ -1,13 +1,13 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Bottone, GettoneGiocatore } from "../components/Base.jsx";
-import { PROFESSIONI, getProfessione } from "../game/data/professioni.js";
-import { SOGNI, getSogno } from "../game/data/largo.js";
+import { useMercato } from "../Mercato.jsx";
 import { soldi, flussoMensile } from "../game/finanze.js";
-import { MAX_GIOCATORI } from "../game/data/tabellone.js";
+import { MAX_GIOCATORI } from "../game/tabellone.js";
 
 /** Sala d'attesa: si vede chi è entrato e si può ancora cambiare scelta. */
 export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }) {
+  const { professioni, sogni, trovaProfessione, trovaSogno } = useMercato();
   const io = stato.giocatori.find((g) => g.id === mioId);
   const sonoHost = stato.hostId === mioId;
   const [modifica, setModifica] = useState(false);
@@ -64,8 +64,8 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
             Al tavolo · {stato.giocatori.length}/{MAX_GIOCATORI}
           </div>
           {stato.giocatori.map((g, i) => {
-            const p = getProfessione(g.professioneId);
-            const s = getSogno(g.sognoId);
+            const p = trovaProfessione(g.professioneId);
+            const s = trovaSogno(g.sognoId);
             return (
               // initial={false}: il contenuto deve essere visibile SUBITO. Se la riga
               // comparisse mentre la scheda è in secondo piano, un'animazione d'ingresso
@@ -101,8 +101,8 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
           </button>
           {!modifica && io && (
             <p className="f13 tenue" style={{ margin: "8px 0 0" }}>
-              {getProfessione(io.professioneId).emoji} {getProfessione(io.professioneId).nome}
-              {" · "}sogno: {getSogno(io.sognoId).nome}
+              {trovaProfessione(io.professioneId).emoji} {trovaProfessione(io.professioneId).nome}
+              {" · "}sogno: {trovaSogno(io.sognoId).nome}
             </p>
           )}
           {modifica && io && (
@@ -110,20 +110,20 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
               <label className="etichetta">Professione</label>
               <select className="campo mb12" value={io.professioneId} disabled={inAzione}
                 onChange={(e) => cambia("prof", e.target.value)}>
-                {PROFESSIONI.map((p) => (
+                {professioni.map((p) => (
                   <option key={p.id} value={p.id}>{p.emoji} {p.nome} — {soldi(p.stipendio)}/mese</option>
                 ))}
               </select>
               <label className="etichetta">Sogno</label>
               <select className="campo" value={io.sognoId} disabled={inAzione}
                 onChange={(e) => cambia("sogno", e.target.value)}>
-                {SOGNI.map((s) => (
+                {sogni.map((s) => (
                   <option key={s.id} value={s.id}>{s.emoji} {s.nome} — {soldi(s.costo)}</option>
                 ))}
               </select>
               {io && (
                 <p className="f12 tenue mt12" style={{ margin: "12px 0 0", lineHeight: 1.5 }}>
-                  Partirai con <strong className="numeri">{soldi(flussoMensile(io) + getProfessione(io.professioneId).risparmi)}</strong> in
+                  Partirai con <strong className="numeri">{soldi(flussoMensile(io) + trovaProfessione(io.professioneId).risparmi)}</strong> in
                   contanti (giorno di paga + risparmi).
                 </p>
               )}

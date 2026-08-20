@@ -3,15 +3,14 @@ import { motion } from "framer-motion";
 import { GettoneGiocatore, Barra, Denaro } from "./Base.jsx";
 import { Sagoma } from "./Tabellone.jsx";
 import { soldi, riepilogo } from "../game/finanze.js";
-import { getProfessione } from "../game/data/professioni.js";
-import { getSogno } from "../game/data/largo.js";
-import { OBIETTIVO_RENDITA as META } from "../game/data/tabellone.js";
+import { useMercato } from "../Mercato.jsx";
 
 /**
  * Il pannello degli avversari: si vede la rendita di tutti crescere.
  * È metà del gusto del gioco — capire chi sta per prendere il largo.
  */
 export default function Giocatori({ stato, mioId, compatto }) {
+  const { trovaProfessione, trovaSogno, obiettivo } = useMercato();
   const diTurno = stato.giocatori[stato.turno]?.id;
 
   return (
@@ -19,11 +18,11 @@ export default function Giocatori({ stato, mioId, compatto }) {
       {!compatto && <div className="sezione-tit" style={{ color: "rgba(244,241,230,.5)" }}>Al tavolo</div>}
       {stato.giocatori.map((g, i) => {
         const r = riepilogo(g);
-        const prof = getProfessione(g.professioneId);
-        const sogno = getSogno(g.sognoId);
+        const prof = trovaProfessione(g.professioneId);
+        const sogno = trovaSogno(g.sognoId);
         const veloce = g.tracciato === "veloce";
         const progressoVeloce = veloce
-          ? (g.redditoRendita - g.redditoInizialeVeloce) / META
+          ? (g.redditoRendita - g.redditoInizialeVeloce) / obiettivo
           : 0;
 
         return (

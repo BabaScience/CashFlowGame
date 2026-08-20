@@ -21,8 +21,11 @@
  * Uscita 0 = i dati reggono. Uscita 1 = i dati hanno rotto il gioco.
  */
 import { creaStanza, applicaAzione, codiceStanza } from "../src/game/motore.js";
-import { PROFESSIONI } from "../src/game/data/professioni.js";
-import { SOGNI } from "../src/game/data/largo.js";
+import { getPacchetto } from "../src/game/mercati/indice.js";
+
+const PACCHETTO = getPacchetto();
+const PROFESSIONI = PACCHETTO.professioni;
+const SOGNI = PACCHETTO.sogni;
 import { flussoMensile, fuoriDallaCorsa, riepilogo, soldi } from "../src/game/finanze.js";
 
 /* ═══════════════ soglie di accettazione ═══════════════ */

@@ -1,4 +1,12 @@
 /**
+ * IL TABELLONE — la parte del gioco che NON cambia da un mercato all'altro.
+ *
+ * La divisione è questa: il tabellone è il gioco, l'economia è il mercato.
+ * Ventiquattro caselle sull'anello interno e quarantotto su quello esterno
+ * valgono a Roma come a Parigi; quanto costa una casa, no. Perciò qui
+ * restano percorsi, tipi di casella e colori, mentre professioni, mazzi,
+ * affari, valuta e obiettivo stanno nel pacchetto del mercato.
+ *
  * I due tracciati del tabellone.
  *
  * LA RUOTA - 24 caselle (anello interno, si tira 1 dado).
@@ -114,9 +122,6 @@ export const CASELLE_LARGO = {
 
 export const N_RUOTA = PERCORSO_RUOTA.length;
 export const N_LARGO = PERCORSO_LARGO.length;
-
-/** Obiettivo di flusso da aggiungere al reddito iniziale per vincere. */
-export const OBIETTIVO_RENDITA = 50000;
 
 /** Numero massimo di giocatori per stanza (come il gioco da tavolo). */
 export const MAX_GIOCATORI = 6;

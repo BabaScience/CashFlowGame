@@ -1,0 +1,66 @@
+/**
+ * MERCATO "CLASSICO" — versione 2026.08
+ *
+ * ⚠️  QUESTO FILE NON SI MODIFICA.
+ *
+ * Un aggiornamento dei dati pubblica un file NUOVO (v2027.02.js e così via)
+ * e lo registra in ../indice.js. Il motivo non è ordine formale: la stanza
+ * salva gli indici già mescolati dei mazzi, e le partite vivono fino a 48
+ * ore. Cambiare i numeri sotto una partita in corso significa distribuire
+ * carte diverse da quelle che erano state mescolate, o andare fuori dai
+ * limiti di un mazzo accorciato. Le stanze si ancorano a { mercatoId,
+ * versioneDati } e rileggono sempre la versione con cui sono nate.
+ *
+ * Che cos'è "classico": l'economia di equilibrio con cui il gioco è stato
+ * bilanciato e verificato. Non sono dati di una città vera, e non pretende
+ * di esserlo — la valuta è astratta apposta. Serve da riferimento stabile
+ * per il bilanciamento e da rete di sicurezza se un mercato reale dovesse
+ * risultare ingiocabile.
+ *
+ * Il primo mercato vero sarà `roma`, su quotazioni OMI, fasce ISTAT e tassi
+ * di Banca d'Italia, con la fonte annotata campo per campo.
+ */
+import { PROFESSIONI, ETICHETTE_SPESE, ETICHETTE_PASSIVITA, DEBITI_ESTINGUIBILI } from "./professioni.js";
+import { MAZZI, PICCOLI_AFFARI, GRANDI_AFFARI, MERCATO, EXTRA, CATEGORIE } from "./mazzi.js";
+import { AFFARI_LARGO, SOGNI } from "./largo.js";
+
+export default Object.freeze({
+  id: "classico",
+  versione: "2026.08",
+  nome: "Classico",
+  luogo: null,                 // non è una città vera
+  descrizione: "L'economia di equilibrio con cui il gioco è bilanciato.",
+
+  /* Come si scrivono i soldi. Non è un dettaglio grafico: è la prima cosa
+     che distingue un mercato dall'altro sullo schermo. */
+  valuta: {
+    simbolo: "$",
+    posizione: "prefisso",     // prefisso | suffisso
+    locale: "it-IT",
+  },
+
+  /* Quanta rendita mensile serve, oltre a quella d'ingresso, per vincere. */
+  obiettivoRendita: 50000,
+
+  professioni: PROFESSIONI,
+  etichetteSpese: ETICHETTE_SPESE,
+  etichettePassivita: ETICHETTE_PASSIVITA,
+  debitiEstinguibili: DEBITI_ESTINGUIBILI,
+
+  mazzi: MAZZI,
+  categorie: CATEGORIE,
+  conteggi: {
+    piccoli: PICCOLI_AFFARI.length,
+    grandi: GRANDI_AFFARI.length,
+    mercato: MERCATO.length,
+    extra: EXTRA.length,
+  },
+
+  affariLargo: AFFARI_LARGO,
+  sogni: SOGNI,
+
+  /* Da dove vengono i numeri. Vuoto qui perché non vengono da nessuna parte:
+     sono scelti a mano. Nei mercati veri ogni voce porta la sua fonte, ed è
+     ciò che separa un gioco da uno strumento che una scuola può adottare. */
+  fonti: {},
+});

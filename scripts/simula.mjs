@@ -4,8 +4,11 @@
  *   node scripts/simula.mjs [numeroPartite]
  */
 import { creaStanza, applicaAzione, codiceStanza, classifica } from "../src/game/motore.js";
-import { PROFESSIONI } from "../src/game/data/professioni.js";
-import { SOGNI } from "../src/game/data/largo.js";
+import { getPacchetto } from "../src/game/mercati/indice.js";
+
+const PACCHETTO = getPacchetto();
+const PROFESSIONI = PACCHETTO.professioni;
+const SOGNI = PACCHETTO.sogni;
 import { fuoriDallaCorsa, flussoMensile, riepilogo } from "../src/game/finanze.js";
 
 const scegli = (a) => a[Math.floor(Math.random() * a.length)];
