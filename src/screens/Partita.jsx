@@ -14,15 +14,16 @@ import { PERCORSO_RUOTA, CASELLE_RUOTA, PERCORSO_LARGO, CASELLE_LARGO } from "..
 import { useSchermoLargo } from "../hooks/useSchermo.js";
 import { useSuoni } from "../hooks/useSuoni.js";
 import { audioAcceso, impostaAudio, sbloccaAudio } from "../lib/suoni.js";
+import { useLingua } from "../Lingua.jsx";
 
 /* Il tabellone non è più una scheda fra le altre: resta sempre a schermo,
    quindi le linguette servono solo per ciò che gli sta sotto. */
 const SCHEDE = [
-  { id: "scheda", icona: "▤", nome: "Scheda" },
-  { id: "gioc", icona: "◉", nome: "Giocatori" },
-  { id: "chat", icona: "✉", nome: "Chat" },
-  { id: "log", icona: "☰", nome: "Registro" },
-  { id: "regole", icona: "?", nome: "Regole" },
+  { id: "scheda", icona: "▤", chiave: "schede.scheda" },
+  { id: "gioc", icona: "◉", chiave: "schede.giocatori" },
+  { id: "chat", icona: "✉", chiave: "schede.chat" },
+  { id: "log", icona: "☰", chiave: "schede.registro" },
+  { id: "regole", icona: "?", chiave: "schede.regole" },
 ];
 
 /** Riquadro che racconta agli altri cosa sta succedendo sul tavolo. */
@@ -59,7 +60,7 @@ function SulTavolo({ stato }) {
   return (
     <motion.div className="carta-scura mt12"
       initial={false} animate={{ opacity: 1, y: 0 }}>
-      <div className="sezione-tit" style={{ color: "rgba(244,241,230,.5)" }}>Sul tavolo</div>
+      <div className="sezione-tit" style={{ color: "rgba(244,241,230,.5)" }}>{t("partita.sulTavolo")}</div>
       <p className="f14" style={{ margin: 0, lineHeight: 1.5 }}>{testo}</p>
       {p.carta?.testo && (
         <p className="f13 tenue mt8" style={{ margin: "8px 0 0", fontStyle: "italic", lineHeight: 1.5 }}>
@@ -81,7 +82,7 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
   if (io.eliminato) {
     return (
       <div className="carta-scura mt12 ta-c">
-        <p className="f14" style={{ margin: 0 }}>Sei fuori dalla partita, ma puoi continuare a seguirla.</p>
+        <p className="f14" style={{ margin: 0 }}>{t("partita.fuoriDallaPartita")}</p>
       </div>
     );
   }
@@ -120,7 +121,7 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
             background: "linear-gradient(160deg,#C9A227,#8E7015)",
             borderRadius: 14, padding: 14, color: "#20190A",
           }}>
-          <div className="titolo f16 mb4">Sei libero!</div>
+          <div className="titolo f16 mb4">{t("partita.seiLibero")}</div>
           <p className="f13" style={{ margin: "0 0 12px", lineHeight: 1.45 }}>
             Il tuo reddito passivo ({soldi(riepilogo(io).redditoPassivo)}) supera
             le spese ({soldi(riepilogo(io).speseTotali)}).
@@ -128,7 +129,7 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
           </p>
           <Bottone variante="btn-verde" disabled={inAzione}
             onClick={() => fai({ tipo: "esciDallaCorsa" })}>
-            Esci dalla Ruota
+            {t("partita.prendiIlLargo")}
           </Bottone>
         </motion.div>
       )}
@@ -142,7 +143,7 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
           )}
           {io.tracciato === "veloce" && io.beneficenzaVeloce && (
             <div className="mb12 mt12">
-              <div className="etichetta ta-c" style={{ color: "rgba(244,241,230,.6)" }}>Quanti dadi?</div>
+              <div className="etichetta ta-c" style={{ color: "rgba(244,241,230,.6)" }}>{t("partita.quantiDadi")}</div>
               <div className="flex g8">
                 {[1, 2, 3].map((n) => (
                   <button key={n} className={`btn ${nDadi === n ? "btn-oro" : "btn-chiaro"}`}
@@ -160,7 +161,7 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
 
       {stato.dado && !stato.pending && (
         <p className="f13 tenue ta-c mt12" style={{ margin: "12px 0 0" }}>
-          Casella risolta. Il turno sta passando…
+          {t("partita.casellaRisolta")}
         </p>
       )}
     </div>
@@ -168,6 +169,7 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
 }
 
 export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci }) {
+  const { t } = useLingua();
   const [scheda, setScheda] = useState("scheda");
   const [audio, setAudio] = useState(audioAcceso);
   useSuoni(stato, mioId);
@@ -187,7 +189,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
   const eraMio = useRef(mioTurno);
   useEffect(() => {
     if (mioTurno && !eraMio.current) {
-      avvisa("Tocca a te!");
+      avvisa(t("partita.toccaATe"));
       if (navigator.vibrate) navigator.vibrate(45);
     }
     eraMio.current = mioTurno;
@@ -234,12 +236,12 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
       backdropFilter: "blur(12px)",
     }}>
       <button onClick={suEsci} className="f11 tenue" style={{ textAlign: "left", background: "none" }}>
-        <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>Stanza</div>
+        <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("partita.stanza")}</div>
         <div className="numeri grassetto f16" style={{ color: "var(--carta)", letterSpacing: 2 }}>{stato.codice}</div>
       </button>
       <div className="ta-c" style={{ flex: 1, minWidth: 0 }}>
         <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>
-          {io.tracciato === "topi" ? "Ruota" : "Largo"}
+          {t(io.tracciato === "topi" ? "partita.ruota" : "partita.largo")}
         </div>
         <div className="f13 grassetto" style={{ color: casella.colore === "#6B4423" ? "#C8A278" : casella.colore }}>
           {casella.emoji} {casella.nome}
@@ -250,13 +252,13 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
           onClick={() => setAudio(impostaAudio(!audio))}
           aria-label={audio ? "Spegni i suoni" : "Accendi i suoni"}
           aria-pressed={audio}
-          title={audio ? "Suoni accesi" : "Suoni spenti"}
+          title={audio ? t("partita.suoniAccesi") : t("partita.suoniSpenti")}
           style={{ fontSize: 17, lineHeight: 1, opacity: audio ? 0.85 : 0.35, padding: 4 }}
         >
           {audio ? "\u{1F50A}" : "\u{1F507}"}
         </button>
         <div className="ta-r">
-          <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>Contanti</div>
+          <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("partita.contanti")}</div>
           <div className="numeri grassetto f16"><NumeroAnimato valore={io.contanti} /></div>
         </div>
       </div>
@@ -278,7 +280,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
           {io.tracciato === "topi" && (
             <div className="zona-progresso">
               <div className="flex tra f12 mb4">
-                <span className="tenue">Rendita verso le spese</span>
+                <span className="tenue">{t("partita.renditaVersoSpese")}</span>
                 <span className="numeri grassetto">
                   {soldi(r.redditoPassivo)} / {soldi(r.speseTotali)}
                 </span>
@@ -329,7 +331,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
           style={{ position: "fixed", right: 22, bottom: 22, width: "auto", zIndex: 35 }}
           onClick={() => setScheda(scheda === "regole" ? "scheda" : "regole")}
         >
-          {scheda === "regole" ? "Torna al tavolo" : "Regole del gioco"}
+          {scheda === "regole" ? t("partita.tornaAlTavolo") : t("partita.regoleDelGioco")}
         </button>
       )}
 
@@ -338,7 +340,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
           <button key={sc.id} data-attivo={scheda === sc.id}
             onClick={() => { setScheda(sc.id); if (sc.id === "log") setLogNuovo(false); }}>
             <span className="icona">{sc.icona}</span>
-            {sc.nome}
+            {t(sc.chiave)}
             {sc.id === "log" && logNuovo && <span className="punto" />}
             {sc.id === "chat" && chatNuova && <span className="punto" />}
           </button>

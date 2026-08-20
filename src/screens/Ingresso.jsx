@@ -6,6 +6,7 @@ import { MERCATI, MERCATO_PREDEFINITO } from "../game/mercati/indice.js";
 import { soldi } from "../game/finanze.js";
 import * as api from "../lib/api.js";
 import { traccia } from "../lib/traccia.js";
+import { useLingua } from "../Lingua.jsx";
 
 /**
  * Schermata iniziale.
@@ -29,6 +30,7 @@ export default function Ingresso({ suEntrato, avvisa, suSfida }) {
 }
 
 function Modulo({ suEntrato, avvisa, suSfida, mercatoId, setMercato }) {
+  const { t, lingua, cambiaLingua, lingue } = useLingua();
   const { professioni, sogni } = useMercato();
   const [nome, setNome] = useState(localStorage.getItem("quotazero:nome") || "");
   const [professioneId, setProfessione] = useState(professioni[0].id);
@@ -51,7 +53,7 @@ function Modulo({ suEntrato, avvisa, suSfida, mercatoId, setMercato }) {
   const ricorda = () => localStorage.setItem("quotazero:nome", nome.trim());
 
   const crea = async () => {
-    if (!nome.trim()) return avvisa("Scrivi il tuo nome.");
+    if (!nome.trim()) return avvisa(t("ingresso.scriviNome"));
     setOccupato(true);
     try {
       ricorda();
@@ -63,9 +65,9 @@ function Modulo({ suEntrato, avvisa, suSfida, mercatoId, setMercato }) {
   };
 
   const entra = async () => {
-    if (!nome.trim()) return avvisa("Scrivi il tuo nome.");
+    if (!nome.trim()) return avvisa(t("ingresso.scriviNome"));
     const c = codice.trim().toUpperCase();
-    if (c.length < 4) return avvisa("Il codice è di 4 lettere.");
+    if (c.length < 4) return avvisa(t("ingresso.codiceCorto"));
     setOccupato(true);
     try {
       ricorda();
@@ -85,32 +87,43 @@ function Modulo({ suEntrato, avvisa, suSfida, mercatoId, setMercato }) {
             Quota Zero
           </h1>
           <p className="f14" style={{ margin: "8px 0 0", color: "rgba(244,241,230,.72)", lineHeight: 1.5 }}>
-            Esci dalla Ruota.<br />
-            Da 2 a 6 giocatori, ovunque siate.
+            {t("app.motto")}<br />
+            {t("app.sottotitolo")}
           </p>
         </div>
 
         <div className="carta">
+          {/* La lingua non è il mercato: si può giocare Roma in inglese. */}
+          <div className="scelta-lingua">
+            {lingue.map((l) => (
+              <button key={l.id} onClick={() => cambiaLingua(l.id)}
+                data-attiva={lingua === l.id} aria-pressed={lingua === l.id}
+                aria-label={l.nome}>
+                <span aria-hidden="true">{l.bandiera}</span> {l.nome}
+              </button>
+            ))}
+          </div>
+
           {suSfida && (
               <button onClick={suSfida} className="richiamo-sfida"
-                aria-label="Gioca la sfida del giorno: da solo, cinque minuti">
+                aria-label={t("ingresso.sfidaAria")}>
                 <span>
-                  <strong>Sfida del giorno</strong><br />
-                  <span className="f12" style={{ color: "var(--tenue)" }}>Da solo, cinque minuti. Stessa partita per tutti.</span>
+                  <strong>{t("ingresso.sfidaTitolo")}</strong><br />
+                  <span className="f12" style={{ color: "var(--tenue)" }}>{t("ingresso.sfidaSotto")}</span>
                 </span>
                 <span className="freccia" aria-hidden="true">→</span>
               </button>
             )}
 
             <div className="gruppo-campo">
-            <label className="etichetta">Il tuo nome</label>
+            <label className="etichetta">{t("ingresso.nome")}</label>
             <input className="campo" value={nome} maxLength={18}
-              onChange={(e) => setNome(e.target.value)} placeholder="Come ti chiamano" />
+              onChange={(e) => setNome(e.target.value)} placeholder={t("ingresso.nomeSegnaposto")} />
           </div>
 
           {/* Prima scelta di tutte: decide professioni, prezzi e valuta. */}
           <div className="gruppo-campo">
-            <label className="etichetta">Dove giochi</label>
+            <label className="etichetta">{t("ingresso.dovegiochi")}</label>
             <select className="campo" value={mercatoId}
               onChange={(e) => {
                 setMercato(e.target.value);
@@ -118,18 +131,17 @@ function Modulo({ suEntrato, avvisa, suSfida, mercatoId, setMercato }) {
               }}>
               {MERCATI.map((m) => (
                 <option key={m.id} value={m.id}>
-                  {m.luogo || m.nome} — {m.descrizione}
+                  {t(`mercati.${m.id}.nome`)} — {t(`mercati.${m.id}.descrizione`)}
                 </option>
               ))}
             </select>
             <p className="f12 tenue" style={{ margin: "6px 0 0", lineHeight: 1.45 }}>
-              Il mercato decide prezzi, stipendi, tassi e valuta. Vale per tutto
-              il tavolo e non si cambia a partita iniziata.
+              {t("ingresso.mercatoNota")}
             </p>
           </div>
 
           <div className="gruppo-campo">
-            <label className="etichetta">Professione</label>
+            <label className="etichetta">{t("ingresso.professione")}</label>
             <select className="campo" value={professioneId} onChange={(e) => setProfessione(e.target.value)}>
               {professioni.map((p) => (
                 <option key={p.id} value={p.id}>{p.emoji} {p.nome} — {soldi(p.stipendio)}/mese</option>
@@ -137,48 +149,45 @@ function Modulo({ suEntrato, avvisa, suSfida, mercatoId, setMercato }) {
             </select>
             <div className="carta mt8" style={{ background: "#F2F0E6", padding: 12 }}>
               <div className="flex tra f13">
-                <span className="tenue">Stipendio</span><span className="numeri">{soldi(prof.stipendio)}</span>
+                <span className="tenue">{t("ingresso.stipendio")}</span><span className="numeri">{soldi(prof.stipendio)}</span>
               </div>
               <div className="flex tra f13">
-                <span className="tenue">Spese totali</span><span className="numeri">{soldi(speseProf)}</span>
+                <span className="tenue">{t("ingresso.speseTotali")}</span><span className="numeri">{soldi(speseProf)}</span>
               </div>
               <div className="flex tra f13 grassetto" style={{ borderTop: "1px dashed var(--linea)", paddingTop: 6, marginTop: 6 }}>
-                <span>Giorno di paga</span><span className="numeri pos">{soldi(flussoProf)}</span>
+                <span>{t("ingresso.giornoDiPaga")}</span><span className="numeri pos">{soldi(flussoProf)}</span>
               </div>
               <p className="f12 tenue" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
-                Per uscire dalla Ruota ti serve un reddito passivo
-                superiore a <strong className="numeri">{soldi(speseProf)}</strong> al mese.
-                {prof.stipendio > 6000 && " Lo stipendio alto non aiuta: alza anche l'asticella."}
+                {t("ingresso.perUscire", { importo: soldi(speseProf) })}
               </p>
             </div>
           </div>
 
           <div className="gruppo-campo">
-            <label className="etichetta">Il tuo sogno</label>
+            <label className="etichetta">{t("ingresso.sogno")}</label>
             <select className="campo" value={sognoId} onChange={(e) => setSogno(e.target.value)}>
               {sogni.map((s) => (
                 <option key={s.id} value={s.id}>{s.emoji} {s.nome} — {soldi(s.costo)}</option>
               ))}
             </select>
             <p className="f12 tenue mt8" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
-              Comprarlo al Largo fa vincere all'istante.
-              Attenzione: ogni avversario che ci atterra sopra ne raddoppia il prezzo per te.
+              {t("ingresso.sognoNota")}
             </p>
           </div>
         </div>
 
         <div className="flex g8 mt16 mb12">
           <button className={`btn ${modo === "crea" ? "btn-oro" : "btn-chiaro"}`} onClick={() => setModo("crea")}>
-            Crea una stanza
+            {t("ingresso.creaStanza")}
           </button>
           <button className={`btn ${modo === "entra" ? "btn-oro" : "btn-chiaro"}`} onClick={() => setModo("entra")}>
-            Entra con codice
+            {t("ingresso.entraConCodice")}
           </button>
         </div>
 
         {modo === "crea" ? (
           <Bottone variante="btn-verde" disabled={occupato} onClick={crea}>
-            {occupato ? "Creo la stanza…" : "Crea e invita gli amici"}
+            {occupato ? t("ingresso.creando") : t("ingresso.creaEInvita")}
           </Bottone>
         ) : (
           <>
@@ -191,13 +200,13 @@ function Modulo({ suEntrato, avvisa, suSfida, mercatoId, setMercato }) {
               style={{ textAlign: "center", fontFamily: "var(--f-numeri)", fontSize: 24, letterSpacing: 8, height: 60 }}
             />
             <Bottone variante="btn-verde" disabled={occupato} onClick={entra}>
-              {occupato ? "Entro…" : "Entra nella partita"}
+              {occupato ? t("ingresso.entrando") : t("ingresso.entraNellaPartita")}
             </Bottone>
           </>
         )}
 
         <p className="f12 ta-c mt16" style={{ color: "rgba(244,241,230,.4)", lineHeight: 1.55 }}>
-          Nessuna registrazione. Il codice della stanza è tutto ciò che serve.
+          {t("app.nessunaRegistrazione")}
         </p>
       </motion.div>
     </div>

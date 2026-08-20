@@ -4,9 +4,11 @@ import { Bottone, GettoneGiocatore } from "../components/Base.jsx";
 import { useMercato } from "../Mercato.jsx";
 import { soldi, flussoMensile } from "../game/finanze.js";
 import { MAX_GIOCATORI } from "../game/tabellone.js";
+import { useLingua } from "../Lingua.jsx";
 
 /** Sala d'attesa: si vede chi è entrato e si può ancora cambiare scelta. */
 export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }) {
+  const { t } = useLingua();
   const { professioni, sogni, trovaProfessione, trovaSogno } = useMercato();
   const io = stato.giocatori.find((g) => g.id === mioId);
   const sonoHost = stato.hostId === mioId;
@@ -15,7 +17,7 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
   const copia = async () => {
     try {
       await navigator.clipboard.writeText(stato.codice);
-      avvisa("Codice copiato negli appunti.");
+      avvisa(t("attesa.copiato"));
     } catch { avvisa(`Il codice è ${stato.codice}`); }
   };
 
@@ -46,7 +48,7 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
     <div className="contenuto">
       <motion.div initial={false} animate={{ opacity: 1 }}>
         <div className="carta ta-c">
-          <div className="maiusc tenue">Codice della stanza</div>
+          <div className="maiusc tenue">{t("attesa.codiceStanza")}</div>
           <div className="titolo numeri" style={{ fontSize: 44, letterSpacing: 10, margin: "6px 0 4px" }}>
             {stato.codice}
           </div>
@@ -54,8 +56,8 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
             Chi ha questo codice può entrare, fino a {MAX_GIOCATORI} giocatori.
           </p>
           <div className="riga-btn">
-            <Bottone variante="btn-fantasma" onClick={copia}>Copia</Bottone>
-            <Bottone variante="btn-blu" onClick={condividi}>Invita</Bottone>
+            <Bottone variante="btn-fantasma" onClick={copia}>{t("attesa.copia")}</Bottone>
+            <Bottone variante="btn-blu" onClick={condividi}>{t("attesa.invita")}</Bottone>
           </div>
         </div>
 
@@ -96,7 +98,7 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
         <div className="carta mt12">
           <button className="flex tra cen pieno p0" style={{ background: "none" }}
             onClick={() => setModifica(!modifica)}>
-            <span className="titolo f14">La tua scelta</span>
+            <span className="titolo f14">{t("attesa.laTuaScelta")}</span>
             <motion.span animate={{ rotate: modifica ? 180 : 0 }} className="tenue">▾</motion.span>
           </button>
           {!modifica && io && (
@@ -114,7 +116,7 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
                   <option key={p.id} value={p.id}>{p.emoji} {p.nome} — {soldi(p.stipendio)}/mese</option>
                 ))}
               </select>
-              <label className="etichetta">Sogno</label>
+              <label className="etichetta">{t("attesa.sogno")}</label>
               <select className="campo" value={io.sognoId} disabled={inAzione}
                 onChange={(e) => cambia("sogno", e.target.value)}>
                 {sogni.map((s) => (
@@ -134,7 +136,7 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
         <div className="mt16">
           {sonoHost ? (
             <Bottone variante="btn-oro" disabled={inAzione || stato.giocatori.length < 2} onClick={avvia}>
-              {stato.giocatori.length < 2 ? "In attesa di giocatori…" : "Comincia la partita"}
+              {stato.giocatori.length < 2 ? t("attesa.inAttesa") : t("attesa.comincia")}
             </Bottone>
           ) : (
             <div className="carta ta-c">

@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node scripts/prova-vercel.mjs && node scripts/prova-uri.mjs && node scripts/prova-regole.mjs && node scripts/prova-chat.mjs && node scripts/prova-suoni.mjs && node scripts/prova-metriche.mjs && node scripts/prova-mercati.mjs && node scripts/prova-sfida.mjs && node scripts/simula.mjs 60 && node scripts/bilancia.mjs 8",
+    "test": "node scripts/prova-vercel.mjs && node scripts/prova-uri.mjs && node scripts/prova-regole.mjs && node scripts/prova-chat.mjs && node scripts/prova-suoni.mjs && node scripts/prova-metriche.mjs && node scripts/prova-mercati.mjs && node scripts/prova-lingua.mjs && node scripts/prova-sfida.mjs && node scripts/simula.mjs 60 && node scripts/bilancia.mjs 8",
     "test:regole": "node scripts/prova-regole.mjs",
     "test:simula": "node scripts/simula.mjs",
     "test:uri": "node scripts/prova-uri.mjs",
@@ -19,7 +19,8 @@
     "test:suoni": "node scripts/prova-suoni.mjs",
     "test:metriche": "node scripts/prova-metriche.mjs",
     "test:mercati": "node scripts/prova-mercati.mjs",
-    "test:sfida": "node scripts/prova-sfida.mjs"
+    "test:sfida": "node scripts/prova-sfida.mjs",
+    "test:lingua": "node scripts/prova-lingua.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.15.0",

@@ -9,10 +9,17 @@ import Vittoria from "./components/Vittoria.jsx";
 import * as api from "./lib/api.js";
 import { traccia, tracciaSessione } from "./lib/traccia.js";
 import { MercatoProvider } from "./Mercato.jsx";
+import { LinguaProvider } from "./Lingua.jsx";
 
 const CHIAVE_STANZA = "quotazero:stanza";
 
+/* La lingua sta sopra a tutto: è l'unica cosa che non cambia mai durante
+   una partita, e deve valere anche sulle schermate senza stanza. */
 export default function App() {
+  return <LinguaProvider><Applicazione /></LinguaProvider>;
+}
+
+function Applicazione() {
   const mioId = api.mioId();
   const [codice, setCodice] = useState(() => {
     // Un link con ?c=ABCD porta dritto nella stanza.

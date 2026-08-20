@@ -561,3 +561,21 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .richiamo-sfida .freccia { color: var(--oro); font-size: 19px; flex: none; }
 .richiamo-sfida:hover { background: rgba(201,162,39,.26); }
 .richiamo-sfida:focus-visible { outline: 2px solid var(--oro); outline-offset: 2px; }
+
+/* ══ scelta della lingua ══ */
+.scelta-lingua { display: flex; gap: 8px; margin-bottom: 16px; }
+.scelta-lingua button {
+  flex: 1;
+  padding: 9px 10px;
+  border-radius: var(--r-s);
+  border: 1px solid var(--linea);
+  background: rgba(0,0,0,.03);
+  color: var(--tenue);
+  font-size: 13px; font-weight: 700;
+}
+.scelta-lingua button[data-attiva="true"] {
+  border-color: var(--oro);
+  background: rgba(201,162,39,.16);
+  color: var(--inchiostro);
+}
+.scelta-lingua button:focus-visible { outline: 2px solid var(--oro); outline-offset: 2px; }

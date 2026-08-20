@@ -2,9 +2,10 @@ import React, { useEffect, useRef, useState } from "react";
 import { Bottone } from "./Base.jsx";
 import { LUNGHEZZA_MAX } from "../game/chat.js";
 import * as api from "../lib/api.js";
+import { useLingua } from "../Lingua.jsx";
 
-const ora = (t) =>
-  new Date(t).toLocaleTimeString("it-IT", { hour: "2-digit", minute: "2-digit" });
+const ora = (t, lingua) =>
+  new Date(t).toLocaleTimeString(lingua === "en" ? "en-GB" : "it-IT", { hour: "2-digit", minute: "2-digit" });
 
 /**
  * La chat del tavolo.
@@ -14,6 +15,7 @@ const ora = (t) =>
  * sale e il polling che c'è già li porta a bordo. Muoiono con la stanza.
  */
 export default function Chat({ stato, mioId, suLetto }) {
+  const { t, lingua } = useLingua();
   const [testo, setTesto] = useState("");
   const [errore, setErrore] = useState("");
   const [invio, setInvio] = useState(false);
@@ -55,35 +57,35 @@ export default function Chat({ stato, mioId, suLetto }) {
     <div className="carta-scura chat">
       <div className="flex tra cen mb8">
         <div className="sezione-tit" style={{ color: "rgba(244,241,230,.5)", margin: 0 }}>
-          Chat del tavolo
+          {t("chat.titolo")}
         </div>
         {sonoHost && (
           <button className="f11 tenue" onClick={cambiaInterruttore}
             style={{ textDecoration: "underline", textUnderlineOffset: 3 }}>
-            {spenta ? "Riaccendi" : "Spegni"}
+            {spenta ? t("chat.riaccendi") : t("chat.spegni")}
           </button>
         )}
       </div>
 
       {spenta ? (
         <p className="f13 tenue" style={{ margin: 0 }}>
-          La chat è spenta in questa stanza.
+          {t("chat.spenta")}
         </p>
       ) : (
         <>
           <div className="chat-righe">
             {messaggi.length === 0 && (
               <p className="f13 tenue" style={{ margin: 0 }}>
-                Ancora nessun messaggio. I messaggi restano solo per la durata della partita.
+                {t("chat.vuota")}
               </p>
             )}
             {messaggi.map((m) => (
               <div key={m.id} className={`chat-riga${m.di === mioId ? " mio" : ""}`}>
                 <div className="chat-testa">
                   <span className="chat-nome" style={{ color: m.colore }}>
-                    {m.di === mioId ? "Tu" : m.nome}
+                    {m.di === mioId ? t("chat.tu") : m.nome}
                   </span>
-                  <span className="chat-ora numeri">{ora(m.t)}</span>
+                  <span className="chat-ora numeri">{ora(m.t, lingua)}</span>
                 </div>
                 <div className="chat-corpo">{m.testo}</div>
               </div>
@@ -96,12 +98,12 @@ export default function Chat({ stato, mioId, suLetto }) {
               type="text"
               value={testo}
               maxLength={LUNGHEZZA_MAX}
-              placeholder="Scrivi al tavolo…"
-              aria-label="Messaggio"
+              placeholder={t("chat.segnaposto")}
+              aria-label={t("chat.messaggio")}
               onChange={(e) => setTesto(e.target.value)}
             />
             <Bottone variante="btn-oro btn-piccolo" disabled={invio || !testo.trim()} onClick={manda}>
-              Invia
+              {t("chat.invia")}
             </Bottone>
           </form>
           {errore && <p className="f12 neg" style={{ margin: "8px 0 0" }}>{errore}</p>}

@@ -58,10 +58,11 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       `finanze.js` scrive `$` a mano sopra a cifre raggruppate all'italiana.
       Deve prendere simbolo, posizione e lingua dal mercato.
 
-- [ ] **2.3 Lingua separata dal mercato**
-      Sono due assi diversi: un francese deve poter giocare *Roma* in francese.
-      Estrarre le stringhe in `src/i18n/it.json`. Sblocca anche l'inglese sopra
-      al mercato di Roma, che è la copertura più economica che esista.
+- [x] **2.3 Lingua separata dal mercato**
+      Fatta per l'interfaccia: italiano e inglese, lingua rilevata dal
+      browser e ricordata, e un test verifica che nessuna chiave manchi e
+      che cambiare lingua non tocchi un prezzo. Roma in inglese resta Roma,
+      in euro.
 
 - [x] **2.4 Scelta del mercato alla creazione della stanza**
       Prima scelta in `Ingresso.jsx`, prima di professione e sogno: è il mercato
@@ -150,6 +151,16 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
 - [ ] **Zero bancarotte a Roma** — con margini di nucleo gli imprevisti si
       assorbono e manca la tensione. Non è un errore, ma il gioco ci guadagna
       se qualcosa può andare male: valutare un tetto al credito concedibile.
+- [ ] **I contenuti dei mercati non sono tradotti** — con l'interfaccia in
+      inglese, professioni, sogni e testi delle carte restano in italiano.
+      Difendibile per Roma (il mercato è romano, il suo lessico anche), ma
+      diventa un problema col terzo mercato. La soluzione giusta è che il
+      pacchetto porti i nomi per lingua; sono circa 150 stringhe per mercato
+      e vanno tradotte da qualcuno che conosca il posto, non a macchina.
+- [ ] **Il registro della partita è sempre in italiano** — il motore scrive
+      frasi già fatte in `s.registro`, e il client le mostra così come sono.
+      Per tradurlo, `nota()` deve salvare chiave e valori invece del testo:
+      una sessantina di punti di chiamata, meccanico ma da fare con calma.
 - [ ] **Il tabellone del Largo cita gli affari per id** (`av01`..`av20`):
       aggiungere una voce al mazzo senza aggiungere una casella la rende
       irraggiungibile. Documentato a caro prezzo.

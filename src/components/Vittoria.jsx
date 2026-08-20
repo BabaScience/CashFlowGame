@@ -5,6 +5,7 @@ import { soldi } from "../game/finanze.js";
 
 import { classifica } from "../game/motore.js";
 import { useMercato } from "../Mercato.jsx";
+import { useLingua } from "../Lingua.jsx";
 
 const COLORI = ["#C9A227", "#C4362B", "#2E6FA8", "#4E8B3D", "#D98324", "#7B4FA8"];
 
@@ -41,15 +42,16 @@ function Coriandoli() {
  * davvero qualcosa, quindi vale la pena mostrare tutti i numeri.
  */
 export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoHost }) {
+  const { t } = useLingua();
   const { trovaProfessione, trovaSogno, obiettivo } = useMercato();
   const tabella = useMemo(() => classifica(stato), [stato]);
   const vincitore = tabella.find((t) => t.vincitore);
   const motivo = {
-    sogno: "ha realizzato il proprio sogno",
-    rendita: `ha raggiunto +${soldi(obiettivo)} di rendita al Largo`,
-    ultimo: "è l'ultimo giocatore rimasto in partita",
-    tempo: "è arrivato più vicino al proprio obiettivo allo scadere del tempo",
-  }[stato.motivoVittoria] || "ha vinto";
+    sogno: t("vittoria.motivo.sogno"),
+    rendita: t("vittoria.motivo.rendita", { importo: soldi(obiettivo) }),
+    ultimo: t("vittoria.motivo.ultimo"),
+    tempo: t("vittoria.motivo.tempo"),
+  }[stato.motivoVittoria] || t("vittoria.motivo.generico");
 
   return (
     <>
@@ -65,9 +67,9 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
               animate={{ scale: [1, 1.16, 1], rotate: [0, 7, -7, 0] }}
               transition={{ duration: 1.7, repeat: Infinity, repeatDelay: 1.2 }}
             >🏆</motion.div>
-            <div className="maiusc tenue mt8">Partita conclusa</div>
+            <div className="maiusc tenue mt8">{t("vittoria.partitaConclusa")}</div>
             <h2 className="titolo f28" style={{ margin: "6px 0 4px" }}>
-              {vincitore ? vincitore.nome : "Nessun vincitore"}
+              {vincitore ? vincitore.nome : t("vittoria.nessunVincitore")}
             </h2>
             <p className="f14 tenue" style={{ margin: 0 }}>{motivo}.</p>
           </div>
@@ -81,21 +83,21 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
                   <div className="f12 tenue">{trovaProfessione(vincitore.professioneId).nome}</div>
                 </div>
               </div>
-              <KV k="Contanti finali" v={soldi(vincitore.contanti)} />
+              <KV k={t("vittoria.contantiFinali")} v={soldi(vincitore.contanti)} />
               {vincitore.tracciato === "veloce" ? (
                 <>
-                  <KV k="Reddito Giorno di Rendita" v={soldi(vincitore.redditoRendita)} />
-                  <KV k="Guadagnato al Largo" v={soldi(vincitore.guadagnoVeloce)} forte />
-                  <KV k="Affari acquistati" v={String(vincitore.affariVeloci)} />
+                  <KV k={t("vittoria.redditoRendita")} v={soldi(vincitore.redditoRendita)} />
+                  <KV k={t("vittoria.guadagnatoAlLargo")} v={soldi(vincitore.guadagnoVeloce)} forte />
+                  <KV k={t("vittoria.affariAcquistati")} v={String(vincitore.affariVeloci)} />
                 </>
               ) : (
                 <KV k="Reddito passivo" v={soldi(vincitore.redditoPassivo)} forte />
               )}
-              <KV k="Turni giocati" v={String(vincitore.turniGiocati)} />
+              <KV k={t("vittoria.turniGiocati")} v={String(vincitore.turniGiocati)} />
             </div>
           )}
 
-          <div className="sezione-tit">Come è andata a tutti</div>
+          <div className="sezione-tit">{t("vittoria.comeEAndata")}</div>
           {tabella.map((t, i) => (
             <motion.div
               key={t.id}
@@ -121,7 +123,7 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
                     {t.usciteDallaCorsa ? ` · uscito dalla corsa al suo ${t.usciteDallaCorsa}° turno` : ""}
                   </div>
                 </div>
-                {t.vincitore && <span className="tag tag-oro">Vincitore</span>}
+                {t.vincitore && <span className="tag tag-oro">{t("vittoria.vincitore")}</span>}
               </div>
 
               <KV k="Contanti" v={soldi(t.contanti)} />
@@ -150,7 +152,7 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
           </p>
 
           <div className="mt16">
-            <Bottone variante="btn-oro" onClick={suNuovaPartita}>Nuova partita</Bottone>
+            <Bottone variante="btn-oro" onClick={suNuovaPartita}>{t("vittoria.nuovaPartita")}</Bottone>
             {sonoHost && (
               <Bottone variante="btn-fantasma mt8" onClick={suChiudi}>
                 Chiudi la stanza e cancella i dati
