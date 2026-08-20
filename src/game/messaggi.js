@@ -1,0 +1,158 @@
+/**
+ * I MESSAGGI DEL REGISTRO.
+ *
+ * Il motore scrive nel registro sia il testo italiano già composto sia la
+ * chiave del messaggio con i suoi valori. Qui stanno le traduzioni: il
+ * client mostra quella della lingua scelta e, se non la trova, il testo
+ * che il motore ha già scritto.
+ *
+ * Le chiavi sono opache (r00, r01…) perché sono state estratte a macchina
+ * da sessantun messaggi già scritti a mano nel motore. Dargli nomi belli
+ * avrebbe significato toccare sessantun punti di chiamata a mano, con il
+ * rischio che va con l'occasione. Il commento accanto a ciascuna dice che
+ * cos'è, che è quello che serve davvero per tradurla.
+ */
+
+export const MESSAGGI = {
+  it: {
+    r00: "⏳ Tempo scaduto dopo {numeroTurno} turni. Vince {capofilaNome}, il più vicino al proprio obiettivo.",
+    r01: "{nome} salta il turno (ne restano {turniDaSaltare}).",
+    r02: "{nome} non ha contanti a sufficienza: la banca gli presta {importo} (rata +{importo2}/mese) per pagare {motivo}.",
+    r03: "{nome} incassa il Giorno di Paga: +{importo}.",
+    r04: "{nome} ha flusso negativo e paga {importo} alla banca.",
+    r05: "{nome} non riesce a coprire il flusso negativo: BANCAROTTA.",
+    r06: "{nome} pesca \"{cartaNome}\" ma non ha figli: nessuna spesa.",
+    r07: "{nome} ha già {MAX_FIGLI} figli: nessun cambiamento.",
+    r08: "{nome} pesca dal Mercato: \"{cartaNome}\".",
+    r09: "{nome} paga {importo} ({n} immobili).",
+    r10: "{nome} incassa {importo} ({n} attività).",
+    r11sale: "{nome}: il flusso dagli affitti sale di {v} al mese.",
+    r11scende: "{nome}: il flusso dagli affitti scende di {v} al mese.",
+    r12: "{nome}: le rate salgono di {importo} al mese ({length} mutui).",
+    r13: "{nome} trova \"{affareNome}\" già acquistato.",
+    r14: "{nome} atterra sul sogno di {vNome}: ora costa {v}.",
+    r15: "{nome}: {nome2}. Perde metà dei contanti ({importo}).",
+    r16: "{nome}: Divorzio. Perde tutti i contanti ({importo}).",
+    r17: "🏆 {nome} ha comprato il proprio sogno e vince la partita!",
+    r18: "🏆 {nome} raggiunge +{v} di flusso al Largo e vince!",
+    r19: "{nuovoNome} entra nella stanza.",
+    r20: "{nome} lascia la stanza.",
+    r21: "{nome} abbandona la partita.",
+    r22: "Partita avviata. Ordine: {ordineTesto}.",
+    r23: "Tocca a {v}.",
+    r24: "Fase di Mercato chiusa.",
+    r25: "{nome} chiede un prestito di {importo} (rata +{importo2}/mese).",
+    r26: "{nome} rimborsa {importo} di prestito bancario.",
+    r27: "{nome} estingue \"{debitoNome}\" ({importo}): spese ridotte.",
+    r28: "🎉 {nome} esce dalla Ruota! Liquidazione {importo} (100 × {importo2} di reddito passivo). Obiettivo: {v}.",
+    r29: "{nome} tira {v} = {passi}.",
+    r30: "{nome} tira {v} = {passi}.",
+    r31: "{nome} incassa il Giorno di Rendita: +{importo}.",
+    r32piccolo: "{nome} pesca un Piccolo Affare: \"{cartaNome}\".",
+    r32grande: "{nome} pesca un Grande Affare: \"{cartaNome}\".",
+    r33: "{nome} paga {importo} per \"{cNome}\".",
+    r34: "{nome} non è colpito da \"{cNome}\".",
+    r35: "{nome} lascia perdere \"{cNome}\".",
+    r36: "{nome} spende {importo}: \"{nome2}\".",
+    r37: "{nome} dona {importo}: 2 dadi per i prossimi 3 turni.",
+    r38: "{nome} non dona.",
+    r39: "👶 {nome} ha un figlio! Spese +{importo}/mese (figli: {figli}).",
+    r40: "📉 {nome} è licenziato: paga {importo} e salta 2 turni.",
+    r41: "{nome}: metà di prestito auto, carte e rate viene cancellata.",
+    r42: "{nome} è ufficialmente fuori dalla partita.",
+    r43: "{nome} esce dalla bancarotta e salta 3 turni.",
+    r44: "🏆 {v} è l'ultimo giocatore rimasto e vince.",
+    r45: "{nome} compra \"{affareNome}\" per {importo}: flusso +{importo2}/mese (totale {importo3}).",
+    r46: "{nome} lascia perdere \"{affareNome}\".",
+    r47: "⭐ {nome} compra il proprio sogno \"{nome2}\" per {importo}!",
+    r48: "{nome} dona {importo}: da ora può scegliere quanti dadi tirare (1, 2 o 3).",
+    r49: "{nome} compra {q} × {simbolo} a {prezzo} ({importo}).",
+    r50: "{nome} compra \"{cNome}\" (acconto {importo}, flusso +{importo2}/mese).",
+    r51: "{nome} compra \"{cNome}\" (acconto {importo}, flusso +{importo2}/mese).",
+    r52: "{nome} paga {importo}: \"{cNome}\".",
+    r53: "{nome} vende \"{aNome}\" a {importo} (netto {importo2}).",
+    r54: "{nome} vende \"{iNome}\" a {importo} (meno {importo2} di mutuo = {importo3}).",
+    r55: "{nome} vende {q} × {simbolo} a {prezzo} (+{importo}).",
+    r56: "{nome} svende \"{iNome}\" alla banca per {importo}.",
+    r57: "{nome} svende \"{aNome}\" alla banca per {importo}.",
+    r58: "{nome} liquida {simbolo} per {importo}.",
+    r59: "{nome} estingue \"{dNome}\" durante la bancarotta.",
+    r60: "{nome} rimborsa {importo} di prestito.",
+  },
+
+  en: {
+    r00: "⏳ Time is up after {numeroTurno} turns. {capofilaNome} wins, closest to their goal.",
+    r01: "{nome} misses a turn ({turniDaSaltare} left).",
+    r02: "{nome} is short of cash: the bank lends {importo} (payment +{importo2}/month) to cover {motivo}.",
+    r03: "{nome} collects Payday: +{importo}.",
+    r04: "{nome} has negative cash flow and pays {importo} to the bank.",
+    r05: "{nome} cannot cover the negative cash flow: BANKRUPT.",
+    r06: "{nome} draws \"{cartaNome}\" but has no children: no cost.",
+    r07: "{nome} already has {MAX_FIGLI} children: nothing changes.",
+    r08: "{nome} draws from the Market: \"{cartaNome}\".",
+    r09: "{nome} pays {importo} ({n} properties).",
+    r10: "{nome} collects {importo} ({n} businesses).",
+    r11sale: "{nome}: rental income rises by {v} a month.",
+    r11scende: "{nome}: rental income falls by {v} a month.",
+    r12: "{nome}: mortgage payments rise by {importo} a month ({length} loans).",
+    r13: "{nome} finds \"{affareNome}\" already taken.",
+    r14: "{nome} lands on {vNome}'s dream: it now costs {v}.",
+    r15: "{nome}: {nome2}. Loses half their cash ({importo}).",
+    r16: "{nome}: Divorce. Loses all their cash ({importo}).",
+    r17: "🏆 {nome} bought their dream and wins the game!",
+    r18: "🏆 {nome} reaches +{v} of income in Open Water and wins!",
+    r19: "{nuovoNome} joins the room.",
+    r20: "{nome} leaves the room.",
+    r21: "{nome} quits the game.",
+    r22: "Game started. Order: {ordineTesto}.",
+    r23: "{v}'s turn.",
+    r24: "Market phase closed.",
+    r25: "{nome} takes a loan of {importo} (payment +{importo2}/month).",
+    r26: "{nome} repays {importo} of the bank loan.",
+    r27: "{nome} pays off \"{debitoNome}\" ({importo}): expenses reduced.",
+    r28: "🎉 {nome} gets off the Wheel! Buyout {importo} (100 × {importo2} of passive income). Target: {v}.",
+    r29: "{nome} rolls {v} = {passi}.",
+    r30: "{nome} rolls {v} = {passi}.",
+    r31: "{nome} collects Income Day: +{importo}.",
+    r32piccolo: "{nome} draws a Small Deal: \"{cartaNome}\".",
+    r32grande: "{nome} draws a Big Deal: \"{cartaNome}\".",
+    r33: "{nome} pays {importo} for \"{cNome}\".",
+    r34: "{nome} is not affected by \"{cNome}\".",
+    r35: "{nome} passes on \"{cNome}\".",
+    r36: "{nome} spends {importo}: \"{nome2}\".",
+    r37: "{nome} donates {importo}: 2 dice for the next 3 turns.",
+    r38: "{nome} does not donate.",
+    r39: "👶 {nome} has a child! Expenses +{importo}/month (children: {figli}).",
+    r40: "📉 {nome} is laid off: pays {importo} and misses 2 turns.",
+    r41: "{nome}: half of the car loan, cards and instalments is written off.",
+    r42: "{nome} is officially out of the game.",
+    r43: "{nome} comes out of bankruptcy and misses 3 turns.",
+    r44: "🏆 {v} is the last player standing and wins.",
+    r45: "{nome} buys \"{affareNome}\" for {importo}: income +{importo2}/month (total {importo3}).",
+    r46: "{nome} passes on \"{affareNome}\".",
+    r47: "⭐ {nome} buys their dream \"{nome2}\" for {importo}!",
+    r48: "{nome} donates {importo}: from now on they can choose how many dice to roll (1, 2 or 3).",
+    r49: "{nome} buys {q} × {simbolo} at {prezzo} ({importo}).",
+    r50: "{nome} buys \"{cNome}\" (down payment {importo}, income +{importo2}/month).",
+    r51: "{nome} buys \"{cNome}\" (down payment {importo}, income +{importo2}/month).",
+    r52: "{nome} pays {importo}: \"{cNome}\".",
+    r53: "{nome} sells \"{aNome}\" for {importo} (net {importo2}).",
+    r54: "{nome} sells \"{iNome}\" for {importo} (less {importo2} of mortgage = {importo3}).",
+    r55: "{nome} sells {q} × {simbolo} at {prezzo} (+{importo}).",
+    r56: "{nome} dumps \"{iNome}\" to the bank for {importo}.",
+    r57: "{nome} dumps \"{aNome}\" to the bank for {importo}.",
+    r58: "{nome} liquidates {simbolo} for {importo}.",
+    r59: "{nome} pays off \"{dNome}\" during bankruptcy.",
+    r60: "{nome} repays {importo} of the loan.",
+  },
+};
+
+/** Il testo di una riga di registro nella lingua richiesta. */
+export function testoRiga(riga, lingua = "it") {
+  const modello = MESSAGGI[lingua]?.[riga?.k] ?? MESSAGGI.it?.[riga?.k];
+  /* Nessuna chiave (riga vecchia, o messaggio nuovo non ancora tradotto):
+     si mostra il testo che il motore ha già composto. */
+  if (!modello) return riga?.testo ?? "";
+  const valori = riga.v || {};
+  return modello.replace(/\{(\w+)\}/g, (_, k) => (valori[k] ?? `{${k}}`));
+}

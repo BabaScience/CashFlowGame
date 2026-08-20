@@ -217,10 +217,17 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       diventa un problema col terzo mercato. La soluzione giusta è che il
       pacchetto porti i nomi per lingua; sono circa 150 stringhe per mercato
       e vanno tradotte da qualcuno che conosca il posto, non a macchina.
-- [ ] **Il registro della partita è sempre in italiano** — il motore scrive
-      frasi già fatte in `s.registro`, e il client le mostra così come sono.
-      Per tradurlo, `nota()` deve salvare chiave e valori invece del testo:
-      una sessantina di punti di chiamata, meccanico ma da fare con calma.
+- [x] **Il registro della partita è sempre in italiano** — fatto. `nota()`
+      salva ora **sia** il testo italiano già composto **sia** la chiave del
+      messaggio con i suoi valori; il client mostra la traduzione se conosce
+      la chiave, altrimenti il testo. La ridondanza è voluta: le stanze
+      durano 48 ore, quindi al momento di un aggiornamento ci sono partite in
+      corso con righe salvate nel formato vecchio.
+      I 61 messaggi sono stati estratti a macchina, non a mano. Trovati per
+      strada: un template annidato che l'estrazione avrebbe corrotto, due
+      messaggi che scrivevano il simbolo del dollaro a mano, e due che
+      passavano parole italiane come valori ("Piccolo", "sale") — restavano
+      italiane in inglese, e sono diventate chiavi distinte.
 - [ ] **Il tabellone del Largo cita gli affari per id** (`av01`..`av20`):
       aggiungere una voce al mazzo senza aggiungere una casella la rende
       irraggiungibile. Documentato a caro prezzo.

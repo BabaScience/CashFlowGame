@@ -139,5 +139,69 @@ prova("L'inglese non ha lasciato dentro l'italiano", () => {
   }
 });
 
+
+/* ── Il registro della partita ─────────────────────────────── */
+import { MESSAGGI, testoRiga } from "../src/game/messaggi.js";
+import { creaStanza, applicaAzione } from "../src/game/motore.js";
+
+console.log("\n── Il registro parla la lingua scelta ──");
+
+prova("Ogni messaggio esiste in tutte le lingue", () => {
+  const chiavi = Object.keys(MESSAGGI.it);
+  vero(chiavi.length > 40, `solo ${chiavi.length} messaggi`);
+  for (const id of Object.keys(MESSAGGI)) {
+    for (const k of chiavi) {
+      vero(MESSAGGI[id][k], `"${id}" non traduce ${k}`);
+    }
+  }
+});
+
+prova("I segnaposto coincidono fra le lingue", () => {
+  const segna = (t) => (String(t).match(/\{(\w+)\}/g) || []).sort().join(",");
+  for (const k of Object.keys(MESSAGGI.it)) {
+    for (const id of Object.keys(MESSAGGI)) {
+      eq(segna(MESSAGGI[id][k]), segna(MESSAGGI.it[k]), `${id}.${k}:`);
+    }
+  }
+});
+
+prova("Il motore salva chiave e valori, non solo il testo", () => {
+  let s = creaStanza("REGI", "a", { seme: 4, mercatoId: "roma" });
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "Ada", professioneId: "quadro", sognoId: "sg01" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "Bo", professioneId: "meccanico", sognoId: "sg02" }).stato;
+  s = applicaAzione(s, { tipo: "avvia", giocatoreId: "a" }).stato;
+  const conChiave = s.registro.filter((r) => r.k);
+  vero(conChiave.length === s.registro.length,
+    `${s.registro.length - conChiave.length} righe senza chiave`);
+  for (const r of conChiave) {
+    vero(testoRiga(r, "it").length > 0);
+    vero(testoRiga(r, "en").length > 0);
+  }
+});
+
+prova("La stessa riga cambia lingua", () => {
+  const riga = { k: "r03", v: { nome: "Ada", importo: "2.920 €" }, testo: "…" };
+  const it = testoRiga(riga, "it"), en = testoRiga(riga, "en");
+  vero(it !== en, "le due lingue producono lo stesso testo");
+  vero(it.includes("Ada") && en.includes("Ada"), "i valori vanno sostituiti in entrambe");
+  vero(it.includes("2.920 €") && en.includes("2.920 €"), "gli importi restano nella valuta del mercato");
+});
+
+prova("Una riga vecchia senza chiave resta leggibile", () => {
+  /* Le stanze durano 48 ore: al momento di un aggiornamento ci sono partite
+     in corso con righe salvate nel formato vecchio. */
+  eq(testoRiga({ testo: "Testo di prima" }, "en"), "Testo di prima");
+  eq(testoRiga({ k: "chiave-inventata", testo: "Ripiego" }, "en"), "Ripiego");
+});
+
+prova("Nessun messaggio scrive un simbolo di valuta a mano", () => {
+  for (const id of Object.keys(MESSAGGI)) {
+    for (const [k, v] of Object.entries(MESSAGGI[id])) {
+      vero(!/\$|€(?!\})/.test(v.replace(/\{\w+\}/g, "")),
+        `${id}.${k} contiene un simbolo fisso: la valuta viene dal mercato`);
+    }
+  }
+});
+
 console.log(`\n${passati} test superati, ${falliti} falliti\n`);
 if (falliti) process.exit(1);

@@ -1,5 +1,7 @@
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { testoRiga } from "../game/messaggi.js";
+import { useLingua } from "../Lingua.jsx";
 
 const COLORI = {
   paga: "#D98324", carta: "#4E8B3D", mercato: "#2E6FA8", extra: "#B23A2E",
@@ -19,6 +21,7 @@ const quando = (t) => {
 
 /** Il registro condiviso: tutti vedono ogni carta pescata e ogni mossa. */
 export default function Registro({ stato, limite }) {
+  const { lingua } = useLingua();
   const righe = limite ? stato.registro.slice(0, limite) : stato.registro;
   return (
     <div className="carta-scura">
@@ -34,7 +37,7 @@ export default function Registro({ stato, limite }) {
             exit={{ opacity: 0 }}
           >
             <span className="bollo" style={{ background: COLORI[r.tipo] || COLORI.info }} />
-            <span style={{ flex: 1 }}>{r.testo}</span>
+            <span style={{ flex: 1 }}>{testoRiga(r, lingua)}</span>
             <span className="f11 tenue" style={{ flex: "none" }}>{quando(r.t)}</span>
           </motion.div>
         ))}
