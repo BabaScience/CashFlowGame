@@ -114,10 +114,12 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
 
 ## 6 · Prima di incassare un euro
 
-- [ ] **6.1 Licenza e proprietà** — `LICENSE`, nota di copyright.
-- [ ] **6.2 Informativa privacy e minori** — età del consenso digitale a 14
-      anni, nessun dato non necessario, conservazione dichiarata (i TTL ci sono
-      già), accordo sul trattamento firmabile da una scuola.
+- [x] **6.1 Licenza e proprietà** — `LICENSE` con dichiarazione di opera
+      indipendente, fonti dei dati e avvertenza sull'art. 166 TUF.
+- [~] **6.2 Informativa privacy e minori** — `PRIVACY.md` scritta. Restano
+      da riempire i segnaposto prima della pubblicazione: contatto del
+      titolare e nomi dei fornitori. Manca il testo dell'accordo sul
+      trattamento da far firmare a una scuola.
 - [ ] **6.3 Accessibilità** — non solo colore (fatto sulle pedine), aree di
       tocco, percorso da tastiera, contrasto.
 - [ ] **6.4 Deposito del marchio** — ricerca di anteriorità formale, poi UIBM o

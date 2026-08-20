@@ -1,0 +1,51 @@
+Copyright (c) 2026 — tutti i diritti riservati.
+
+Quota Zero — simulatore finanziario multigiocatore.
+
+Questo software e i suoi contenuti (codice, testi, regolamento, dati dei
+mercati, grafica e suoni) sono opera dell'autore e sono protetti dal diritto
+d'autore. Nessuna licenza d'uso, copia, modifica o distribuzione è concessa
+senza autorizzazione scritta.
+
+──────────────────────────────────────────────────────────────────────────
+
+OPERA INDIPENDENTE
+
+Quota Zero è un'opera originale e indipendente. Non è affiliato, collegato,
+sponsorizzato o approvato da alcun editore di giochi da tavolo, e non ne
+riproduce testi, illustrazioni, marchi o materiali.
+
+Le meccaniche di gioco — un prospetto economico per giocatore, due tracciati,
+il passaggio dall'uno all'altro quando la rendita supera le spese — non sono
+proteggibili con il diritto d'autore, che tutela l'espressione e non il
+sistema. Il brevetto statunitense che copriva questo tipo di gioco (US
+5.826.878, depositato nel 1996) è scaduto il 14 novembre 2016.
+
+Sono invece originali, e appartengono all'autore, il codice, i testi, il
+regolamento, il lessico di gioco, i nomi, i dati dei mercati e il modo in cui
+sono derivati dalle fonti pubbliche citate.
+
+──────────────────────────────────────────────────────────────────────────
+
+FONTI DEI DATI
+
+I mercati si basano su dati pubblici, citati con la data in
+`src/game/mercati/<mercato>/fonti.js`. Le fonti restano di chi le pubblica e
+vanno citate come indicato. In particolare, per il mercato di Roma:
+Agenzia delle Entrate — Osservatorio del Mercato Immobiliare (OMI),
+Banca d'Italia, ISTAT e Osservatorio JobPricing.
+
+Da confermare per iscritto prima di qualunque uso commerciale: i termini di
+riutilizzo dei dati OMI.
+
+──────────────────────────────────────────────────────────────────────────
+
+AVVERTENZA
+
+Quota Zero è uno strumento didattico. Non fornisce consulenza finanziaria,
+non raccomanda strumenti finanziari e non costituisce sollecitazione
+all'investimento. In Italia la consulenza in materia di investimenti è
+attività riservata (art. 166 TUF).
+
+Le componenti di terze parti mantengono le rispettive licenze; l'elenco è in
+package.json.
