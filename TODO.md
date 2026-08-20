@@ -118,9 +118,19 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       La prima versione era rotta in silenzio — l'ancora sbagliata faceva
       salire chiunque, anche chi comprava a caso — ed è il motivo per cui i
       test ora insistono su una cosa sola: giocare peggio deve far scendere.
-- [ ] **4.4 Turni asincroni** — togliere il vincolo che sei persone siano
-      libere nello stesso momento, che è il motivo per cui muoiono i giochi da
-      tavolo online.
+- [x] **4.4 Turni asincroni** — il motore era già pronto (lo stato vive sul
+      server, la stanza dura 48 ore), mancavano le due cose che rendono la
+      cosa usabile: sapere che è il tuo turno e ritrovare la strada per
+      tornarci. Notifiche del browser quando la scheda è in secondo piano, e
+      un elenco delle partite aperte sulla schermata d'ingresso. Entrambi sul
+      dispositivo, nessun identificativo, nessun costo.
+      **Limite dichiarato:** le notifiche funzionano a scheda aperta, anche
+      in secondo piano, ma non ad applicazione chiusa. Vedi 4.5.
+
+- [ ] **4.5 Notifiche vere (a app chiusa)** — servono service worker, VAPID
+      e un servizio di push: è il primo pezzo di infrastruttura da mantenere
+      e da pagare. Da fare quando ci saranno partite abbastanza lente da
+      giustificarlo, non prima.
 
 ## 5 · Imparare
 

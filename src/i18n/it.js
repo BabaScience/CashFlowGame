@@ -37,6 +37,8 @@ export default {
     codice: "Codice della stanza",
     scriviNome: "Scrivi il tuo nome.",
     codiceCorto: "Il codice è di 4 lettere.",
+    partiteAperte: "Le tue partite",
+    dimentica: "Togli dall'elenco",
     lingua: "Lingua",
   },
 
@@ -73,6 +75,7 @@ export default {
     regoleDelGioco: "Regole del gioco",
     tornaAlTavolo: "Torna al tavolo",
     suoniAccesi: "Suoni accesi",
+    avvisami: "Avvisami quando tocca a me",
     suoniSpenti: "Suoni spenti",
   },
 

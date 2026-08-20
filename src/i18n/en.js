@@ -43,6 +43,8 @@ export default {
     codice: "Room code",
     scriviNome: "Enter your name.",
     codiceCorto: "The code is 4 letters.",
+    partiteAperte: "Your games",
+    dimentica: "Remove from list",
     lingua: "Language",
   },
 
@@ -79,6 +81,7 @@ export default {
     regoleDelGioco: "Rules of the game",
     tornaAlTavolo: "Back to the table",
     suoniAccesi: "Sound on",
+    avvisami: "Notify me when it's my turn",
     suoniSpenti: "Sound off",
   },
 

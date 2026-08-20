@@ -93,6 +93,25 @@ function Modulo({ suEntrato, avvisa, suSfida, mercatoId, setMercato }) {
         </div>
 
         <div className="carta">
+          {aperte.length > 0 && (
+            <div className="partite-aperte">
+              <div className="etichetta">{t("ingresso.partiteAperte")}</div>
+              {aperte.map((p) => (
+                <div key={p.codice} className="partita-aperta">
+                  <button onClick={() => suEntrato(p.codice)} className="riprendi">
+                    <span className="numeri grassetto">{p.codice}</span>
+                    <span className="f12 tenue">
+                      {t(`mercati.${p.mercatoId || "classico"}.nome`)}
+                      {p.giocatori ? ` · ${p.giocatori}` : ""}
+                    </span>
+                  </button>
+                  <button className="scarta" aria-label={t("ingresso.dimentica")}
+                    onClick={() => { dimenticaPartita(p.codice); setAperte(partiteAperte()); }}>×</button>
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* La lingua non è il mercato: si può giocare Roma in inglese. */}
           <div className="scelta-lingua">
             {lingue.map((l) => (

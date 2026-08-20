@@ -13,6 +13,7 @@ import { soldi, riepilogo, fuoriDallaCorsa } from "../game/finanze.js";
 import { PERCORSO_RUOTA, CASELLE_RUOTA, PERCORSO_LARGO, CASELLE_LARGO } from "../game/tabellone.js";
 import { useSchermoLargo } from "../hooks/useSchermo.js";
 import { useSuoni } from "../hooks/useSuoni.js";
+import { avvisaTurno, chiediAvvisi, ricordaPartita, statoAvvisi } from "../lib/partite.js";
 import { audioAcceso, impostaAudio, sbloccaAudio } from "../lib/suoni.js";
 import { useLingua } from "../Lingua.jsx";
 
@@ -191,9 +192,31 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
     if (mioTurno && !eraMio.current) {
       avvisa(t("partita.toccaATe"));
       if (navigator.vibrate) navigator.vibrate(45);
+      /* Se non stai guardando, te lo diciamo fuori dalla pagina: è ciò che
+         rende sopportabile una partita giocata a turni distanziati. */
+      avvisaTurno({
+        codice: stato.codice,
+        titolo: t("partita.toccaATe"),
+        testo: `${t("partita.stanza")} ${stato.codice}`,
+      });
     }
     eraMio.current = mioTurno;
-  }, [mioTurno, avvisa]);
+  }, [mioTurno, avvisa, t, stato.codice]);
+
+  /* L'elenco delle partite aperte vive sul dispositivo: serve a ritrovare
+     la strada, non a sapere chi sei. */
+  useEffect(() => {
+    ricordaPartita(stato.codice, {
+      mercatoId: stato.mercatoId,
+      giocatori: stato.giocatori.length,
+      fase: stato.fase,
+    });
+  }, [stato.codice, stato.mercatoId, stato.giocatori.length, stato.fase]);
+
+  /* Il permesso per gli avvisi si chiede quando ha senso: quando è il tuo
+     turno e sei tornato apposta. Chiederlo all'avvio se lo prende un "no". */
+  const [avvisiChiesti, setAvvisiChiesti] = useState(false);
+  const mostraChiediAvvisi = mioTurno && !avvisiChiesti && statoAvvisi() === "default";
 
   const lettiChat = useRef((stato.chat || []).length);
   const [chatNuova, setChatNuova] = useState(false);
@@ -295,6 +318,14 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
 
           {/* Il pulsante del turno resta sempre raggiungibile col pollice. */}
           <div className="zona-azioni">
+            {mostraChiediAvvisi && (
+              <button className="f12 tenue" style={{
+                display: "block", width: "100%", textAlign: "center",
+                padding: "6px 0", textDecoration: "underline", textUnderlineOffset: 3,
+              }} onClick={async () => { await chiediAvvisi(); setAvvisiChiesti(true); }}>
+                {t("partita.avvisami")}
+              </button>
+            )}
             <Azioni stato={stato} mioId={mioId} invia={invia} inAzione={inAzione} avvisa={avvisa} />
             <SulTavolo stato={stato} />
           </div>

@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node scripts/prova-vercel.mjs && node scripts/prova-uri.mjs && node scripts/prova-regole.mjs && node scripts/prova-chat.mjs && node scripts/prova-suoni.mjs && node scripts/prova-metriche.mjs && node scripts/prova-mercati.mjs && node scripts/prova-lingua.mjs && node scripts/prova-sfida.mjs && node scripts/prova-agente.mjs && node scripts/prova-valutazione.mjs && node scripts/simula.mjs 60 && node scripts/bilancia.mjs 8",
+    "test": "node scripts/prova-vercel.mjs && node scripts/prova-uri.mjs && node scripts/prova-regole.mjs && node scripts/prova-chat.mjs && node scripts/prova-suoni.mjs && node scripts/prova-metriche.mjs && node scripts/prova-mercati.mjs && node scripts/prova-lingua.mjs && node scripts/prova-sfida.mjs && node scripts/prova-agente.mjs && node scripts/prova-valutazione.mjs && node scripts/prova-partite.mjs && node scripts/simula.mjs 60 && node scripts/bilancia.mjs 8",
     "test:regole": "node scripts/prova-regole.mjs",
     "test:simula": "node scripts/simula.mjs",
     "test:uri": "node scripts/prova-uri.mjs",
@@ -23,7 +23,8 @@
     "test:lingua": "node scripts/prova-lingua.mjs",
     "agente": "node agente/proponi.mjs",
     "test:agente": "node scripts/prova-agente.mjs",
-    "test:valutazione": "node scripts/prova-valutazione.mjs"
+    "test:valutazione": "node scripts/prova-valutazione.mjs",
+    "test:partite": "node scripts/prova-partite.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.15.0",
