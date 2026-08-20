@@ -170,9 +170,9 @@ export const ETICHETTE_PASSIVITA = {
 export const DEBITI_ESTINGUIBILI = [
   { chiave: "mutuo", spesa: "mutuo", nome: "Mutuo casa" },
   { chiave: "prestitoStudio", spesa: "prestitoStudio", nome: "Prestito studio" },
-  { chiave: "auto", spesa: "auto", nome: "Prestito auto" },
-  { chiave: "cartaCredito", spesa: "cartaCredito", nome: "Carte di credito" },
-  { chiave: "rate", spesa: "rate", nome: "Debiti negozi" },
+  { chiave: "auto", spesa: "auto", nome: "Prestito auto", dimezzabileInBancarotta: true },
+  { chiave: "cartaCredito", spesa: "cartaCredito", nome: "Carte di credito", dimezzabileInBancarotta: true },
+  { chiave: "rate", spesa: "rate", nome: "Debiti negozi", dimezzabileInBancarotta: true },
 ];
 
 export const getProfessione = (id) =>

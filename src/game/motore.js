@@ -851,10 +851,21 @@ export function applicaAzione(stato, azione) {
   if (tipo === "concludiBancarotta") {
     if (s.pending.tipo !== "bancarotta") return err("Azione non valida ora.");
     if (flussoMensile(g) < 0) {
-      // Dimezza auto, carte e rate insieme alle relative spese (regolamento pag. 5).
-      for (const k of ["auto", "cartaCredito", "rate"]) {
-        g.passivita[k] = Math.floor(g.passivita[k] / 2);
-        g.spese[k] = Math.floor(g.spese[k] / 2);
+      /* Quali debiti si dimezzano lo dice il pacchetto, non il motore.
+         Prima l'elenco era scritto a mano con le chiavi del mercato
+         "classico": su Roma, che non ha la voce "rate", si scriveva NaN
+         dentro le spese — e siccome arrotonda() trattava NaN come zero,
+         il giocatore si ritrovava spese pari a zero, usciva dalla Ruota
+         con una rendita irrisoria e restava impantanato al Largo. Un
+         numero mancante non deve mai diventare uno zero silenzioso. */
+      for (const d of debitiEstinguibiliDi(s)) {
+        if (!d.dimezzabileInBancarotta) continue;
+        if (Number.isFinite(g.passivita[d.chiave])) {
+          g.passivita[d.chiave] = Math.floor(g.passivita[d.chiave] / 2);
+        }
+        if (Number.isFinite(g.spese[d.spesa])) {
+          g.spese[d.spesa] = Math.floor(g.spese[d.spesa] / 2);
+        }
       }
       nota(s, `${g.nome}: metà di prestito auto, carte e rate viene cancellata.`, "bancarotta", g.id);
     }

@@ -125,11 +125,23 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
 
 ## 6bis · Emerso costruendo
 
-- [ ] **Il Largo romano è lento** — 30% delle partite finisce allo scadere
-      del tempo. Alzare le rese del Largo o abbassare l'obiettivo.
-- [ ] **Zero bancarotte a Roma** — nessuna tensione. Il fido all'1,2% mensile
-      è realistico ma troppo mite: valutare un limite al credito concedibile
-      invece di un tasso punitivo.
+- [x] **Un NaN azzerava le spese** — la bancarotta dimezzava un elenco di
+      voci scritto a mano con le chiavi del mercato "classico". Su Roma, che
+      non ha la voce `rate`, scriveva NaN nelle spese, e `arrotonda()`
+      trasformava il NaN in zero **senza dire niente**: il giocatore si
+      ritrovava spese pari a zero, usciva dalla Ruota con una rendita
+      irrisoria e restava impantanato al Largo. Sembrava un problema di
+      bilanciamento, era un baco. Ora l'elenco lo dichiara il pacchetto, il
+      NaN non viene più inghiottito, e il cancello controlla l'integrità dei
+      numeri a ogni mossa.
+- [x] **Il Largo romano era lento** — era un sintomo del NaN. Risolto.
+- [x] **Reddito individuale contro spese di nucleo** — le schede accostavano
+      spese familiari (affitto, utenze, auto) a un reddito di una persona
+      sola, lasciando margini da 145 € al mese. Incoerenza mia. Le schede
+      ora dichiarano il reddito del nucleo.
+- [ ] **Zero bancarotte a Roma** — con margini di nucleo gli imprevisti si
+      assorbono e manca la tensione. Non è un errore, ma il gioco ci guadagna
+      se qualcosa può andare male: valutare un tetto al credito concedibile.
 - [ ] **Il tabellone del Largo cita gli affari per id** (`av01`..`av20`):
       aggiungere una voce al mazzo senza aggiungere una casella la rende
       irraggiungibile. Documentato a caro prezzo.

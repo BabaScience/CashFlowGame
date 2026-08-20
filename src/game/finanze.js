@@ -12,7 +12,19 @@
 export const TASSO_PRESTITO = 0.1;
 export const MAX_FIGLI = 3;
 
-export const arrotonda = (n) => Math.round(n || 0);
+/**
+ * Arrotonda, trattando i valori mancanti come zero.
+ *
+ * Attenzione a che cosa NON fa: non ripara un NaN che sia finito nei dati.
+ * `Math.round(NaN || 0)` restituiva zero, e uno zero silenzioso al posto
+ * delle spese di un giocatore è costato una diagnosi lunga — sembrava un
+ * problema di bilanciamento del mercato di Roma, era un NaN. Adesso il NaN
+ * resta NaN e si propaga fino ai test, che lo cercano apposta.
+ */
+export const arrotonda = (n) => {
+  if (n === null || n === undefined || n === "") return 0;
+  return Math.round(n);
+};
 
 /** Somma dei dividendi mensili di tutti i titoli posseduti. */
 export function dividendi(g) {

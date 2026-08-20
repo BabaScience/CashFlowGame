@@ -222,6 +222,17 @@ function partita({ mercatoId, professioneId, giocatori = 3, seme, maxAzioni = 12
     errori = 0;
     s = out.stato;
     azioni++;
+    /* Un solo NaN fra spese e passività azzerava silenziosamente il totale.
+       Costa poco cercarlo a ogni mossa, e ha già ripagato la spesa. */
+    for (const g of s.giocatori) {
+      for (const [k, v] of Object.entries(g.spese)) {
+        if (!Number.isFinite(v)) throw new Error(`spesa "${k}" non è un numero (${v}) su ${g.nome}`);
+      }
+      for (const [k, v] of Object.entries(g.passivita)) {
+        if (!Number.isFinite(v)) throw new Error(`passività "${k}" non è un numero (${v}) su ${g.nome}`);
+      }
+      if (!Number.isFinite(g.contanti)) throw new Error(`contanti non numerici su ${g.nome}`);
+    }
     for (const g of s.giocatori) {
       if (g.tracciato === "veloce" && !uscita.has(g.id)) uscita.set(g.id, g.turniGiocati);
     }

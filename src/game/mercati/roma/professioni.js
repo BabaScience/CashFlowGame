@@ -1,8 +1,13 @@
 /**
  * LE DODICI PROFESSIONI DI ROMA.
  *
- * Importi NETTI mensili, non RAL: è quello che arriva sul conto, ed è
- * l'unico numero che una persona riconosce come proprio. Le fasce vengono
+ * Importi NETTI mensili di NUCLEO, non RAL e non di una persona sola.
+ *
+ * La distinzione conta, e ci è costata una diagnosi: le spese della scheda
+ * — affitto, utenze, auto, spesa — sono di una famiglia, quindi accostarle
+ * al reddito di un individuo lasciava margini da 145 € al mese e rendeva il
+ * gioco una macina. In Italia un nucleo ha in media circa un percettore e
+ * mezzo. La professione indicata è quella principale. Le fasce vengono
  * dal Salary Outlook di JobPricing (RAL media nel privato 32.991 €, Lazio
  * 32.220 €) riportate al netto, e dalle tabelle contrattuali per il pubblico
  * impiego.
@@ -28,52 +33,52 @@ const scheda = (id, nome, emoji, stipendio, risparmi, perFiglio, spese, passivit
 });
 
 export const PROFESSIONI = [
-  scheda("dirigente-medico", "Dirigente medico", "🩺", 3800, 6000, 320,
-    { casa: 1150, tasse: 0, prestitoStudio: 180, auto: 260, cartaCredito: 120, utenze: 210, vita: 980 },
+  scheda("dirigente-medico", "Dirigente medico", "🩺", 5700, 9100, 530,
+    { casa: 1150, tasse: 0, prestitoStudio: 180, auto: 260, cartaCredito: 120, utenze: 210, vita: 860 },
     { mutuo: 235000, prestitoStudio: 14000, auto: 12000, cartaCredito: 3500 }),
 
-  scheda("pilota", "Pilota di linea", "✈️", 4200, 7000, 340,
-    { casa: 1300, tasse: 0, prestitoStudio: 240, auto: 300, cartaCredito: 140, utenze: 220, vita: 1100 },
+  scheda("pilota", "Pilota di linea", "✈️", 6300, 10100, 560,
+    { casa: 1300, tasse: 0, prestitoStudio: 240, auto: 300, cartaCredito: 140, utenze: 220, vita: 970 },
     { mutuo: 265000, prestitoStudio: 19000, auto: 14000, cartaCredito: 4000 }),
 
-  scheda("avvocato", "Avvocato", "⚖️", 2900, 4500, 260,
-    { casa: 980, tasse: 0, prestitoStudio: 150, auto: 220, cartaCredito: 110, utenze: 180, vita: 760 },
+  scheda("avvocato", "Avvocato", "⚖️", 4350, 7000, 370,
+    { casa: 980, tasse: 0, prestitoStudio: 150, auto: 220, cartaCredito: 110, utenze: 180, vita: 670 },
     { mutuo: 198000, prestitoStudio: 11000, auto: 10000, cartaCredito: 3000 }),
 
-  scheda("architetto", "Architetto", "📐", 2100, 3000, 210,
-    { casa: 820, tasse: 0, prestitoStudio: 120, auto: 180, cartaCredito: 90, utenze: 160, vita: 570 },
+  scheda("architetto", "Architetto", "📐", 3150, 5000, 230,
+    { casa: 820, tasse: 0, prestitoStudio: 120, auto: 180, cartaCredito: 90, utenze: 160, vita: 500 },
     { mutuo: 165000, prestitoStudio: 9000, auto: 8000, cartaCredito: 2500 }),
 
-  scheda("quadro", "Quadro d'azienda", "📊", 2750, 4000, 250,
-    { casa: 950, tasse: 0, prestitoStudio: 110, auto: 240, cartaCredito: 110, utenze: 180, vita: 730 },
+  scheda("quadro", "Quadro d'azienda", "📊", 4100, 6600, 340,
+    { casa: 950, tasse: 0, prestitoStudio: 110, auto: 240, cartaCredito: 110, utenze: 180, vita: 640 },
     { mutuo: 192000, prestitoStudio: 8000, auto: 11000, cartaCredito: 3000 }),
 
-  scheda("insegnante", "Insegnante", "📚", 1700, 2200, 170,
-    { casa: 700, tasse: 0, prestitoStudio: 60, auto: 130, cartaCredito: 70, utenze: 140, vita: 450 },
+  scheda("insegnante", "Insegnante", "📚", 2550, 4100, 190,
+    { casa: 700, tasse: 0, prestitoStudio: 60, auto: 130, cartaCredito: 70, utenze: 140, vita: 400 },
     { mutuo: 138000, prestitoStudio: 4500, auto: 6000, cartaCredito: 1800 }),
 
-  scheda("infermiere", "Infermiere", "💉", 1750, 2400, 170,
-    { casa: 700, tasse: 0, prestitoStudio: 60, auto: 130, cartaCredito: 70, utenze: 140, vita: 480 },
+  scheda("infermiere", "Infermiere", "💉", 2600, 4200, 190,
+    { casa: 700, tasse: 0, prestitoStudio: 60, auto: 130, cartaCredito: 70, utenze: 140, vita: 420 },
     { mutuo: 138000, prestitoStudio: 4500, auto: 6000, cartaCredito: 1800 }),
 
-  scheda("agente", "Agente di polizia", "🚓", 1750, 2400, 170,
-    { casa: 690, tasse: 0, prestitoStudio: 0, auto: 140, cartaCredito: 70, utenze: 140, vita: 480 },
+  scheda("agente", "Agente di polizia", "🚓", 2600, 4200, 210,
+    { casa: 690, tasse: 0, prestitoStudio: 0, auto: 140, cartaCredito: 70, utenze: 140, vita: 420 },
     { mutuo: 135000, prestitoStudio: 0, auto: 6500, cartaCredito: 1800 }),
 
-  scheda("autotrasportatore", "Autotrasportatore", "🚚", 1800, 2600, 170,
-    { casa: 660, tasse: 0, prestitoStudio: 0, auto: 170, cartaCredito: 70, utenze: 140, vita: 500 },
+  scheda("autotrasportatore", "Autotrasportatore", "🚚", 2700, 4300, 220,
+    { casa: 660, tasse: 0, prestitoStudio: 0, auto: 170, cartaCredito: 70, utenze: 140, vita: 440 },
     { mutuo: 128000, prestitoStudio: 0, auto: 8000, cartaCredito: 1800 }),
 
-  scheda("impiegato", "Impiegato amministrativo", "🗂️", 1600, 2000, 160,
-    { casa: 660, tasse: 0, prestitoStudio: 50, auto: 110, cartaCredito: 70, utenze: 135, vita: 430 },
+  scheda("impiegato", "Impiegato amministrativo", "🗂️", 2400, 3800, 180,
+    { casa: 660, tasse: 0, prestitoStudio: 50, auto: 110, cartaCredito: 70, utenze: 135, vita: 380 },
     { mutuo: 128000, prestitoStudio: 3500, auto: 5000, cartaCredito: 1700 }),
 
-  scheda("meccanico", "Meccanico", "🔧", 1650, 2200, 160,
-    { casa: 640, tasse: 0, prestitoStudio: 0, auto: 120, cartaCredito: 70, utenze: 135, vita: 460 },
+  scheda("meccanico", "Meccanico", "🔧", 2500, 4000, 200,
+    { casa: 640, tasse: 0, prestitoStudio: 0, auto: 120, cartaCredito: 70, utenze: 135, vita: 400 },
     { mutuo: 124000, prestitoStudio: 0, auto: 5500, cartaCredito: 1700 }),
 
-  scheda("operatore", "Operatore ecologico", "🧹", 1500, 1800, 150,
-    { casa: 600, tasse: 0, prestitoStudio: 0, auto: 100, cartaCredito: 60, utenze: 130, vita: 400 },
+  scheda("operatore", "Operatore ecologico", "🧹", 2250, 3600, 180,
+    { casa: 600, tasse: 0, prestitoStudio: 0, auto: 100, cartaCredito: 60, utenze: 130, vita: 350 },
     { mutuo: 116000, prestitoStudio: 0, auto: 4500, cartaCredito: 1500 }),
 ];
 
@@ -108,6 +113,6 @@ export const ETICHETTE_PASSIVITA = {
 export const DEBITI_ESTINGUIBILI = [
   { chiave: "mutuo", spesa: "casa", nome: "Mutuo sulla casa" },
   { chiave: "prestitoStudio", spesa: "prestitoStudio", nome: "Prestito studi" },
-  { chiave: "auto", spesa: "auto", nome: "Finanziamento auto" },
-  { chiave: "cartaCredito", spesa: "cartaCredito", nome: "Carta di credito" },
+  { chiave: "auto", spesa: "auto", nome: "Finanziamento auto", dimezzabileInBancarotta: true },
+  { chiave: "cartaCredito", spesa: "cartaCredito", nome: "Carta di credito", dimezzabileInBancarotta: true },
 ];
