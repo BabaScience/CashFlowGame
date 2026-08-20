@@ -151,9 +151,16 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       da riempire i segnaposto prima della pubblicazione: contatto del
       titolare e nomi dei fornitori. Manca il testo dell'accordo sul
       trattamento da far firmare a una scuola.
-- [~] **6.3 Accessibilità** — fatte le sagome sulle pedine (non solo colore)
-      e i nomi accessibili sui pulsanti senza testo. Restano da verificare
-      aree di tocco, percorso completo da tastiera e contrasti.
+- [x] **6.3 Accessibilità** — passata con controllo automatico
+      (`scripts/prova-accessibilita.mjs`, 14 verifiche). Corretti: quattro
+      campi con etichetta visibile ma **non associata** (un lettore di
+      schermo annunciava solo "casella di testo"), un `outline: none` che
+      lasciava chi naviga da tastiera senza sapere dov'è, il grigio tenue a
+      3,9:1 sulla carta chiara e il verde degli importi a 3,6:1 — entrambi
+      sotto il 4,5:1 richiesto. Il titolo della pagina ora segue la lingua.
+      **Resta la parte che una macchina non può fare:** provare il gioco con
+      un lettore di schermo vero, e verificare il percorso completo da
+      tastiera sul tabellone.
 - [ ] **6.4 Deposito del marchio** — ricerca di anteriorità formale, poi UIBM o
       EUIPO.
 

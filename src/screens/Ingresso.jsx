@@ -121,7 +121,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
               aria-label={t("impara.richiamo")}>
               <span>
                 <strong>{t("impara.richiamo")}</strong><br />
-                <span className="f12" style={{ color: "var(--tenue)" }}>{t("impara.richiamoSotto")}</span>
+                <span className="f12" style={{ color: "var(--tenue-carta)" }}>{t("impara.richiamoSotto")}</span>
               </span>
               <span className="freccia" aria-hidden="true">→</span>
             </button>
@@ -143,22 +143,22 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
                 aria-label={t("ingresso.sfidaAria")}>
                 <span>
                   <strong>{t("ingresso.sfidaTitolo")}</strong><br />
-                  <span className="f12" style={{ color: "var(--tenue)" }}>{t("ingresso.sfidaSotto")}</span>
+                  <span className="f12" style={{ color: "var(--tenue-carta)" }}>{t("ingresso.sfidaSotto")}</span>
                 </span>
                 <span className="freccia" aria-hidden="true">→</span>
               </button>
             )}
 
             <div className="gruppo-campo">
-            <label className="etichetta">{t("ingresso.nome")}</label>
-            <input className="campo" value={nome} maxLength={18}
+            <label className="etichetta" htmlFor="campo-nome">{t("ingresso.nome")}</label>
+            <input id="campo-nome" className="campo" value={nome} maxLength={18}
               onChange={(e) => setNome(e.target.value)} placeholder={t("ingresso.nomeSegnaposto")} />
           </div>
 
           {/* Prima scelta di tutte: decide professioni, prezzi e valuta. */}
           <div className="gruppo-campo">
-            <label className="etichetta">{t("ingresso.dovegiochi")}</label>
-            <select className="campo" value={mercatoId}
+            <label className="etichetta" htmlFor="campo-mercato">{t("ingresso.dovegiochi")}</label>
+            <select id="campo-mercato" className="campo" value={mercatoId}
               onChange={(e) => {
                 setMercato(e.target.value);
                 localStorage.setItem("quotazero:mercato", e.target.value);
@@ -175,8 +175,8 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
           </div>
 
           <div className="gruppo-campo">
-            <label className="etichetta">{t("ingresso.professione")}</label>
-            <select className="campo" value={professioneId} onChange={(e) => setProfessione(e.target.value)}>
+            <label className="etichetta" htmlFor="campo-professione">{t("ingresso.professione")}</label>
+            <select id="campo-professione" className="campo" value={professioneId} onChange={(e) => setProfessione(e.target.value)}>
               {professioni.map((p) => (
                 <option key={p.id} value={p.id}>{p.emoji} {p.nome} — {soldi(p.stipendio)}/mese</option>
               ))}
@@ -198,8 +198,8 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
           </div>
 
           <div className="gruppo-campo">
-            <label className="etichetta">{t("ingresso.sogno")}</label>
-            <select className="campo" value={sognoId} onChange={(e) => setSogno(e.target.value)}>
+            <label className="etichetta" htmlFor="campo-sogno">{t("ingresso.sogno")}</label>
+            <select id="campo-sogno" className="campo" value={sognoId} onChange={(e) => setSogno(e.target.value)}>
               {sogni.map((s) => (
                 <option key={s.id} value={s.id}>{s.emoji} {s.nome} — {soldi(s.costo)}</option>
               ))}
@@ -226,6 +226,8 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
         ) : (
           <>
             <input
+              id="campo-codice"
+              aria-label={t("ingresso.codice")}
               className="campo mb12"
               value={codice}
               onChange={(e) => setCodice(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}

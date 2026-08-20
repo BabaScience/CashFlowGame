@@ -13,11 +13,19 @@
   --carta-scura: #E6E1D2;
   --inchiostro:  #16211d;
   --tenue:       #6E7B74;
+  /* Lo stesso grigio, ma abbastanza scuro da leggersi sulla carta chiara.
+     #6E7B74 su #F4F1E6 dà 3,9:1, sotto il 4,5:1 che serve a un testo
+     piccolo; questo arriva a 5,3:1. Ne servono due perché `.tenue` vive
+     anche sulle carte scure, dove scurirlo lo renderebbe illeggibile. */
+  --tenue-carta: #5A6660;
   --linea:       #D3CDBC;
 
   --oro:         #C9A227;
   --oro-chiaro:  #E3C55A;
   --verde:       #4E8B3D;
+  /* Il verde pieno va bene per i riempimenti, non per il testo: su carta
+     chiara dà 3,6:1. Questo arriva sopra il 4,5:1 richiesto. */
+  --verde-testo: #3A6A2C;
   --blu:         #2E6FA8;
   --rosso:       #B23A2E;
   --arancio:     #D98324;
@@ -168,6 +176,12 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
   }
 }
 
+/* Sulla carta chiara il grigio tenue deve essere più scuro: vedi i token. */
+.carta .tenue,
+.carta .etichetta,
+.richiamo-sfida .tenue,
+.partita-aperta .tenue { color: var(--tenue-carta); }
+
 /* ══ carte di carta ══ */
 .carta {
   background: var(--carta);
@@ -231,10 +245,13 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
   background: #fff;
   color: var(--inchiostro);
   padding: 0 14px;
-  outline: none;
 }
+/* Il contorno di fuoco NON si toglie. Prima c'era `outline: none`, che
+   lascia chi naviga da tastiera senza sapere dov'è: si vedeva solo il
+   bordo cambiare colore, e su un campo già bordato non si nota. */
+.campo:focus-visible { outline: 2px solid var(--oro); outline-offset: 1px; }
 .campo:focus { border-color: var(--oro); }
-.etichetta { display: block; font-size: 12px; font-weight: 700; color: var(--tenue); margin: 0 0 6px; text-transform: uppercase; letter-spacing: .08em; }
+.etichetta { display: block; font-size: 12px; font-weight: 700; color: var(--tenue-carta); margin: 0 0 6px; text-transform: uppercase; letter-spacing: .08em; }
 .gruppo-campo + .gruppo-campo { margin-top: 14px; }
 
 /* ══ riga chiave/valore del conto economico ══ */
@@ -244,7 +261,7 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .kv-v { font-family: var(--f-numeri); font-size: 14.5px; font-weight: 600; }
 .kv-forte .kv-k { font-weight: 700; color: var(--inchiostro); }
 .kv-forte .kv-v { font-size: 16px; font-weight: 600; }
-.pos { color: var(--verde); }
+.pos { color: var(--verde-testo); }
 .neg { color: var(--rosso); }
 
 /* ══ intestazione di sezione ══ */
@@ -570,7 +587,7 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
   border-radius: var(--r-s);
   border: 1px solid var(--linea);
   background: rgba(0,0,0,.03);
-  color: var(--tenue);
+  color: var(--tenue-carta);
   font-size: 13px; font-weight: 700;
 }
 .scelta-lingua button[data-attiva="true"] {

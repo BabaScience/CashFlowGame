@@ -14,6 +14,7 @@
 export default {
   app: {
     nome: "Quota Zero",
+    titoloPagina: "Quota Zero · Make for open water",
     motto: "Get off the Wheel.",
     sottotitolo: "2 to 6 players, wherever you are.",
     nessunaRegistrazione: "No sign-up. A room code is all you need.",

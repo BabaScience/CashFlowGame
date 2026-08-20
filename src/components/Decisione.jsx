@@ -90,9 +90,10 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
 
         {azione && (
           <div className="mb12">
-            <label className="etichetta">Quante azioni?</label>
+            <label className="etichetta" htmlFor="campo-quantita">Quante azioni?</label>
             <div className="flex g8">
               <input
+                id="campo-quantita"
                 className="campo" type="number" inputMode="numeric" min="0" max={maxQ}
                 value={quantita} onChange={(e) => setQuantita(e.target.value)}
                 placeholder="0" style={{ flex: 1 }}

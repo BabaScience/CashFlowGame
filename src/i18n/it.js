@@ -8,6 +8,7 @@
 export default {
   app: {
     nome: "Quota Zero",
+    titoloPagina: "Quota Zero · Prendi il largo",
     motto: "Esci dalla Ruota.",
     sottotitolo: "Da 2 a 6 giocatori, ovunque siate.",
     nessunaRegistrazione: "Nessuna registrazione. Il codice della stanza è tutto ciò che serve.",

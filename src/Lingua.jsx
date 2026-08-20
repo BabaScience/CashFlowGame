@@ -1,4 +1,4 @@
-import React, { createContext, useCallback, useContext, useMemo, useState } from "react";
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { traduci, linguaCorrente, impostaLingua, LINGUE } from "./i18n/index.js";
 
 /**
@@ -20,6 +20,16 @@ export function LinguaProvider({ children }) {
   });
 
   const cambiaLingua = useCallback((id) => setLinguaStato(impostaLingua(id)), []);
+
+  /* Anche il titolo della scheda parla la lingua scelta: restava in
+     italiano con l'interfaccia in inglese, e lo si vede nella barra del
+     browser e nei segnalibri. */
+  useEffect(() => {
+    if (typeof document !== "undefined") {
+      document.title = traduci(lingua, "app.titoloPagina");
+      document.documentElement.lang = lingua;
+    }
+  }, [lingua]);
 
   const valore = useMemo(() => ({
     lingua,

@@ -110,14 +110,14 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
           {modifica && io && (
             <div className="mt12">
               <label className="etichetta">Professione</label>
-              <select className="campo mb12" value={io.professioneId} disabled={inAzione}
+              <select id="attesa-professione" aria-label={t("attesa.professione")} className="campo mb12" value={io.professioneId} disabled={inAzione}
                 onChange={(e) => cambia("prof", e.target.value)}>
                 {professioni.map((p) => (
                   <option key={p.id} value={p.id}>{p.emoji} {p.nome} — {soldi(p.stipendio)}/mese</option>
                 ))}
               </select>
               <label className="etichetta">{t("attesa.sogno")}</label>
-              <select className="campo" value={io.sognoId} disabled={inAzione}
+              <select id="attesa-sogno" aria-label={t("attesa.sogno")} className="campo" value={io.sognoId} disabled={inAzione}
                 onChange={(e) => cambia("sogno", e.target.value)}>
                 {sogni.map((s) => (
                   <option key={s.id} value={s.id}>{s.emoji} {s.nome} — {soldi(s.costo)}</option>
