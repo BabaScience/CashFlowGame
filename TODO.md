@@ -63,25 +63,29 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       Estrarre le stringhe in `src/i18n/it.json`. Sblocca anche l'inglese sopra
       al mercato di Roma, che è la copertura più economica che esista.
 
-- [ ] **2.4 Scelta del mercato alla creazione della stanza**
+- [x] **2.4 Scelta del mercato alla creazione della stanza**
       Prima scelta in `Ingresso.jsx`, prima di professione e sogno: è il mercato
       a decidere quali professioni esistono. Un mercato solo per tavolo.
 
 ## 3 · Roma su dati veri
 
-- [ ] **3.1 Livelli di realismo** (`regole/livelli.js`)
-      Livello 1 base (prezzi e tassi veri, imposta unica), Livello 2 reale
-      (cedolare secca, IMU, spese d'acquisto, sfitto), Livello 3 esperto
-      (IRPEF, plusvalenze, forfettario). Agganci riempiti dal pacchetto, non
-      una scala di `if` sparsa nel motore.
+- [~] **3.1 Livelli di realismo**
+      Livello 1 **fatto**, ma come dato e non come meccanica: imposte, IMU,
+      condominio, manutenzione e sfitto sono una trattenuta unica del 28% sul
+      canone, applicata quando si costruisce la carta (`derivazione.js`).
+      Restano da fare il Livello 2 (ogni voce separata e visibile, cedolare
+      secca al 21% o al 10% col canone concordato) e il Livello 3 (IRPEF,
+      plusvalenze, forfettario). Quelli sì richiedono agganci nel motore.
 
-- [ ] **3.2 Pacchetto Roma 2026**
+- [x] **3.2 Pacchetto Roma 2026**
       Professioni su fasce ISTAT/JobPricing al netto, immobili su quotazioni
       OMI per zona, credito su Banca d'Italia, fisco reale. Ogni valore porta
       `{ valore, fonte, url, aggiornato }`: è ciò che separa un gioco da uno
       strumento didattico che una scuola compra.
-      Ribilanciare la scheda *Infermiere*, oggi la peggiore (21% di uscite,
-      38% di fallimenti) perché porta un mutuo da 75.000 su 3.100 di reddito.
+      Fatto. Da sistemare ancora due cose emerse dal cancello:
+      il 30% delle partite romane finisce **a tempo** invece che con una
+      vittoria vera (il Largo è troppo lento), e la bancarotta è allo 0%
+      (il fido all'1,2% mensile è troppo mite, non c'è tensione).
 
 - [ ] **3.3 Raccolta dati automatica**
       Progetto separato: legge le fonti ufficiali aperte e propone un pacchetto
@@ -118,6 +122,17 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       tocco, percorso da tastiera, contrasto.
 - [ ] **6.4 Deposito del marchio** — ricerca di anteriorità formale, poi UIBM o
       EUIPO.
+
+## 6bis · Emerso costruendo
+
+- [ ] **Il Largo romano è lento** — 30% delle partite finisce allo scadere
+      del tempo. Alzare le rese del Largo o abbassare l'obiettivo.
+- [ ] **Zero bancarotte a Roma** — nessuna tensione. Il fido all'1,2% mensile
+      è realistico ma troppo mite: valutare un limite al credito concedibile
+      invece di un tasso punitivo.
+- [ ] **Il tabellone del Largo cita gli affari per id** (`av01`..`av20`):
+      aggiungere una voce al mazzo senza aggiungere una casella la rende
+      irraggiungibile. Documentato a caro prezzo.
 
 ## 7 · Quando funzionerà
 

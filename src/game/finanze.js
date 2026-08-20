@@ -3,7 +3,13 @@
  * Una sola fonte di verità: sia il server sia l'interfaccia usano queste funzioni.
  */
 
-export const TASSO_PRESTITO = 0.1; // 10% al mese, come da regolamento
+/**
+ * Tasso del fido bancario, al mese, quando il mercato non ne dichiara uno.
+ * Il valore alto del pacchetto "classico" è una regola da gioco da tavolo:
+ * il prestito serve a togliersi dai guai, non a finanziare una strategia.
+ * I mercati reali dichiarano il proprio (vedi `tassoPrestito` nel pacchetto).
+ */
+export const TASSO_PRESTITO = 0.1;
 export const MAX_FIGLI = 3;
 
 export const arrotonda = (n) => Math.round(n || 0);
@@ -34,7 +40,11 @@ export function redditoTotale(g) {
 
 /** Rata del prestito bancario: $100 al mese ogni $1.000 presi in prestito. */
 export function ratePrestito(g) {
-  return arrotonda((g.passivita.prestitoBanca || 0) * TASSO_PRESTITO);
+  /* Il tasso viaggia col giocatore, come lo stipendio: è una condizione del
+     suo mercato, e va letto senza dover risalire allo stato della partita —
+     speseTotali() è chiamata da mezza interfaccia. */
+  const tasso = g.tassoPrestito ?? TASSO_PRESTITO;
+  return arrotonda((g.passivita.prestitoBanca || 0) * tasso);
 }
 
 export function speseFigli(g) {

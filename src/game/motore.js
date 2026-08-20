@@ -83,6 +83,7 @@ export function creaGiocatore(s, id, nome, professioneId, sognoId, indice) {
     contanti: 0,
     stipendio: p.stipendio,
     perFiglio: p.perFiglio,
+    tassoPrestito: pacchettoDi(s).tassoPrestito,
     figli: 0,
     spese: { ...p.spese },
     passivita: { ...p.passivita, prestitoBanca: 0 },
@@ -155,11 +156,49 @@ export function creaStanza(codice, hostId, opzioni = {}) {
 
 /* ═══════════════ avanzamento del turno ═══════════════ */
 
+/**
+ * Una partita deve finire.
+ *
+ * Senza un limite, un giocatore che prende il largo con una rendita minima
+ * riceve una liquidazione minima, non arriva al primo affare, e le penalità
+ * del Largo gli tolgono quel poco che accumula: gira per migliaia di turni
+ * senza vincere e senza perdere. Non è una partita combattuta, è uno
+ * stallo, ed è la cosa peggiore che possa capitare a un tavolo.
+ *
+ * Al limite vince chi si è avvicinato di più al proprio obiettivo. È anche
+ * la regola giusta per una partita da tavolo che deve stare in una serata.
+ */
+function fineATempo(s) {
+  const vivi = s.giocatori.filter((g) => !g.eliminato);
+  if (!vivi.length) return;
+
+  /* Quanto manca a ciascuno, come frazione del proprio traguardo. */
+  const progresso = (g) => {
+    if (g.tracciato === "veloce") {
+      const traguardo = obiettivoDi(s);
+      const fatto = g.redditoRendita - g.redditoInizialeVeloce;
+      return 1 + Math.max(0, fatto) / Math.max(1, traguardo);
+    }
+    const r = riepilogo(g);
+    return Math.min(0.999, r.redditoPassivo / Math.max(1, r.speseTotali));
+  };
+
+  const ordinati = [...vivi].sort((a, b) => progresso(b) - progresso(a));
+  const capofila = ordinati[0];
+  s.fase = "finita";
+  s.vincitore = capofila.id;
+  s.motivoVittoria = "tempo";
+  nota(s, `⏳ Tempo scaduto dopo ${s.numeroTurno} turni. Vince ${capofila.nome}, il più vicino al proprio obiettivo.`, "sistema", capofila.id);
+}
+
 function prossimoTurno(s) {
   s.dado = null;
   s.pending = null;
   const vivi = s.giocatori.filter((g) => !g.eliminato);
   if (vivi.length === 0) return;
+
+  const limite = pacchettoDi(s).turniMassimi;
+  if (limite && s.numeroTurno >= limite) return fineATempo(s);
 
   for (let i = 0; i < s.giocatori.length * 3; i++) {
     s.turno = (s.turno + 1) % s.giocatori.length;

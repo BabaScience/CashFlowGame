@@ -1,17 +1,45 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Bottone } from "../components/Base.jsx";
-import { useMercato } from "../Mercato.jsx";
+import { MercatoProvider, useMercato } from "../Mercato.jsx";
+import { MERCATI, MERCATO_PREDEFINITO } from "../game/mercati/indice.js";
 import { soldi } from "../game/finanze.js";
 import * as api from "../lib/api.js";
 import { traccia } from "../lib/traccia.js";
 
-/** Schermata iniziale: crea una stanza oppure entra con un codice. */
+/**
+ * Schermata iniziale.
+ *
+ * Il mercato si sceglie qui e prima di tutto il resto, perché è il mercato
+ * a decidere quali professioni esistono e quanto costano le cose: scegliere
+ * "Roma" dopo aver scelto la professione significherebbe cambiarla sotto i
+ * piedi a chi l'ha appena letta. Chi entra con un codice non sceglie nulla:
+ * il mercato è quello della stanza, uno per tavolo.
+ */
 export default function Ingresso({ suEntrato, avvisa }) {
+  const [mercatoId, setMercato] = useState(
+    () => localStorage.getItem("quotazero:mercato") || MERCATO_PREDEFINITO
+  );
+  return (
+    <MercatoProvider mercatoId={mercatoId}>
+      <Modulo suEntrato={suEntrato} avvisa={avvisa}
+        mercatoId={mercatoId} setMercato={setMercato} />
+    </MercatoProvider>
+  );
+}
+
+function Modulo({ suEntrato, avvisa, mercatoId, setMercato }) {
   const { professioni, sogni } = useMercato();
   const [nome, setNome] = useState(localStorage.getItem("quotazero:nome") || "");
-  const [professioneId, setProfessione] = useState("insegnante");
-  const [sognoId, setSogno] = useState("sg01");
+  const [professioneId, setProfessione] = useState(professioni[0].id);
+  const [sognoId, setSogno] = useState(sogni[0].id);
+
+  /* Cambiando mercato le professioni cambiano: si riporta la scelta su una
+     che esiste, altrimenti la scheda mostrata non è quella che si gioca. */
+  useEffect(() => {
+    if (!professioni.some((p) => p.id === professioneId)) setProfessione(professioni[0].id);
+    if (!sogni.some((x) => x.id === sognoId)) setSogno(sogni[0].id);
+  }, [professioni, sogni, professioneId, sognoId]);
   const [codice, setCodice] = useState("");
   const [occupato, setOccupato] = useState(false);
   const [modo, setModo] = useState("crea");
@@ -27,8 +55,8 @@ export default function Ingresso({ suEntrato, avvisa }) {
     setOccupato(true);
     try {
       ricorda();
-      const r = await api.creaStanza(nome.trim(), professioneId, sognoId);
-      traccia("stanzaCreata");
+      const r = await api.creaStanza(nome.trim(), professioneId, sognoId, mercatoId);
+      traccia("stanzaCreata", { mercato: mercatoId });
       suEntrato(r.stato.codice);
     } catch (e) { avvisa(e.message); }
     finally { setOccupato(false); }
@@ -67,6 +95,26 @@ export default function Ingresso({ suEntrato, avvisa }) {
             <label className="etichetta">Il tuo nome</label>
             <input className="campo" value={nome} maxLength={18}
               onChange={(e) => setNome(e.target.value)} placeholder="Come ti chiamano" />
+          </div>
+
+          {/* Prima scelta di tutte: decide professioni, prezzi e valuta. */}
+          <div className="gruppo-campo">
+            <label className="etichetta">Dove giochi</label>
+            <select className="campo" value={mercatoId}
+              onChange={(e) => {
+                setMercato(e.target.value);
+                localStorage.setItem("quotazero:mercato", e.target.value);
+              }}>
+              {MERCATI.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {m.luogo || m.nome} — {m.descrizione}
+                </option>
+              ))}
+            </select>
+            <p className="f12 tenue" style={{ margin: "6px 0 0", lineHeight: 1.45 }}>
+              Il mercato decide prezzi, stipendi, tassi e valuta. Vale per tutto
+              il tavolo e non si cambia a partita iniziata.
+            </p>
           </div>
 
           <div className="gruppo-campo">

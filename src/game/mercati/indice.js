@@ -18,15 +18,18 @@
  * registrarlo qui, far passare `npm run test:bilancia`.
  */
 import classico202608 from "./classico/v2026.08.js";
+import roma202608 from "./roma/v2026.08.js";
 
 /** Ogni versione mai pubblicata, per chiave "id:versione". */
 const REGISTRO = new Map([
   ["classico:2026.08", classico202608],
+  ["roma:2026.08", roma202608],
 ]);
 
 /** L'ultima versione di ogni mercato: è quella che prendono le partite nuove. */
 const CORRENTI = new Map([
   ["classico", "2026.08"],
+  ["roma", "2026.08"],
 ]);
 
 /** Il mercato di partenza, finché non se ne sceglie un altro. */

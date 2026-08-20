@@ -48,6 +48,7 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
     sogno: "ha realizzato il proprio sogno",
     rendita: `ha raggiunto +${soldi(obiettivo)} di rendita al Largo`,
     ultimo: "è l'ultimo giocatore rimasto in partita",
+    tempo: "è arrivato più vicino al proprio obiettivo allo scadere del tempo",
   }[stato.motivoVittoria] || "ha vinto";
 
   return (

@@ -42,6 +42,12 @@ export default Object.freeze({
   /* Quanta rendita mensile serve, oltre a quella d'ingresso, per vincere. */
   obiettivoRendita: 50000,
 
+  /* Regola da gioco da tavolo: 100 di rata ogni 1.000 presi in prestito. */
+  /* Una partita deve stare in una serata, e deve comunque finire. */
+  turniMassimi: 400,
+
+  tassoPrestito: 0.1,
+
   professioni: PROFESSIONI,
   etichetteSpese: ETICHETTE_SPESE,
   etichettePassivita: ETICHETTE_PASSIVITA,

@@ -21,11 +21,14 @@
  * Uscita 0 = i dati reggono. Uscita 1 = i dati hanno rotto il gioco.
  */
 import { creaStanza, applicaAzione, codiceStanza } from "../src/game/motore.js";
-import { getPacchetto } from "../src/game/mercati/indice.js";
+import { getPacchetto, MERCATI, esiste, versioneCorrente } from "../src/game/mercati/indice.js";
 
-const PACCHETTO = getPacchetto();
-const PROFESSIONI = PACCHETTO.professioni;
-const SOGNI = PACCHETTO.sogni;
+/* Quale mercato si sta verificando: `node scripts/bilancia.mjs 12 roma`.
+   Senza argomento si verificano TUTTI i mercati registrati, perché un
+   pacchetto ingiocabile non deve poter arrivare in produzione solo
+   perché nessuno si è ricordato di controllarlo. */
+const MERCATO = process.argv.find((a) => /^[a-z]+$/.test(a) && a !== "--verboso" && esiste(a, versioneCorrente(a)));
+const DA_VERIFICARE = MERCATO ? [MERCATO] : MERCATI.map((m) => m.id);
 import { flussoMensile, fuoriDallaCorsa, riepilogo, soldi } from "../src/game/finanze.js";
 
 /* ═══════════════ soglie di accettazione ═══════════════ */
@@ -185,13 +188,13 @@ function mossa(s) {
 
 /* ═══════════════ una partita ═══════════════ */
 
-function partita({ professioneId, giocatori = 3, seme, maxAzioni = 12000 }) {
-  let s = creaStanza(codiceStanza(), "p0", { seme });
+function partita({ mercatoId, professioneId, giocatori = 3, seme, maxAzioni = 12000 }) {
+  let s = creaStanza(codiceStanza(), "p0", { seme, mercatoId });
   for (let i = 0; i < giocatori; i++) {
     const r = applicaAzione(s, {
       tipo: "entra", giocatoreId: "p" + i, nome: "Bot" + i,
       professioneId,                                   // stessa scheda per tutti:
-      sognoId: SOGNI[i % SOGNI.length].id,             // isola l'effetto della professione
+      sognoId: getPacchetto(mercatoId).sogni[i % getPacchetto(mercatoId).sogni.length].id,
     });
     if (r.errore) throw new Error("entra: " + r.errore);
     s = r.stato;
@@ -236,111 +239,127 @@ const mediana = (a) => {
   return b.length % 2 ? b[m] : Math.round((b[m - 1] + b[m]) / 2);
 };
 
-const PER_PROFESSIONE = Number(process.argv[2]) || 12;
-const VERBOSO = process.argv.includes("--verboso");
-
-console.log(`\nBILANCIA · ${PER_PROFESSIONE} partite × ${PROFESSIONI.length} professioni\n`);
-
-const righe = [];
-let vittorieVere = 0, partiteTotali = 0, nonCompletate = 0;
-
-for (const prof of PROFESSIONI) {
-  let giocatoriTot = 0, usciti = 0, falliti = 0, vinte = 0;
-  const turniUscita = [];
-
-  for (let i = 0; i < PER_PROFESSIONE; i++) {
-    /* Semi fissi e distinti: riproducibili, ma non tutti uguali fra loro. */
-    const seme = (0x5bf03635 ^ (prof.id.length * 2654435761) ^ (i * 40503)) >>> 0;
-    const { s, uscita, completata } = partita({ professioneId: prof.id, seme });
-
-    partiteTotali++;
-    giocatoriTot += s.giocatori.length;
-    usciti += uscita.size;
-    falliti += s.giocatori.filter((g) => g.eliminato).length;
-    turniUscita.push(...uscita.values());
-    if (!completata) nonCompletate++;
-    if (s.motivoVittoria === "sogno" || s.motivoVittoria === "rendita") { vinte++; vittorieVere++; }
-  }
-
-  righe.push({
-    nome: prof.nome,
-    stipendio: prof.stipendio,
-    quotaUscita: usciti / giocatoriTot,
-    quotaFallimento: falliti / giocatoriTot,
-    medianaTurni: mediana(turniUscita),
-    vinte, su: PER_PROFESSIONE,
-  });
-}
-
-/* ── tabella ── */
+const PER_PROFESSIONE = Number(process.argv.find((a) => /^\d+$/.test(a))) || 12;
 const pad = (t, n) => String(t).padEnd(n);
 const lpad = (t, n) => String(t).padStart(n);
-console.log(pad("professione", 20) + lpad("stipendio", 10) + lpad("uscite", 9) + lpad("turni", 8) + lpad("fallim.", 9) + lpad("vinte", 8));
-console.log("─".repeat(64));
-for (const r of righe) {
-  const allarme = r.quotaUscita < SOGLIE.usciteMinPerProfessione ? "  ⚠" : "";
-  console.log(
-    pad(r.nome, 20) +
-    lpad(soldi(r.stipendio), 10) +
-    lpad((r.quotaUscita * 100).toFixed(0) + "%", 9) +
-    lpad(r.medianaTurni ?? "—", 8) +
-    lpad((r.quotaFallimento * 100).toFixed(0) + "%", 9) +
-    lpad(`${r.vinte}/${r.su}`, 8) + allarme
-  );
+
+let mercatiRotti = 0;
+
+for (const mercatoId of DA_VERIFICARE) {
+  const pacchetto = getPacchetto(mercatoId);
+  const professioni = pacchetto.professioni;
+  const den = (n) => soldi(n, pacchetto.valuta);
+
+  console.log(`\n${"═".repeat(66)}`);
+  console.log(`MERCATO "${pacchetto.nome}" v${pacchetto.versione} · ${PER_PROFESSIONE} partite × ${professioni.length} professioni`);
+  console.log("═".repeat(66));
+
+  const righe = [];
+  let vittorieVere = 0, partiteTotali = 0, nonCompletate = 0;
+  const azioniViste = [];
+  let aTempo = 0;
+
+  for (const prof of professioni) {
+    let giocatoriTot = 0, usciti = 0, falliti = 0, vinte = 0;
+    const turniUscita = [];
+
+    for (let i = 0; i < PER_PROFESSIONE; i++) {
+      const seme = (0x5bf03635 ^ (prof.id.length * 2654435761) ^ (i * 40503) ^ mercatoId.length) >>> 0;
+      const { s, uscita, completata, azioni } = partita({ mercatoId, professioneId: prof.id, seme });
+
+      partiteTotali++;
+      giocatoriTot += s.giocatori.length;
+      usciti += uscita.size;
+      falliti += s.giocatori.filter((g) => g.eliminato).length;
+      turniUscita.push(...uscita.values());
+      if (!completata) {
+        nonCompletate++;
+        if (process.argv.includes("--diagnosi")) {
+          console.log(`\n  ⚠ partita appesa · ${prof.nome} · seme ${seme} · turno ${s.numeroTurno}`);
+          for (const g of s.giocatori) {
+            const r = riepilogo(g);
+            console.log(`      ${g.nome} ${g.tracciato}${g.eliminato ? " (fuori)" : ""}`
+              + ` · contanti ${Math.round(g.contanti)}`
+              + ` · rendita ${g.tracciato === "veloce" ? g.redditoRendita : r.redditoPassivo}`
+              + ` · obiettivo ${g.tracciato === "veloce" ? (g.redditoInizialeVeloce + getPacchetto(mercatoId).obiettivoRendita) : r.speseTotali}`
+              + ` · affari ${g.affariVeloci?.length ?? 0}`);
+          }
+        }
+      }
+      azioniViste.push(azioni);
+      if (s.motivoVittoria === "sogno" || s.motivoVittoria === "rendita") { vinte++; vittorieVere++; }
+      else if (s.motivoVittoria === "tempo") aTempo++;
+    }
+
+    righe.push({
+      nome: prof.nome, stipendio: prof.stipendio,
+      quotaUscita: usciti / giocatoriTot,
+      quotaFallimento: falliti / giocatoriTot,
+      medianaTurni: mediana(turniUscita),
+      vinte, su: PER_PROFESSIONE,
+    });
+  }
+
+  console.log(pad("professione", 26) + lpad("reddito", 10) + lpad("uscite", 9) + lpad("turni", 8) + lpad("fallim.", 9) + lpad("vinte", 8));
+  console.log("─".repeat(70));
+  for (const r of righe) {
+    const allarme = r.quotaUscita < SOGLIE.usciteMinPerProfessione ? "  ⚠" : "";
+    console.log(
+      pad(r.nome, 26) + lpad(den(r.stipendio), 10) +
+      lpad((r.quotaUscita * 100).toFixed(0) + "%", 9) +
+      lpad(r.medianaTurni ?? "—", 8) +
+      lpad((r.quotaFallimento * 100).toFixed(0) + "%", 9) +
+      lpad(`${r.vinte}/${r.su}`, 8) + allarme
+    );
+  }
+
+  const mediane = righe.map((r) => r.medianaTurni).filter((x) => x != null);
+  const medianaGlobale = mediana(mediane);
+  const piuLenta = Math.max(...mediane, 0);
+  const piuVeloce = Math.min(...mediane, Infinity);
+  const quotaVittorieVere = vittorieVere / partiteTotali;
+  const fallimentoMedio = righe.reduce((a, r) => a + r.quotaFallimento, 0) / righe.length;
+
+  const esiti = [];
+  const verifica = (ok, testo, dettaglio) => esiti.push({ ok, testo, dettaglio });
+
+  const morte = righe.filter((r) => r.quotaUscita < SOGLIE.usciteMinPerProfessione);
+  verifica(morte.length === 0, "Ogni professione ha una via d'uscita dalla Ruota",
+    morte.length ? `senza uscita: ${morte.map((r) => r.nome).join(", ")}`
+                 : `minimo osservato ${(Math.min(...righe.map((r) => r.quotaUscita)) * 100).toFixed(0)}%`);
+
+  verifica(quotaVittorieVere >= SOGLIE.vittorieVereMin, "Le partite si concludono con una vittoria vera",
+    `${(quotaVittorieVere * 100).toFixed(0)}% (minimo ${(SOGLIE.vittorieVereMin * 100).toFixed(0)}%)`
+    + ` · a tempo ${(aTempo / partiteTotali * 100).toFixed(0)}%`);
+
+  verifica(medianaGlobale != null && medianaGlobale >= SOGLIE.turniUscitaMediana[0] && medianaGlobale <= SOGLIE.turniUscitaMediana[1],
+    "Il ritmo dell'uscita è nella fascia prevista",
+    `mediana ${medianaGlobale} turni (fascia ${SOGLIE.turniUscitaMediana.join("–")})`);
+
+  const rapporto = piuVeloce > 0 && isFinite(piuVeloce) ? piuLenta / piuVeloce : Infinity;
+  verifica(rapporto <= SOGLIE.rapportoMaxLentaVeloce, "Le professioni sono confrontabili fra loro",
+    `la più lenta impiega ${rapporto.toFixed(1)}× la più rapida (massimo ${SOGLIE.rapportoMaxLentaVeloce}×)`);
+
+  verifica(fallimentoMedio <= SOGLIE.bancarotteMax, "La bancarotta resta un rischio, non la norma",
+    `${(fallimentoMedio * 100).toFixed(0)}% dei giocatori (massimo ${(SOGLIE.bancarotteMax * 100).toFixed(0)}%)`);
+
+  verifica(nonCompletate === 0, "Nessuna partita resta appesa",
+    `${nonCompletate} su ${partiteTotali} · azioni: mediana ${mediana(azioniViste)}, massimo ${Math.max(...azioniViste)}`);
+
+  console.log();
+  for (const e of esiti) console.log(`  ${e.ok ? "✅" : "❌"} ${e.testo}\n       ${e.dettaglio}`);
+
+  const falliti = esiti.filter((e) => !e.ok);
+  if (falliti.length) {
+    mercatiRotti++;
+    console.error(`\n  ❌ "${pacchetto.nome}" non è pubblicabile: ${falliti.length} verifica/he non superata/e.`);
+  } else {
+    console.log(`\n  ✅ "${pacchetto.nome}" regge: vincibile da tutte e ${professioni.length} le professioni.`);
+  }
 }
 
-/* ── verifiche ── */
-const mediane = righe.map((r) => r.medianaTurni).filter((x) => x != null);
-const medianaGlobale = mediana(righe.flatMap((r) => (r.medianaTurni != null ? [r.medianaTurni] : [])));
-const piuLenta = Math.max(...mediane, 0);
-const piuVeloce = Math.min(...mediane, Infinity);
-const quotaVittorieVere = vittorieVere / partiteTotali;
-const fallimentoMedio = righe.reduce((a, r) => a + r.quotaFallimento, 0) / righe.length;
-
-const esiti = [];
-const verifica = (ok, testo, dettaglio) => esiti.push({ ok, testo, dettaglio });
-
-const morte = righe.filter((r) => r.quotaUscita < SOGLIE.usciteMinPerProfessione);
-verifica(
-  morte.length === 0,
-  "Ogni professione ha una via d'uscita dalla Ruota",
-  morte.length ? `senza uscita: ${morte.map((r) => r.nome).join(", ")}` : `minimo osservato ${(Math.min(...righe.map((r) => r.quotaUscita)) * 100).toFixed(0)}%`
-);
-
-verifica(
-  quotaVittorieVere >= SOGLIE.vittorieVereMin,
-  "Le partite si concludono con una vittoria vera",
-  `${(quotaVittorieVere * 100).toFixed(0)}% (minimo ${(SOGLIE.vittorieVereMin * 100).toFixed(0)}%)`
-);
-
-verifica(
-  medianaGlobale != null && medianaGlobale >= SOGLIE.turniUscitaMediana[0] && medianaGlobale <= SOGLIE.turniUscitaMediana[1],
-  "Il ritmo dell'uscita è nella fascia prevista",
-  `mediana ${medianaGlobale} turni (fascia ${SOGLIE.turniUscitaMediana.join("–")})`
-);
-
-const rapporto = piuVeloce > 0 && isFinite(piuVeloce) ? piuLenta / piuVeloce : Infinity;
-verifica(
-  rapporto <= SOGLIE.rapportoMaxLentaVeloce,
-  "Le professioni sono confrontabili fra loro",
-  `la più lenta impiega ${rapporto.toFixed(1)}× la più rapida (massimo ${SOGLIE.rapportoMaxLentaVeloce}×)`
-);
-
-verifica(
-  fallimentoMedio <= SOGLIE.bancarotteMax,
-  "La bancarotta resta un rischio, non la norma",
-  `${(fallimentoMedio * 100).toFixed(0)}% dei giocatori (massimo ${(SOGLIE.bancarotteMax * 100).toFixed(0)}%)`
-);
-
-verifica(nonCompletate === 0, "Nessuna partita resta appesa", `${nonCompletate} su ${partiteTotali}`);
-
-console.log();
-for (const e of esiti) console.log(`  ${e.ok ? "✅" : "❌"} ${e.testo}\n       ${e.dettaglio}`);
-
-const falliti = esiti.filter((e) => !e.ok);
-if (falliti.length) {
-  console.error(`\n❌ BILANCIAMENTO ROTTO — ${falliti.length} verifica/he non superata/e.`);
-  console.error("   I dati attuali rendono il gioco ingiocabile. Non pubblicare questo pacchetto.\n");
+if (mercatiRotti) {
+  console.error(`\n❌ BILANCIAMENTO ROTTO in ${mercatiRotti} mercato/i. Non pubblicare.\n`);
   process.exit(1);
 }
-console.log(`\n✅ I dati reggono: il gioco è vincibile da tutte e ${PROFESSIONI.length} le professioni.\n`);
+console.log(`\n✅ Tutti i mercati verificati reggono.\n`);
