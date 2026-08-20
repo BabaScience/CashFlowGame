@@ -88,10 +88,16 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       vittoria vera (il Largo è troppo lento), e la bancarotta è allo 0%
       (il fido all'1,2% mensile è troppo mite, non c'è tensione).
 
-- [ ] **3.3 Raccolta dati automatica**
-      Progetto separato: legge le fonti ufficiali aperte e propone un pacchetto
-      nuovo come richiesta di modifica, con la fonte per ogni campo. Mai una
-      scrittura diretta. Il cancello di bilanciamento decide se si pubblica.
+- [x] **3.3 Raccolta dati automatica** — `agente/`, con due fonti che
+      funzionano davvero (BCE per i tassi, Eurostat per la deriva dei
+      prezzi) e due che richiedono una persona (OMI, retribuzioni). Propone
+      e basta: non scrive mai nei dati di gioco, e un test lo verifica
+      leggendo il sorgente. Da spostare in un repository suo quando avrà
+      senso; per ora sta qui perché condivide il cancello di bilanciamento.
+      **Nota utile trovata subito:** il tasso BCE più i costi accessori dà
+      3,89% contro il 3,9% del pacchetto — conferma indipendente. I prezzi
+      delle case in Italia sono a +4,0% annuo, sopra la soglia del 3%:
+      quando si vuole aggiornare Roma, si riparte da lì.
 
 ## 4 · Perché tornarci ogni giorno
 
