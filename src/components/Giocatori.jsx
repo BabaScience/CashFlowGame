@@ -3,11 +3,11 @@ import { motion } from "framer-motion";
 import { GettoneGiocatore, Barra, Denaro } from "./Base.jsx";
 import { soldi, riepilogo } from "../game/finanze.js";
 import { getProfessione } from "../game/data/professioni.js";
-import { getSogno } from "../game/data/corsiaVeloce.js";
-import { OBIETTIVO_CASHFLOW as META } from "../game/data/tabellone.js";
+import { getSogno } from "../game/data/largo.js";
+import { OBIETTIVO_RENDITA as META } from "../game/data/tabellone.js";
 
 /**
- * Il pannello degli avversari: si vede il cashflow di tutti crescere.
+ * Il pannello degli avversari: si vede il quotazero di tutti crescere.
  * È metà del gusto del gioco da tavolo — capire chi sta per uscire dalla corsa.
  */
 export default function Giocatori({ stato, mioId, compatto }) {
@@ -22,7 +22,7 @@ export default function Giocatori({ stato, mioId, compatto }) {
         const sogno = getSogno(g.sognoId);
         const veloce = g.tracciato === "veloce";
         const progressoVeloce = veloce
-          ? (g.redditoCashflowDay - g.redditoInizialeVeloce) / META
+          ? (g.redditoRendita - g.redditoInizialeVeloce) / META
           : 0;
 
         return (
@@ -57,13 +57,13 @@ export default function Giocatori({ stato, mioId, compatto }) {
 
               <div className="flex tra cen g8" style={{ marginTop: 2 }}>
                 <span className="f11 tenue" style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-                  {veloce ? "🏁 Corsia Veloce" : `${prof.emoji} ${prof.nome}`}
+                  {veloce ? "🏁 Largo" : `${prof.emoji} ${prof.nome}`}
                   {g.eliminato && " · fuori"}
                   {g.turniDaSaltare > 0 && ` · salta ${g.turniDaSaltare}`}
                 </span>
                 <span className="f11 numeri" style={{ flex: "none", color: "var(--oro-chiaro)" }}>
                   {veloce
-                    ? `${soldi(g.redditoCashflowDay)}/mese`
+                    ? `${soldi(g.redditoRendita)}/mese`
                     : `${soldi(r.redditoPassivo)} / ${soldi(r.speseTotali)}`}
                 </span>
               </div>
@@ -81,7 +81,7 @@ export default function Giocatori({ stato, mioId, compatto }) {
       {!compatto && (
         <p className="f11 tenue mt12" style={{ margin: "12px 0 0", lineHeight: 1.5 }}>
           La barra mostra quanto il reddito passivo copre le spese. Quando arriva in
-          fondo, quel giocatore può uscire dalla Corsa dei Topi.
+          fondo, quel giocatore può uscire dalla Ruota.
         </p>
       )}
     </div>

@@ -1,15 +1,15 @@
 /**
  * I due tracciati del tabellone.
  *
- * CORSA DEI TOPI - 24 caselle (anello interno, si tira 1 dado).
- * Ricostruzione fedele del tabellone originale: le Opportunità si alternano
+ * LA RUOTA - 24 caselle (anello interno, si tira 1 dado).
+ * Le Opportunità si alternano
  * agli eventi, con un Giorno di Paga ogni 8 caselle.
  *
- * CORSIA VELOCE - 48 caselle (anello esterno, si tirano 2 dadi).
- * Alterna affari (verde), sogni (rosa), Giorni del Cashflow e le penalità.
+ * IL LARGO - 48 caselle (anello esterno, si tirano 2 dadi).
+ * Alterna affari (verde), sogni (rosa), Giorni del Quota Zero e le penalità.
  */
 
-export const CORSA_TOPI = [
+export const PERCORSO_RUOTA = [
   "paga",        // 0
   "opportunita", // 1
   "extra",       // 2
@@ -36,8 +36,8 @@ export const CORSA_TOPI = [
   "opportunita", // 23
 ];
 
-/** Descrizione di ogni tipo di casella della Corsa dei Topi. */
-export const CASELLE_TOPI = {
+/** Descrizione di ogni tipo di casella della Ruota. */
+export const CASELLE_RUOTA = {
   paga: { nome: "Giorno di Paga", breve: "PAGA", colore: "#D98324", emoji: "💵" },
   opportunita: { nome: "Opportunità", breve: "OPP", colore: "#4E8B3D", emoji: "◆" },
   mercato: { nome: "Il Mercato", breve: "MERC", colore: "#2E6FA8", emoji: "📈" },
@@ -48,11 +48,11 @@ export const CASELLE_TOPI = {
 };
 
 /**
- * Corsia Veloce: 48 caselle.
+ * Largo: 48 caselle.
  * `rif` collega la casella all'affare o al sogno corrispondente.
  */
-export const CORSIA_VELOCE = [
-  { tipo: "cashflowDay" },                    // 0
+export const PERCORSO_LARGO = [
+  { tipo: "rendita" },                    // 0
   { tipo: "affare", rif: "av01" },            // 1
   { tipo: "sogno", rif: "sg01" },             // 2
   { tipo: "affare", rif: "av02" },            // 3
@@ -64,7 +64,7 @@ export const CORSIA_VELOCE = [
   { tipo: "affare", rif: "av05" },            // 9
   { tipo: "sogno", rif: "sg03" },             // 10
   { tipo: "affare", rif: "av06" },            // 11
-  { tipo: "cashflowDay" },                    // 12
+  { tipo: "rendita" },                    // 12
   { tipo: "affare", rif: "av07" },            // 13
   { tipo: "sogno", rif: "sg04" },             // 14
   { tipo: "affare", rif: "av08" },            // 15
@@ -76,7 +76,7 @@ export const CORSIA_VELOCE = [
   { tipo: "affare", rif: "av11" },            // 21
   { tipo: "sogno", rif: "sg06" },             // 22
   { tipo: "affare", rif: "av12" },            // 23
-  { tipo: "cashflowDay" },                    // 24
+  { tipo: "rendita" },                    // 24
   { tipo: "affare", rif: "av13" },            // 25
   { tipo: "sogno", rif: "sg07" },             // 26
   { tipo: "affare", rif: "av14" },            // 27
@@ -88,7 +88,7 @@ export const CORSIA_VELOCE = [
   { tipo: "affare", rif: "av17" },            // 33
   { tipo: "sogno", rif: "sg09" },             // 34
   { tipo: "affare", rif: "av18" },            // 35
-  { tipo: "cashflowDay" },                    // 36
+  { tipo: "rendita" },                    // 36
   { tipo: "affare", rif: "av19" },            // 37
   { tipo: "sogno", rif: "sg10" },             // 38
   { tipo: "affare", rif: "av20" },            // 39
@@ -102,8 +102,8 @@ export const CORSIA_VELOCE = [
   { tipo: "sogno", rif: "sg03" },             // 47
 ];
 
-export const CASELLE_VELOCE = {
-  cashflowDay: { nome: "Giorno del Cashflow", breve: "CASHFLOW", colore: "#D98324", emoji: "💰" },
+export const CASELLE_LARGO = {
+  rendita: { nome: "Giorno di Rendita", breve: "RENDITA", colore: "#D98324", emoji: "💰" },
   affare: { nome: "Affare", breve: "AFFARE", colore: "#4E8B3D", emoji: "◆" },
   sogno: { nome: "Sogno", breve: "SOGNO", colore: "#C2557A", emoji: "★" },
   beneficenza: { nome: "Beneficenza", breve: "BENEF", colore: "#7B4FA8", emoji: "❤️" },
@@ -112,11 +112,11 @@ export const CASELLE_VELOCE = {
   divorzio: { nome: "Divorzio", breve: "DIVORZIO", colore: "#5A5A5A", emoji: "💔" },
 };
 
-export const N_TOPI = CORSA_TOPI.length;
-export const N_VELOCE = CORSIA_VELOCE.length;
+export const N_RUOTA = PERCORSO_RUOTA.length;
+export const N_LARGO = PERCORSO_LARGO.length;
 
 /** Obiettivo di flusso da aggiungere al reddito iniziale per vincere. */
-export const OBIETTIVO_CASHFLOW = 50000;
+export const OBIETTIVO_RENDITA = 50000;
 
 /** Numero massimo di giocatori per stanza (come il gioco da tavolo). */
 export const MAX_GIOCATORI = 6;

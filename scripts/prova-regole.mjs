@@ -6,7 +6,7 @@
 import { creaStanza, applicaAzione, codiceStanza } from "../src/game/motore.js";
 import { getProfessione } from "../src/game/data/professioni.js";
 import { flussoMensile, speseTotali, redditoTotale, redditoPassivo, riepilogo } from "../src/game/finanze.js";
-import { OBIETTIVO_CASHFLOW } from "../src/game/data/tabellone.js";
+import { OBIETTIVO_RENDITA } from "../src/game/data/tabellone.js";
 
 let passati = 0, falliti = 0;
 const test = (nome, fn) => {
@@ -37,7 +37,7 @@ function turnoDi(s, id) {
   return s;
 }
 
-console.log("\n── Setup e conto economico (manuale pag. 2, 12) ──");
+console.log("\n── Setup e conto economico ──");
 
 test("Medico: stipendio 13.200, spese 9.650, flusso 3.550", () => {
   const p = getProfessione("medico");
@@ -72,7 +72,7 @@ test("Massimo 6 giocatori", () => {
   vero(appErr(s, { tipo: "entra", giocatoreId: "p6", nome: "Settimo", professioneId: "medico", sognoId: "sg01" }), "il settimo doveva essere rifiutato");
 });
 
-console.log("\n── Prestito bancario (pag. 4) ──");
+console.log("\n── Prestito bancario ──");
 
 test("Prestito di 1.000 -> +100 di rata mensile", () => {
   let s = turnoDi(tavolo(), "p0");
@@ -97,7 +97,7 @@ test("Rimborso di 1.000 -> rata -100", () => {
   eq(flussoMensile(G(s, 0)), prima + 100);
 });
 
-console.log("\n── Estinzione debiti (pag. 4) ──");
+console.log("\n── Estinzione debiti ──");
 
 test("Estinguere un debito azzera la relativa spesa", () => {
   let s = turnoDi(tavolo(), "p0");
@@ -124,7 +124,7 @@ test("Il debito va estinto per intero", () => {
   vero(appErr(s, { tipo: "estingui", giocatoreId: "p0", chiave: "mutuo" }), "estinzione parziale doveva fallire");
 });
 
-console.log("\n── Caselle della Corsa dei Topi (pag. 3-4) ──");
+console.log("\n── Caselle della Ruota ──");
 
 test("Beneficenza: costo = 10% del reddito totale, poi 3 turni con 2 dadi", () => {
   let s = tavolo();
@@ -165,14 +165,14 @@ test("Licenziamento: paghi le spese totali e salti 2 turni", () => {
   eq(G(s, 0).turniBeneficenza, 0, "il licenziamento annulla la beneficenza");
 });
 
-console.log("\n── Uscita dalla Corsa dei Topi (pag. 5) ──");
+console.log("\n── Uscita dalla Ruota ──");
 
 test("Non puoi uscire finché il passivo non supera le spese", () => {
   const s = tavolo();
   vero(appErr(turnoDi(s, "p0"), { tipo: "esciDallaCorsa", giocatoreId: "p0" }), "uscita prematura doveva fallire");
 });
 
-test("Liquidazione = 100 × reddito passivo, e diventa il Reddito del Giorno del Cashflow", () => {
+test("Liquidazione = 100 × reddito passivo, e diventa il Reddito del Giorno di Rendita", () => {
   let s = tavolo();
   s = turnoDi(s, "p0");
   const g = G(s, 0);
@@ -184,29 +184,29 @@ test("Liquidazione = 100 × reddito passivo, e diventa il Reddito del Giorno del
   s = app(s, { tipo: "esciDallaCorsa", giocatoreId: "p0" });
   const dopo = G(s, 0);
   eq(dopo.tracciato, "veloce");
-  eq(dopo.redditoCashflowDay, 1000000, "liquidazione 100x");
+  eq(dopo.redditoRendita, 1000000, "liquidazione 100x");
   eq(dopo.redditoInizialeVeloce, 1000000);
   eq(dopo.contanti, contantiPrima + 1000000, "la liquidazione è versata in contanti");
   eq(dopo.posizione, 0);
 });
 
-console.log("\n── Corsia Veloce e vittoria (pag. 3, 6) ──");
+console.log("\n── Largo e vittoria ──");
 
 test("Vittoria col flusso: reddito iniziale + 50.000", () => {
   let s = tavolo();
   s = turnoDi(s, "p0");
   const g = G(s, 0);
   g.tracciato = "veloce";
-  g.redditoCashflowDay = 100000;
+  g.redditoRendita = 100000;
   g.redditoInizialeVeloce = 100000;
   g.contanti = 500000;
   g.posizione = 1;
   s.pending = { tipo: "affareVeloce", giocatoreId: "p0",
-    affare: { id: "av06", nome: "Squadra sportiva", acconto: 500000, flusso: OBIETTIVO_CASHFLOW } };
+    affare: { id: "av06", nome: "Squadra sportiva", acconto: 500000, flusso: OBIETTIVO_RENDITA } };
   s = app(s, { tipo: "compraAffareVeloce", giocatoreId: "p0" });
   eq(s.fase, "finita", "la partita deve finire");
   eq(s.vincitore, "p0");
-  eq(s.motivoVittoria, "cashflow");
+  eq(s.motivoVittoria, "rendita");
 });
 
 test("Vittoria col sogno: comprare il proprio sogno chiude la partita", () => {
@@ -275,7 +275,7 @@ test("Verifica fiscale e causa costano metà dei contanti, il divorzio tutto", (
   vero(!r.errore, "il tiro deve riuscire");
 });
 
-console.log("\n── Bancarotta (pag. 5) ──");
+console.log("\n── Bancarotta ──");
 
 test("Flusso negativo + contanti insufficienti = bancarotta", () => {
   let s = tavolo();
@@ -317,7 +317,7 @@ test("Se dopo tutto il flusso resta negativo, il giocatore è eliminato", () => 
   vero(G(s, 0).eliminato, "doveva essere eliminato");
 });
 
-console.log("\n── Pagamenti obbligatori (pag. 3-4) ──");
+console.log("\n── Pagamenti obbligatori ──");
 
 test("Una Spesa Extra senza contanti fa accendere un prestito, non va in rosso", () => {
   let s = turnoDi(tavolo(), "p0");

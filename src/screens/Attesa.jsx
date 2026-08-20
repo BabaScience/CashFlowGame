@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Bottone, GettoneGiocatore } from "../components/Base.jsx";
 import { PROFESSIONI, getProfessione } from "../game/data/professioni.js";
-import { SOGNI, getSogno } from "../game/data/corsiaVeloce.js";
+import { SOGNI, getSogno } from "../game/data/largo.js";
 import { soldi, flussoMensile } from "../game/finanze.js";
 import { MAX_GIOCATORI } from "../game/data/tabellone.js";
 
@@ -20,9 +20,9 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
   };
 
   const condividi = async () => {
-    const testo = `Giochiamo a CASHFLOW! Entra con il codice ${stato.codice}: ${location.origin}?c=${stato.codice}`;
+    const testo = `Giochiamo a Quota Zero! Entra con il codice ${stato.codice}: ${location.origin}?c=${stato.codice}`;
     if (navigator.share) {
-      try { await navigator.share({ title: "CASHFLOW", text: testo }); return; } catch { /* annullato */ }
+      try { await navigator.share({ title: "Quota Zero", text: testo }); return; } catch { /* annullato */ }
     }
     copia();
   };

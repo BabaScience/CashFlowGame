@@ -43,8 +43,8 @@ test("URI senza credenziali: utente e password vengono inseriti", () => {
 });
 
 test("mongodb:// semplice (non SRV)", () => {
-  const { uri } = componiUri("mongodb://localhost:27017/cashflow", "bamba", "segreta");
-  eq(uri, "mongodb://bamba:segreta@localhost:27017/cashflow");
+  const { uri } = componiUri("mongodb://localhost:27017/quotazero", "bamba", "segreta");
+  eq(uri, "mongodb://bamba:segreta@localhost:27017/quotazero");
 });
 
 test("credenziali già nella URI e nessuna variabile: si tiene la URI", () => {

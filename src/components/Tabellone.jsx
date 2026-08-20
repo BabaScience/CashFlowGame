@@ -1,14 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import {
-  CORSA_TOPI, CORSIA_VELOCE, CASELLE_TOPI, CASELLE_VELOCE,
-  N_TOPI, N_VELOCE,
+  PERCORSO_RUOTA, PERCORSO_LARGO, CASELLE_RUOTA, CASELLE_LARGO,
+  N_RUOTA, N_LARGO,
 } from "../game/data/tabellone.js";
 
 /* ── geometria ─────────────────────────────────────────────── */
 const L = 400, CX = L / 2, CY = L / 2;
-const R_EST = 170, SP_EST = 24;   // corsia veloce
-const R_INT = 116, SP_INT = 28;   // corsa dei topi
+const R_EST = 170, SP_EST = 24;   // Largo
+const R_INT = 116, SP_INT = 28;   // Ruota
 
 const ang = (i, n, frazione = 0.5) => ((i + frazione) / n) * Math.PI * 2 - Math.PI / 2;
 const punto = (a, r) => [CX + Math.cos(a) * r, CY + Math.sin(a) * r];
@@ -122,15 +122,15 @@ export default function Tabellone({ stato, mioId }) {
       <circle cx={CX} cy={CY} r={196} fill="url(#feltro)" stroke="rgba(201,162,39,.34)" strokeWidth="1.5" />
       <circle cx={CX} cy={CY} r={R_EST + SP_EST / 2 + 5} fill="none" stroke="rgba(201,162,39,.2)" strokeWidth="1" />
 
-      {/* ── Corsia Veloce (anello esterno) ── */}
+      {/* ── Largo (anello esterno) ── */}
       <g filter="url(#morbida)">
-        {CORSIA_VELOCE.map((c, i) => {
-          const def = CASELLE_VELOCE[c.tipo];
+        {PERCORSO_LARGO.map((c, i) => {
+          const def = CASELLE_LARGO[c.tipo];
           const preso = c.tipo === "affare" && stato.affariVenduti?.[c.rif];
           return (
             <path
               key={"v" + i}
-              d={settore(i, N_VELOCE, R_EST, SP_EST)}
+              d={settore(i, N_LARGO, R_EST, SP_EST)}
               fill={def.colore}
               opacity={preso ? 0.32 : 0.94}
               stroke="rgba(0,0,0,.22)"
@@ -140,13 +140,13 @@ export default function Tabellone({ stato, mioId }) {
         })}
       </g>
 
-      {/* ── Corsa dei Topi (anello interno) ── */}
+      {/* ── Ruota (anello interno) ── */}
       <g filter="url(#morbida)">
-        {CORSA_TOPI.map((t, i) => (
+        {PERCORSO_RUOTA.map((t, i) => (
           <path
             key={"t" + i}
-            d={settore(i, N_TOPI, R_INT, SP_INT)}
-            fill={CASELLE_TOPI[t].colore}
+            d={settore(i, N_RUOTA, R_INT, SP_INT)}
+            fill={CASELLE_RUOTA[t].colore}
             opacity={0.95}
             stroke="rgba(0,0,0,.22)"
             strokeWidth="0.6"
@@ -154,9 +154,9 @@ export default function Tabellone({ stato, mioId }) {
         ))}
       </g>
 
-      {/* Etichette brevi sulla corsa dei topi */}
-      {CORSA_TOPI.map((t, i) => {
-        const a = ang(i, N_TOPI);
+      {/* Etichette brevi sulla Ruota */}
+      {PERCORSO_RUOTA.map((t, i) => {
+        const a = ang(i, N_RUOTA);
         const [tx, ty] = punto(a, R_INT);
         const gradi = (a * 180) / Math.PI + 90;
         const capovolto = gradi > 90 && gradi < 270;
@@ -168,16 +168,16 @@ export default function Tabellone({ stato, mioId }) {
             textAnchor="middle" dominantBaseline="central"
             style={{ fontSize: 7.2, fontWeight: 800, fill: "rgba(255,255,255,.92)", letterSpacing: .2 }}
           >
-            {CASELLE_TOPI[t].breve}
+            {CASELLE_RUOTA[t].breve}
           </text>
         );
       })}
 
-      {/* Simboli sulla corsia veloce */}
-      {CORSIA_VELOCE.map((c, i) => {
-        const a = ang(i, N_VELOCE);
+      {/* Simboli sulla Largo */}
+      {PERCORSO_LARGO.map((c, i) => {
+        const a = ang(i, N_LARGO);
         const [tx, ty] = punto(a, R_EST);
-        const simbolo = { cashflowDay: "€", affare: "◆", sogno: "★", beneficenza: "♥",
+        const simbolo = { rendita: "€", affare: "◆", sogno: "★", beneficenza: "♥",
           verificaFiscale: "!", causa: "§", divorzio: "×" }[c.tipo];
         return (
           <text key={"lv" + i} x={tx} y={ty} textAnchor="middle" dominantBaseline="central"
@@ -189,9 +189,9 @@ export default function Tabellone({ stato, mioId }) {
 
       {/* ── Centro ── */}
       <circle cx={CX} cy={CY} r={R_INT - SP_INT / 2 - 6} fill="#132a22" stroke="rgba(201,162,39,.3)" strokeWidth="1.2" />
-      <text x={CX} y={CY - 26} textAnchor="middle" className="tab-etichetta" style={{ fontSize: 17, fill: "#E3C55A" }}>CASHFLOW</text>
+      <text x={CX} y={CY - 26} textAnchor="middle" className="tab-etichetta" style={{ fontSize: 17, fill: "#E3C55A" }}>Quota Zero</text>
       <text x={CX} y={CY - 8} textAnchor="middle" style={{ fontSize: 8.5, fill: "rgba(244,241,230,.55)", letterSpacing: 1.6, fontWeight: 700 }}>
-        CORSA DEI TOPI
+        LA RUOTA
       </text>
 
       {io && (
@@ -199,12 +199,12 @@ export default function Tabellone({ stato, mioId }) {
           <text x={CX} y={CY + 16} textAnchor="middle"
             style={{ fontSize: 10.5, fill: "rgba(244,241,230,.85)", fontWeight: 700 }}>
             {io.tracciato === "topi"
-              ? CASELLE_TOPI[CORSA_TOPI[io.posizione]].nome
-              : CASELLE_VELOCE[CORSIA_VELOCE[io.posizione].tipo].nome}
+              ? CASELLE_RUOTA[PERCORSO_RUOTA[io.posizione]].nome
+              : CASELLE_LARGO[PERCORSO_LARGO[io.posizione].tipo].nome}
           </text>
           <text x={CX} y={CY + 31} textAnchor="middle"
             style={{ fontSize: 8, fill: "rgba(244,241,230,.45)", letterSpacing: .8 }}>
-            {io.tracciato === "topi" ? "la tua casella" : "corsia veloce"}
+            {io.tracciato === "topi" ? "la tua casella" : "Largo"}
           </text>
         </>
       )}
@@ -219,14 +219,14 @@ export default function Tabellone({ stato, mioId }) {
       {inTopi.map((g) => {
         const gruppo = affTopi.get(g.posizione) || [g.id];
         return (
-          <Gettone key={g.id} giocatore={g} n={N_TOPI} raggio={R_INT}
+          <Gettone key={g.id} giocatore={g} n={N_RUOTA} raggio={R_INT}
             ordine={gruppo.indexOf(g.id)} totale={gruppo.length} èTurno={g.id === diTurno} />
         );
       })}
       {inVeloce.map((g) => {
         const gruppo = affVeloce.get(g.posizione) || [g.id];
         return (
-          <Gettone key={g.id} giocatore={g} n={N_VELOCE} raggio={R_EST}
+          <Gettone key={g.id} giocatore={g} n={N_LARGO} raggio={R_EST}
             ordine={gruppo.indexOf(g.id)} totale={gruppo.length} èTurno={g.id === diTurno} />
         );
       })}
@@ -237,8 +237,8 @@ export default function Tabellone({ stato, mioId }) {
 /** Legenda dei colori, mostrata sotto al tabellone. */
 export function Legenda({ tracciato = "topi" }) {
   const voci = tracciato === "topi"
-    ? Object.entries(CASELLE_TOPI)
-    : Object.entries(CASELLE_VELOCE);
+    ? Object.entries(CASELLE_RUOTA)
+    : Object.entries(CASELLE_LARGO);
   return (
     <div className="flex g6 mt12" style={{ flexWrap: "wrap", justifyContent: "center" }}>
       {voci.map(([k, v]) => (

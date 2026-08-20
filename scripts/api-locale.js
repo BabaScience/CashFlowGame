@@ -37,7 +37,7 @@ const leggiCorpo = (req) =>
 
 export default function apiLocale() {
   return {
-    name: "cashflow-api-locale",
+    name: "quotazero-api-locale",
     configureServer(server) {
       server.middlewares.use(async (req, res, next) => {
         if (!req.url.startsWith("/api/")) return next();

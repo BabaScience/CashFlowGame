@@ -24,7 +24,7 @@ function indirizzoSito() {
 function urlAssoluti() {
   const base = indirizzoSito();
   return {
-    name: "cashflow-url-assoluti",
+    name: "quotazero-url-assoluti",
     transformIndexHtml(html) {
       if (!base) {
         console.warn(

@@ -7,7 +7,7 @@ import Partita from "./screens/Partita.jsx";
 import Vittoria from "./components/Vittoria.jsx";
 import * as api from "./lib/api.js";
 
-const CHIAVE_STANZA = "cashflow:stanza";
+const CHIAVE_STANZA = "quotazero:stanza";
 
 export default function App() {
   const mioId = api.mioId();

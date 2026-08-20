@@ -1,10 +1,13 @@
-# CASHFLOW online
+# Quota Zero
 
-Versione web e multigiocatore del gioco da tavolo **CASHFLOW®** di Robert Kiyosaki.
+Simulatore finanziario multigiocatore su dati reali di città vere.
 Da 2 a 6 giocatori, ognuno dal proprio telefono, con un codice stanza di 4 lettere.
 
-- **Corsa dei Topi** (24 caselle) e **Corsia Veloce** (48 caselle), entrambe complete
-- Le 12 professioni originali, con i numeri delle schede vere
+Si parte da quota zero: uno stipendio, delle spese, dei debiti. Si gira sulla
+**Ruota** finché la rendita non supera le spese — e allora si prende il **Largo**.
+
+- **Ruota** (24 caselle) e **Largo** (48 caselle)
+- 12 professioni costruite su fasce retributive reali
 - Mazzi Piccoli Affari, Grandi Affari, Mercato e Spese Extra
 - Conto economico e stato patrimoniale calcolati dal server: nessuno può sbagliare i conti
 - Le carte pescate le vedono tutti; il registro tiene traccia di ogni mossa
@@ -34,7 +37,7 @@ npm test
 ```
 
 Esegue 17 verifiche sulla stringa di connessione, 30 verifiche puntuali sul
-regolamento (ognuna cita la pagina del manuale ufficiale) e simula 60 partite
+regolamento e simula 60 partite
 complete con giocatori automatici, controllando che il motore non si blocchi
 mai e che nessuno finisca coi contanti negativi.
 
@@ -71,7 +74,7 @@ controllare (password sbagliata, cluster irraggiungibile, IP non ammesso).
 ### 2. Il repository
 
 ```bash
-git remote add origin https://github.com/TUO-UTENTE/cashflow-online.git
+git remote add origin https://github.com/TUO-UTENTE/quota-zero.git
 git push -u origin main
 ```
 
@@ -86,7 +89,7 @@ git push -u origin main
    | `MONGODB_URI` | sì | La stringa copiata da Atlas. I segnaposto `<db_username>` / `<db_password>` possono restare. |
    | `MONGODB_USERNAME` | sì | Utente del database (Atlas → Database Access). |
    | `MONGODB_PASSWORD` | sì | La sua password. Può contenere `@ / : # %`: viene codificata da sola. |
-   | `MONGODB_DB` | no | Nome del database. Predefinito: `cashflow`. |
+   | `MONGODB_DB` | no | Nome del database. Predefinito: `quotazero`. |
    | `CRON_SECRET` | consigliata | Stringa a caso che protegge `/api/cleanup`. |
    | `VITE_SITE_URL` | no | Solo con un dominio tuo, per l'anteprima dei link. Su `.vercel.app` si ricava da sola. |
 
@@ -185,7 +188,7 @@ api/                  funzioni serverless (Vercel)
 src/game/             il gioco, senza una riga di interfaccia
   data/professioni.js le 12 professioni
   data/mazzi.js       Piccoli Affari, Grandi Affari, Mercato, Spese Extra
-  data/corsiaVeloce.js affari e sogni della Corsia Veloce
+  data/corsiaVeloce.js affari e sogni del Largo
   data/tabellone.js   i due tracciati
   finanze.js          conto economico e stato patrimoniale
   motore.js           applicaAzione(stato, azione) -> nuovo stato
@@ -214,23 +217,22 @@ insieme non possono corrompere la partita.
 
 ---
 
-## Fedeltà al regolamento
+## Le regole
 
-Le regole seguono *CASHFLOW® Rules of the Game* (edizione 1996-2000). In
-particolare: il Giorno di Paga si incassa anche solo passandoci sopra; i prestiti
-sono a multipli di $1.000 al 10% mensile; tasse, altre spese e spese figli non
-sono estinguibili; la bancarotta svende gli attivi a metà dell'acconto; l'uscita
-dalla Corsa dei Topi paga 100 volte il reddito passivo; atterrare sul sogno di un
-altro glielo rincara del 100%.
+Il regolamento completo è in [MANUALE.md](MANUALE.md) ed è scritto per questo
+gioco. In sintesi: il Giorno di Paga si incassa anche solo passandoci sopra; i
+prestiti sono a multipli di 1.000 al 10% mensile; tasse, altre spese e spese
+per i figli non sono estinguibili; la bancarotta svende gli attivi a metà
+dell'acconto; prendere il largo paga 100 volte la rendita mensile; atterrare
+sul sogno di un altro glielo rincara del 100%.
 
-La scheda del **Medico** è trascritta alla lettera dal manuale ufficiale
-($13.200 di stipendio, $9.650 di spese, $3.550 di flusso). Le altre undici
-professioni sono ricostruite sullo stesso schema e verificate aritmeticamente.
-I mazzi di carte sono scritti per questa versione, rispettando fasce di prezzo e
-rendimenti del gioco originale.
+Ogni scheda professione è verificata aritmeticamente (somma delle spese =
+spese totali, stipendio − spese = flusso) e ogni carta è scritta per questa
+versione. `npm test` controlla entrambe le cose, e `npm run test:bilancia`
+verifica che da ogni professione si possa davvero vincere.
 
 ---
 
-*CASHFLOW® è un marchio registrato di CASHFLOW® Technologies, Inc.
+*Quota Zero è un marchio registrato di Quota Zero Technologies, Inc.
 Questo è un progetto personale a scopo didattico, senza fini commerciali e senza
 alcun rapporto con i titolari del marchio.*

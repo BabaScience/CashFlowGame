@@ -4,7 +4,7 @@ import { Bottone, KV } from "./Base.jsx";
 import { soldi } from "../game/finanze.js";
 import { classifica } from "../game/motore.js";
 import { getProfessione } from "../game/data/professioni.js";
-import { getSogno } from "../game/data/corsiaVeloce.js";
+import { getSogno } from "../game/data/largo.js";
 
 const COLORI = ["#C9A227", "#C4362B", "#2E6FA8", "#4E8B3D", "#D98324", "#7B4FA8"];
 
@@ -45,7 +45,7 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
   const vincitore = tabella.find((t) => t.vincitore);
   const motivo = {
     sogno: "ha realizzato il proprio sogno",
-    cashflow: "ha raggiunto +$50.000 di flusso sulla Corsia Veloce",
+    quotazero: "ha raggiunto +$50.000 di flusso al Largo",
     ultimo: "è l'ultimo giocatore rimasto in partita",
   }[stato.motivoVittoria] || "ha vinto";
 
@@ -82,8 +82,8 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
               <KV k="Contanti finali" v={soldi(vincitore.contanti)} />
               {vincitore.tracciato === "veloce" ? (
                 <>
-                  <KV k="Reddito Giorno del Cashflow" v={soldi(vincitore.redditoCashflowDay)} />
-                  <KV k="Guadagnato sulla Corsia Veloce" v={soldi(vincitore.guadagnoVeloce)} forte />
+                  <KV k="Reddito Giorno di Rendita" v={soldi(vincitore.redditoRendita)} />
+                  <KV k="Guadagnato al Largo" v={soldi(vincitore.guadagnoVeloce)} forte />
                   <KV k="Affari acquistati" v={String(vincitore.affariVeloci)} />
                 </>
               ) : (
@@ -115,7 +115,7 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
                   <div className="f12 tenue">
                     {getProfessione(t.professioneId).nome}
                     {" · "}
-                    {t.eliminato ? "eliminato" : t.tracciato === "veloce" ? "Corsia Veloce" : "Corsa dei Topi"}
+                    {t.eliminato ? "eliminato" : t.tracciato === "veloce" ? "Largo" : "Ruota"}
                     {t.usciteDallaCorsa ? ` · uscito dalla corsa al suo ${t.usciteDallaCorsa}° turno` : ""}
                   </div>
                 </div>
@@ -125,8 +125,8 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
               <KV k="Contanti" v={soldi(t.contanti)} />
               {t.tracciato === "veloce" ? (
                 <>
-                  <KV k="Flusso mensile" v={soldi(t.redditoCashflowDay)} />
-                  <KV k="Crescita sulla Corsia Veloce" v={`+${soldi(t.guadagnoVeloce)}`} />
+                  <KV k="Flusso mensile" v={soldi(t.redditoRendita)} />
+                  <KV k="Crescita al Largo" v={`+${soldi(t.guadagnoVeloce)}`} />
                   <KV k="Affari" v={String(t.affariVeloci)} />
                 </>
               ) : (

@@ -1,11 +1,11 @@
-# CASHFLOW — Manuale di gioco
+# Quota Zero — Manuale di gioco
 
-Versione online del gioco da tavolo di Robert Kiyosaki.
+Simulatore finanziario multigiocatore.
 Da 2 a 6 giocatori. Una partita dura in media 60–120 minuti.
 
-> Questo manuale segue il regolamento ufficiale *CASHFLOW® Rules of the Game*.
-> Dove il gioco da tavolo richiede un banchiere umano, qui il calcolo è
-> automatico: le schede si aggiornano da sole e non si può sbagliare una somma.
+> Non serve un banchiere: il conto economico e lo stato patrimoniale di ogni
+> giocatore sono calcolati dal server a ogni mossa. Nessuno può sbagliare una
+> somma, e tutti vedono gli stessi numeri.
 
 ---
 
@@ -15,13 +15,13 @@ Da 2 a 6 giocatori. Una partita dura in media 60–120 minuti.
 2. [Come si vince](#2-come-si-vince)
 3. [Preparazione](#3-preparazione)
 4. [La tua scheda finanziaria](#4-la-tua-scheda-finanziaria)
-5. [Parte I — La Corsa dei Topi](#5-parte-i--la-corsa-dei-topi)
-6. [Le caselle della Corsa dei Topi](#6-le-caselle-della-corsa-dei-topi)
+5. [Parte I — La Ruota](#5-parte-i--la-corsa-dei-topi)
+6. [Le caselle della Ruota](#6-le-caselle-della-corsa-dei-topi)
 7. [La banca: prestiti e debiti](#7-la-banca-prestiti-e-debiti)
 8. [La bancarotta](#8-la-bancarotta)
-9. [Uscire dalla Corsa dei Topi](#9-uscire-dalla-corsa-dei-topi)
-10. [Parte II — La Corsia Veloce](#10-parte-ii--la-corsia-veloce)
-11. [Le caselle della Corsia Veloce](#11-le-caselle-della-corsia-veloce)
+9. [Uscire dalla Ruota](#9-uscire-dalla-corsa-dei-topi)
+10. [Parte II — La Largo](#10-parte-ii--la-corsia-veloce)
+11. [Le caselle del Largo](#11-le-caselle-della-corsia-veloce)
 12. [Fine partita](#12-fine-partita)
 13. [Strategia: cosa insegna davvero](#13-strategia-cosa-insegna-davvero)
 14. [Note sulla versione online](#14-note-sulla-versione-online)
@@ -30,7 +30,7 @@ Da 2 a 6 giocatori. Una partita dura in media 60–120 minuti.
 
 ## 1. L'idea del gioco
 
-La maggior parte delle persone vive in quella che il gioco chiama **Corsa dei Topi**:
+La maggior parte delle persone vive in quella che il gioco chiama **Ruota**:
 si lavora, arriva lo stipendio, si pagano le spese, e il mese dopo si ricomincia.
 Più si guadagna, più si spende. La ruota gira e non si arriva mai da nessuna parte.
 
@@ -39,8 +39,8 @@ ogni mese senza che tu debba lavorarci. Immobili affittati, attività avviate,
 titoli che pagano dividendi. Quel denaro si chiama **reddito passivo**.
 
 Quando il tuo reddito passivo supera le tue spese totali, non hai più bisogno
-dello stipendio: sei libero. In quel momento esci dalla Corsa dei Topi ed entri
-nella **Corsia Veloce**, dove si gioca per i sogni.
+dello stipendio: sei libero. In quel momento esci dalla Ruota ed entri
+nella **Largo**, dove si gioca per i sogni.
 
 > **Attivo**: qualcosa che ti mette soldi in tasca.
 > **Passività**: qualcosa che ti toglie soldi di tasca.
@@ -50,14 +50,14 @@ nella **Corsia Veloce**, dove si gioca per i sogni.
 
 ## 2. Come si vince
 
-Ci sono **due modi**, entrambi validi solo dopo essere arrivati sulla Corsia Veloce:
+Ci sono **due modi**, entrambi validi solo dopo essere arrivati al Largo:
 
 **1. Compra il tuo sogno.**
-A inizio partita scegli un sogno fra i dodici della Corsia Veloce. Quando ci
+A inizio partita scegli un sogno fra i dodici del Largo. Quando ci
 atterri sopra e hai i contanti per pagarlo, lo compri e vinci all'istante.
 
 **2. Aumenta di $50.000 il tuo flusso mensile.**
-Entrando sulla Corsia Veloce ricevi un Reddito del Giorno del Cashflow iniziale.
+Entrando al Largo ricevi un Reddito del Giorno di Rendita iniziale.
 Comprando gli affari verdi lo fai crescere. Quando supera il valore iniziale
 di **$50.000**, vinci.
 
@@ -71,7 +71,7 @@ La partita finisce nel momento in cui qualcuno raggiunge uno dei due obiettivi.
 2. Gli altri **entrano col codice**. Massimo 6 giocatori.
 3. Ognuno sceglie:
    - una **professione** fra le dodici disponibili (dal Custode al Medico);
-   - un **sogno** fra i dodici della Corsia Veloce (due giocatori possono
+   - un **sogno** fra i dodici del Largo (due giocatori possono
      scegliere lo stesso sogno — pensaci bene, è un rischio).
 4. Chi ha creato la stanza avvia la partita quando sono tutti pronti.
 5. All'avvio ogni giocatore riceve in contanti:
@@ -134,7 +134,7 @@ Tutte e quattro insieme sono il **Reddito totale**.
 
 ---
 
-## 5. Parte I — La Corsa dei Topi
+## 5. Parte I — La Ruota
 
 L'anello interno del tabellone, 24 caselle.
 
@@ -145,7 +145,7 @@ L'anello interno del tabellone, 24 caselle.
 
 ---
 
-## 6. Le caselle della Corsa dei Topi
+## 6. Le caselle della Ruota
 
 ### 💵 Giorno di Paga (3 caselle)
 Ogni volta che **atterri sopra o ci passi**, incassi il tuo Flusso mensile.
@@ -242,7 +242,7 @@ Se anche così il flusso resta negativo, **sei fuori dalla partita**.
 
 ---
 
-## 9. Uscire dalla Corsa dei Topi
+## 9. Uscire dalla Ruota
 
 Puoi uscire **all'inizio di un tuo turno**, non appena:
 
@@ -253,18 +253,18 @@ Nel momento in cui esci:
 1. Ricevi la **liquidazione**: **100 × il tuo reddito passivo**, in contanti.
    (Il gioco lo spiega così: hai dimostrato di saper investire, e i tuoi
    investimenti hanno reso cento volte tanto.)
-2. Quella stessa cifra diventa il tuo **Reddito del Giorno del Cashflow**:
-   la incassi ogni volta che atterri o passi su una casella Giorno del Cashflow.
+2. Quella stessa cifra diventa il tuo **Reddito del Giorno di Rendita**:
+   la incassi ogni volta che atterri o passi su una casella Giorno di Rendita.
 3. Il tuo obiettivo diventa: **reddito iniziale + $50.000**.
-4. Conto economico e stato patrimoniale della Corsa dei Topi non contano più.
+4. Conto economico e stato patrimoniale della Ruota non contano più.
 5. **Non puoi più chiedere prestiti alla banca.**
 
 Chi esce prima ha un vantaggio enorme. Ma chi esce con un reddito passivo più
-alto parte da un Giorno del Cashflow più grande.
+alto parte da un Giorno di Rendita più grande.
 
 ---
 
-## 10. Parte II — La Corsia Veloce
+## 10. Parte II — La Largo
 
 L'anello esterno, 48 caselle. Si tirano **2 dadi**.
 
@@ -273,15 +273,15 @@ Qui si gioca solo per due cose: il tuo sogno e il tuo flusso mensile.
 
 ---
 
-## 11. Le caselle della Corsia Veloce
+## 11. Le caselle del Largo
 
-### 💰 Giorno del Cashflow (4 caselle)
-Atterrando o passando incassi il tuo Reddito del Giorno del Cashflow.
+### 💰 Giorno di Rendita (4 caselle)
+Atterrando o passando incassi il tuo Reddito del Giorno di Rendita.
 
 ### ◆ Affare (20 caselle)
 Ogni casella verde è un investimento unico: una piantagione di caffè, un parco
 eolico, una squadra sportiva. Paghi l'**acconto** indicato e il suo flusso
-mensile si aggiunge al tuo Reddito del Giorno del Cashflow.
+mensile si aggiunge al tuo Reddito del Giorno di Rendita.
 
 **Una volta comprato, quell'affare non è più disponibile per gli altri.**
 Sul tabellone appare sbiadito.
@@ -316,9 +316,9 @@ Appena un giocatore compra il proprio sogno o raggiunge +$50.000 di flusso,
 la partita si chiude e appare il riepilogo finale con, per ogni giocatore:
 
 - contanti finali e patrimonio netto;
-- reddito passivo e spese totali (o flusso della Corsia Veloce);
+- reddito passivo e spese totali (o flusso del Largo);
 - valore degli attivi e totale delle passività;
-- turno in cui è uscito dalla Corsa dei Topi;
+- turno in cui è uscito dalla Ruota;
 - numero di figli e di affari acquistati.
 
 Serve a capire *perché* qualcuno ha vinto — che è la parte più utile.
@@ -353,23 +353,24 @@ rende $270 al mese — ma senza rischio e senza acconto.
 
 ## 14. Note sulla versione online
 
-**Fedeltà al regolamento.** Tutte le regole di questo manuale seguono
-*CASHFLOW® Rules of the Game*. La scheda del Medico è trascritta alla lettera
-dal manuale ufficiale; le altre undici professioni sono ricostruite sullo stesso
-schema e verificate aritmeticamente. I mazzi di carte sono originali, scritti per
-questa versione, ma rispettano le fasce di prezzo e i rendimenti del gioco vero.
+**I numeri.** Ogni scheda professione è verificata aritmeticamente: la somma
+delle voci di spesa deve dare le spese totali, e stipendio meno spese deve dare
+il flusso indicato. Le carte sono scritte per questa versione. Un test di
+bilanciamento (`npm run test:bilancia`) gioca centinaia di partite automatiche e
+verifica che da ognuna delle dodici professioni si possa davvero prendere il
+largo: se un cambio di dati rendesse una professione senza via d'uscita, la
+pubblicazione si ferma.
 
-**Il tabellone.** 24 caselle nella Corsa dei Topi e 48 sulla Corsia Veloce,
-con la stessa alternanza del tabellone originale.
+**Il tabellone.** 24 caselle sulla Ruota e 48 al Largo.
 
 **Il dado.** Un generatore casuale uniforme, tirato sul server: nessun
-giocatore può influenzarlo. Sulla Corsia Veloce si tirano due dadi separati,
+giocatore può influenzarlo. Sulil Largo si tirano due dadi separati,
 quindi il 7 esce sei volte più spesso del 2, come coi dadi veri.
 
 **Cosa è stato semplificato.** Tre regole del gioco da tavolo non sono state
 riportate, ed è giusto saperlo:
 
-- **Rivendere una carta Opportunità a un altro giocatore.** Nel gioco vero,
+- **Rivendere una carta Opportunità a un altro giocatore.** Al tavolo,
   quando la carta lo consente, puoi cedere a un altro giocatore il diritto di
   fare quell'affare, a un prezzo che contrattate fra voi. Qui la carta la
   gioca solo chi l'ha pescata: la contrattazione libera richiederebbe una
@@ -379,7 +380,7 @@ riportate, ed è giusto saperlo:
   hai contanti, il prestito viene acceso da solo (a multipli di $1.000, con la
   sua rata). Serve a non lasciare mai i contanti sotto zero, che sul tabellone
   vero non può succedere perché i soldi sono fisici.
-- **Gli affari della Corsia Veloce che richiedono un tiro di dado.** Alcune
+- **Gli affari del Largo che richiedono un tiro di dado.** Alcune
   caselle verdi originali si conquistano solo riuscendo un tiro, e restano
   disponibili finché qualcuno non ci riesce. Qui si comprano direttamente
   pagando l'acconto.
@@ -400,6 +401,6 @@ la stanza può cancellarla subito a fine partita.
 
 ---
 
-*CASHFLOW® è un marchio registrato di CASHFLOW® Technologies, Inc.
+*Quota Zero è un marchio registrato di Quota Zero Technologies, Inc.
 Questo progetto è una realizzazione personale a scopo didattico, senza fini
 commerciali e senza alcun rapporto con i titolari del marchio.*

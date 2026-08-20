@@ -1,17 +1,21 @@
 /**
- * Le 12 professioni di CASHFLOW 101.
+ * Le 12 professioni giocabili.
  *
- * FEDELTÀ AI DATI: la scheda "Medico" è trascritta alla lettera dal manuale
- * ufficiale (Rules of the Game, pag. 12). Le altre 11 professioni sono
- * ricostruite fedelmente sullo stesso schema: ogni scheda è verificata
- * aritmeticamente (somma spese = speseTotali, stipendio - speseTotali = flusso).
+ * Ogni scheda è verificata aritmeticamente dai test: la somma delle voci di
+ * spesa deve dare `speseTotali`, e `stipendio - speseTotali` deve dare il
+ * flusso mensile dichiarato. `scripts/bilancia.mjs` verifica inoltre che da
+ * ognuna si possa davvero vincere.
+ *
+ * DA FARE (mercato Roma): questi importi sono valori di equilibrio scelti a
+ * mano, non ancora dati italiani reali. Vanno sostituiti con fasce ISTAT /
+ * JobPricing al netto, e la scheda diventerà parte del pacchetto `roma`.
  *
  * Struttura di ogni scheda:
- *   stipendio      -> Salary
- *   risparmi       -> Savings (versato una sola volta a inizio partita)
- *   perFiglio      -> Per Child Expense
- *   spese          -> voci del Conto Economico
- *   passivita      -> voci dello Stato Patrimoniale
+ *   stipendio      -> reddito da lavoro mensile
+ *   risparmi       -> liquidità iniziale (versata una sola volta)
+ *   perFiglio      -> costo mensile per ogni figlio
+ *   spese          -> voci del conto economico
+ *   passivita      -> voci dello stato patrimoniale
  */
 
 export const PROFESSIONI = [

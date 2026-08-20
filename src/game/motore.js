@@ -8,39 +8,32 @@
 
 import { PROFESSIONI, getProfessione, DEBITI_ESTINGUIBILI } from "./data/professioni.js";
 import { MAZZI, PICCOLI_AFFARI, GRANDI_AFFARI, MERCATO, EXTRA } from "./data/mazzi.js";
-import { AFFARI_VELOCI, SOGNI, getSogno, getAffareVeloce } from "./data/corsiaVeloce.js";
+import { AFFARI_LARGO, SOGNI, getSogno, getAffareVeloce } from "./data/largo.js";
 import {
-  CORSA_TOPI, CORSIA_VELOCE, N_TOPI, N_VELOCE,
-  OBIETTIVO_CASHFLOW, MAX_GIOCATORI, COLORI,
+  PERCORSO_RUOTA, PERCORSO_LARGO, N_RUOTA, N_LARGO,
+  OBIETTIVO_RENDITA, MAX_GIOCATORI, COLORI,
 } from "./data/tabellone.js";
 import {
   redditoPassivo, redditoTotale, speseTotali, flussoMensile,
   fuoriDallaCorsa, riepilogo, arrotonda, soldi, MAX_FIGLI,
 } from "./finanze.js";
+import { semeCasuale, dado, idBreve, mescola } from "./caso.js";
 
 /* ═══════════════ utilità ═══════════════ */
 
-const idBreve = () => Math.random().toString(36).slice(2, 10);
-
+/**
+ * Il caso della partita è deterministico e vive nello stato (seme + passi):
+ * vedi caso.js. Il codice stanza invece resta davvero casuale, perché deve
+ * essere imprevedibile e unico nel database, non riproducibile.
+ */
 export const codiceStanza = () =>
   Array.from({ length: 4 }, () =>
     "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random() * 32)]
   ).join("");
 
-const mescola = (n) => {
-  const a = [...Array(n).keys()];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
-  }
-  return a;
-};
-
-const dado = () => 1 + Math.floor(Math.random() * 6);
-
 /** Aggiunge una riga al registro condiviso (massimo 120 righe). */
 function nota(s, testo, tipo = "info", giocatoreId = null) {
-  s.registro.unshift({ id: idBreve(), testo, tipo, giocatoreId, t: Date.now() });
+  s.registro.unshift({ id: idBreve(s), testo, tipo, giocatoreId, t: Date.now() });
   if (s.registro.length > 120) s.registro.length = 120;
 }
 
@@ -52,7 +45,7 @@ function pesca(s, nomeMazzo) {
   const mazzo = MAZZI[nomeMazzo];
   const stato = s.mazzi[nomeMazzo];
   if (stato.p >= stato.ordine.length) {
-    stato.ordine = mescola(mazzo.length);
+    stato.ordine = mescola(s, mazzo.length);
     stato.p = 0;
   }
   const carta = mazzo[stato.ordine[stato.p]];
@@ -72,7 +65,7 @@ export function creaGiocatore(id, nome, professioneId, sognoId, indice) {
     sognoId: sognoId || SOGNI[0].id,
     pronto: false,
 
-    // Corsa dei Topi
+    // Ruota
     tracciato: "topi",
     posizione: 0,
     contanti: 0,
@@ -89,8 +82,8 @@ export function creaGiocatore(id, nome, professioneId, sognoId, indice) {
     inBancarotta: false,
     eliminato: false,
 
-    // Corsia Veloce
-    redditoCashflowDay: 0,
+    // Largo
+    redditoRendita: 0,
     redditoInizialeVeloce: 0,
     affariVeloci: [],       // id degli affari comprati
     beneficenzaVeloce: false,
@@ -99,34 +92,40 @@ export function creaGiocatore(id, nome, professioneId, sognoId, indice) {
 
     // statistiche
     turniGiocati: 0,
-    usciteDallaCorsa: null, // a quale dei SUOI turni è uscito dalla Corsa dei Topi
+    usciteDallaCorsa: null, // a quale dei SUOI turni è uscito dalla Ruota
   };
 }
 
-export function creaStanza(codice, hostId) {
-  return {
+export function creaStanza(codice, hostId, opzioni = {}) {
+  const s = {
     codice,
     versione: 1,
     fase: "attesa", // attesa | inCorso | finita
     hostId,
+    // Il caso della partita, ricostruibile a ogni lettura dal database.
+    seme: (opzioni.seme ?? semeCasuale()) >>> 0,
+    passi: 0,
     giocatori: [],
     turno: 0,
     numeroTurno: 0,
     dado: null,
     pending: null,
     registro: [],
-    mazzi: {
-      piccoli: { ordine: mescola(PICCOLI_AFFARI.length), p: 0 },
-      grandi: { ordine: mescola(GRANDI_AFFARI.length), p: 0 },
-      mercato: { ordine: mescola(MERCATO.length), p: 0 },
-      extra: { ordine: mescola(EXTRA.length), p: 0 },
-    },
+    mazzi: null,   // riempito sotto: mescolare consuma il generatore
     affariVenduti: {},   // idAffareVeloce -> idGiocatore
     vincitore: null,
     motivoVittoria: null,
     creataIl: Date.now(),
     aggiornataIl: Date.now(),
   };
+
+  s.mazzi = {
+    piccoli: { ordine: mescola(s, PICCOLI_AFFARI.length), p: 0 },
+    grandi: { ordine: mescola(s, GRANDI_AFFARI.length), p: 0 },
+    mercato: { ordine: mescola(s, MERCATO.length), p: 0 },
+    extra: { ordine: mescola(s, EXTRA.length), p: 0 },
+  };
+  return s;
 }
 
 /* ═══════════════ avanzamento del turno ═══════════════ */
@@ -158,15 +157,15 @@ function prossimoTurno(s) {
 function paghePassate(da, passi) {
   let n = 0;
   for (let i = 1; i <= passi; i++) {
-    if (CORSA_TOPI[(da + i) % N_TOPI] === "paga") n += 1;
+    if (PERCORSO_RUOTA[(da + i) % N_RUOTA] === "paga") n += 1;
   }
   return n;
 }
 
-function cashflowDayPassati(da, passi) {
+function giorniRenditaPassati(da, passi) {
   let n = 0;
   for (let i = 1; i <= passi; i++) {
-    if (CORSIA_VELOCE[(da + i) % N_VELOCE].tipo === "cashflowDay") n += 1;
+    if (PERCORSO_LARGO[(da + i) % N_LARGO].tipo === "rendita") n += 1;
   }
   return n;
 }
@@ -237,7 +236,7 @@ function risolviCasella(s, g) {
 }
 
 function risolviTopi(s, g) {
-  const tipo = CORSA_TOPI[g.posizione];
+  const tipo = PERCORSO_RUOTA[g.posizione];
 
   if (tipo === "paga") {
     // già incassata durante il movimento
@@ -348,9 +347,9 @@ function applicaEventoMercato(s, carta) {
 }
 
 function risolviVeloce(s, g) {
-  const casella = CORSIA_VELOCE[g.posizione];
+  const casella = PERCORSO_LARGO[g.posizione];
 
-  if (casella.tipo === "cashflowDay") return prossimoTurno(s);
+  if (casella.tipo === "rendita") return prossimoTurno(s);
 
   if (casella.tipo === "affare") {
     const affare = getAffareVeloce(casella.rif);
@@ -426,14 +425,14 @@ function controllaVittoria(s, g) {
   }
   if (
     g.tracciato === "veloce" &&
-    g.redditoCashflowDay >= g.redditoInizialeVeloce + OBIETTIVO_CASHFLOW
+    g.redditoRendita >= g.redditoInizialeVeloce + OBIETTIVO_RENDITA
   ) {
     s.fase = "finita";
     s.vincitore = g.id;
-    s.motivoVittoria = "cashflow";
+    s.motivoVittoria = "rendita";
     nota(
       s,
-      `🏆 ${g.nome} raggiunge +${soldi(OBIETTIVO_CASHFLOW)} di flusso sulla Corsia Veloce e vince!`,
+      `🏆 ${g.nome} raggiunge +${soldi(OBIETTIVO_RENDITA)} di flusso al Largo e vince!`,
       "vittoria", g.id
     );
     return true;
@@ -509,7 +508,7 @@ export function applicaAzione(stato, azione) {
       p.contanti = flussoMensile(p) + prof.risparmi;
     }
     // Ordine di gioco: si tira un dado, il più alto comincia.
-    const tiri = s.giocatori.map((p) => ({ id: p.id, nome: p.nome, v: dado() }));
+    const tiri = s.giocatori.map((p) => ({ id: p.id, nome: p.nome, v: dado(s) }));
     tiri.sort((a, b) => b.v - a.v);
     const ordine = tiri.map((t) => t.id);
     s.giocatori.sort((a, b) => ordine.indexOf(a.id) - ordine.indexOf(b.id));
@@ -601,21 +600,21 @@ export function applicaAzione(stato, azione) {
   }
 
   if (tipo === "esciDallaCorsa") {
-    if (g.tracciato !== "topi") return err("Sei già sulla Corsia Veloce.");
+    if (g.tracciato !== "topi") return err("Sei già al Largo.");
     if (s.pending) return err("Concludi prima l'azione in corso.");
     if (!fuoriDallaCorsa(g)) return err("Il tuo reddito passivo non supera ancora le spese totali.");
     const passivo = redditoPassivo(g);
     const buyout = passivo * 100;
     g.tracciato = "veloce";
     g.posizione = 0;
-    g.redditoCashflowDay = buyout;
+    g.redditoRendita = buyout;
     g.redditoInizialeVeloce = buyout;
     g.contanti += buyout;
     g.turniBeneficenza = 0;
     g.usciteDallaCorsa = g.turniGiocati;
     nota(
       s,
-      `🎉 ${g.nome} esce dalla Corsa dei Topi! Liquidazione ${soldi(buyout)} (100 × ${soldi(passivo)} di reddito passivo). Obiettivo: ${soldi(buyout + OBIETTIVO_CASHFLOW)}.`,
+      `🎉 ${g.nome} esce dalla Ruota! Liquidazione ${soldi(buyout)} (100 × ${soldi(passivo)} di reddito passivo). Obiettivo: ${soldi(buyout + OBIETTIVO_RENDITA)}.`,
       "liberta", g.id
     );
     return ok();
@@ -633,7 +632,7 @@ export function applicaAzione(stato, azione) {
     } else {
       n = g.beneficenzaVeloce ? Math.min(3, Math.max(1, azione.nDadi || 2)) : 2;
     }
-    const valori = Array.from({ length: n }, dado);
+    const valori = Array.from({ length: n }, () => dado(s));
     const passi = valori.reduce((a, b) => a + b, 0);
     s.dado = { valori, totale: passi };
 
@@ -642,7 +641,7 @@ export function applicaAzione(stato, azione) {
     const da = g.posizione;
     if (g.tracciato === "topi") {
       const paghe = paghePassate(da, passi);
-      g.posizione = (da + passi) % N_TOPI;
+      g.posizione = (da + passi) % N_RUOTA;
       nota(s, `${g.nome} tira ${valori.join(" + ")} = ${passi}.`, "dado", g.id);
       for (let i = 0; i < paghe; i++) {
         if (giornoDiPaga(s, g)) {
@@ -652,12 +651,12 @@ export function applicaAzione(stato, azione) {
       }
       risolviTopi(s, g);
     } else {
-      const giorni = cashflowDayPassati(da, passi);
-      g.posizione = (da + passi) % N_VELOCE;
+      const giorni = giorniRenditaPassati(da, passi);
+      g.posizione = (da + passi) % N_LARGO;
       nota(s, `${g.nome} tira ${valori.join(" + ")} = ${passi}.`, "dado", g.id);
       for (let i = 0; i < giorni; i++) {
-        g.contanti += g.redditoCashflowDay;
-        nota(s, `${g.nome} incassa il Giorno del Cashflow: +${soldi(g.redditoCashflowDay)}.`, "paga", g.id);
+        g.contanti += g.redditoRendita;
+        nota(s, `${g.nome} incassa il Giorno di Rendita: +${soldi(g.redditoRendita)}.`, "paga", g.id);
       }
       risolviVeloce(s, g);
     }
@@ -796,7 +795,7 @@ export function applicaAzione(stato, azione) {
     return ok();
   }
 
-  /* ─── Corsia Veloce ─── */
+  /* ─── Largo ─── */
 
   if (tipo === "compraAffareVeloce" || tipo === "passaAffareVeloce") {
     if (s.pending.tipo !== "affareVeloce") return err("Azione non valida ora.");
@@ -805,11 +804,11 @@ export function applicaAzione(stato, azione) {
       if (g.contanti < affare.acconto) return err("Contanti insufficienti.");
       g.contanti -= affare.acconto;
       g.affariVeloci.push(affare.id);
-      g.redditoCashflowDay += affare.flusso;
+      g.redditoRendita += affare.flusso;
       s.affariVenduti[affare.id] = g.id;
       nota(
         s,
-        `${g.nome} compra "${affare.nome}" per ${soldi(affare.acconto)}: flusso +${soldi(affare.flusso)}/mese (totale ${soldi(g.redditoCashflowDay)}).`,
+        `${g.nome} compra "${affare.nome}" per ${soldi(affare.acconto)}: flusso +${soldi(affare.flusso)}/mese (totale ${soldi(g.redditoRendita)}).`,
         "veloce", g.id
       );
       if (controllaVittoria(s, g)) return ok();
@@ -838,7 +837,7 @@ export function applicaAzione(stato, azione) {
   if (tipo === "beneficenzaVeloce") {
     if (s.pending.tipo !== "beneficenzaVeloce") return err("Azione non valida ora.");
     if (azione.accetta) {
-      const costo = arrotonda(g.redditoCashflowDay * 0.1);
+      const costo = arrotonda(g.redditoRendita * 0.1);
       if (g.contanti < costo) return err("Contanti insufficienti.");
       g.contanti -= costo;
       g.beneficenzaVeloce = true;
@@ -885,7 +884,7 @@ function compraCarta(s, g, c, azione) {
     if (g.contanti < c.acconto) return "Contanti insufficienti per l'acconto.";
     g.contanti -= c.acconto;
     g.immobili.push({
-      rid: idBreve(), categoria: c.categoria, nome: c.nome,
+      rid: idBreve(s), categoria: c.categoria, nome: c.nome,
       costo: c.costo, acconto: c.acconto, mutuo: c.mutuo, flusso: c.flusso,
     });
     nota(s, `${g.nome} compra "${c.nome}" (acconto ${soldi(c.acconto)}, flusso +${soldi(c.flusso)}/mese).`, "carta", g.id);
@@ -896,7 +895,7 @@ function compraCarta(s, g, c, azione) {
     if (g.contanti < c.acconto) return "Contanti insufficienti per l'acconto.";
     g.contanti -= c.acconto;
     g.attivita.push({
-      rid: idBreve(), nome: c.nome, costo: c.costo,
+      rid: idBreve(s), nome: c.nome, costo: c.costo,
       acconto: c.acconto, passivita: c.passivita || 0, flusso: c.flusso,
     });
     nota(s, `${g.nome} compra "${c.nome}" (acconto ${soldi(c.acconto)}, flusso +${soldi(c.flusso)}/mese).`, "carta", g.id);
@@ -1026,8 +1025,8 @@ export function classifica(s) {
         valoreAttivi: r.valoreAttivi,
         passivitaTotali: r.passivitaTotali,
         patrimonioNetto: g.contanti + r.valoreAttivi - r.passivitaTotali,
-        redditoCashflowDay: g.redditoCashflowDay,
-        guadagnoVeloce: g.redditoCashflowDay - g.redditoInizialeVeloce,
+        redditoRendita: g.redditoRendita,
+        guadagnoVeloce: g.redditoRendita - g.redditoInizialeVeloce,
         affariVeloci: g.affariVeloci.length,
         sognoComprato: g.sognoComprato,
         figli: g.figli,
@@ -1045,4 +1044,4 @@ export function classifica(s) {
     });
 }
 
-export { OBIETTIVO_CASHFLOW, MAX_GIOCATORI };
+export { OBIETTIVO_RENDITA, MAX_GIOCATORI };

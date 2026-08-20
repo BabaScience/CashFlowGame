@@ -67,7 +67,7 @@ export function valoreAttivi(g) {
   return arrotonda(titoli + imm + att);
 }
 
-/** È libero dalla Corsa dei Topi? Reddito passivo > Spese totali. */
+/** È libero dalla Ruota? Reddito passivo > Spese totali. */
 export function fuoriDallaCorsa(g) {
   return redditoPassivo(g) > speseTotali(g);
 }
@@ -81,7 +81,7 @@ export function progressoLiberta(g) {
 
 /**
  * Riepilogo completo, pronto da mostrare a schermo.
- * Usato anche dal pannello che mostra il cashflow degli avversari.
+ * Usato anche dal pannello che mostra il quotazero degli avversari.
  */
 export function riepilogo(g) {
   const div = dividendi(g);
@@ -111,12 +111,12 @@ export function riepilogo(g) {
   };
 }
 
-/** Riepilogo per un giocatore già sulla Corsia Veloce. */
+/** Riepilogo per un giocatore già al Largo. */
 export function riepilogoVeloce(g) {
   return {
-    redditoCashflowDay: g.redditoCashflowDay,
+    redditoRendita: g.redditoRendita,
     redditoIniziale: g.redditoInizialeVeloce,
-    guadagnato: g.redditoCashflowDay - g.redditoInizialeVeloce,
+    guadagnato: g.redditoRendita - g.redditoInizialeVeloce,
     numeroAffari: g.affariVeloci.length,
   };
 }

@@ -43,7 +43,7 @@ export default function CartaGioco({ classe = "c-piccoli", etichetta, titolo, ch
             >
               <div className="ta-c">
                 <div style={{ fontSize: 30 }}>◆</div>
-                <div className="maiusc mt8" style={{ opacity: 0.8 }}>Cashflow</div>
+                <div className="maiusc mt8" style={{ opacity: 0.8 }}>Quota Zero</div>
               </div>
             </motion.div>
           )}

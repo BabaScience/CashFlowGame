@@ -1,15 +1,15 @@
 /**
- * Dati della Corsia Veloce (Fast Track).
+ * Dati del Largo (percorso esterno).
  *
  * AFFARI (caselle verdi): ogni casella è un investimento unico. Chi ci atterra
  * può comprarlo pagando l'acconto; da quel momento non è più disponibile per
- * gli altri e aggiunge il suo flusso al Reddito del Giorno del Cashflow.
+ * gli altri e aggiunge il suo flusso al Reddito del Giorno di Rendita.
  *
  * SOGNI (caselle rosa): l'obiettivo personale scelto a inizio partita.
  * Comprare il proprio sogno fa vincere la partita all'istante.
  */
 
-export const AFFARI_VELOCI = [
+export const AFFARI_LARGO = [
   { id: "av01", nome: "Piantagione di caffè in Brasile", acconto: 250000, flusso: 30000, testo: "600 ettari già produttivi, con contratti di fornitura pluriennali." },
   { id: "av02", nome: "Compagnia di navigazione", acconto: 300000, flusso: 35000, testo: "Quattro navi cargo su rotte asiatiche consolidate." },
   { id: "av03", nome: "Centro commerciale", acconto: 400000, flusso: 50000, testo: "Quaranta negozi, occupazione al 95%, gestione esternalizzata." },
@@ -48,4 +48,4 @@ export const SOGNI = [
 ];
 
 export const getSogno = (id) => SOGNI.find((s) => s.id === id) || SOGNI[0];
-export const getAffareVeloce = (id) => AFFARI_VELOCI.find((a) => a.id === id);
+export const getAffareVeloce = (id) => AFFARI_LARGO.find((a) => a.id === id);

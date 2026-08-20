@@ -8,7 +8,7 @@
 import { componiUri, uriOscurata } from "../api/_lib/uri.js";
 import { MongoClient } from "mongodb";
 
-const NOME_DB = process.env.MONGODB_DB || "cashflow";
+const NOME_DB = process.env.MONGODB_DB || "quotazero";
 
 const { uri, errore } = componiUri(
   process.env.MONGODB_URI,
@@ -16,7 +16,7 @@ const { uri, errore } = componiUri(
   process.env.MONGODB_PASSWORD
 );
 
-console.log("\nCASHFLOW · verifica della connessione\n");
+console.log("\nQuota Zero · verifica della connessione\n");
 
 const presente = (n) => (process.env[n] ? "impostata" : "MANCANTE");
 console.log(`  MONGODB_URI       ${presente("MONGODB_URI")}`);

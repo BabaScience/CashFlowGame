@@ -1,10 +1,10 @@
 /** Chiamate al server. Nessuna logica di gioco qui: solo trasporto. */
 
 const identita = () => {
-  let id = localStorage.getItem("cashflow:id");
+  let id = localStorage.getItem("quotazero:id");
   if (!id) {
     id = "g" + Math.random().toString(36).slice(2, 12) + Date.now().toString(36).slice(-4);
-    localStorage.setItem("cashflow:id", id);
+    localStorage.setItem("quotazero:id", id);
   }
   return id;
 };

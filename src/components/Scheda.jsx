@@ -3,12 +3,12 @@ import { motion } from "framer-motion";
 import { KV, Bottone, Barra, Denaro } from "./Base.jsx";
 import { soldi, riepilogo } from "../game/finanze.js";
 import { ETICHETTE_SPESE, DEBITI_ESTINGUIBILI, getProfessione } from "../game/data/professioni.js";
-import { getSogno, getAffareVeloce } from "../game/data/corsiaVeloce.js";
-import { OBIETTIVO_CASHFLOW } from "../game/data/tabellone.js";
+import { getSogno, getAffareVeloce } from "../game/data/largo.js";
+import { OBIETTIVO_RENDITA } from "../game/data/tabellone.js";
 
 /**
  * La scheda finanziaria: Conto Economico e Stato Patrimoniale,
- * gli stessi due prospetti che si compilano a matita col gioco vero.
+ * i due prospetti che chiunque abbia un mutuo dovrebbe saper leggere.
  */
 export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
   const [apri, setApri] = useState("conto");
@@ -61,8 +61,8 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
         <Barra valore={r.progresso} />
         <p className="f12 tenue mt8" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
           {r.libero
-            ? "Il tuo reddito passivo supera le spese: puoi uscire dalla Corsa dei Topi!"
-            : `Ti manca ancora ${soldi(r.speseTotali - r.redditoPassivo)} al mese di reddito passivo per uscire dalla Corsa dei Topi.`}
+            ? "Il tuo reddito passivo supera le spese: puoi uscire dalla Ruota!"
+            : `Ti manca ancora ${soldi(r.speseTotali - r.redditoPassivo)} al mese di reddito passivo per uscire dalla Ruota.`}
         </p>
 
         <div className="flex tra mt12" style={{ gap: 10 }}>
@@ -212,26 +212,26 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
   );
 }
 
-/** Scheda ridotta per chi è già sulla Corsia Veloce. */
+/** Scheda ridotta per chi è già al Largo. */
 function SchedaVeloce({ giocatore: g }) {
-  const obiettivo = g.redditoInizialeVeloce + OBIETTIVO_CASHFLOW;
-  const fatto = g.redditoCashflowDay - g.redditoInizialeVeloce;
+  const obiettivo = g.redditoInizialeVeloce + OBIETTIVO_RENDITA;
+  const fatto = g.redditoRendita - g.redditoInizialeVeloce;
   const sogno = getSogno(g.sognoId);
   return (
     <>
       <div className="carta" style={{ background: "linear-gradient(165deg,#FBF4E4,#F1E3BE)" }}>
-        <div className="maiusc tenue mb4">Corsia Veloce</div>
+        <div className="maiusc tenue mb4">Largo</div>
         <div className="titolo f22 mb12">{g.nome}</div>
         <KV k="Contanti" v={soldi(g.contanti)} forte />
-        <KV k="Reddito del Giorno del Cashflow" v={soldi(g.redditoCashflowDay)} forte />
+        <KV k="Reddito del Giorno di Rendita" v={soldi(g.redditoRendita)} forte />
         <KV k="Reddito iniziale" v={soldi(g.redditoInizialeVeloce)} />
         <KV k="Obiettivo per vincere" v={soldi(obiettivo)} />
         <div className="mt12">
           <div className="flex tra f12 mb4">
-            <span className="tenue">Progresso verso +{soldi(OBIETTIVO_CASHFLOW)}</span>
+            <span className="tenue">Progresso verso +{soldi(OBIETTIVO_RENDITA)}</span>
             <span className="numeri grassetto">{soldi(fatto)}</span>
           </div>
-          <Barra valore={fatto / OBIETTIVO_CASHFLOW} />
+          <Barra valore={fatto / OBIETTIVO_RENDITA} />
         </div>
       </div>
 

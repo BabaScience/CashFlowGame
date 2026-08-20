@@ -1,10 +1,10 @@
 /**
- * I mazzi di CASHFLOW 101, tradotti e adattati in italiano.
+ * I mazzi di Quota Zero, tradotti e adattati in italiano.
  *
  *  PICCOLI_AFFARI  -> Opportunità "Piccolo Affare" (max $5.000 di entrata)
  *  GRANDI_AFFARI   -> Opportunità "Grande Affare"  (da $6.000 in su)
  *  MERCATO         -> Il Mercato (compratori ed eventi economici)
- *  EXTRA           -> Spese Extra / Doodads (obbligatorie)
+ *  EXTRA           -> Spese Extra / spese non necessarie (obbligatorie)
  *
  * Tipi di carta:
  *  azione     { simbolo, prezzo, dividendo, min, max }   compra/vendi titoli
@@ -32,29 +32,29 @@ export const CATEGORIE = {
 /* ═══════════════════ PICCOLI AFFARI ═══════════════════ */
 export const PICCOLI_AFFARI = [
   // ── Titoli ──
-  { id: "pa01", tipo: "azione", nome: "Azioni OK4U Farmaceutica", simbolo: "OK4U", prezzo: 5, dividendo: 0, min: 5, max: 30,
+  { id: "pa01", tipo: "azione", nome: "Azioni Farmia", simbolo: "FARMIA", prezzo: 5, dividendo: 0, min: 5, max: 30,
     testo: "Il titolo è ai minimi storici dopo una causa legale. Solo tu puoi comprare a questo prezzo; tutti possono vendere." },
-  { id: "pa02", tipo: "azione", nome: "Azioni OK4U Farmaceutica", simbolo: "OK4U", prezzo: 10, dividendo: 0, min: 5, max: 30,
+  { id: "pa02", tipo: "azione", nome: "Azioni Farmia", simbolo: "FARMIA", prezzo: 10, dividendo: 0, min: 5, max: 30,
     testo: "Un nuovo farmaco supera la fase 2. Fascia di oscillazione $5 - $30." },
-  { id: "pa03", tipo: "azione", nome: "Azioni OK4U Farmaceutica", simbolo: "OK4U", prezzo: 20, dividendo: 0, min: 5, max: 30,
+  { id: "pa03", tipo: "azione", nome: "Azioni Farmia", simbolo: "FARMIA", prezzo: 20, dividendo: 0, min: 5, max: 30,
     testo: "La forza del mercato spinge in alto le quotazioni di questo storico produttore di medicinali." },
-  { id: "pa04", tipo: "azione", nome: "Azioni MYT4U Elettronica", simbolo: "MYT4U", prezzo: 10, dividendo: 0, min: 10, max: 40,
+  { id: "pa04", tipo: "azione", nome: "Azioni Voltia", simbolo: "VOLTIA", prezzo: 10, dividendo: 0, min: 10, max: 40,
     testo: "Azienda di elettronica di consumo. Nessun dividendo, forte crescita attesa." },
-  { id: "pa05", tipo: "azione", nome: "Azioni MYT4U Elettronica", simbolo: "MYT4U", prezzo: 20, dividendo: 0, min: 10, max: 40,
+  { id: "pa05", tipo: "azione", nome: "Azioni Voltia", simbolo: "VOLTIA", prezzo: 20, dividendo: 0, min: 10, max: 40,
     testo: "Il nuovo modello va a ruba nei negozi. Fascia di oscillazione $10 - $40." },
-  { id: "pa06", tipo: "azione", nome: "Azioni MYT4U Elettronica", simbolo: "MYT4U", prezzo: 30, dividendo: 0, min: 10, max: 40,
+  { id: "pa06", tipo: "azione", nome: "Azioni Voltia", simbolo: "VOLTIA", prezzo: 30, dividendo: 0, min: 10, max: 40,
     testo: "Gli analisti alzano il target. Sei ancora in tempo o è già tardi?" },
-  { id: "pa07", tipo: "azione", nome: "Azioni 2BIG Energia", simbolo: "2BIG", prezzo: 20, dividendo: 1, min: 20, max: 40,
+  { id: "pa07", tipo: "azione", nome: "Azioni Energa", simbolo: "ENERGA", prezzo: 20, dividendo: 1, min: 20, max: 40,
     testo: "Azienda di servizi energetici: paga $1 di dividendo per azione al mese." },
-  { id: "pa08", tipo: "azione", nome: "Azioni 2BIG Energia", simbolo: "2BIG", prezzo: 30, dividendo: 1, min: 20, max: 40,
+  { id: "pa08", tipo: "azione", nome: "Azioni Energa", simbolo: "ENERGA", prezzo: 30, dividendo: 1, min: 20, max: 40,
     testo: "Tariffe approvate dall'autorità: il dividendo resta $1 per azione al mese." },
-  { id: "pa09", tipo: "azione", nome: "Fondo comune GRO4US", simbolo: "GRO4US", prezzo: 10, dividendo: 0, min: 10, max: 30,
+  { id: "pa09", tipo: "azione", nome: "Fondo comune Altura", simbolo: "ALTURA", prezzo: 10, dividendo: 0, min: 10, max: 30,
     testo: "Fondo azionario a forte crescita. Nessuna cedola, si guadagna sulla rivendita." },
-  { id: "pa10", tipo: "azione", nome: "Fondo comune GRO4US", simbolo: "GRO4US", prezzo: 20, dividendo: 0, min: 10, max: 30,
+  { id: "pa10", tipo: "azione", nome: "Fondo comune Altura", simbolo: "ALTURA", prezzo: 20, dividendo: 0, min: 10, max: 30,
     testo: "Il fondo ha battuto l'indice per il terzo anno consecutivo." },
-  { id: "pa11", tipo: "azione", nome: "Fondo immobiliare ON2U", simbolo: "ON2U", prezzo: 10, dividendo: 0.5, min: 5, max: 30,
+  { id: "pa11", tipo: "azione", nome: "Fondo immobiliare Dimora", simbolo: "DIMORA", prezzo: 10, dividendo: 0.5, min: 5, max: 30,
     testo: "Fondo immobiliare quotato: distribuisce $0,50 per azione al mese." },
-  { id: "pa12", tipo: "azione", nome: "Fondo immobiliare ON2U", simbolo: "ON2U", prezzo: 25, dividendo: 0.5, min: 5, max: 30,
+  { id: "pa12", tipo: "azione", nome: "Fondo immobiliare Dimora", simbolo: "DIMORA", prezzo: 25, dividendo: 0.5, min: 5, max: 30,
     testo: "Gli affitti salgono e il fondo si rivaluta. Cedola invariata a $0,50." },
   { id: "pa13", tipo: "azione", nome: "Certificato di deposito", simbolo: "CD", prezzo: 1000, dividendo: 5, min: 1000, max: 1000, unitaSingola: true,
     testo: "Deposito vincolato: $1.000 che rendono $5 al mese. Sicuro, ma lento." },
@@ -104,7 +104,7 @@ export const PICCOLI_AFFARI = [
     testo: "Un mese di affitto non incassato, più le spese legali." },
 
   // ── Altri titoli e occasioni ──
-  { id: "pa33", tipo: "azione", nome: "Azioni OK4U Farmaceutica", simbolo: "OK4U", prezzo: 30, dividendo: 0, min: 5, max: 30,
+  { id: "pa33", tipo: "azione", nome: "Azioni Farmia", simbolo: "FARMIA", prezzo: 30, dividendo: 0, min: 5, max: 30,
     testo: "Massimo storico. Chi ha comprato a $5 sorride." },
   { id: "pa34", tipo: "immobile", categoria: "casa2", nome: "Casa 2 locali, zona universitaria", costo: 35000, acconto: 3500, mutuo: 31500, flusso: 110,
     testo: "Studenti in affitto tutto l'anno accademico." },
@@ -112,7 +112,7 @@ export const PICCOLI_AFFARI = [
     testo: "Un piccolo gestionale con 40 clienti in abbonamento. Margini alti." },
   { id: "pa36", tipo: "immobile", categoria: "casa4", nome: "Casa 4 locali pignorata", costo: 75000, acconto: 3000, mutuo: 72000, flusso: 150,
     testo: "La banca vuole chiudere la pratica. Acconto sorprendentemente basso." },
-  { id: "pa37", tipo: "azione", nome: "Fondo comune GRO4US", simbolo: "GRO4US", prezzo: 30, dividendo: 0, min: 10, max: 30,
+  { id: "pa37", tipo: "azione", nome: "Fondo comune Altura", simbolo: "ALTURA", prezzo: 30, dividendo: 0, min: 10, max: 30,
     testo: "Il fondo è caro. Gli analisti consigliano prudenza." },
   { id: "pa38", tipo: "immobile", categoria: "duplex", nome: "Bifamiliare da ristrutturare", costo: 90000, acconto: 9000, mutuo: 81000, flusso: 250,
     testo: "Una unità è già affittata, l'altra da sistemare." },
@@ -199,19 +199,19 @@ export const MERCATO = [
     testo: "Offerta di uscita al 125% del costo per una tua attività." },
 
   // Movimenti dei titoli (tutti possono vendere a questo prezzo)
-  { id: "me13", tipo: "prezzo", simbolo: "OK4U", prezzo: 30, nome: "OK4U vola in borsa",
+  { id: "me13", tipo: "prezzo", simbolo: "FARMIA", prezzo: 30, nome: "FARMIA vola in borsa",
     testo: "Approvato un nuovo farmaco: il titolo tocca il massimo di fascia. Tutti possono vendere a $30." },
-  { id: "me14", tipo: "prezzo", simbolo: "OK4U", prezzo: 5, nome: "OK4U crolla",
+  { id: "me14", tipo: "prezzo", simbolo: "FARMIA", prezzo: 5, nome: "FARMIA crolla",
     testo: "Effetti collaterali inattesi: il titolo scivola al minimo di fascia." },
-  { id: "me15", tipo: "prezzo", simbolo: "MYT4U", prezzo: 40, nome: "MYT4U: offerta pubblica d'acquisto",
+  { id: "me15", tipo: "prezzo", simbolo: "VOLTIA", prezzo: 40, nome: "VOLTIA: offerta pubblica d'acquisto",
     testo: "Un colosso lancia un'OPA. Tutti possono vendere a $40." },
-  { id: "me16", tipo: "prezzo", simbolo: "MYT4U", prezzo: 10, nome: "MYT4U delude le attese",
+  { id: "me16", tipo: "prezzo", simbolo: "VOLTIA", prezzo: 10, nome: "VOLTIA delude le attese",
     testo: "Trimestrale sotto le stime, il titolo torna ai minimi." },
-  { id: "me17", tipo: "prezzo", simbolo: "2BIG", prezzo: 40, nome: "2BIG acquisita",
+  { id: "me17", tipo: "prezzo", simbolo: "ENERGA", prezzo: 40, nome: "ENERGA acquisita",
     testo: "Fusione nel settore energetico. Tutti possono vendere a $40." },
-  { id: "me18", tipo: "prezzo", simbolo: "GRO4US", prezzo: 30, nome: "GRO4US ai massimi",
+  { id: "me18", tipo: "prezzo", simbolo: "ALTURA", prezzo: 30, nome: "ALTURA ai massimi",
     testo: "Il mercato azionario corre e il fondo con lui." },
-  { id: "me19", tipo: "prezzo", simbolo: "ON2U", prezzo: 30, nome: "ON2U si rivaluta",
+  { id: "me19", tipo: "prezzo", simbolo: "DIMORA", prezzo: 30, nome: "DIMORA si rivaluta",
     testo: "Boom degli affitti: il fondo immobiliare tocca il massimo di fascia." },
 
   // Eventi economici
@@ -223,7 +223,7 @@ export const MERCATO = [
     testo: "Il quartiere si rivaluta. Nessun effetto immediato, ma i prossimi compratori pagheranno di più." },
 ];
 
-/* ═══════════════════ SPESE EXTRA (DOODADS) ═══════════════════ */
+/* ═══════════════════ SPESE EXTRA (SPESE NON NECESSARIE) ═══════════════════ */
 export const EXTRA = [
   { id: "ex01", nome: "Nuovo telefono di ultima generazione", importo: 1200, testo: "Il vecchio funzionava ancora benissimo." },
   { id: "ex02", nome: "Weekend last minute", importo: 800, testo: "L'offerta scadeva tra due ore. Almeno così ti hanno detto." },

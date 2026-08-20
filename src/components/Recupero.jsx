@@ -42,7 +42,7 @@ export default class Recupero extends React.Component {
             <button
               className="btn btn-fantasma mt8"
               onClick={() => {
-                localStorage.removeItem("cashflow:stanza");
+                localStorage.removeItem("quotazero:stanza");
                 location.href = location.pathname;
               }}
             >

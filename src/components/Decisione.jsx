@@ -276,7 +276,7 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
     );
   }
 
-  /* ── Beneficenza (Corsa dei Topi) ── */
+  /* ── Beneficenza (Ruota) ── */
   if (p.tipo === "beneficenza") {
     return (
       <Foglio aperto>
@@ -434,14 +434,14 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
     );
   }
 
-  /* ── Corsia Veloce: affare ── */
+  /* ── Largo: affare ── */
   if (p.tipo === "affareVeloce") {
     const a = p.affare;
-    const nuovo = io.redditoCashflowDay + a.flusso;
+    const nuovo = io.redditoRendita + a.flusso;
     const obiettivo = io.redditoInizialeVeloce + 50000;
     return (
       <Foglio aperto>
-        <CartaGioco chiave={chiave} classe="c-veloce" etichetta="Affare · Corsia Veloce" titolo={a.nome}>
+        <CartaGioco chiave={chiave} classe="c-veloce" etichetta="Affare · Largo" titolo={a.nome}>
           <p className="f14" style={{ margin: 0, lineHeight: 1.45 }}>{a.testo}</p>
           <div className="mt12">
             <Voce k="Acconto" v={soldi(a.acconto)} />
@@ -472,7 +472,7 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
     );
   }
 
-  /* ── Corsia Veloce: sogno ── */
+  /* ── Largo: sogno ── */
   if (p.tipo === "sogno") {
     return (
       <Foglio aperto>
@@ -523,12 +523,12 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
     );
   }
 
-  /* ── Corsia Veloce: beneficenza ── */
+  /* ── Largo: beneficenza ── */
   if (p.tipo === "beneficenzaVeloce") {
-    const costo = Math.round(io.redditoCashflowDay * 0.1);
+    const costo = Math.round(io.redditoRendita * 0.1);
     return (
       <Foglio aperto>
-        <CartaGioco chiave={chiave} classe="c-benef" etichetta="Beneficenza · Corsia Veloce"
+        <CartaGioco chiave={chiave} classe="c-benef" etichetta="Beneficenza · Largo"
           titolo={p.gia ? "Hai già donato" : "Vuoi donare?"}>
           <p className="f14" style={{ margin: 0, lineHeight: 1.5 }}>
             {p.gia
@@ -553,7 +553,7 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
     );
   }
 
-  /* ── Corsia Veloce: penalità ── */
+  /* ── Largo: penalità ── */
   if (p.tipo === "penalitaVeloce") {
     return (
       <Foglio aperto>

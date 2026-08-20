@@ -5,7 +5,7 @@
  */
 import { creaStanza, applicaAzione, codiceStanza, classifica } from "../src/game/motore.js";
 import { PROFESSIONI } from "../src/game/data/professioni.js";
-import { SOGNI } from "../src/game/data/corsiaVeloce.js";
+import { SOGNI } from "../src/game/data/largo.js";
 import { fuoriDallaCorsa, flussoMensile, riepilogo } from "../src/game/finanze.js";
 
 const scegli = (a) => a[Math.floor(Math.random() * a.length)];
@@ -155,7 +155,7 @@ for (let i = 0; i < N; i++) {
   if (finita) {
     finite++;
     if (s.motivoVittoria === "sogno") sogno++;
-    else if (s.motivoVittoria === "cashflow") cash++;
+    else if (s.motivoVittoria === "rendita") cash++;
     else ultimo++;
   } else timeout++;
 }

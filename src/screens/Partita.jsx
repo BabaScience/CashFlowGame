@@ -9,7 +9,7 @@ import Manuale from "../components/Manuale.jsx";
 import Decisione from "../components/Decisione.jsx";
 import { Bottone, NumeroAnimato, Barra } from "../components/Base.jsx";
 import { soldi, riepilogo, fuoriDallaCorsa } from "../game/finanze.js";
-import { CORSA_TOPI, CASELLE_TOPI, CORSIA_VELOCE, CASELLE_VELOCE } from "../game/data/tabellone.js";
+import { PERCORSO_RUOTA, CASELLE_RUOTA, PERCORSO_LARGO, CASELLE_LARGO } from "../game/data/tabellone.js";
 import { useSchermoLargo } from "../hooks/useSchermo.js";
 
 const SCHEDE = [
@@ -123,7 +123,7 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
           </p>
           <Bottone variante="btn-verde" disabled={inAzione}
             onClick={() => fai({ tipo: "esciDallaCorsa" })}>
-            Esci dalla Corsa dei Topi
+            Esci dalla Ruota
           </Bottone>
         </motion.div>
       )}
@@ -203,8 +203,8 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
 
   const r = riepilogo(io);
   const casella = io.tracciato === "topi"
-    ? CASELLE_TOPI[CORSA_TOPI[io.posizione]]
-    : CASELLE_VELOCE[CORSIA_VELOCE[io.posizione].tipo];
+    ? CASELLE_RUOTA[PERCORSO_RUOTA[io.posizione]]
+    : CASELLE_LARGO[PERCORSO_LARGO[io.posizione].tipo];
 
   const barraAlta = (
     <div className="flex tra cen g12" style={{
@@ -218,7 +218,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
       </button>
       <div className="ta-c" style={{ flex: 1, minWidth: 0 }}>
         <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>
-          {io.tracciato === "topi" ? "Corsa dei Topi" : "Corsia Veloce"}
+          {io.tracciato === "topi" ? "Ruota" : "Largo"}
         </div>
         <div className="f13 grassetto" style={{ color: casella.colore === "#6B4423" ? "#C8A278" : casella.colore }}>
           {casella.emoji} {casella.nome}

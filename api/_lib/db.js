@@ -13,7 +13,7 @@
 import { MongoClient } from "mongodb";
 import { componiUri, uriOscurata } from "./uri.js";
 
-const NOME_DB = process.env.MONGODB_DB || "cashflow";
+const NOME_DB = process.env.MONGODB_DB || "quotazero";
 
 /**
  * Le credenziali arrivano da tre variabili separate:
@@ -37,8 +37,8 @@ export const TTL_FINITA_MS = 6 * 60 * 60 * 1000;    // 6 ore
 /** Stanze mai avviate: si buttano prima. */
 export const TTL_ATTESA_MS = 6 * 60 * 60 * 1000;    // 6 ore
 
-let cached = global.__cashflowMongo;
-if (!cached) cached = global.__cashflowMongo = { client: null, promise: null, indici: false };
+let cached = global.__quotazeroMongo;
+if (!cached) cached = global.__quotazeroMongo = { client: null, promise: null, indici: false };
 
 /**
  * Stato della configurazione, con un messaggio utile da mostrare

@@ -2,13 +2,13 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Bottone } from "../components/Base.jsx";
 import { PROFESSIONI } from "../game/data/professioni.js";
-import { SOGNI } from "../game/data/corsiaVeloce.js";
+import { SOGNI } from "../game/data/largo.js";
 import { soldi } from "../game/finanze.js";
 import * as api from "../lib/api.js";
 
 /** Schermata iniziale: crea una stanza oppure entra con un codice. */
 export default function Ingresso({ suEntrato, avvisa }) {
-  const [nome, setNome] = useState(localStorage.getItem("cashflow:nome") || "");
+  const [nome, setNome] = useState(localStorage.getItem("quotazero:nome") || "");
   const [professioneId, setProfessione] = useState("insegnante");
   const [sognoId, setSogno] = useState("sg01");
   const [codice, setCodice] = useState("");
@@ -19,7 +19,7 @@ export default function Ingresso({ suEntrato, avvisa }) {
   const speseProf = Object.values(prof.spese).reduce((a, b) => a + b, 0);
   const flussoProf = prof.stipendio - speseProf;
 
-  const ricorda = () => localStorage.setItem("cashflow:nome", nome.trim());
+  const ricorda = () => localStorage.setItem("quotazero:nome", nome.trim());
 
   const crea = async () => {
     if (!nome.trim()) return avvisa("Scrivi il tuo nome.");
@@ -51,10 +51,10 @@ export default function Ingresso({ suEntrato, avvisa }) {
         <div className="ta-c" style={{ padding: "26px 0 22px" }}>
           <div style={{ fontSize: 34 }}>◆</div>
           <h1 className="titolo" style={{ fontSize: 32, margin: "8px 0 0", color: "var(--oro-chiaro)" }}>
-            CASHFLOW
+            Quota Zero
           </h1>
           <p className="f14" style={{ margin: "8px 0 0", color: "rgba(244,241,230,.72)", lineHeight: 1.5 }}>
-            Esci dalla Corsa dei Topi.<br />
+            Esci dalla Ruota.<br />
             Da 2 a 6 giocatori, ovunque siate.
           </p>
         </div>
@@ -84,7 +84,7 @@ export default function Ingresso({ suEntrato, avvisa }) {
                 <span>Giorno di paga</span><span className="numeri pos">{soldi(flussoProf)}</span>
               </div>
               <p className="f12 tenue" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
-                Per uscire dalla Corsa dei Topi ti serve un reddito passivo
+                Per uscire dalla Ruota ti serve un reddito passivo
                 superiore a <strong className="numeri">{soldi(speseProf)}</strong> al mese.
                 {prof.stipendio > 6000 && " Lo stipendio alto non aiuta: alza anche l'asticella."}
               </p>
@@ -99,7 +99,7 @@ export default function Ingresso({ suEntrato, avvisa }) {
               ))}
             </select>
             <p className="f12 tenue mt8" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
-              Comprarlo sulla Corsia Veloce fa vincere all'istante.
+              Comprarlo al Largo fa vincere all'istante.
               Attenzione: ogni avversario che ci atterra sopra ne raddoppia il prezzo per te.
             </p>
           </div>

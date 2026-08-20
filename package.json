@@ -1,19 +1,20 @@
 {
-  "name": "cashflow-online",
+  "name": "quota-zero",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "description": "CASHFLOW - il gioco da tavolo, online e multigiocatore",
+  "description": "Quota Zero - simulatore finanziario multigiocatore su dati reali",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "node scripts/prova-vercel.mjs && node scripts/prova-uri.mjs && node scripts/prova-regole.mjs && node scripts/simula.mjs 60",
+    "test": "node scripts/prova-vercel.mjs && node scripts/prova-uri.mjs && node scripts/prova-regole.mjs && node scripts/simula.mjs 60 && node scripts/bilancia.mjs 8",
     "test:regole": "node scripts/prova-regole.mjs",
     "test:simula": "node scripts/simula.mjs",
     "test:uri": "node scripts/prova-uri.mjs",
     "db:prova": "node --env-file=.env scripts/prova-connessione.mjs",
-    "test:vercel": "node scripts/prova-vercel.mjs"
+    "test:vercel": "node scripts/prova-vercel.mjs",
+    "test:bilancia": "node scripts/bilancia.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.15.0",
