@@ -5,6 +5,7 @@ import { PROFESSIONI } from "../game/data/professioni.js";
 import { SOGNI } from "../game/data/largo.js";
 import { soldi } from "../game/finanze.js";
 import * as api from "../lib/api.js";
+import { traccia } from "../lib/traccia.js";
 
 /** Schermata iniziale: crea una stanza oppure entra con un codice. */
 export default function Ingresso({ suEntrato, avvisa }) {
@@ -27,6 +28,7 @@ export default function Ingresso({ suEntrato, avvisa }) {
     try {
       ricorda();
       const r = await api.creaStanza(nome.trim(), professioneId, sognoId);
+      traccia("stanzaCreata");
       suEntrato(r.stato.codice);
     } catch (e) { avvisa(e.message); }
     finally { setOccupato(false); }
@@ -40,6 +42,7 @@ export default function Ingresso({ suEntrato, avvisa }) {
     try {
       ricorda();
       await api.azione(c, { tipo: "entra", nome: nome.trim(), professioneId, sognoId });
+      traccia("stanzaRaggiunta");
       suEntrato(c);
     } catch (e) { avvisa(e.message); }
     finally { setOccupato(false); }

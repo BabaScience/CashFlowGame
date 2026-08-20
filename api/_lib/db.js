@@ -38,7 +38,7 @@ export const TTL_FINITA_MS = 6 * 60 * 60 * 1000;    // 6 ore
 export const TTL_ATTESA_MS = 6 * 60 * 60 * 1000;    // 6 ore
 
 let cached = global.__quotazeroMongo;
-if (!cached) cached = global.__quotazeroMongo = { client: null, promise: null, indici: false };
+if (!cached) cached = global.__quotazeroMongo = { client: null, promise: null, indici: false, indiciMetriche: false };
 
 /**
  * Stato della configurazione, con un messaggio utile da mostrare
@@ -77,6 +77,22 @@ export async function stanze() {
       cached.indici = false;
       console.error("creazione indici fallita:", e.message);
     });
+  }
+  return col;
+}
+
+/**
+ * Collezione dei contatori d'uso. Un documento per giorno, nessun dato
+ * personale dentro: vedi src/game/metriche.js. Anche qui un indice TTL,
+ * così i giorni vecchi si cancellano da soli.
+ */
+export async function metriche() {
+  const c = await client();
+  const col = c.db(NOME_DB).collection("metriche");
+  if (!cached.indiciMetriche) {
+    cached.indiciMetriche = true;
+    await col.createIndex({ scadeIl: 1 }, { expireAfterSeconds: 0 })
+      .catch((e) => { cached.indiciMetriche = false; console.error("indice metriche:", e.message); });
   }
   return col;
 }

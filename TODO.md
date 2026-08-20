@@ -39,7 +39,7 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       `prefers-reduced-motion`. Solo campioni CC0, con un file di licenze nel
       repo: un ufficio acquisti scolastico lo chiederà.
 
-- [ ] **1.3 Analisi d'uso**
+- [x] **1.3 Analisi d'uso**
       Oggi non sappiamo rispondere a "la gente torna?", che è la sola domanda
       che conta. Strumento senza cookie e conforme al GDPR. Eventi minimi:
       stanze create, partite finite, ritorno a 1/7/30 giorni, durata del turno,

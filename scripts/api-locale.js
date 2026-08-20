@@ -8,9 +8,11 @@
  */
 import { creaStanza, codiceStanza, applicaAzione } from "../src/game/motore.js";
 import { preparaMessaggio, accoda } from "../src/game/chat.js";
+import { incrementiPer } from "../src/game/metriche.js";
 
 const TTL = { attesa: 6 * 3600e3, inCorso: 48 * 3600e3, finita: 6 * 3600e3 };
 const stanze = new Map();
+const metriche = new Map();   // giorno -> contatori, come in produzione
 
 const scaduta = (v) => Date.now() > v.scadeIl;
 const salva = (stato) => stanze.set(stato.codice, { stato, scadeIl: Date.now() + TTL[stato.fase] });
@@ -107,6 +109,20 @@ export default function apiLocale() {
             if (esito.errore) return invia(res, 400, { errore: esito.errore });
             salva(accoda(rec.stato, esito.messaggio));
             return invia(res, 200, { messaggio: esito.messaggio });
+          }
+
+          /* ── metriche: solo contatori, nessun identificativo ── */
+          if (url.pathname === "/api/eventi") {
+            if (req.method === "GET") {
+              return invia(res, 200, { giorni: [...metriche.entries()].map(([_id, v]) => ({ _id, ...v })) });
+            }
+            const b = await leggiCorpo(req);
+            const esito = incrementiPer(b);
+            if (esito.errore) return invia(res, 204);
+            const giorno = metriche.get(esito.giorno) || {};
+            for (const [k, v] of Object.entries(esito.incrementi)) giorno[k] = (giorno[k] || 0) + v;
+            metriche.set(esito.giorno, giorno);
+            return invia(res, 204);
           }
 
           /* ── pulizia ── */

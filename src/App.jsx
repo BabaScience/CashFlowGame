@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useStanza } from "./hooks/useStanza.js";
 import { Avviso, Bottone } from "./components/Base.jsx";
 import Ingresso from "./screens/Ingresso.jsx";
@@ -6,6 +6,7 @@ import Attesa from "./screens/Attesa.jsx";
 import Partita from "./screens/Partita.jsx";
 import Vittoria from "./components/Vittoria.jsx";
 import * as api from "./lib/api.js";
+import { traccia, tracciaSessione } from "./lib/traccia.js";
 
 const CHIAVE_STANZA = "quotazero:stanza";
 
@@ -25,6 +26,42 @@ export default function App() {
   }, []);
 
   const { stato, errore, caricamento, inAzione, invia } = useStanza(codice, mioId);
+
+  /* ── Misure d'uso: solo contatori, nessun identificativo. Vedi traccia.js ── */
+  useEffect(() => { tracciaSessione(); }, []);
+
+  const faseVista = useRef(null);
+  const uscitaVista = useRef(false);
+  useEffect(() => {
+    if (!stato) return;
+    const io = stato.giocatori.find((g) => g.id === mioId);
+
+    if (stato.fase !== faseVista.current) {
+      if (stato.fase === "inCorso" && faseVista.current === "attesa") {
+        traccia("partitaAvviata", { giocatori: stato.giocatori.length });
+      }
+      if (stato.fase === "finita") {
+        traccia("partitaFinita", { turni: stato.numeroTurno, motivo: stato.motivoVittoria });
+        if (stato.vincitore === mioId) traccia("vittoria");
+      }
+      faseVista.current = stato.fase;
+    }
+
+    // Il momento che il gioco esiste per insegnare.
+    if (io?.tracciato === "veloce" && !uscitaVista.current) {
+      uscitaVista.current = true;
+      traccia("uscitaDallaRuota", { turni: io.turniGiocati });
+    }
+  }, [stato, mioId]);
+
+  // Chi chiude a partita in corso: è il numero che dice se il gioco è troppo lungo.
+  useEffect(() => {
+    const suChiusura = () => {
+      if (stato?.fase === "inCorso") traccia("abbandono", { turni: stato.numeroTurno });
+    };
+    window.addEventListener("pagehide", suChiusura);
+    return () => window.removeEventListener("pagehide", suChiusura);
+  }, [stato]);
 
   useEffect(() => {
     if (codice) localStorage.setItem(CHIAVE_STANZA, codice);
