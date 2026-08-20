@@ -12,8 +12,9 @@ import { soldi, riepilogo, fuoriDallaCorsa } from "../game/finanze.js";
 import { PERCORSO_RUOTA, CASELLE_RUOTA, PERCORSO_LARGO, CASELLE_LARGO } from "../game/data/tabellone.js";
 import { useSchermoLargo } from "../hooks/useSchermo.js";
 
+/* Il tabellone non è più una scheda fra le altre: resta sempre a schermo,
+   quindi le linguette servono solo per ciò che gli sta sotto. */
 const SCHEDE = [
-  { id: "tavolo", icona: "◆", nome: "Tavolo" },
   { id: "scheda", icona: "▤", nome: "Scheda" },
   { id: "gioc", icona: "◉", nome: "Giocatori" },
   { id: "log", icona: "☰", nome: "Registro" },
@@ -128,8 +129,6 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
         </motion.div>
       )}
 
-      <Dadi dado={stato.dado} />
-
       {!stato.pending && !stato.dado && (
         <>
           {io.tracciato === "topi" && io.turniBeneficenza > 0 && (
@@ -165,8 +164,8 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
 }
 
 export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci }) {
-  const [scheda, setScheda] = useState("tavolo");
-  const largo = useSchermoLargo();
+  const [scheda, setScheda] = useState("scheda");
+  const largo = useSchermoLargo(1000);
   const io = stato.giocatori.find((g) => g.id === mioId);
   const diTurno = stato.giocatori[stato.turno];
   const mioTurno = diTurno?.id === mioId;
@@ -231,51 +230,58 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
     </div>
   );
 
-  const pannelloTavolo = (
-    <>
-      <Tabellone stato={stato} mioId={mioId} />
-      <Legenda tracciato={io.tracciato} />
-      <Azioni stato={stato} mioId={mioId} invia={invia} inAzione={inAzione} avvisa={avvisa} />
-      <SulTavolo stato={stato} />
-
-      {io.tracciato === "topi" && (
-        <div className="carta-scura mt12">
-          <div className="flex tra f12 mb4">
-            <span className="tenue">Reddito passivo verso le spese</span>
-            <span className="numeri grassetto">{soldi(r.redditoPassivo)} / {soldi(r.speseTotali)}</span>
-          </div>
-          <Barra scura valore={r.progresso} />
-        </div>
-      )}
-    </>
-  );
-
   return (
-    <div className="schermo">
+    <div className="schermo schermo-partita">
       {barraAlta}
 
-      <div className="contenuto">
-        {/* Su schermi larghi si vede tutto insieme. */}
-        <div className="scrivania">
-          <div>
-            {(largo || scheda === "tavolo") && pannelloTavolo}
-            {largo && scheda === "regole" && <div className="mt12"><Manuale /></div>}
-            {!largo && (
-              <>
-                {scheda === "scheda" && <div className="mt12"><Scheda giocatore={io} invia={invia} inAzione={inAzione} mio /></div>}
-                {scheda === "gioc" && <div className="mt12"><Giocatori stato={stato} mioId={mioId} /></div>}
-                {scheda === "log" && <div className="mt12"><Registro stato={stato} /></div>}
-                {scheda === "regole" && <div className="mt12"><Manuale /></div>}
-              </>
-            )}
+      <div className="corpo">
+        {/* Colonna del tavolo: non scorre mai. */}
+        <div className="colonna-tavolo">
+          <div className="zona-tavolo">
+            <Tabellone stato={stato} mioId={mioId} />
+            <Dadi tiro={stato.ultimoTiro} mioId={mioId} />
           </div>
 
-          {largo && (
-            <div className="scrivania-lato">
-              <Giocatori stato={stato} mioId={mioId} />
-              <div className="mt12"><Scheda giocatore={io} invia={invia} inAzione={inAzione} mio /></div>
-              <div className="mt12"><Registro stato={stato} limite={25} /></div>
+          {io.tracciato === "topi" && (
+            <div className="zona-progresso">
+              <div className="flex tra f12 mb4">
+                <span className="tenue">Rendita verso le spese</span>
+                <span className="numeri grassetto">
+                  {soldi(r.redditoPassivo)} / {soldi(r.speseTotali)}
+                </span>
+              </div>
+              <Barra scura valore={r.progresso} />
             </div>
+          )}
+
+          {largo && (
+            <div className="zona-progresso"><Legenda tracciato={io.tracciato} /></div>
+          )}
+
+          {/* Il pulsante del turno resta sempre raggiungibile col pollice. */}
+          <div className="zona-azioni">
+            <Azioni stato={stato} mioId={mioId} invia={invia} inAzione={inAzione} avvisa={avvisa} />
+            <SulTavolo stato={stato} />
+          </div>
+        </div>
+
+        {/* Unica zona che scorre. */}
+        <div className="zona-pannello">
+          {largo ? (
+            scheda === "regole" ? <Manuale /> : (
+              <>
+                <Giocatori stato={stato} mioId={mioId} />
+                <div className="mt12"><Scheda giocatore={io} invia={invia} inAzione={inAzione} mio /></div>
+                <div className="mt12"><Registro stato={stato} limite={25} /></div>
+              </>
+            )
+          ) : (
+            <>
+              {scheda === "scheda" && <Scheda giocatore={io} invia={invia} inAzione={inAzione} mio />}
+              {scheda === "gioc" && <Giocatori stato={stato} mioId={mioId} />}
+              {scheda === "log" && <Registro stato={stato} />}
+              {scheda === "regole" && <Manuale />}
+            </>
           )}
         </div>
       </div>
@@ -286,19 +292,19 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
         <button
           className="btn btn-chiaro btn-piccolo"
           style={{ position: "fixed", right: 22, bottom: 22, width: "auto", zIndex: 35 }}
-          onClick={() => setScheda(scheda === "regole" ? "tavolo" : "regole")}
+          onClick={() => setScheda(scheda === "regole" ? "scheda" : "regole")}
         >
           {scheda === "regole" ? "Torna al tavolo" : "Regole del gioco"}
         </button>
       )}
 
       <nav className="navbar">
-        {SCHEDE.map((s) => (
-          <button key={s.id} data-attivo={scheda === s.id}
-            onClick={() => { setScheda(s.id); if (s.id === "log") setLogNuovo(false); }}>
-            <span className="icona">{s.icona}</span>
-            {s.nome}
-            {s.id === "log" && logNuovo && <span className="punto" />}
+        {SCHEDE.map((sc) => (
+          <button key={sc.id} data-attivo={scheda === sc.id}
+            onClick={() => { setScheda(sc.id); if (sc.id === "log") setLogNuovo(false); }}>
+            <span className="icona">{sc.icona}</span>
+            {sc.nome}
+            {sc.id === "log" && logNuovo && <span className="punto" />}
           </button>
         ))}
       </nav>

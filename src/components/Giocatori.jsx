@@ -1,14 +1,15 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { GettoneGiocatore, Barra, Denaro } from "./Base.jsx";
+import { Sagoma } from "./Tabellone.jsx";
 import { soldi, riepilogo } from "../game/finanze.js";
 import { getProfessione } from "../game/data/professioni.js";
 import { getSogno } from "../game/data/largo.js";
 import { OBIETTIVO_RENDITA as META } from "../game/data/tabellone.js";
 
 /**
- * Il pannello degli avversari: si vede il quotazero di tutti crescere.
- * È metà del gusto del gioco da tavolo — capire chi sta per uscire dalla corsa.
+ * Il pannello degli avversari: si vede la rendita di tutti crescere.
+ * È metà del gusto del gioco — capire chi sta per prendere il largo.
  */
 export default function Giocatori({ stato, mioId, compatto }) {
   const diTurno = stato.giocatori[stato.turno]?.id;
@@ -35,6 +36,14 @@ export default function Giocatori({ stato, mioId, compatto }) {
           >
             <div style={{ position: "relative" }}>
               <GettoneGiocatore giocatore={g} />
+              {/* La stessa sagoma che porta la pedina sul tabellone. */}
+              <span style={{
+                position: "absolute", right: -3, bottom: -3,
+                background: "rgba(10,20,17,.9)", borderRadius: 4, padding: 1.5,
+                display: "grid", placeItems: "center",
+              }}>
+                <Sagoma indice={i} colore={g.colore} lato={11} />
+              </span>
               {g.id === diTurno && stato.fase === "inCorso" && (
                 <motion.span
                   style={{

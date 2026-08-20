@@ -81,7 +81,7 @@ export function progressoLiberta(g) {
 
 /**
  * Riepilogo completo, pronto da mostrare a schermo.
- * Usato anche dal pannello che mostra il quotazero degli avversari.
+ * Usato anche dal pannello che mostra il flusso degli avversari.
  */
 export function riepilogo(g) {
   const div = dividendi(g);

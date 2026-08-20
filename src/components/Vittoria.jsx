@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Bottone, KV } from "./Base.jsx";
 import { soldi } from "../game/finanze.js";
+import { OBIETTIVO_RENDITA } from "../game/data/tabellone.js";
 import { classifica } from "../game/motore.js";
 import { getProfessione } from "../game/data/professioni.js";
 import { getSogno } from "../game/data/largo.js";
@@ -45,7 +46,7 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
   const vincitore = tabella.find((t) => t.vincitore);
   const motivo = {
     sogno: "ha realizzato il proprio sogno",
-    quotazero: "ha raggiunto +$50.000 di flusso al Largo",
+    rendita: `ha raggiunto +${soldi(OBIETTIVO_RENDITA)} di rendita al Largo`,
     ultimo: "è l'ultimo giocatore rimasto in partita",
   }[stato.motivoVittoria] || "ha vinto";
 

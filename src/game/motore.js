@@ -109,6 +109,7 @@ export function creaStanza(codice, hostId, opzioni = {}) {
     turno: 0,
     numeroTurno: 0,
     dado: null,
+    ultimoTiro: null,   // ultimo lancio, per mostrarlo a tutti
     pending: null,
     registro: [],
     mazzi: null,   // riempito sotto: mescolare consuma il generatore
@@ -635,6 +636,16 @@ export function applicaAzione(stato, azione) {
     const valori = Array.from({ length: n }, () => dado(s));
     const passi = valori.reduce((a, b) => a + b, 0);
     s.dado = { valori, totale: passi };
+    /* `dado` serve alla logica del turno e viene azzerato al cambio turno.
+       `ultimoTiro` serve invece a mostrarlo, e non si azzera mai: chi legge
+       lo stato ogni 1,4 secondi altrimenti non vedrebbe mai i tiri altrui,
+       perché la casella spesso si risolve dentro la stessa scrittura. Il
+       contatore `n` permette al client di riconoscere un tiro nuovo. */
+    s.ultimoTiro = {
+      n: (s.ultimoTiro?.n || 0) + 1,
+      giocatoreId: g.id, nome: g.nome, colore: g.colore,
+      valori, totale: passi,
+    };
 
     if (g.tracciato === "topi" && g.turniBeneficenza > 0) g.turniBeneficenza -= 1;
 

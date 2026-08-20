@@ -67,7 +67,14 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .tenue    { color: var(--tenue); }
 .maiusc   { text-transform: uppercase; letter-spacing: .12em; font-weight: 700; font-size: 11px; }
 
-/* ══ struttura ══ */
+/* ══ struttura ══
+   La partita è un guscio alto quanto lo schermo, non una pagina che scorre.
+   Prima il tabellone spariva verso l'alto appena si guardava la propria
+   scheda, e per tirare i dadi bisognava riscendere: due gesti per ogni
+   turno. Ora il tavolo e il pulsante restano fermi, e scorre soltanto il
+   pannello sotto. Le zone hanno tutte `min-height: 0`, altrimenti in
+   flexbox il contenuto le gonfia e lo scorrimento interno non parte.
+   ══ */
 .schermo {
   min-height: 100%;
   display: flex;
@@ -84,6 +91,81 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 @media (min-width: 900px) {
   .contenuto { max-width: 1120px; padding: 22px; }
   .schermo { padding-bottom: 0; }
+}
+
+/* Guscio della sola schermata di gioco. */
+.schermo-partita {
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding-bottom: 0;
+}
+.corpo {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.colonna-tavolo {
+  flex: none;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.zona-tavolo {
+  flex: none;
+  min-height: 0;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  padding: 8px 14px 0;
+}
+.zona-tavolo .tabellone {
+  width: auto;
+  max-width: 100%;
+  max-height: 36vh;
+}
+.zona-progresso { flex: none; padding: 6px 16px 0; }
+.zona-azioni    { flex: none; padding: 8px 14px 10px; }
+.zona-pannello {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0 14px 16px;
+}
+
+/* Tablet: stesso impianto, più respiro e un tabellone più generoso. */
+@media (min-width: 720px) {
+  .zona-tavolo .tabellone { max-height: 42vh; }
+  .zona-tavolo, .zona-azioni, .zona-pannello { padding-left: 22px; padding-right: 22px; }
+}
+
+/* Scrivania: due colonne affiancate, il tavolo occupa l'altezza piena. */
+@media (min-width: 1000px) {
+  .corpo {
+    flex-direction: row;
+    gap: 22px;
+    padding: 18px 22px;
+    max-width: 1320px;
+    width: 100%;
+    margin: 0 auto;
+  }
+  .colonna-tavolo { flex: 1 1 auto; min-width: 0; }
+  .zona-tavolo {
+    flex: 1;
+    align-items: center;
+    padding: 0;
+  }
+  .zona-tavolo .tabellone { max-height: 100%; }
+  .zona-progresso { padding: 10px 0 0; }
+  .zona-azioni { padding: 10px 0 0; }
+  .zona-pannello {
+    flex: 0 0 390px;
+    padding: 0 2px 8px 0;
+  }
 }
 
 /* ══ carte di carta ══ */
@@ -203,6 +285,7 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
   position: fixed;
   left: 0; right: 0; bottom: 0;
   height: var(--barra-basso);
+  flex: none;
   padding-bottom: env(safe-area-inset-bottom);
   display: flex;
   background: rgba(10,20,17,.92);
@@ -231,7 +314,10 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
   border: 2px solid #0a1411;
 }
 .navbar .icona { font-size: 19px; line-height: 1; }
-@media (min-width: 900px) { .navbar { display: none; } }
+/* Dentro il guscio di gioco la barra fa parte della colonna: se restasse
+   fissa coprirebbe il pannello invece di delimitarlo. */
+.schermo-partita .navbar { position: static; padding-bottom: env(safe-area-inset-bottom); }
+@media (min-width: 1000px) { .navbar { display: none; } }
 
 /* ══ griglia da scrivania ══ */
 .scrivania { display: block; }
@@ -314,6 +400,29 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .c-veloce   { background: linear-gradient(165deg, #FBF4E4, #F3E6C6); border-top: 5px solid var(--oro); }
 .c-sogno    { background: linear-gradient(165deg, #FBEDF2, #F4D9E3); border-top: 5px solid var(--rosa); }
 .c-banca    { background: linear-gradient(165deg, #FBEDEB, #F2D6D1); border-top: 5px solid var(--rosso); }
+
+/* ══ il tiro, mostrato sopra al tabellone ══ */
+.tiro-velo {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.tiro {
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  padding: 18px 26px;
+  border-radius: var(--r-l);
+  background: rgba(9, 18, 15, .93);
+  border: 1px solid rgba(227, 197, 90, .35);
+  box-shadow: var(--ombra-alta);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+.tiro-chi     { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
+.tiro-dadi    { display: flex; gap: 12px; }
+.tiro-totale  { font-size: 22px; font-weight: 700; color: var(--oro-chiaro); }
 
 /* ══ dadi ══ */
 .dado {

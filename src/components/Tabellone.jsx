@@ -30,8 +30,48 @@ function posGettone(indice, n, r, ordine, totale) {
   return punto(a, r + scarto);
 }
 
+/**
+ * Sagome distinte per giocatore.
+ *
+ * Sei pedine tonde di sei colori diversi, su un tabellone piccolo, sono
+ * indistinguibili per chi non separa bene i colori — circa un uomo su
+ * dodici. La forma raddoppia l'informazione senza aggiungere ingombro,
+ * e serve anche a chi guarda lo schermo di sguincio da mezzo metro.
+ */
+export function sagoma(indice, r) {
+  const poligono = (n, rotazione = 0) =>
+    Array.from({ length: n }, (_, k) => {
+      const a = (k / n) * Math.PI * 2 - Math.PI / 2 + rotazione;
+      return `${(Math.cos(a) * r).toFixed(2)},${(Math.sin(a) * r).toFixed(2)}`;
+    }).join(" ");
+  switch (indice % 6) {
+    case 0:  return null;                              // cerchio
+    case 1:  return poligono(4, Math.PI / 4);          // quadrato
+    case 2:  return poligono(4);                       // rombo
+    case 3:  return poligono(3);                       // triangolo
+    case 4:  return poligono(5);                       // pentagono
+    default: return poligono(6);                       // esagono
+  }
+}
+
+/** La stessa sagoma in piccolo, per legende ed elenchi. */
+export function Sagoma({ indice, colore, lato = 13 }) {
+  const r = lato / 2 - 1;
+  const punti = sagoma(indice, r);
+  return (
+    <svg width={lato} height={lato} viewBox={`0 0 ${lato} ${lato}`} aria-hidden="true"
+      style={{ flex: "none", display: "block" }}>
+      <g transform={`translate(${lato / 2} ${lato / 2})`}>
+        {punti
+          ? <polygon points={punti} fill={colore} />
+          : <circle cx="0" cy="0" r={r} fill={colore} />}
+      </g>
+    </svg>
+  );
+}
+
 /* ── gettone animato ───────────────────────────────────────── */
-function Gettone({ giocatore, n, raggio, ordine, totale, èTurno }) {
+function Gettone({ giocatore, n, raggio, ordine, totale, èTurno, mio, indice }) {
   const [frames, setFrames] = useState(null);
   const precedente = useRef(giocatore.posizione);
   const [x, y] = posGettone(giocatore.posizione, n, raggio, ordine, totale);
@@ -74,13 +114,31 @@ function Gettone({ giocatore, n, raggio, ordine, totale, èTurno }) {
           transition={{ duration: 1.9, repeat: Infinity, ease: "easeInOut" }}
         />
       )}
-      <circle
-        cx={0} cy={0} r={8.5}
-        fill={giocatore.colore}
-        stroke="#F4F1E6"
-        strokeWidth="2.4"
-        opacity={giocatore.eliminato ? 0.3 : 1}
-      />
+      {/* La propria pedina è più grande, bordata di chiaro e siglata: sul
+          telefono era impossibile ritrovarsi fra sei dischetti uguali. */}
+      {mio && (
+        <circle cx={0} cy={0} r={13.5} fill="none"
+          stroke="#F4F1E6" strokeWidth="1.4" opacity="0.55" />
+      )}
+      {(() => {
+        const r = mio ? 10.5 : 8;
+        const punti = sagoma(indice, r);
+        const comuni = {
+          fill: giocatore.colore,
+          stroke: mio ? "#FFFFFF" : "#F4F1E6",
+          strokeWidth: mio ? 3 : 2.2,
+          opacity: giocatore.eliminato ? 0.3 : 1,
+        };
+        return punti
+          ? <polygon points={punti} {...comuni} strokeLinejoin="round" />
+          : <circle cx={0} cy={0} r={r} {...comuni} />;
+      })()}
+      {mio && !giocatore.eliminato && (
+        <text x={0} y={22} textAnchor="middle"
+          style={{ fontSize: 7, fontWeight: 800, fill: "#F4F1E6", letterSpacing: .5 }}>
+          TU
+        </text>
+      )}
     </motion.g>
   );
 }
@@ -220,14 +278,16 @@ export default function Tabellone({ stato, mioId }) {
         const gruppo = affTopi.get(g.posizione) || [g.id];
         return (
           <Gettone key={g.id} giocatore={g} n={N_RUOTA} raggio={R_INT}
-            ordine={gruppo.indexOf(g.id)} totale={gruppo.length} èTurno={g.id === diTurno} />
+            ordine={gruppo.indexOf(g.id)} totale={gruppo.length} èTurno={g.id === diTurno}
+            mio={g.id === mioId} indice={giocatori.indexOf(g)} />
         );
       })}
       {inVeloce.map((g) => {
         const gruppo = affVeloce.get(g.posizione) || [g.id];
         return (
           <Gettone key={g.id} giocatore={g} n={N_LARGO} raggio={R_EST}
-            ordine={gruppo.indexOf(g.id)} totale={gruppo.length} èTurno={g.id === diTurno} />
+            ordine={gruppo.indexOf(g.id)} totale={gruppo.length} èTurno={g.id === diTurno}
+            mio={g.id === mioId} indice={giocatori.indexOf(g)} />
         );
       })}
     </svg>
