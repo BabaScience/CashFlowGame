@@ -147,10 +147,11 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
 
 - [x] **6.1 Licenza e proprietà** — `LICENSE` con dichiarazione di opera
       indipendente, fonti dei dati e avvertenza sull'art. 166 TUF.
-- [~] **6.2 Informativa privacy e minori** — `PRIVACY.md` scritta. Restano
-      da riempire i segnaposto prima della pubblicazione: contatto del
-      titolare e nomi dei fornitori. Manca il testo dell'accordo sul
-      trattamento da far firmare a una scuola.
+- [~] **6.2 Informativa privacy e minori** — `PRIVACY.md` e
+      `ACCORDO-SCUOLE.md` (nomina a responsabile ex art. 28 GDPR) scritti.
+      **Restano due cose che non posso fare io:** riempire i segnaposto
+      (contatto del titolare, nomi dei fornitori effettivi) e far verificare
+      entrambi i testi a un legale prima dell'uso.
 - [x] **6.3 Accessibilità** — passata con controllo automatico
       (`scripts/prova-accessibilita.mjs`, 14 verifiche). Corretti: quattro
       campi con etichetta visibile ma **non associata** (un lettore di
