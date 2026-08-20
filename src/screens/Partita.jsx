@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Tabellone, { Legenda } from "../components/Tabellone.jsx";
 import Dadi from "../components/Dadi.jsx";
@@ -6,6 +6,7 @@ import Scheda from "../components/Scheda.jsx";
 import Giocatori from "../components/Giocatori.jsx";
 import Registro from "../components/Registro.jsx";
 import Manuale from "../components/Manuale.jsx";
+import Chat from "../components/Chat.jsx";
 import Decisione from "../components/Decisione.jsx";
 import { Bottone, NumeroAnimato, Barra } from "../components/Base.jsx";
 import { soldi, riepilogo, fuoriDallaCorsa } from "../game/finanze.js";
@@ -17,6 +18,7 @@ import { useSchermoLargo } from "../hooks/useSchermo.js";
 const SCHEDE = [
   { id: "scheda", icona: "▤", nome: "Scheda" },
   { id: "gioc", icona: "◉", nome: "Giocatori" },
+  { id: "chat", icona: "✉", nome: "Chat" },
   { id: "log", icona: "☰", nome: "Registro" },
   { id: "regole", icona: "?", nome: "Regole" },
 ];
@@ -180,6 +182,15 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
     eraMio.current = mioTurno;
   }, [mioTurno, avvisa]);
 
+  const lettiChat = useRef((stato.chat || []).length);
+  const [chatNuova, setChatNuova] = useState(false);
+  useEffect(() => {
+    const n = (stato.chat || []).length;
+    if (n > lettiChat.current && scheda !== "chat") setChatNuova(true);
+    if (scheda === "chat") { lettiChat.current = n; setChatNuova(false); }
+  }, [stato.chat, scheda]);
+  const segnaLetti = useCallback((n) => { lettiChat.current = n; }, []);
+
   const nuoveRighe = useRef(stato.registro[0]?.id);
   const [logNuovo, setLogNuovo] = useState(false);
   useEffect(() => {
@@ -272,6 +283,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
               <>
                 <Giocatori stato={stato} mioId={mioId} />
                 <div className="mt12"><Scheda giocatore={io} invia={invia} inAzione={inAzione} mio /></div>
+                <div className="mt12"><Chat stato={stato} mioId={mioId} suLetto={segnaLetti} /></div>
                 <div className="mt12"><Registro stato={stato} limite={25} /></div>
               </>
             )
@@ -279,6 +291,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
             <>
               {scheda === "scheda" && <Scheda giocatore={io} invia={invia} inAzione={inAzione} mio />}
               {scheda === "gioc" && <Giocatori stato={stato} mioId={mioId} />}
+              {scheda === "chat" && <Chat stato={stato} mioId={mioId} suLetto={segnaLetti} />}
               {scheda === "log" && <Registro stato={stato} />}
               {scheda === "regole" && <Manuale />}
             </>
@@ -305,6 +318,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
             <span className="icona">{sc.icona}</span>
             {sc.nome}
             {sc.id === "log" && logNuovo && <span className="punto" />}
+            {sc.id === "chat" && chatNuova && <span className="punto" />}
           </button>
         ))}
       </nav>

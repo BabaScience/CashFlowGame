@@ -111,6 +111,9 @@ export function creaStanza(codice, hostId, opzioni = {}) {
     dado: null,
     ultimoTiro: null,   // ultimo lancio, per mostrarlo a tutti
     pending: null,
+    chat: [],
+    chatAperta: true,   // l'host può spegnerla: in classe è obbligatorio poterlo fare
+
     registro: [],
     mazzi: null,   // riempito sotto: mescolare consuma il generatore
     affariVenduti: {},   // idAffareVeloce -> idGiocatore
@@ -525,6 +528,16 @@ export function applicaAzione(stato, azione) {
   }
 
   /* ─── Da qui in poi serve una partita in corso ─── */
+  /* La chat non passa di qui (vedi chat.js), ma il suo interruttore sì:
+     è una decisione della stanza, e va registrata come le altre. */
+  if (tipo === "impostaChat") {
+    if (s.hostId !== giocatoreId) return err("Solo chi ha creato la stanza può spegnere la chat.");
+    s.chatAperta = azione.aperta !== false;
+    if (!s.chatAperta) s.chat = [];
+    nota(s, s.chatAperta ? "La chat è stata riaperta." : "La chat è stata spenta.", "sistema");
+    return ok();
+  }
+
   if (s.fase !== "inCorso") return err("La partita non è in corso.");
   if (!g) return err("Giocatore non trovato.");
   if (g.eliminato) return err("Non sei più in partita.");

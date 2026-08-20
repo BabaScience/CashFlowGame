@@ -25,7 +25,7 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
 
 ## 1 · Completare l'esperienza di gioco
 
-- [ ] **1.1 Chat di stanza**
+- [x] **1.1 Chat di stanza**
       Dentro il documento della stanza, tetto di 80 messaggi, muore col TTL
       esistente: nessuna infrastruttura nuova, nessun costo. Endpoint separato
       con `$push` + `$slice` + `$inc`, fuori dal motore, altrimenti ogni

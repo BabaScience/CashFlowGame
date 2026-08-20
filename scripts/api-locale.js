@@ -7,6 +7,7 @@
  * In produzione valgono le funzioni serverless dentro /api.
  */
 import { creaStanza, codiceStanza, applicaAzione } from "../src/game/motore.js";
+import { preparaMessaggio, accoda } from "../src/game/chat.js";
 
 const TTL = { attesa: 6 * 3600e3, inCorso: 48 * 3600e3, finita: 6 * 3600e3 };
 const stanze = new Map();
@@ -93,6 +94,19 @@ export default function apiLocale() {
             }
 
             return invia(res, 400, { errore: "Operazione sconosciuta." });
+          }
+
+          /* ── chat: append, fuori dal motore come in produzione ── */
+          if (url.pathname === "/api/chat" && req.method === "POST") {
+            const b = await leggiCorpo(req);
+            if (!b.giocatoreId) return invia(res, 400, { errore: "Identificativo mancante." });
+            const codice = (b.codice || "").toUpperCase();
+            const rec = stanze.get(codice);
+            if (!rec || scaduta(rec)) return invia(res, 404, { errore: "Stanza non trovata o scaduta." });
+            const esito = preparaMessaggio(rec.stato, b.giocatoreId, b.testo);
+            if (esito.errore) return invia(res, 400, { errore: esito.errore });
+            salva(accoda(rec.stato, esito.messaggio));
+            return invia(res, 200, { messaggio: esito.messaggio });
           }
 
           /* ── pulizia ── */
