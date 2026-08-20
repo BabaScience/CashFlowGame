@@ -28,6 +28,8 @@ export const EVENTI = [
   "uscitaDallaRuota",  // il momento che il gioco esiste per insegnare
   "vittoria",
   "abbandono",         // si chiude con la partita ancora in corso
+  "sfidaIniziata",
+  "sfidaFinita",
 ];
 
 /** Fasce di ritorno: la granularità che serve, non una in più. */

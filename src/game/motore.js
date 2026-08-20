@@ -124,6 +124,7 @@ export function creaStanza(codice, hostId, opzioni = {}) {
     hostId,
     mercatoId,
     versioneDati,
+    solitaria: Boolean(opzioni.solitaria),
     // Il caso della partita, ricostruibile a ogni lettura dal database.
     seme: (opzioni.seme ?? semeCasuale()) >>> 0,
     passi: 0,
@@ -564,7 +565,11 @@ export function applicaAzione(stato, azione) {
   if (tipo === "avvia") {
     if (s.fase !== "attesa") return err("La partita è già iniziata.");
     if (s.hostId !== giocatoreId) return err("Solo chi ha creato la stanza può avviare.");
-    if (s.giocatori.length < 2) return err("Servono almeno 2 giocatori.");
+    /* Al tavolo servono almeno due persone. In solitaria no: la sfida del
+       giorno è una persona sola contro il proprio conto economico, e il
+       motore è lo stesso — cambia solo chi si ha di fronte. */
+    if (!s.solitaria && s.giocatori.length < 2) return err("Servono almeno 2 giocatori.");
+    if (s.solitaria && s.giocatori.length !== 1) return err("La sfida si gioca da soli.");
 
     // Ognuno riceve il primo Giorno di Paga più i risparmi (regolamento pag. 2).
     for (const p of s.giocatori) {

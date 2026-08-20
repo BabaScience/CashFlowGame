@@ -16,19 +16,19 @@ import { traccia } from "../lib/traccia.js";
  * piedi a chi l'ha appena letta. Chi entra con un codice non sceglie nulla:
  * il mercato è quello della stanza, uno per tavolo.
  */
-export default function Ingresso({ suEntrato, avvisa }) {
+export default function Ingresso({ suEntrato, avvisa, suSfida }) {
   const [mercatoId, setMercato] = useState(
     () => localStorage.getItem("quotazero:mercato") || MERCATO_PREDEFINITO
   );
   return (
     <MercatoProvider mercatoId={mercatoId}>
-      <Modulo suEntrato={suEntrato} avvisa={avvisa}
+      <Modulo suEntrato={suEntrato} avvisa={avvisa} suSfida={suSfida}
         mercatoId={mercatoId} setMercato={setMercato} />
     </MercatoProvider>
   );
 }
 
-function Modulo({ suEntrato, avvisa, mercatoId, setMercato }) {
+function Modulo({ suEntrato, avvisa, suSfida, mercatoId, setMercato }) {
   const { professioni, sogni } = useMercato();
   const [nome, setNome] = useState(localStorage.getItem("quotazero:nome") || "");
   const [professioneId, setProfessione] = useState(professioni[0].id);
@@ -91,7 +91,18 @@ function Modulo({ suEntrato, avvisa, mercatoId, setMercato }) {
         </div>
 
         <div className="carta">
-          <div className="gruppo-campo">
+          {suSfida && (
+              <button onClick={suSfida} className="richiamo-sfida"
+                aria-label="Gioca la sfida del giorno: da solo, cinque minuti">
+                <span>
+                  <strong>Sfida del giorno</strong><br />
+                  <span className="f12" style={{ color: "var(--tenue)" }}>Da solo, cinque minuti. Stessa partita per tutti.</span>
+                </span>
+                <span className="freccia" aria-hidden="true">→</span>
+              </button>
+            )}
+
+            <div className="gruppo-campo">
             <label className="etichetta">Il tuo nome</label>
             <input className="campo" value={nome} maxLength={18}
               onChange={(e) => setNome(e.target.value)} placeholder="Come ti chiamano" />

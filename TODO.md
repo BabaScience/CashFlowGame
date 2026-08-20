@@ -94,11 +94,16 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
 
 ## 4 · Perché tornarci ogni giorno
 
-- [ ] **4.1 Sfida del giorno** — stesso seme per tutti, un tentativo,
-      classifica, risultato condivisibile. Il testo da condividere è il budget
-      pubblicitario.
-- [ ] **4.2 Modalità in solitaria da cinque minuti** — la partita da 60-120
-      minuti non si gioca dieci volte al giorno. Questa sì.
+- [x] **4.1 Sfida del giorno** — stesso seme, stessa professione, stesso
+      mazzo per tutti quelli che giocano oggi; un tentativo; punteggio,
+      serie e risultato condivisibile in stile Wordle. Manca la
+      **classifica**: richiede di conservare un identificativo, e sarebbe la
+      prima cosa che ci fa raccogliere dati su qualcuno. Da progettare con
+      cura, non da aggiungere di corsa.
+- [x] **4.2 Modalità in solitaria** — la sfida gira **tutta nel browser**:
+      nessuna stanza, nessuna scrittura sul database, nessun costo. La
+      modalità che dovrebbe essere giocata più spesso è quella che non
+      consuma niente.
 - [ ] **4.3 Punteggio** — un numero visibile che si muove, misurato sulla
       qualità delle decisioni contro il gioco ottimo, che sappiamo calcolare.
 - [ ] **4.4 Turni asincroni** — togliere il vincolo che sei persone siano
@@ -120,8 +125,9 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       da riempire i segnaposto prima della pubblicazione: contatto del
       titolare e nomi dei fornitori. Manca il testo dell'accordo sul
       trattamento da far firmare a una scuola.
-- [ ] **6.3 Accessibilità** — non solo colore (fatto sulle pedine), aree di
-      tocco, percorso da tastiera, contrasto.
+- [~] **6.3 Accessibilità** — fatte le sagome sulle pedine (non solo colore)
+      e i nomi accessibili sui pulsanti senza testo. Restano da verificare
+      aree di tocco, percorso completo da tastiera e contrasti.
 - [ ] **6.4 Deposito del marchio** — ricerca di anteriorità formale, poi UIBM o
       EUIPO.
 

@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useStanza } from "./hooks/useStanza.js";
 import { Avviso, Bottone } from "./components/Base.jsx";
 import Ingresso from "./screens/Ingresso.jsx";
+import Sfida from "./screens/Sfida.jsx";
 import Attesa from "./screens/Attesa.jsx";
 import Partita from "./screens/Partita.jsx";
 import Vittoria from "./components/Vittoria.jsx";
@@ -20,6 +21,7 @@ export default function App() {
     return localStorage.getItem(CHIAVE_STANZA) || null;
   });
   const [avviso, setAvviso] = useState("");
+  const [sfida, setSfida] = useState(false);
 
   const avvisa = useCallback((t) => {
     setAvviso(t);
@@ -89,11 +91,16 @@ export default function App() {
   }, [codice, avvisa]);
 
   /* ── Nessuna stanza: schermata d'ingresso ── */
+  /* La sfida del giorno non ha stanza: gira tutta nel browser. */
+  if (sfida) {
+    return <Sfida suEsci={() => setSfida(false)} />;
+  }
+
   if (!codice) {
     return (
       <MercatoProvider stato={stato}>
         <div className="schermo" style={{ paddingBottom: 24 }}>
-          <Ingresso suEntrato={setCodice} avvisa={avvisa} />
+          <Ingresso suEntrato={setCodice} avvisa={avvisa} suSfida={() => setSfida(true)} />
           <Avviso testo={avviso} />
         </div>
       </MercatoProvider>
