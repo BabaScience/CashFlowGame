@@ -180,9 +180,18 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       spese familiari (affitto, utenze, auto) a un reddito di una persona
       sola, lasciando margini da 145 € al mese. Incoerenza mia. Le schede
       ora dichiarano il reddito del nucleo.
-- [ ] **Zero bancarotte a Roma** — con margini di nucleo gli imprevisti si
-      assorbono e manca la tensione. Non è un errore, ma il gioco ci guadagna
-      se qualcosa può andare male: valutare un tetto al credito concedibile.
+- [x] **Zero bancarotte a Roma** — risolto cambiando idea su che cosa sia
+      la tensione. Un nucleo romano con mille euro di margine **è** resiliente:
+      forzare la bancarotta sarebbe meno realistico, non più. Il rischio vero
+      di chi vive di affitti non è una spesa una tantum, è che cambi quanto
+      entra ogni mese. Aggiunti tre eventi di mercato — canoni che calano del
+      15%, canoni che salgono del 12%, tassi che salgono — che colpiscono il
+      **flusso** invece dei contanti. Un rialzo dei tassi costa 414 € al mese
+      a chi ha nove mutui e niente a chi non ne ha: la leva viene punita
+      esattamente dove va punita. La bancarotta resta allo 0%, ed è giusto
+      così; la tensione ora è strategica.
+      Da fare in un secondo momento: una perdita del lavoro modellata sul
+      serio (NASpI, durata, percentuale) è materia da Livello 2.
 - [ ] **I contenuti dei mercati non sono tradotti** — con l'interfaccia in
       inglese, professioni, sogni e testi delle carte restano in italiano.
       Difendibile per Roma (il mercato è romano, il suo lessico anche), ma

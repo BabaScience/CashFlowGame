@@ -235,6 +235,15 @@ export const MERCATO = [
     testo: "Turismo record: ogni giocatore incassa 900 per ciascuna attività." },
   { tipo: "evento", effetto: "spesaPerImmobile", importo: 260, nome: "Aumento delle spese condominiali",
     testo: "Assicurazione e manutenzione salgono per tutti: 260 per immobile." },
+  /* Il rischio vero di chi vive di affitti non è una spesa una tantum: è
+     che cambi quanto entra ogni mese. Queste carte lo mettono sul tavolo. */
+  { tipo: "evento", effetto: "variazioneCanoni", variazione: -0.15, nome: "Il mercato degli affitti si raffredda",
+    testo: "Nuove regole sugli affitti brevi e più offerta in città: i canoni calano del 15% per tutti." },
+  { tipo: "evento", effetto: "variazioneCanoni", variazione: 0.12, nome: "Corsa agli affitti",
+    testo: "Domanda in crescita e poca offerta: i canoni salgono del 12% per tutti." },
+  { tipo: "evento", effetto: "variazioneRate", variazione: 0.015, nome: "La BCE alza i tassi",
+    testo: "Chi ha un mutuo a tasso variabile vede salire la rata. Chi non ha debiti non se ne accorge." },
+
   { tipo: "evento", effetto: "nessuno", nome: "Nuova fermata della metro C",
     testo: "Il quartiere si rivaluta. Nessun effetto immediato: i prossimi compratori pagheranno di più." },
 ];

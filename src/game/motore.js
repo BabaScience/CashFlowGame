@@ -407,6 +407,35 @@ function applicaEventoMercato(s, carta) {
         p.contanti += tot;
         nota(s, `${p.nome} incassa ${den(s, tot)} (${n} attività).`, "mercato", p.id);
       }
+    } else if (carta.effetto === "variazioneCanoni") {
+      /* Il canone che cambia per tutti: il rischio più vero di chi vive di
+         affitti, e l'unico modo onesto di mettere tensione in un mercato in
+         cui le famiglie hanno margini larghi. Non toglie contanti — cambia
+         quanto entra ogni mese, che è molto peggio e molto più realistico. */
+      const immobili = p.immobili.filter((i) => i.flusso !== 0);
+      if (immobili.length) {
+        let delta = 0;
+        for (const i of immobili) {
+          const prima = i.flusso;
+          i.flusso = arrotonda(i.flusso * (1 + carta.variazione));
+          delta += i.flusso - prima;
+        }
+        const verso = delta >= 0 ? "sale" : "scende";
+        nota(s, `${p.nome}: il flusso dagli affitti ${verso} di ${den(s, Math.abs(delta))} al mese.`, "mercato", p.id);
+      }
+    } else if (carta.effetto === "variazioneRate") {
+      /* I tassi che si muovono. Colpisce chi ha usato la leva, e solo lui:
+         è esattamente ciò che succede con un mutuo a tasso variabile. */
+      const conMutuo = p.immobili.filter((i) => (i.mutuo || 0) > 0);
+      if (conMutuo.length) {
+        let delta = 0;
+        for (const i of conMutuo) {
+          const aumento = arrotonda((i.mutuo * carta.variazione) / 12);
+          i.flusso -= aumento;
+          delta += aumento;
+        }
+        nota(s, `${p.nome}: le rate salgono di ${den(s, delta)} al mese (${conMutuo.length} mutui).`, "mercato", p.id);
+      }
     }
   }
 }
