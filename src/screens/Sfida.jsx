@@ -7,6 +7,9 @@ import {
   giornoSfida, TURNI_SFIDA,
 } from "../game/sfida.js";
 import { MercatoProvider, useMercato } from "../Mercato.jsx";
+import {
+  riferimentoDelGiorno, registraValutazione, storicoValutazione, fasciaValutazione,
+} from "../game/valutazione.js";
 import { Bottone, Barra } from "../components/Base.jsx";
 import Tabellone from "../components/Tabellone.jsx";
 import Dadi from "../components/Dadi.jsx";
@@ -52,6 +55,8 @@ export default function Sfida({ suEsci, mercatoId = "roma" }) {
 function Presentazione({ giorno, gia, suGioca, suEsci }) {
   const { pacchetto, soldi } = useMercato();
   const storico = storicoSfida();
+  const val = storicoValutazione();
+  const fv = fasciaValutazione(val.valutazione);
 
   return (
     <div className="schermo">
@@ -67,8 +72,21 @@ function Presentazione({ giorno, gia, suGioca, suEsci }) {
             alle tue spese. Un solo tentativo.
           </p>
 
+          <div className="carta mt12" style={{ padding: "14px 16px" }}>
+            <div className="flex tra cen">
+              <div style={{ textAlign: "left" }}>
+                <div className="maiusc tenue">Valutazione</div>
+                <div className="titolo f28" style={{ lineHeight: 1.1 }}>{val.valutazione}</div>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div className="f20">{fv.emoji}</div>
+                <div className="f13 grassetto">{fv.nome}</div>
+              </div>
+            </div>
+          </div>
+
           {(storico.giocate > 0) && (
-            <div className="flex g12" style={{ justifyContent: "center", marginBottom: 18 }}>
+            <div className="flex g12" style={{ justifyContent: "center", margin: "16px 0 18px" }}>
               <Dato k="Serie" v={`${storico.serie} 🔥`} />
               <Dato k="Record" v={`${storico.migliore}`} />
               <Dato k="Giocate" v={`${storico.giocate}`} />
@@ -126,7 +144,11 @@ function Tavolo({ partita, setPartita, giorno, suEsci }) {
 
     if (nuovo.fase === "finita" || nuovo.numeroTurno > TURNI_SFIDA) {
       const res = registraRisultato(nuovo, giorno);
-      setEsito(res);
+      /* Il riferimento gioca la stessa identica partita: il confronto misura
+         le scelte, non la fortuna del mazzo. */
+      const rif = riferimentoDelGiorno(giorno, nuovo.mercatoId);
+      const v = registraValutazione(res.punteggio, rif);
+      setEsito({ ...res, riferimento: rif, valutazione: v });
       traccia("sfidaFinita", { turni: nuovo.numeroTurno });
     }
     return { errore: null };
@@ -231,6 +253,32 @@ function Esito({ stato, esito, giorno, suEsci }) {
           <div style={{ fontSize: 26, letterSpacing: 4, marginBottom: 18 }}>
             {"▰".repeat(f.blocchi)}<span style={{ opacity: 0.25 }}>{"▱".repeat(5 - f.blocchi)}</span>
           </div>
+
+          {esito.valutazione && (
+            <div className="carta" style={{ padding: "14px 16px", marginBottom: 16 }}>
+              <div className="flex tra cen">
+                <div style={{ textAlign: "left" }}>
+                  <div className="maiusc tenue">Valutazione</div>
+                  <div className="titolo f28" style={{ lineHeight: 1.1 }}>
+                    {esito.valutazione.dopo}
+                    <span className="f16" style={{
+                      marginLeft: 8,
+                      color: esito.valutazione.variazione >= 0 ? "var(--verde)" : "var(--rosso)",
+                    }}>
+                      {esito.valutazione.variazione >= 0 ? "+" : ""}{esito.valutazione.variazione}
+                    </span>
+                  </div>
+                </div>
+                <div style={{ textAlign: "right" }}>
+                  <div className="f20">{fasciaValutazione(esito.valutazione.dopo).emoji}</div>
+                  <div className="f13 grassetto">{fasciaValutazione(esito.valutazione.dopo).nome}</div>
+                </div>
+              </div>
+              <p className="f12 tenue" style={{ margin: "10px 0 0", lineHeight: 1.45 }}>
+                Il riferimento ha fatto <strong>{esito.riferimento}</strong> sulla tua stessa partita.
+              </p>
+            </div>
+          )}
 
           <div className="flex g12" style={{ justifyContent: "center", marginBottom: 18 }}>
             <Dato k="Serie" v={`${esito.serie} 🔥`} />

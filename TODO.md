@@ -111,8 +111,13 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       nessuna stanza, nessuna scrittura sul database, nessun costo. La
       modalità che dovrebbe essere giocata più spesso è quella che non
       consuma niente.
-- [ ] **4.3 Punteggio** — un numero visibile che si muove, misurato sulla
-      qualità delle decisioni contro il gioco ottimo, che sappiamo calcolare.
+- [x] **4.3 Valutazione** — un numero che sale e scende, ancorato a un
+      **riferimento che gioca la tua stessa identica partita**: il mazzo
+      della sfida è deterministico, quindi il confronto misura le scelte e
+      non la fortuna. Vive sul dispositivo, quindi niente identificativi.
+      La prima versione era rotta in silenzio — l'ancora sbagliata faceva
+      salire chiunque, anche chi comprava a caso — ed è il motivo per cui i
+      test ora insistono su una cosa sola: giocare peggio deve far scendere.
 - [ ] **4.4 Turni asincroni** — togliere il vincolo che sei persone siano
       libere nello stesso momento, che è il motivo per cui muoiono i giochi da
       tavolo online.
