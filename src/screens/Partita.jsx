@@ -29,6 +29,7 @@ const SCHEDE = [
 
 /** Riquadro che racconta agli altri cosa sta succedendo sul tavolo. */
 function SulTavolo({ stato }) {
+  const { t } = useLingua();
   const p = stato.pending;
   if (!p) return null;
   const chi = stato.giocatori.find((g) => g.id === p.giocatoreId);
@@ -74,6 +75,7 @@ function SulTavolo({ stato }) {
 
 /** Il pannello delle azioni: cambia in base a cosa puoi fare adesso. */
 function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
+  const { t } = useLingua();
   const io = stato.giocatori.find((g) => g.id === mioId);
   const diTurno = stato.giocatori[stato.turno];
   const mioTurno = diTurno?.id === mioId;

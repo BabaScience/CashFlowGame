@@ -165,6 +165,15 @@ export default {
     richiamoSotto: "Short lessons and thirty-second puzzles.",
   },
 
+  decisione: {
+    rimborsoSpiegazione: "Debt {debito} · every {taglio} repaid removes {rata} of expenses.",
+    taglieSpiegazione: "Small Deals are shares, single homes and small businesses: typical down payment {piccolo}. Big Deals are apartment blocks and running companies: typical down payment {grande}. Choose by what you can actually put down.",
+  },
+
+  scheda: {
+    prestitoSpiegazione: "You can borrow in multiples of {taglio}. Every {taglio} costs {rata} a month.",
+  },
+
   mercati: {
     classico: {
       nome: "Classic",

@@ -9,7 +9,7 @@ import { useMercato } from "../Mercato.jsx";
  * come quando qualcuno gira una carta sul tavolo.
  */
 export default function CartaGioco({ classe = "c-piccoli", etichetta, titolo, children, chiave }) {
-  const { categorie } = useMercato();
+
   // La copertura è puramente decorativa: il fronte della carta è SEMPRE
   // disegnato sotto. Se l'animazione non parte — scheda in secondo piano,
   // fotogrammi sospesi dal browser, "riduci animazioni" attivo — la carta
@@ -70,6 +70,13 @@ export function roi(flusso, acconto) {
 
 /** Corpo di una carta Opportunità. */
 export function CorpoAffare({ carta }) {
+  const { categorie, flussoDi } = useMercato();
+  /* Il flusso che conta è quello del livello in cui si sta giocando, non
+     quello stampato sulla carta: al Livello 2 la stessa carta rendeva -20
+     invece dei +151 promessi, e si decideva su un numero che non si
+     avverava. */
+  const flusso = flussoDi(carta);
+
   if (carta.tipo === "azione") {
     return (
       <>
@@ -94,7 +101,7 @@ export function CorpoAffare({ carta }) {
       </>
     );
   }
-  const r = roi(carta.flusso, carta.acconto);
+  const r = roi(flusso, carta.acconto);
   return (
     <>
       <p className="f14" style={{ margin: "0 0 12px", lineHeight: 1.45 }}>{carta.testo}</p>
@@ -104,11 +111,11 @@ export function CorpoAffare({ carta }) {
       <Voce k="Costo totale" v={soldi(carta.costo)} />
       <Voce k="Acconto richiesto" v={soldi(carta.acconto)} />
       <Voce k={carta.tipo === "immobile" ? "Mutuo" : "Debito"} v={soldi(carta.mutuo ?? carta.passivita ?? 0)} />
-      <Voce k="Flusso mensile" v={carta.flusso ? `+${soldi(carta.flusso)}` : "nessuno"} forte />
-      {r !== null && carta.flusso > 0 && (
+      <Voce k="Flusso mensile" v={flusso ? `${flusso > 0 ? "+" : ""}${soldi(flusso)}` : "nessuno"} forte />
+      {r !== null && flusso > 0 && (
         <p className="f12 tenue" style={{ margin: "10px 0 0" }}>
           Rendimento sull'acconto: <strong>{r}%</strong> all'anno
-          ({soldi(carta.flusso)} × 12 ÷ {soldi(carta.acconto)}).
+          ({soldi(flusso)} × 12 ÷ {soldi(carta.acconto)}).
         </p>
       )}
     </>

@@ -178,6 +178,14 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
 
 ## 6bis · Emerso costruendo
 
+- [x] **Nessun test disegnava un componente** — è il difetto che ha generato
+      tutti gli altri di questa sezione. `vite build` compila un componente
+      che usa un nome inesistente, e i test giravano sui moduli. Aggiunto
+      `scripts/prova-schermate.sh`, che impacchetta le schermate con esbuild
+      e le disegna davvero in Node. Ha trovato **sei difetti al primo colpo**,
+      tutti invisibili alla compilazione e alcuni invisibili anche aprendo la
+      pagina, perché comparivano solo in certi momenti della partita.
+
 - [x] **`vite build` non vede i nomi non importati** — due volte di seguito,
       spostando pezzi di `Ingresso.jsx`, una modifica ha perso la riga di
       import: la compilazione passava e la schermata si rompeva solo aprendola.

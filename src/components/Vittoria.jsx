@@ -45,7 +45,7 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
   const { t } = useLingua();
   const { trovaProfessione, trovaSogno, obiettivo } = useMercato();
   const tabella = useMemo(() => classifica(stato), [stato]);
-  const vincitore = tabella.find((t) => t.vincitore);
+  const vincitore = tabella.find((riga) => riga.vincitore);
   const motivo = {
     sogno: t("vittoria.motivo.sogno"),
     rendita: t("vittoria.motivo.rendita", { importo: soldi(obiettivo) }),
@@ -98,51 +98,51 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
           )}
 
           <div className="sezione-tit">{t("vittoria.comeEAndata")}</div>
-          {tabella.map((t, i) => (
+          {tabella.map((riga, i) => (
             <motion.div
-              key={t.id}
+              key={riga.id}
               className="carta mb8"
               initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.3 }}
-              style={t.vincitore ? { borderColor: "var(--oro)", borderWidth: 2 } : undefined}
+              style={riga.vincitore ? { borderColor: "var(--oro)", borderWidth: 2 } : undefined}
             >
               <div className="flex cen g12 mb8">
-                <span className="gettone gettone-p" style={{ background: t.colore }}>
-                  {t.nome.slice(0, 2).toUpperCase()}
+                <span className="gettone gettone-p" style={{ background: riga.colore }}>
+                  {riga.nome.slice(0, 2).toUpperCase()}
                 </span>
                 <div style={{ flex: 1 }}>
                   <div className="grassetto f15">
-                    {i + 1}. {t.nome}
-                    {t.id === mioId && <span className="tenue"> · tu</span>}
+                    {i + 1}. {riga.nome}
+                    {riga.id === mioId && <span className="tenue"> · tu</span>}
                   </div>
                   <div className="f12 tenue">
-                    {trovaProfessione(t.professioneId).nome}
+                    {trovaProfessione(riga.professioneId).nome}
                     {" · "}
-                    {t.eliminato ? "eliminato" : t.tracciato === "veloce" ? "Largo" : "Ruota"}
-                    {t.usciteDallaCorsa ? ` · uscito dalla corsa al suo ${t.usciteDallaCorsa}° turno` : ""}
+                    {riga.eliminato ? "eliminato" : riga.tracciato === "veloce" ? "Largo" : "Ruota"}
+                    {riga.usciteDallaCorsa ? ` · uscito dalla corsa al suo ${riga.usciteDallaCorsa}° turno` : ""}
                   </div>
                 </div>
-                {t.vincitore && <span className="tag tag-oro">{t("vittoria.vincitore")}</span>}
+                {riga.vincitore && <span className="tag tag-oro">{t("vittoria.vincitore")}</span>}
               </div>
 
-              <KV k="Contanti" v={soldi(t.contanti)} />
-              {t.tracciato === "veloce" ? (
+              <KV k="Contanti" v={soldi(riga.contanti)} />
+              {riga.tracciato === "veloce" ? (
                 <>
-                  <KV k="Flusso mensile" v={soldi(t.redditoRendita)} />
-                  <KV k="Crescita al Largo" v={`+${soldi(t.guadagnoVeloce)}`} />
-                  <KV k="Affari" v={String(t.affariVeloci)} />
+                  <KV k="Flusso mensile" v={soldi(riga.redditoRendita)} />
+                  <KV k="Crescita al Largo" v={`+${soldi(riga.guadagnoVeloce)}`} />
+                  <KV k="Affari" v={String(riga.affariVeloci)} />
                 </>
               ) : (
                 <>
-                  <KV k="Reddito passivo" v={soldi(t.redditoPassivo)} />
-                  <KV k="Spese totali" v={soldi(t.speseTotali)} />
-                  <KV k="Giorno di paga" v={soldi(t.flussoMensile)} />
-                  <KV k="Attivi / Passività" v={`${soldi(t.valoreAttivi)} / ${soldi(t.passivitaTotali)}`} />
+                  <KV k="Reddito passivo" v={soldi(riga.redditoPassivo)} />
+                  <KV k="Spese totali" v={soldi(riga.speseTotali)} />
+                  <KV k="Giorno di paga" v={soldi(riga.flussoMensile)} />
+                  <KV k="Attivi / Passività" v={`${soldi(riga.valoreAttivi)} / ${soldi(riga.passivitaTotali)}`} />
                 </>
               )}
-              <KV k="Patrimonio netto" v={soldi(t.patrimonioNetto)} forte />
-              <KV k="Figli" v={String(t.figli)} />
+              <KV k="Patrimonio netto" v={soldi(riga.patrimonioNetto)} forte />
+              <KV k="Figli" v={String(riga.figli)} />
             </motion.div>
           ))}
 

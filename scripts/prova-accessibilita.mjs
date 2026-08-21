@@ -142,5 +142,52 @@ prova("Gli avvisi importanti sono annunciati", () => {
   vero(/aria-live|role="status"/.test(dadi), "il risultato del dado va annunciato");
 });
 
+console.log("\n── Ogni componente che traduce chiede la lingua ──");
+
+prova("Nessun componente usa il mercato senza useMercato()", () => {
+  /* `CorpoAffare` usava `categorie` senza il gancio, e `SchedaVeloce`
+     usava `obiettivo`: entrambi sotto-componenti che compaiono solo in
+     certi momenti della partita, quindi il difetto non si vedeva
+     all'apertura. */
+  const NOMI = ["categorie", "debitiEstinguibili", "etichetteSpese", "etichettePassivita",
+                "obiettivo", "trovaProfessione", "trovaSogno", "trovaAffare", "professioni", "sogni"];
+  const guai = [];
+  for (const f of JSX) {
+    const src = readFileSync(f, "utf8");
+    for (const parte of src.split(/\n(?=(?:export )?(?:default )?function [A-Z]\w*\()/)) {
+      const m = parte.match(/^(?:export )?(?:default )?function ([A-Z]\w*)\(/);
+      if (!m || parte.includes("useMercato()")) continue;
+      for (const n of NOMI) {
+        const usato = new RegExp(`(?<![\\w.$])${n}\\s*[([.]`).test(parte);
+        const locale = new RegExp(`(?:const|let)\\s*\\{[^}]*\\b${n}\\b`).test(parte)
+                    || new RegExp(`function [A-Z]\\w*\\([^)]*\\b${n}\\b`).test(parte);
+        if (usato && !locale) guai.push(`${relative(RADICE, f)} · ${m[1]}() usa "${n}"`);
+      }
+    }
+  }
+  if (guai.length) throw new Error(guai.join("\n       "));
+});
+
+prova("Nessun componente usa t() senza useLingua()", () => {
+  /* `SulTavolo` e `Azioni` usavano t() senza il gancio: sono
+     sotto-componenti che compaiono solo quando c'è una decisione in
+     sospeso, quindi la schermata si rompeva a metà partita e non
+     all'apertura. */
+  const guai = [];
+  for (const f of JSX) {
+    const src = readFileSync(f, "utf8");
+    const parti = src.split(/\n(?=(?:export )?(?:default )?function [A-Z]\w*\()/);
+    for (const parte of parti) {
+      const m = parte.match(/^(?:export )?(?:default )?function ([A-Z]\w*)\(/);
+      if (!m) continue;
+      const usa = /(?<![\w.$])t\(/.test(parte);
+      if (usa && !parte.includes("useLingua()")) {
+        guai.push(`${relative(RADICE, f)} · ${m[1]}()`);
+      }
+    }
+  }
+  if (guai.length) throw new Error(guai.join("\n       "));
+});
+
 console.log(`\n${passati} test superati, ${falliti} falliti\n`);
 if (falliti) process.exit(1);

@@ -3,12 +3,14 @@ import { motion } from "framer-motion";
 import { KV, Bottone, Barra, Denaro } from "./Base.jsx";
 import { soldi, riepilogo } from "../game/finanze.js";
 import { useMercato } from "../Mercato.jsx";
+import { useLingua } from "../Lingua.jsx";
 
 /**
  * La scheda finanziaria: Conto Economico e Stato Patrimoniale,
  * i due prospetti che chiunque abbia un mutuo dovrebbe saper leggere.
  */
 export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
+  const { t } = useLingua();
   const { etichetteSpese, debitiEstinguibili, trovaProfessione, trovaSogno, trovaAffare, obiettivo } = useMercato();
   const [apri, setApri] = useState("conto");
   const [prestito, setPrestito] = useState(5000);
@@ -149,7 +151,9 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
       {mio && sezione("banca", "Banca", (
         <>
           <p className="f13 tenue" style={{ margin: "0 0 12px", lineHeight: 1.5 }}>
-            Puoi chiedere prestiti a multipli di $1.000. Ogni $1.000 costa $100 al mese.
+            {t("scheda.prestitoSpiegazione", {
+              taglio: soldi(1000), rata: soldi(Math.round(1000 * (g.tassoPrestito ?? 0.1))),
+            })}
             Puoi farlo in qualunque momento del tuo turno.
           </p>
           <label className="etichetta">Importo del prestito</label>
@@ -163,8 +167,8 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
               onClick={() => setPrestito((v) => v + 1000)}>+</Bottone>
           </div>
           <p className="f12 tenue mb12" style={{ margin: "0 0 12px" }}>
-            Costo: <strong className="numeri">{soldi(prestito / 10)}</strong> al mese ·
-            il tuo flusso passerebbe a <strong className="numeri">{soldi(r.flussoMensile - prestito / 10)}</strong>.
+            Costo: <strong className="numeri">{soldi(Math.round(prestito * (g.tassoPrestito ?? TASSO_PRESTITO)))}</strong> al mese ·
+            il tuo flusso passerebbe a <strong className="numeri">{soldi(r.flussoMensile - Math.round(prestito * (g.tassoPrestito ?? TASSO_PRESTITO)))}</strong>.
           </p>
           <Bottone variante="btn-blu" disabled={inAzione}
             onClick={() => fai({ tipo: "prestito", importo: prestito })}>
@@ -213,7 +217,12 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
 
 /** Scheda ridotta per chi è già al Largo. */
 function SchedaVeloce({ giocatore: g }) {
-  const obiettivo = g.redditoInizialeVeloce + obiettivo;
+  /* `obiettivo` arriva dal mercato. La rinomina da OBIETTIVO_RENDITA aveva
+     prodotto `const obiettivo = ... + obiettivo`, cioè una costante che
+     citava sé stessa: la scheda esplodeva per chiunque avesse preso il
+     largo, e nessun test la disegnava in quello stato. */
+  const { obiettivo, trovaSogno, trovaAffare } = useMercato();
+  const traguardo = g.redditoInizialeVeloce + obiettivo;
   const fatto = g.redditoRendita - g.redditoInizialeVeloce;
   const sogno = trovaSogno(g.sognoId);
   return (
@@ -224,10 +233,10 @@ function SchedaVeloce({ giocatore: g }) {
         <KV k="Contanti" v={soldi(g.contanti)} forte />
         <KV k="Reddito del Giorno di Rendita" v={soldi(g.redditoRendita)} forte />
         <KV k="Reddito iniziale" v={soldi(g.redditoInizialeVeloce)} />
-        <KV k="Obiettivo per vincere" v={soldi(obiettivo)} />
+        <KV k="Obiettivo per vincere" v={soldi(traguardo)} />
         <div className="mt12">
           <div className="flex tra f12 mb4">
-            <span className="tenue">Progresso verso +{soldi(obiettivo)}</span>
+            <span className="tenue">Progresso verso +{soldi(traguardo)}</span>
             <span className="numeri grassetto">{soldi(fatto)}</span>
           </div>
           <Barra valore={fatto / obiettivo} />

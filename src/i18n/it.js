@@ -159,6 +159,15 @@ export default {
     richiamoSotto: "Lezioni brevi e quesiti da trenta secondi.",
   },
 
+  decisione: {
+    rimborsoSpiegazione: "Debito {debito} · ogni {taglio} rimborsati tolgono {rata} di spese.",
+    taglieSpiegazione: "I Piccoli Affari sono titoli, case singole e piccole attività: anticipo tipico {piccolo}. I Grandi Affari sono palazzine, stabili e aziende avviate: anticipo tipico {grande}. Scegli in base a quanto hai in mano.",
+  },
+
+  scheda: {
+    prestitoSpiegazione: "Puoi chiedere prestiti a multipli di {taglio}. Ogni {taglio} costa {rata} al mese.",
+  },
+
   mercati: {
     classico: {
       nome: "Classico",

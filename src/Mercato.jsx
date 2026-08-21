@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useMemo } from "react";
 import { getPacchetto, pacchettoDi } from "./game/mercati/indice.js";
+import { flussoAlLivello, vociFlusso, LIVELLO_PREDEFINITO } from "./game/regole/livelli.js";
 import { soldi as formatta, impostaValutaCorrente } from "./game/finanze.js";
 
 /**
@@ -22,6 +23,7 @@ export function MercatoProvider({ stato, mercatoId, children }) {
   const valore = useMemo(() => {
     const pacchetto = stato ? pacchettoDi(stato) : getPacchetto(mercatoId);
     const { valuta } = pacchetto;
+    const livello = stato?.livello ?? LIVELLO_PREDEFINITO;
     // Da qui in poi ogni soldi() dell'interfaccia parla la valuta giusta.
     impostaValutaCorrente(valuta);
     return {
@@ -36,6 +38,13 @@ export function MercatoProvider({ stato, mercatoId, children }) {
       etichettePassivita: pacchetto.etichettePassivita,
       debitiEstinguibili: pacchetto.debitiEstinguibili,
       obiettivo: pacchetto.obiettivoRendita,
+      livello,
+      /* Il flusso di una carta al livello di QUESTA stanza. La carta porta
+         stampato il numero del Livello 1: mostrarlo così com'è al Livello 2
+         significa far decidere su un numero che poi non si avvera — la
+         carta prometteva +151 e l'immobile ne rendeva -20. */
+      flussoDi: (carta) => flussoAlLivello(carta, livello, pacchetto.fisco),
+      vociDi: (carta) => vociFlusso(carta, livello, pacchetto.fisco),
       trovaProfessione: (id) =>
         pacchetto.professioni.find((p) => p.id === id) || pacchetto.professioni[0],
       trovaSogno: (id) => pacchetto.sogni.find((x) => x.id === id) || pacchetto.sogni[0],

@@ -203,5 +203,32 @@ prova("Nessun messaggio scrive un simbolo di valuta a mano", () => {
   }
 });
 
+prova("Nessun componente scrive un simbolo di valuta a mano", async () => {
+  /* La spiegazione delle taglie diceva "$5.000" dentro una partita in euro,
+     e la nota sui prestiti "$1.000 costa $100". La valuta viene dal mercato:
+     scriverla a mano funziona finché il gioco ha una valuta sola. */
+  const { readdirSync, statSync, readFileSync } = await import("node:fs");
+  const { join, relative } = await import("node:path");
+  const RADICE = new URL("..", import.meta.url).pathname;
+  const file = (dir, out = []) => {
+    for (const n of readdirSync(dir)) {
+      const p = join(dir, n);
+      if (statSync(p).isDirectory()) file(p, out);
+      else if (/\.jsx$/.test(p)) out.push(p);
+    }
+    return out;
+  };
+  const guai = [];
+  for (const f of file(join(RADICE, "src"))) {
+    const src = readFileSync(f, "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, " ")
+      .replace(/\/\/[^\n]*/g, " ");
+    for (const m of src.matchAll(/[$€£]\s?[0-9][\d.,]*/g)) {
+      guai.push(`${relative(RADICE, f)}: "${m[0]}"`);
+    }
+  }
+  if (guai.length) throw new Error(guai.join("\n       "));
+});
+
 console.log(`\n${passati} test superati, ${falliti} falliti\n`);
 if (falliti) process.exit(1);

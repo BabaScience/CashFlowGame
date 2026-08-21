@@ -3,6 +3,8 @@ import { Foglio, Bottone, Denaro } from "./Base.jsx";
 import CartaGioco, { CorpoAffare, Voce } from "./CartaGioco.jsx";
 import { soldi, flussoMensile, riepilogo } from "../game/finanze.js";
 import { useMercato } from "../Mercato.jsx";
+import { useLingua } from "../Lingua.jsx";
+import { TASSO_PRESTITO } from "../game/finanze.js";
 
 /**
  * Tutte le decisioni del gioco passano da qui.
@@ -10,7 +12,19 @@ import { useMercato } from "../Mercato.jsx";
  * vedono la stessa carta nel riquadro "sul tavolo" della schermata di gioco.
  */
 export default function Decisione({ stato, mioId, invia, inAzione }) {
-  const { categorie, debitiEstinguibili } = useMercato();
+  const { t } = useLingua();
+  /* Il tasso del fido viaggia col giocatore, come lo stipendio: scriverlo a
+     mano significava mostrare il tasso di un altro mercato. */
+  const rataDi = (importo) => Math.round(importo * (io?.tassoPrestito ?? TASSO_PRESTITO));
+  const { categorie, debitiEstinguibili, pacchetto, flussoDi } = useMercato();
+  /* Le due taglie non sono separate da una soglia netta: su Roma i mazzi
+     si sovrappongono nei prezzi e si distinguono per tipo, non per cifra.
+     Annunciare una soglia produceva una frase falsa ("i piccoli costano al
+     massimo 137.500, i grandi partono da 34.000"). Si mostra invece
+     l'anticipo tipico, che è la cosa che serve a decidere. */
+  const mediana = (a) => { const b = [...a].sort((x, y) => x - y); return b[b.length >> 1]; };
+  const tipicoPiccoli = mediana(pacchetto.mazzi.piccoli.filter((c) => c.acconto).map((c) => c.acconto));
+  const tipicoGrandi = mediana(pacchetto.mazzi.grandi.filter((c) => c.acconto).map((c) => c.acconto));
   const p = stato.pending;
   const io = stato.giocatori.find((g) => g.id === mioId);
   const [quantita, setQuantita] = useState("");
@@ -42,9 +56,11 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
         <div className="maiusc tenue mb8">Opportunità</div>
         <h3 className="titolo f22 mb12" style={{ margin: "0 0 12px" }}>Che affare vuoi guardare?</h3>
         <p className="f14 tenue mb16" style={{ margin: "0 0 16px", lineHeight: 1.5 }}>
-          I Piccoli Affari costano al massimo $5.000 di entrata: titoli, case singole,
-          piccole attività. I Grandi Affari partono da $6.000 e comprendono palazzine
-          e aziende avviate.
+          {/* Le soglie sono in valuta del mercato: scritte a mano restavano
+              in dollari dentro una partita in euro. */}
+          {t("decisione.taglieSpiegazione", {
+            piccolo: soldi(tipicoPiccoli), grande: soldi(tipicoGrandi),
+          })}
         </p>
         <div className="riga-btn">
           <Bottone variante="btn-verde" disabled={inAzione}
@@ -117,10 +133,10 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
             <p className="f13" style={{ margin: 0, lineHeight: 1.5 }}>
               Ti mancano <strong className="numeri">{soldi(mancano)}</strong>.
               Puoi chiedere un prestito di <strong className="numeri">{soldi(prestitoUtile)}</strong>:
-              costerebbe <strong className="numeri">{soldi(prestitoUtile / 10)}</strong> al mese
-              {c.flusso > 0 && (
-                <> contro un flusso di <strong className="numeri">+{soldi(c.flusso)}</strong>
-                  {c.flusso > prestitoUtile / 10 ? " — conviene." : " — non conviene."}</>
+              costerebbe <strong className="numeri">{soldi(rataDi(prestitoUtile))}</strong> al mese
+              {flussoDi(c) > 0 && (
+                <> contro un flusso di <strong className="numeri">+{soldi(flussoDi(c))}</strong>
+                  {flussoDi(c) > rataDi(prestitoUtile) ? " — conviene." : " — non conviene."}</>
               )}
             </p>
             <Bottone variante="btn-fantasma btn-piccolo pieno mt12" disabled={inAzione}
@@ -376,7 +392,11 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
           <div className="carta mb8" style={{ padding: 12 }}>
             <div className="grassetto f14 mb4">Rimborsa il prestito bancario</div>
             <div className="f12 tenue mb8">
-              Debito {soldi(io.passivita.prestitoBanca)} · ogni $1.000 rimborsati tolgono $100 di spese.
+              {t("decisione.rimborsoSpiegazione", {
+                debito: soldi(io.passivita.prestitoBanca),
+                taglio: soldi(1000),
+                rata: soldi(Math.round(1000 * (io.tassoPrestito ?? 0.1))),
+              })}
             </div>
             <Bottone variante="btn-blu btn-piccolo pieno" disabled={inAzione}
               onClick={() => fai({

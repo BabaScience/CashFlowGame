@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Bottone } from "../components/Base.jsx";
 import { MercatoProvider, useMercato } from "../Mercato.jsx";
-import { MERCATI, MERCATO_PREDEFINITO } from "../game/mercati/indice.js";
+import { MERCATI, MERCATO_PREDEFINITO, getPacchetto } from "../game/mercati/indice.js";
+import { LIVELLI, LIVELLO_PREDEFINITO } from "../game/regole/livelli.js";
 import { soldi } from "../game/finanze.js";
 import * as api from "../lib/api.js";
 import { traccia } from "../lib/traccia.js";
@@ -34,6 +35,10 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
   /* Le partite lasciate a metà. Il gioco a turni distanziati serve a poco
      se poi non si ritrova la strada per tornarci. */
   const [aperte, setAperte] = useState(() => partiteAperte());
+  /* Il livello di realismo esiste solo dove esiste un fisco da mostrare:
+     "classico" è un'economia astratta e non ha imposte da aprire. */
+  const [livello, setLivello] = useState(LIVELLO_PREDEFINITO);
+  const haFisco = Boolean(getPacchetto(mercatoId).fisco);
   const { t, lingua, cambiaLingua, lingue } = useLingua();
   const { professioni, sogni } = useMercato();
   const [nome, setNome] = useState(localStorage.getItem("quotazero:nome") || "");
@@ -50,7 +55,12 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
   const [occupato, setOccupato] = useState(false);
   const [modo, setModo] = useState("crea");
 
-  const prof = professioni.find((p) => p.id === professioneId);
+  /* Il ripiego non è pigrizia: cambiando mercato, `professioneId` resta per
+     un attimo quello del mercato precedente. L'effetto che lo corregge gira
+     DOPO il primo disegno, e in quel disegno `find` restituiva undefined.
+     La schermata si rompeva a metà del cambio, e nessun test la coglieva
+     perché nessuno cambiava mercato. */
+  const prof = professioni.find((p) => p.id === professioneId) || professioni[0];
   const speseProf = Object.values(prof.spese).reduce((a, b) => a + b, 0);
   const flussoProf = prof.stipendio - speseProf;
 
@@ -61,7 +71,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
     setOccupato(true);
     try {
       ricorda();
-      const r = await api.creaStanza(nome.trim(), professioneId, sognoId, mercatoId);
+      const r = await api.creaStanza(nome.trim(), professioneId, sognoId, mercatoId, haFisco ? livello : 1);
       traccia("stanzaCreata", { mercato: mercatoId });
       suEntrato(r.stato.codice);
     } catch (e) { avvisa(e.message); }

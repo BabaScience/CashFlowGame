@@ -159,5 +159,54 @@ prova("Chi ha un fisco lo ha completo", () => {
   }
 });
 
+console.log("\n── Dal modulo alla stanza ──");
+
+prova("Il client passa il livello, e la firma non è andata fuori sincrono", async () => {
+  const { readFileSync } = await import("node:fs");
+  const api = readFileSync(new URL("../src/lib/api.js", import.meta.url), "utf8");
+  const ingresso = readFileSync(new URL("../src/screens/Ingresso.jsx", import.meta.url), "utf8");
+  const locale = readFileSync(new URL("../scripts/api-locale.js", import.meta.url), "utf8");
+  const stanza = readFileSync(new URL("../api/room.js", import.meta.url), "utf8");
+
+  const firma = api.match(/export const creaStanza = \(([^)]*)\)/)?.[1] || "";
+  const attesi = firma.split(",").map((x) => x.trim()).filter(Boolean);
+  vero(attesi.includes("livello"), "api.creaStanza deve accettare il livello");
+
+  const chiamata = ingresso.match(/api\.creaStanza\(([^;]*?)\);/s)?.[1] || "";
+  const passati_ = chiamata.split(",").length;
+  vero(passati_ >= attesi.length,
+    `Ingresso passa ${passati_} argomenti su ${attesi.length}: la firma è cresciuta e il chiamante è rimasto indietro`);
+  vero(/livello/.test(chiamata), "Ingresso non passa il livello");
+
+  for (const [nome, testo] of [["api-locale", locale], ["api/room", stanza]]) {
+    vero(/livello/.test(testo), `${nome} non legge il livello dal corpo della richiesta`);
+  }
+});
+
+prova("L'interfaccia non scrive a mano il tasso del prestito", async () => {
+  /* Mostrava "18.000 € costano 1.800 € al mese" anche su Roma, dove il
+     fido costa l'1,2%: il consiglio era sbagliato di otto volte. Il tasso
+     viaggia col giocatore, come lo stipendio. */
+  const { readFileSync, readdirSync, statSync } = await import("node:fs");
+  const { join, relative } = await import("node:path");
+  const RADICE = new URL("..", import.meta.url).pathname;
+  const file = (dir, out = []) => {
+    for (const n of readdirSync(dir)) {
+      const p = join(dir, n);
+      if (statSync(p).isDirectory()) file(p, out);
+      else if (/\.jsx$/.test(p)) out.push(p);
+    }
+    return out;
+  };
+  const guai = [];
+  for (const f of file(join(RADICE, "src"))) {
+    const src = readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, " ").replace(/\/\/[^\n]*/g, " ");
+    for (const m of src.matchAll(/\b(?:prestito|prestitoUtile|importo)\s*\/\s*10\b/g)) {
+      guai.push(`${relative(RADICE, f)}: "${m[0]}"`);
+    }
+  }
+  if (guai.length) throw new Error(guai.join("\n       "));
+});
+
 console.log(`\n${passati} test superati, ${falliti} falliti\n`);
 if (falliti) process.exit(1);
