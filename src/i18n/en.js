@@ -216,6 +216,7 @@ export default {
   },
 
   scheda: {
+    tiManca: "You still need {importo} a month of passive income. This market asks for twice your expenses: leaving at break-even means coming back at the first surprise.",
     prestitoSpiegazione: "You can borrow in multiples of {taglio}. Every {taglio} costs {rata} a month.",
   },
 
@@ -290,7 +291,6 @@ export default {
   scheda: {
     contanti: "Cash",
     redditoVersoSpese: "Passive income against expenses",
-    tiManca: "You still need {importo} a month of passive income to leave the Wheel.",
     puoiUscire: "Your passive income beats your expenses: you can leave the Wheel!",
     giornoDiPaga: "Payday",
     passivo: "Passive",

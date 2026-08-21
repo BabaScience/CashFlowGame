@@ -6,7 +6,11 @@ import { componiUri, uriOscurata } from "../api/_lib/uri.js";
 
 let ok = 0, ko = 0;
 const test = (nome, fn) => {
-  try { fn(); console.log(`  ✅ ${nome}`); ok++; }
+  try {
+    const r = fn();
+    if (r && typeof r.then === "function") {
+      throw new Error("prova asincrona: questo banco è sincrono, le verifiche non girerebbero");
+    } console.log(`  ✅ ${nome}`); ok++; }
   catch (e) { console.log(`  ❌ ${nome}\n       ${e.message}`); ko++; }
 };
 const eq = (a, b, m = "") => { if (a !== b) throw new Error(`${m}\n       atteso:  ${b}\n       ottenuto:${a}`); };

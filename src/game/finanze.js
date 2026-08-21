@@ -89,14 +89,30 @@ export function valoreAttivi(g) {
   return arrotonda(titoli + imm + att);
 }
 
-/** È libero dalla Ruota? Reddito passivo > Spese totali. */
+/**
+ * Quanto reddito passivo serve per uscire, in questa partita.
+ *
+ * Il margine viaggia col giocatore come lo stipendio e il tasso: `speseTotali`
+ * è chiamata da mezza interfaccia, e risalire ogni volta al pacchetto del
+ * mercato costerebbe più di quanto valga.
+ */
+export const sogliaUscita = (g) => speseTotali(g) * (g.margineUscita ?? 1);
+
+/**
+ * È libero dalla Ruota?
+ *
+ * Non basta pareggiare. A 1× si esce nel mese esatto in cui i conti si
+ * toccano — una rata nuova, un mese di sfitto, un inquilino che non paga, e
+ * si è dentro di nuovo. Nessuno lascia il lavoro al pareggio; ci si lascia
+ * un margine, e su Roma il margine è il doppio.
+ */
 export function fuoriDallaCorsa(g) {
-  return redditoPassivo(g) > speseTotali(g);
+  return redditoPassivo(g) > sogliaUscita(g);
 }
 
 /** Percentuale di avanzamento verso la libertà finanziaria (0 - 1). */
 export function progressoLiberta(g) {
-  const sp = speseTotali(g);
+  const sp = sogliaUscita(g);
   if (sp <= 0) return 1;
   return Math.min(1, redditoPassivo(g) / sp);
 }
@@ -128,8 +144,13 @@ export function riepilogo(g) {
     flussoMensile: totEntrate - totUscite,
     passivitaTotali: passivitaTotali(g),
     valoreAttivi: valoreAttivi(g),
-    libero: passivo > totUscite,
-    progresso: totUscite > 0 ? Math.min(1, passivo / totUscite) : 1,
+    /* La soglia, non le spese: su Roma serve il doppio delle spese, e
+       l'interfaccia deve mostrare quella barra lì — altrimenti dice
+       "ci sei" a metà strada. */
+    soglia: arrotonda(totUscite * (g.margineUscita ?? 1)),
+    margineUscita: g.margineUscita ?? 1,
+    libero: passivo > totUscite * (g.margineUscita ?? 1),
+    progresso: totUscite > 0 ? Math.min(1, passivo / (totUscite * (g.margineUscita ?? 1))) : 1,
   };
 }
 

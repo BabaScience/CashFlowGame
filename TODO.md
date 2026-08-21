@@ -283,6 +283,34 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       già (`etichettePassivita`): va usato quello, come fa ora il riquadro
       del debito.
 
+- [x] **La scorciatoia del prestito** — fatto. Si prendevano 100.000 € dalla
+      banca senza alcun controllo, si compravano due attività e si usciva
+      dalla Ruota in cinque turni. Misurato prima: con il prestito 13 partite
+      su 40 finivano in fuga (mediana 25 turni, minimo 5, quattro entro i 15);
+      senza, 1 su 40. Non era una strategia, era **la** strategia.
+      Corretti: il tetto del credito (rata totale ≤ ⅓ del netto, massimo
+      75.000 €, canone di casa escluso perché non è una rata di
+      finanziamento), i costi di vendita (agenzia 3% + imposta sostitutiva
+      26% sulla plusvalenza entro cinque anni), e la soglia d'uscita, che su
+      Roma è il doppio delle spese.
+- [ ] **Le attività rendono il 32% l'anno, senza rischio** — è l'ultimo pezzo
+      irrealistico rimasto, e non si risolve con una tabella. Come *prezzo*
+      quei numeri reggono: 95.000 € per 31.800 € l'anno è circa 3× gli utili,
+      che è un multiplo plausibile per una micro-impresa. Quello che non
+      regge è la **certezza**: nel gioco un'attività non chiude, non ha
+      bisogno di qualcuno che ci lavori, e non ha annate storte. Il 32% nella
+      realtà è il prezzo di quel rischio.
+      Le due strade: abbassare le rese (semplice, e rende Roma una
+      passeggiata di soli immobili negativi), oppure lasciare i prezzi e
+      aggiungere il rischio — variabilità degli utili e possibilità di
+      chiusura. La seconda è più onesta e più interessante, ma è una scelta
+      di progetto e cambia il ritmo della partita.
+- [ ] **Il debito delle attività non costa niente** — comprando la Pizzeria a
+      140.000 € con 45.000 € di acconto restano 95.000 € di debito che non
+      ha rata. I mutui immobiliari ce l'hanno. Va dato un costo, ma va fatto
+      insieme alla decisione sopra: da solo azzera quasi tutte le attività e
+      Roma diventa invincibile.
+
 ## 7 · Quando funzionerà
 
 - [-] **7.1 Costo del polling** — sei giocatori a 1,4 s fanno ~15.400 chiamate

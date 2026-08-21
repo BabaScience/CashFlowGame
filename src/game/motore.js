@@ -12,6 +12,7 @@ import { flussoAlLivello, LIVELLO_PREDEFINITO } from "./regole/livelli.js";
 import {
   redditoPassivo, redditoTotale, speseTotali, flussoMensile,
   fuoriDallaCorsa, riepilogo, arrotonda, soldi, MAX_FIGLI,
+  ratePrestito, TASSO_PRESTITO,
 } from "./finanze.js";
 import { semeCasuale, dado, idBreve, mescola } from "./caso.js";
 
@@ -100,6 +101,9 @@ export function creaGiocatore(s, id, nome, professioneId, sognoId, indice) {
     stipendio: p.stipendio,
     perFiglio: p.perFiglio,
     tassoPrestito: pacchettoDi(s).tassoPrestito,
+    /* Il margine d'uscita viaggia col giocatore: `fuoriDallaCorsa` è
+       chiamata da mezza interfaccia e non deve risalire allo stato. */
+    margineUscita: pacchettoDi(s).margineUscita ?? 1,
     figli: 0,
     spese: { ...p.spese },
     passivita: { ...p.passivita, prestitoBanca: 0 },
@@ -259,6 +263,36 @@ function giorniRenditaPassati(da, passi) {
     if (PERCORSO_LARGO[(da + i) % N_LARGO].tipo === "rendita") n += 1;
   }
   return n;
+}
+
+/**
+ * Quanto la banca presterebbe ancora a questo giocatore.
+ *
+ * Due vincoli, come nella realtà:
+ *   · la rata totale — quelle già in corso più la nuova — non supera un
+ *     terzo del reddito netto mensile;
+ *   · c'è comunque un tetto, perché il credito al consumo non arriva a
+ *     cifre da mutuo.
+ *
+ * Il reddito che conta è quello dimostrabile: lo stipendio e le rendite già
+ * in essere, non quelle che si comprerebbero col prestito.
+ */
+function massimoPrestabile(s, g) {
+  const cc = pacchettoDi(s).creditoConsumo;
+  if (!cc) return 500000;  // mercati che non lo dichiarano: com'era prima
+  const tasso = g.tassoPrestito ?? TASSO_PRESTITO;
+  const reddito = g.stipendio + redditoPassivo(g);
+  /* Le rate già in corso: tutte le voci di spesa che sono rate, più il
+     costo del fido già acceso. */
+  const escluse = new Set(cc.vociEscluse || []);
+  const rateInCorso = ratePrestito(g)
+    + (pacchettoDi(s).debitiEstinguibili || [])
+      .filter((d) => !escluse.has(d.spesa))
+      .reduce((somma, d) => somma + (g.spese[d.spesa] || 0), 0);
+  const spazio = reddito * cc.quotaRedditoMax - rateInCorso;
+  if (spazio <= 0) return 0;
+  const perRata = Math.floor(spazio / tasso / 1000) * 1000;
+  return Math.max(0, Math.min(perRata, cc.importoMassimo));
 }
 
 /* ═══════════════ pagamenti ═══════════════ */
@@ -708,7 +742,18 @@ export function applicaAzione(stato, azione) {
   if (tipo === "prestito") {
     const imp = Math.floor(azione.importo || 0);
     if (imp < 1000 || imp % 1000 !== 0) return err("Il prestito è a multipli di $1.000.");
-    if (imp > 500000) return err("Importo troppo alto.");
+    /* Quanto la banca è disposta a prestare.
+       Prima: mezzo milione a chiunque, senza guardare niente. Nella realtà
+       il credito al consumo si concede se la rata — sommata a quelle già in
+       corso — non supera circa un terzo del reddito netto mensile, ed è
+       comunque limitato a poche decine di migliaia di euro. Vedi
+       mercati/roma/fonti.js. */
+    const tetto = massimoPrestabile(s, g);
+    if (imp > tetto) {
+      return err(tetto <= 0
+        ? `La banca non concede altro credito: le rate che hai già assorbono un terzo del tuo reddito.`
+        : `La banca arriva a ${den(s, tetto)}: la rata non può superare un terzo del reddito netto.`);
+    }
     g.passivita.prestitoBanca += imp;
     g.contanti += imp;
     nota(s, `${g.nome} chiede un prestito di ${den(s, imp)} (rata +${den(s, imp / 10)}/mese).`, "r25", { nome: g.nome, importo: den(s, imp), importo2: den(s, imp / 10) }, "prestito", g.id);
@@ -1055,6 +1100,10 @@ function compraCarta(s, g, c, azione) {
       rid: idBreve(s), categoria: c.categoria, nome: c.nome,
       costo: c.costo, acconto: c.acconto, mutuo: c.mutuo, flusso: flussoReale,
       canone: c.canone, rata: c.rata,
+      /* Il mese dell'acquisto: la plusvalenza si tassa solo se si rivende
+         entro cinque anni, ed è la regola che distingue l'investimento
+         dalla speculazione. Senza questa data non si può sapere. */
+      mesiAcquisto: g.mesi ?? 0,
     });
     nota(s, `${g.nome} compra "${c.nome}" (acconto ${den(s, c.acconto)}, flusso +${den(s, c.flusso)}/mese).`, "r50", { nome: g.nome, cNome: c.nome, importo: den(s, c.acconto), importo2: den(s, c.flusso) }, "carta", g.id);
     return null;
@@ -1081,6 +1130,33 @@ function compraCarta(s, g, c, azione) {
   return "Tipo di carta sconosciuto.";
 }
 
+/**
+ * I conti di una vendita immobiliare.
+ *
+ * Il gioco incassava prezzo meno mutuo e basta: si comprava con 56.500 € di
+ * acconto, arrivava un'offerta a 1,55× e si portavano a casa 143.600 € netti
+ * — il 154% sul capitale, esentasse, in un turno. Nella realtà si paga
+ * l'agenzia e, se si rivende entro cinque anni, un'imposta sostitutiva del
+ * 26% sulla plusvalenza, trattenuta dal notaio al rogito. Dopo i cinque anni
+ * la plusvalenza non si tassa più: è la regola che distingue l'investimento
+ * dalla speculazione, ed è la cosa più utile che una compravendita in questo
+ * gioco possa insegnare.
+ */
+function contiDellaVendita(s, g, bene, prezzo) {
+  const cv = pacchettoDi(s).costiVendita;
+  if (!cv) return { agenzia: 0, imposta: 0, netto: prezzo - (bene.mutuo || 0) };
+
+  const agenzia = arrotonda(prezzo * cv.agenzia);
+  const mesiPossesso = (g.mesi ?? 0) - (bene.mesiAcquisto ?? 0);
+  /* La plusvalenza è prezzo di vendita meno prezzo d'acquisto: il mutuo non
+     c'entra, è solo il modo in cui l'acquisto era stato pagato. */
+  const guadagno = prezzo - (bene.costo || 0);
+  const imposta = (mesiPossesso < cv.mesiEsenzione && guadagno > 0)
+    ? arrotonda(guadagno * cv.plusvalenza)
+    : 0;
+  return { agenzia, imposta, netto: prezzo - (bene.mutuo || 0) - agenzia - imposta };
+}
+
 function vendiAlMercato(s, g, c, azione) {
   if (c.tipo === "offerta") {
     if (c.categoria === "attivita") {
@@ -1097,12 +1173,12 @@ function vendiAlMercato(s, g, c, azione) {
     if (!i) return "Immobile non trovato.";
     if (i.categoria !== c.categoria) return "Questa offerta non riguarda quell'immobile.";
     const prezzo = c.moltiplicatore ? arrotonda(i.costo * c.moltiplicatore) : c.prezzo;
-    const netto = prezzo - i.mutuo;
+    const { agenzia, imposta, netto } = contiDellaVendita(s, g, i, prezzo);
     g.contanti += netto;
     g.immobili = g.immobili.filter((x) => x.rid !== i.rid);
     nota(
       s,
-      `${g.nome} vende "${i.nome}" a ${den(s, prezzo)} (meno ${den(s, i.mutuo)} di mutuo = ${den(s, netto)}).`, "r54", { nome: g.nome, iNome: i.nome, importo: den(s, prezzo), importo2: den(s, i.mutuo), importo3: den(s, netto) },
+      `${g.nome} vende "${i.nome}" a ${den(s, prezzo)}: meno ${den(s, i.mutuo)} di mutuo, ${den(s, agenzia)} di agenzia e ${den(s, imposta)} di imposta = ${den(s, netto)}.`, "r54", { nome: g.nome, iNome: i.nome, importo: den(s, prezzo), importo2: den(s, i.mutuo), importo3: den(s, netto) },
       "mercato", g.id
     );
     return null;

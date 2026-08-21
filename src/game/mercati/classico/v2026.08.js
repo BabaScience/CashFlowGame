@@ -50,6 +50,12 @@ export default Object.freeze({
 
   /* Nessun fisco: "classico" è un'economia di equilibrio, non un paese.
      Si gioca solo al Livello 1, e il selettore lo rispetta. */
+  /* Il mercato classico resta all'1×: è l'impianto astratto da tavolo, e
+     cambiarlo qui significherebbe cambiare il gioco che la gente conosce.
+     La regola più severa vive su Roma, che è il mercato che promette di
+     somigliare alla realtà. */
+  margineUscita: 1,
+
   fisco: null,
 
   professioni: PROFESSIONI,

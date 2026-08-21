@@ -210,6 +210,7 @@ export default {
   },
 
   scheda: {
+    tiManca: "Ti manca ancora {importo} al mese di reddito passivo. Su questo mercato serve il doppio delle spese: uscire al pareggio significa rientrare al primo imprevisto.",
     prestitoSpiegazione: "Puoi chiedere prestiti a multipli di {taglio}. Ogni {taglio} costa {rata} al mese.",
   },
 
@@ -284,7 +285,6 @@ export default {
   scheda: {
     contanti: "Contanti",
     redditoVersoSpese: "Reddito passivo verso le spese",
-    tiManca: "Ti manca ancora {importo} al mese di reddito passivo per uscire dalla Ruota.",
     puoiUscire: "Il tuo reddito passivo supera le spese: puoi uscire dalla Ruota!",
     giornoDiPaga: "Giorno di paga",
     passivo: "Passivo",

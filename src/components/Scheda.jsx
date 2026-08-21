@@ -56,14 +56,14 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
         <div className="flex tra f13 mb4">
           <span className="tenue">{t("scheda.redditoVersoSpese")}</span>
           <span className="numeri grassetto">
-            {soldi(r.redditoPassivo)} / {soldi(r.speseTotali)}
+            {soldi(r.redditoPassivo)} / {soldi(r.soglia)}
           </span>
         </div>
         <Barra valore={r.progresso} />
         <p className="f12 tenue mt8" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
           {r.libero
             ? t("scheda.puoiUscire")
-            : t("scheda.tiManca", { importo: soldi(r.speseTotali - r.redditoPassivo) })}
+            : t("scheda.tiManca", { importo: soldi(r.soglia - r.redditoPassivo) })}
         </p>
 
         <div className="flex tra mt12" style={{ gap: 10 }}>

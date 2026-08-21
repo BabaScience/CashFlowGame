@@ -11,12 +11,20 @@ import { getPacchetto } from "../src/game/mercati/indice.js";
 const PACCHETTO = getPacchetto();
 const getProfessione = (id) => PACCHETTO.professioni.find((p) => p.id === id) || PACCHETTO.professioni[0];
 const OBIETTIVO_RENDITA = PACCHETTO.obiettivoRendita;
-import { flussoMensile, speseTotali, redditoTotale, redditoPassivo, riepilogo } from "../src/game/finanze.js";
+import { flussoMensile, speseTotali, redditoTotale, redditoPassivo, riepilogo, fuoriDallaCorsa } from "../src/game/finanze.js";
 
 
 let passati = 0, falliti = 0;
 const test = (nome, fn) => {
-  try { fn(); console.log(`  ✅ ${nome}`); passati++; }
+  try {
+    const r = fn();
+    /* Una prova asincrona passerebbe sempre: `fn()` restituisce una
+       promessa, nessuno l'aspetta, e le verifiche dentro non girano mai. */
+    if (r && typeof r.then === "function") {
+      throw new Error("prova asincrona: questo banco è sincrono, le verifiche non girerebbero");
+    }
+    console.log(`  ✅ ${nome}`); passati++;
+  }
   catch (e) { console.log(`  ❌ ${nome}\n       ${e.message}`); falliti++; }
 };
 const eq = (a, b, m = "") => { if (a !== b) throw new Error(`${m} atteso ${b}, ottenuto ${a}`); };
@@ -382,6 +390,137 @@ test("Ogni azione incrementa la versione (per la sincronizzazione)", () => {
   const v = s.versione;
   s = app(s, { tipo: "prestito", giocatoreId: s.giocatori[s.turno].id, importo: 1000 });
   eq(s.versione, v + 1, "versione");
+});
+
+/* ═══════════════ realismo: credito, vendita, soglia ═══════════════ */
+
+console.log("\n── La banca guarda il reddito ──");
+
+
+function tavoloRoma(professioneId = "insegnante") {
+  let s = creaStanza("REAL", "a", { seme: 21, mercatoId: "roma", livello: 2 });
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "A", professioneId, sognoId: "sg01" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "B", professioneId: "meccanico", sognoId: "sg02" }).stato;
+  s = applicaAzione(s, { tipo: "avvia", giocatoreId: "a" }).stato;
+  s.turno = s.giocatori.findIndex((x) => x.id === "a");
+  return s;
+}
+const massimo = (s) => {
+  for (const imp of [500000, 200000, 100000, 75000, 60000, 50000, 40000, 30000, 20000, 10000, 5000, 1000]) {
+    if (!applicaAzione(s, { tipo: "prestito", giocatoreId: "a", importo: imp }).errore) return imp;
+  }
+  return 0;
+};
+
+test("Mezzo milione a un insegnante non lo presta nessuno", () => {
+  /* Era il difetto che rendeva banale tutto il resto: nessun controllo, solo
+     un tetto a 500.000. Con un prestito così si compravano due attività e si
+     usciva dalla Ruota in cinque turni. */
+  const m = massimo(tavoloRoma("insegnante"));
+  vero(m > 0, "la banca non presta più niente a nessuno");
+  vero(m <= 75000, `presta ancora ${m}: oltre il tetto del credito al consumo`);
+  vero(m < 100000, "presta ancora cifre da mutuo senza garanzie");
+});
+
+test("Chi guadagna di più ottiene di più", () => {
+  const povero = massimo(tavoloRoma("insegnante"));
+  const ricco = massimo(tavoloRoma("dirigente-medico"));
+  vero(ricco > povero, `${ricco} contro ${povero}: il reddito non conta`);
+});
+
+test("Le rate già in corso riducono lo spazio", () => {
+  /* È la regola vera: la banca somma le rate che hai già. */
+  const s = tavoloRoma("quadro");
+  const primo = massimo(s);
+  const conDebito = applicaAzione(s, { tipo: "prestito", giocatoreId: "a", importo: 20000 }).stato;
+  conDebito.turno = s.turno;
+  let secondo = 0;
+  for (const imp of [75000, 50000, 40000, 30000, 20000, 10000, 5000, 1000]) {
+    if (!applicaAzione(conDebito, { tipo: "prestito", giocatoreId: "a", importo: imp }).errore) { secondo = imp; break; }
+  }
+  vero(secondo < primo, `dopo 20.000 € di debito presterebbe ancora ${secondo} (prima ${primo})`);
+});
+
+console.log("\n── Vendere costa ──");
+
+test("Rivendere entro cinque anni paga agenzia e plusvalenza", () => {
+  const P = getPacchetto("roma");
+  const categorie = new Set(P.mazzi.mercato.filter((c) => c.tipo === "offerta" && c.moltiplicatore).map((c) => c.categoria));
+  const imm = P.mazzi.grandi.find((c) => c.tipo === "immobile" && c.mutuo > 0 && categorie.has(c.categoria));
+  const off = P.mazzi.mercato.filter((c) => c.tipo === "offerta" && c.moltiplicatore && c.categoria === imm.categoria)
+    .sort((a, b) => b.moltiplicatore - a.moltiplicatore)[0];
+  let s = tavoloRoma();
+  s.giocatori.find((g) => g.id === "a").contanti = 400000;
+  s.pending = { tipo: "carta", giocatoreId: "a", carta: imm };
+  s = applicaAzione(s, { tipo: "compraCarta", giocatoreId: "a" }).stato;
+  const io = () => s.giocatori.find((g) => g.id === "a");
+  const prima = io().contanti;
+  s.pending = { tipo: "mercato", carta: off, idonei: ["a"], risposto: [] };
+  const r = applicaAzione(s, { tipo: "vendiAlMercato", giocatoreId: "a", rid: io().immobili[0].rid, ultima: true });
+  vero(!r.errore, r.errore);
+  s = r.stato;
+  const incassato = io().contanti - prima;
+  const lordo = Math.round(imm.costo * off.moltiplicatore) - imm.mutuo;
+  vero(incassato < lordo, "la vendita non ha trattenuto niente");
+  const guadagno = (incassato - imm.acconto) / imm.acconto;
+  vero(guadagno < 0.6, `${(guadagno * 100).toFixed(0)}% sul capitale in un turno: è ancora troppo`);
+});
+
+test("Dopo cinque anni la plusvalenza non si tassa più", () => {
+  const P = getPacchetto("roma");
+  const categorie = new Set(P.mazzi.mercato.filter((c) => c.tipo === "offerta" && c.moltiplicatore).map((c) => c.categoria));
+  const imm = P.mazzi.grandi.find((c) => c.tipo === "immobile" && c.mutuo > 0 && categorie.has(c.categoria));
+  const off = P.mazzi.mercato.filter((c) => c.tipo === "offerta" && c.moltiplicatore && c.categoria === imm.categoria)
+    .sort((a, b) => b.moltiplicatore - a.moltiplicatore)[0];
+  const vendiDopo = (mesi) => {
+    let s = tavoloRoma();
+    const g = s.giocatori.find((x) => x.id === "a");
+    g.contanti = 400000;
+    s.pending = { tipo: "carta", giocatoreId: "a", carta: imm };
+    s = applicaAzione(s, { tipo: "compraCarta", giocatoreId: "a" }).stato;
+    const io = s.giocatori.find((x) => x.id === "a");
+    io.mesi = (io.immobili[0].mesiAcquisto ?? 0) + mesi;
+    const prima = io.contanti;
+    s.pending = { tipo: "mercato", carta: off, idonei: ["a"], risposto: [] };
+    const r = applicaAzione(s, { tipo: "vendiAlMercato", giocatoreId: "a", rid: io.immobili[0].rid, ultima: true });
+    vero(!r.errore, r.errore);
+    return r.stato.giocatori.find((x) => x.id === "a").contanti - prima;
+  };
+  const subito = vendiDopo(12);
+  const dopo = vendiDopo(61);
+  vero(dopo > subito, `tenerlo cinque anni non cambia niente (${subito} contro ${dopo})`);
+});
+
+console.log("\n── La soglia d'uscita ──");
+
+test("Su Roma serve il doppio delle spese", () => {
+  const s = tavoloRoma();
+  const g = s.giocatori.find((x) => x.id === "a");
+  const r = riepilogo(g);
+  eq(r.margineUscita, 2, "Roma deve chiedere il doppio:");
+  eq(r.soglia, r.speseTotali * 2, "la soglia:");
+  vero(!fuoriDallaCorsa({ ...g, immobili: [], attivita: [], azioni: [] }), "non si esce da fermi");
+});
+
+test("Pareggiare le spese non basta più", () => {
+  const s = tavoloRoma();
+  const g = { ...s.giocatori.find((x) => x.id === "a") };
+  const spese = speseTotali(g);
+  /* Un reddito passivo pari alle spese: prima bastava. */
+  g.attivita = [{ rid: "x", nome: "test", costo: 1, acconto: 1, passivita: 0, flusso: spese + 1 }];
+  vero(!fuoriDallaCorsa(g), "al pareggio si esce ancora");
+  g.attivita = [{ rid: "x", nome: "test", costo: 1, acconto: 1, passivita: 0, flusso: spese * 2 + 1 }];
+  vero(fuoriDallaCorsa(g), "col doppio non si esce");
+});
+
+test("Il mercato classico resta all'1×", () => {
+  /* È l'impianto astratto da tavolo: cambiarlo lì cambierebbe il gioco che
+     la gente conosce. */
+  let s = creaStanza("CLAS", "a", { seme: 3, mercatoId: "classico" });
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "A", professioneId: "medico", sognoId: "sg01" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "B", professioneId: "meccanico", sognoId: "sg02" }).stato;
+  s = applicaAzione(s, { tipo: "avvia", giocatoreId: "a" }).stato;
+  eq(riepilogo(s.giocatori[0]).margineUscita, 1);
 });
 
 console.log(`\n${passati} test superati, ${falliti} falliti\n`);

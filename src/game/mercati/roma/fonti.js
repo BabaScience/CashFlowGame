@@ -83,7 +83,52 @@ export const COSTI_ACQUISTO = {
   agenzia: 0.03,
 };
 
+/**
+ * QUANTO COSTA VENDERE.
+ *
+ * Il gioco lo ignorava del tutto: si comprava, arrivava una carta Mercato a
+ * 1,55× e si incassava il 154% sul capitale versato, netto, subito. Nella
+ * realtà chi vende paga l'agenzia e, se vende entro cinque anni
+ * dall'acquisto, un'imposta sostitutiva del 26% sulla plusvalenza —
+ * trattenuta dal notaio in sede di rogito. Dopo i cinque anni la
+ * plusvalenza non si tassa: è esattamente la regola che distingue
+ * l'investimento dalla speculazione, ed è la cosa più utile che questo
+ * gioco possa insegnare su una compravendita.
+ */
+export const COSTI_VENDITA = {
+  agenzia: 0.03,           // provvigione del venditore
+  plusvalenza: 0.26,       // imposta sostitutiva, entro i 5 anni
+  mesiEsenzione: 60,       // cinque anni
+};
+
 /** Il credito, come lo concedono davvero le banche italiane. */
+/**
+ * IL CREDITO AL CONSUMO, cioè il "fido bancario" del gioco.
+ *
+ * Fonti (agosto 2026): il TAEG medio del credito al consumo sta intorno al
+ * 10%, e le finanziarie principali arrivano a 30.000–60.000 € di importo
+ * massimo. Un fido di conto corrente costa di più — 12–18% — ed è quello
+ * che il gioco modella: debito che non si ammortizza e resta lì finché non
+ * lo si estingue.
+ *
+ * Ma il numero che conta non è il tasso: è il LIMITE. Le banche italiane
+ * concedono se la rata — sommata a quelle già in corso — non supera circa
+ * un terzo del reddito netto mensile. È la regola del 30-35%, e "assenza di
+ * altri debiti" è una delle condizioni per stare nella parte alta.
+ *
+ * Il gioco non aveva niente di tutto questo: chiunque poteva farsi prestare
+ * mezzo milione con uno stipendio da insegnante.
+ */
+export const CREDITO_CONSUMO = {
+  quotaRedditoMax: 1 / 3,   // rata totale sul netto mensile
+  importoMassimo: 75000,    // tetto del credito al consumo, capo alto
+  /* Il canone di casa non è una rata di finanziamento: non compare nelle
+     centrali rischi e la banca lo pesa come costo di vita, non come debito
+     in corso. Contarlo fra le rate rendeva impossibile ottenere un euro a
+     chiunque paghi un affitto — cioè a tutti. */
+  vociEscluse: ["casa"],
+};
+
 export const CREDITO = {
   taeg: 0.039,             // 3,9%: media del primo semestre 2026
   anni: 25,

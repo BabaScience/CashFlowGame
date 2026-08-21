@@ -443,7 +443,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
               <div className="flex tra f12 mb4">
                 <span className="tenue">{t("partita.renditaVersoSpese")}</span>
                 <span className="numeri grassetto">
-                  {soldi(r.redditoPassivo)} / {soldi(r.speseTotali)}
+                  {soldi(r.redditoPassivo)} / {soldi(r.soglia)}
                 </span>
               </div>
               <Barra scura valore={r.progresso} />
