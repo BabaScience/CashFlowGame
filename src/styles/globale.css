@@ -849,3 +849,102 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
   width: 7px; height: 7px; border-radius: 50%;
   background: var(--rosso);
 }
+
+/* ══ la pagina d'ingresso ══
+   Prima era un modulo di otto campi: chi arrivava doveva configurare una
+   partita prima di capire che gioco fosse, e chi voleva solo i quesiti
+   doveva scorrere oltre tutto. Ora le destinazioni vengono prima, e la
+   configurazione sta dietro quella che si sceglie. ══ */
+.cappello { padding: 6px 0 22px; }
+
+.scelta-lingua-angolo {
+  justify-content: flex-end;
+  margin: 0;
+  padding-top: 14px;
+}
+.scelta-lingua-angolo button { flex: 0 0 auto; padding: 6px 12px; font-size: 12px; }
+
+.destinazioni { display: grid; gap: 10px; }
+@media (min-width: 760px) {
+  /* Due colonne, ma la prima destinazione tiene la riga tutta per sé:
+     giocare non è una delle quattro opzioni, è quella per cui si è qui. */
+  .destinazioni { grid-template-columns: 1fr 1fr; }
+  .destinazione-prima { grid-column: 1 / -1; }
+}
+
+.destinazione {
+  display: flex; align-items: center; gap: 14px;
+  width: 100%;
+  padding: 16px;
+  text-align: left;
+  border-radius: var(--r-m);
+  background: var(--carta);
+  color: var(--inchiostro);
+  border: 1px solid var(--linea);
+  box-shadow: var(--ombra-carta);
+  transition: transform .12s ease, box-shadow .12s ease;
+}
+.destinazione:hover { transform: translateY(-2px); box-shadow: 0 6px 0 rgba(0,0,0,.08), 0 14px 30px rgba(0,0,0,.22); }
+.destinazione:active { transform: translateY(0); }
+.destinazione:focus-visible { outline: 2px solid var(--oro); outline-offset: 2px; }
+
+.destinazione-prima {
+  background: linear-gradient(180deg, var(--oro-chiaro), var(--oro));
+  border-color: rgba(0,0,0,.18);
+  padding: 20px 18px;
+}
+.destinazione-prima .dest-titolo { font-size: 19px; }
+.destinazione-prima .dest-nota { color: rgba(42,34,5,.78); }
+.destinazione-prima .dest-freccia { color: #2A2205; }
+
+.dest-icona { flex: none; font-size: 26px; line-height: 1; }
+.dest-testo { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 3px; }
+.dest-titolo { font-family: var(--f-titolo); font-size: 16px; line-height: 1.2; }
+.dest-nota { font-size: 12.5px; line-height: 1.4; color: var(--tenue-carta); }
+.dest-freccia { flex: none; font-size: 19px; color: var(--oro); }
+
+/* Cos'è questo gioco, per chi non l'ha mai visto. */
+.spiegazione { margin-top: 14px; }
+.spiegazione ol { margin: 10px 0 0; padding: 0 0 0 20px; }
+.spiegazione li { font-size: 13.5px; line-height: 1.55; color: var(--inchiostro); }
+.spiegazione li + li { margin-top: 8px; }
+
+.torna {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-bottom: 14px;
+  font-size: 12px; font-weight: 700;
+  letter-spacing: .06em; text-transform: uppercase;
+  color: var(--tenue-carta);
+}
+.torna:hover { color: var(--inchiostro); }
+.torna:focus-visible { outline: 2px solid var(--oro); outline-offset: 2px; }
+
+/* ══ il debito con la banca ══
+   L'unica voce del conto che nasce da sé: la banca presta d'ufficio quando
+   i contanti non bastano. Stava dentro due pannelli chiusi, quindi arrivava
+   senza che si vedesse cambiare niente. ══ */
+.carta-debito {
+  margin-top: 12px;
+  background: #FBF0EC;
+  border-color: #E3BFB5;
+  border-left: 4px solid var(--rosso);
+}
+.carta-debito .etichetta { color: var(--rosso); }
+
+/* ══ il marchio ══
+   Quando si può premere riporta a casa: è una convenzione così diffusa che
+   chi non la trova la cerca lo stesso. ══ */
+.logo {
+  display: inline-flex; align-items: center; gap: 9px;
+  color: var(--oro-chiaro);
+  background: none;
+}
+.logo-rombo { font-size: 17px; line-height: 1; }
+.logo-nome { font-family: var(--f-titolo); font-size: 16px; letter-spacing: .01em; }
+.logo-cliccabile { cursor: pointer; border-radius: 10px; padding: 4px 6px; margin-left: -6px; }
+.logo-cliccabile:hover { color: #fff; }
+.logo-cliccabile:focus-visible { outline: 2px solid var(--oro); outline-offset: 2px; }
+
+.logo-grande { flex-direction: column; gap: 6px; }
+.logo-grande .logo-rombo { font-size: 34px; color: var(--carta); }
+.logo-grande .logo-nome { font-size: 32px; }

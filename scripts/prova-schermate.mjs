@@ -34,6 +34,14 @@ globalThis.localStorage = {
   setItem: (k, v) => memoria.set(k, String(v)),
   removeItem: (k) => memoria.delete(k),
 };
+/* La lingua si fissa qui, e non si lascia decidere all'ambiente.
+   Node 21+ definisce già `navigator.languages` (["en-US"]), quindi la
+   guardia qui sotto non scattava mai e ogni schermata veniva disegnata in
+   inglese: le prove passavano lo stesso perché nessuna guardava il testo.
+   La prima che l'ha fatto è finita a cercare "Gioca al tavolo" dentro una
+   pagina che diceva "Play at a table". */
+memoria.set("quotazero:lingua", "it");
+
 /* In Node moderno `navigator` esiste ed è di sola lettura: si aggiunge solo
    ciò che manca, invece di sostituirlo. */
 if (!globalThis.navigator?.languages) {
@@ -48,6 +56,7 @@ if (!globalThis.location) {
 }
 globalThis.matchMedia = () => ({ matches: false, addEventListener() {}, removeEventListener() {} });
 
+const { traduci } = await import("../src/i18n/index.js");
 const { LinguaProvider } = await import("../src/Lingua.jsx");
 const { MercatoProvider } = await import("../src/Mercato.jsx");
 const Ingresso = (await import("../src/screens/Ingresso.jsx")).default;
@@ -91,13 +100,37 @@ const nulla = () => {};
 
 console.log("\n── Le schermate si disegnano ──");
 
-prova("Ingresso, visitatore nuovo", () => {
+prova("Ingresso, visitatore nuovo: prima le destinazioni", () => {
+  /* Chi arriva non deve trovarsi davanti un modulo di otto campi prima di
+     sapere che gioco sia. */
   const html = disegna(React.createElement(Ingresso, {
     suEntrato: nulla, avvisa: nulla, suSfida: nulla, suImpara: nulla,
   }));
   vero(html.length > 500, "markup troppo corto: la schermata è vuota");
   vero(html.includes("Quota Zero"), "manca il nome del prodotto");
+  vero(/class="destinazione/.test(html), "mancano le destinazioni");
+  vero(!/role="combobox"/.test(html), "il modulo non deve venire prima della scelta");
+});
+
+prova("Ogni destinazione dice cosa succede se la scegli", () => {
+  const html = disegna(React.createElement(Ingresso, {
+    suEntrato: nulla, avvisa: nulla, suSfida: nulla, suImpara: nulla,
+  }));
+  for (const k of ["casa.tavolo", "casa.sfida", "casa.lezioni", "casa.quesiti"]) {
+    const testo = traduci("it", k);
+    vero(html.includes(testo), `manca la destinazione "${testo}"`);
+  }
+  /* Una destinazione senza spiegazione è un pulsante che si preme a caso. */
+  vero(html.includes(traduci("it", "casa.tavoloNota")), "le destinazioni non si spiegano");
+});
+
+prova("Ingresso, chi ha scelto di giocare trova il modulo", () => {
+  const html = disegna(React.createElement(Ingresso, {
+    suEntrato: nulla, avvisa: nulla, suSfida: nulla, suImpara: nulla,
+    vistaIniziale: "modulo",
+  }));
   vero(/role="combobox"/.test(html), "mancano i campi di scelta");
+  vero(html.includes(traduci("it", "casa.torna")), "non si può tornare indietro");
 });
 
 prova("Ingresso con partite lasciate a metà", () => {
@@ -223,6 +256,28 @@ prova("Sfida già giocata oggi", () => {
   const html = disegna(React.createElement(Sfida, { suEsci: nulla }));
   vero(html.includes("42"), "manca il punteggio di oggi");
   memoria.delete("quotazero:sfida");
+});
+
+console.log("\n── Il marchio ──");
+
+const Logo = (await import("../src/components/Logo.jsx")).default;
+const { MARCHIO } = await import("../src/marchio.js");
+
+prova("Il logo prende il nome da marchio.js", () => {
+  /* Scritto a mano nella pagina d'ingresso, il nome è quello che alla
+     rinomina resta indietro. */
+  vero(disegna(React.createElement(Logo, {})).includes(MARCHIO.nome));
+});
+
+prova("Senza destinazione non finge di essere un pulsante", () => {
+  const html = disegna(React.createElement(Logo, {}));
+  vero(!html.includes("<button"), "un logo che non porta da nessuna parte non è premibile");
+});
+
+prova("Con una destinazione è un pulsante che si annuncia", () => {
+  const html = disegna(React.createElement(Logo, { suCasa: nulla }));
+  vero(html.includes("<button"), "non è premibile");
+  vero(/aria-label="[^"]+"/.test(html), "un pulsante col solo rombo va nominato");
 });
 
 console.log("\n── La tendina ──");

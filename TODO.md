@@ -259,6 +259,30 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       in italiano. Viste aprendo la sala d'attesa in inglese. Sono due
       chiavi, non è un lavoro di traduzione.
 
+- [x] **Il banner delle anteprime diceva ancora il nome vecchio** — fatto, e
+      va raccontato perché è il difetto peggiore trovato finora. `public/og-banner.png`
+      è l'immagine che compare quando qualcuno condivide un link su WhatsApp,
+      Telegram, Slack o LinkedIn. Mostrava **"CASHFLOW"** a caratteri di
+      scatola e **"Esci dalla Corsa dei Topi"**: le due espressioni che tutta
+      la rinomina esisteva per togliere di mezzo, sull'asset più pubblico del
+      progetto. La causa è che `scripts/genera-immagini.py` si scriveva il
+      nome a mano, quindi la rinomina non l'ha toccato e nessun test guardava
+      lì — perché lì non c'è codice, c'è un PNG. Ora il generatore legge
+      `src/marchio.js` e `prova-marchio.mjs` sorveglia che nessun testo
+      spedito porti i nomi vecchi.
+- [ ] **La scheda finanziaria è tutta in italiano** — `components/Scheda.jsx`
+      scrive a mano "Conto economico", "Entrate", "Uscite", "Attivi",
+      "Passività", "Contanti", "Giorno di paga", "Estingui un debito" e una
+      ventina d'altre. Con l'interfaccia in inglese restano in italiano, ed è
+      il pannello che si guarda più di ogni altro. Circa 30 chiavi: è lavoro
+      meccanico, non traduzione difficile.
+- [ ] **Lo stato patrimoniale elenca voci che a Roma non esistono** —
+      `Scheda.jsx` scrive a mano le righe delle passività, fra cui "Debiti
+      negozi" (`rate`), che è una categoria del mercato classico. A Roma quel
+      campo non c'è e la riga mostra zero. Le etichette per mercato esistono
+      già (`etichettePassivita`): va usato quello, come fa ora il riquadro
+      del debito.
+
 ## 7 · Quando funzionerà
 
 - [-] **7.1 Costo del polling** — sei giocatori a 1,4 s fanno ~15.400 chiamate

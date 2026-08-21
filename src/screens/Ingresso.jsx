@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Bottone } from "../components/Base.jsx";
 import Scelta from "../components/Scelta.jsx";
+import Logo from "../components/Logo.jsx";
 import { MercatoProvider, useMercato } from "../Mercato.jsx";
 import { MERCATI, MERCATO_PREDEFINITO, getPacchetto } from "../game/mercati/indice.js";
 import { LIVELLI, LIVELLO_PREDEFINITO } from "../game/regole/livelli.js";
@@ -20,19 +21,19 @@ import { useLingua } from "../Lingua.jsx";
  * piedi a chi l'ha appena letta. Chi entra con un codice non sceglie nulla:
  * il mercato è quello della stanza, uno per tavolo.
  */
-export default function Ingresso({ suEntrato, avvisa, suSfida, suImpara }) {
+export default function Ingresso({ suEntrato, avvisa, suSfida, suImpara, vistaIniziale }) {
   const [mercatoId, setMercato] = useState(
     () => localStorage.getItem("quotazero:mercato") || MERCATO_PREDEFINITO
   );
   return (
     <MercatoProvider mercatoId={mercatoId}>
       <Modulo suEntrato={suEntrato} avvisa={avvisa} suSfida={suSfida} suImpara={suImpara}
-        mercatoId={mercatoId} setMercato={setMercato} />
+        mercatoId={mercatoId} setMercato={setMercato} vistaIniziale={vistaIniziale} />
     </MercatoProvider>
   );
 }
 
-function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato }) {
+function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, vistaIniziale = "casa" }) {
   /* Le partite lasciate a metà. Il gioco a turni distanziati serve a poco
      se poi non si ritrova la strada per tornarci. */
   const [aperte, setAperte] = useState(() => partiteAperte());
@@ -55,6 +56,11 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
   const [codice, setCodice] = useState("");
   const [occupato, setOccupato] = useState(false);
   const [modo, setModo] = useState("crea");
+  /* "casa" mostra le destinazioni, "modulo" la configurazione della
+     partita. Prima erano la stessa cosa: chi arrivava trovava un modulo di
+     otto campi prima di sapere che gioco fosse, e chi voleva solo i
+     quesiti doveva scorrere oltre tutto. */
+  const [vista, setVista] = useState(vistaIniziale);
 
   /* Il ripiego non è pigrizia: cambiando mercato, `professioneId` resta per
      un attimo quello del mercato precedente. L'effetto che lo corregge gira
@@ -96,71 +102,119 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
   return (
     <div className="contenuto">
       <motion.div initial={false} animate={{ opacity: 1, y: 0 }}>
-        <div className="ta-c" style={{ padding: "26px 0 22px" }}>
-          <div style={{ fontSize: 34 }}>◆</div>
-          <h1 className="titolo" style={{ fontSize: 32, margin: "8px 0 0", color: "var(--oro-chiaro)" }}>
-            Quota Zero
-          </h1>
+        {/* La lingua è un'impostazione, non una destinazione: sta in un
+            angolo, non in mezzo alla pagina come prima. */}
+        <div className="scelta-lingua scelta-lingua-angolo">
+          {lingue.map((l) => (
+            <button key={l.id} onClick={() => cambiaLingua(l.id)}
+              data-attiva={lingua === l.id} aria-pressed={lingua === l.id}
+              aria-label={l.nome}>
+              <span aria-hidden="true">{l.bandiera}</span> {l.nome}
+            </button>
+          ))}
+        </div>
+
+        <div className="ta-c cappello">
+          {/* Dal modulo il logo riporta alle destinazioni; dalla casa non
+              porta da nessuna parte, e allora non finge di essere un
+              pulsante. */}
+          <Logo grande suCasa={vista === "modulo" ? () => setVista("casa") : undefined} />
           <p className="f14" style={{ margin: "8px 0 0", color: "rgba(244,241,230,.72)", lineHeight: 1.5 }}>
             {t("app.motto")}<br />
             {t("app.sottotitolo")}
           </p>
         </div>
 
-        <div className="carta">
-          {aperte.length > 0 && (
-            <div className="partite-aperte">
-              <div className="etichetta">{t("ingresso.partiteAperte")}</div>
-              {aperte.map((p) => (
-                <div key={p.codice} className="partita-aperta">
-                  <button onClick={() => suEntrato(p.codice)} className="riprendi">
-                    <span className="numeri grassetto">{p.codice}</span>
-                    <span className="f12 tenue">
-                      {t(`mercati.${p.mercatoId || "classico"}.nome`)}
-                      {p.giocatori ? ` · ${p.giocatori}` : ""}
-                    </span>
-                  </button>
-                  <button className="scarta" aria-label={t("ingresso.dimentica")}
-                    onClick={() => { dimenticaPartita(p.codice); setAperte(partiteAperte()); }}>×</button>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {suImpara && (
-            <button onClick={suImpara} className="richiamo-sfida" style={{ marginTop: 8 }}
-              aria-label={t("impara.richiamo")}>
-              <span>
-                <strong>{t("impara.richiamo")}</strong><br />
-                <span className="f12" style={{ color: "var(--tenue-carta)" }}>{t("impara.richiamoSotto")}</span>
-              </span>
-              <span className="freccia" aria-hidden="true">→</span>
-            </button>
-          )}
-
-          {/* La lingua non è il mercato: si può giocare Roma in inglese. */}
-          <div className="scelta-lingua">
-            {lingue.map((l) => (
-              <button key={l.id} onClick={() => cambiaLingua(l.id)}
-                data-attiva={lingua === l.id} aria-pressed={lingua === l.id}
-                aria-label={l.nome}>
-                <span aria-hidden="true">{l.bandiera}</span> {l.nome}
-              </button>
-            ))}
-          </div>
-
-          {suSfida && (
-              <button onClick={suSfida} className="richiamo-sfida"
-                aria-label={t("ingresso.sfidaAria")}>
-                <span>
-                  <strong>{t("ingresso.sfidaTitolo")}</strong><br />
-                  <span className="f12" style={{ color: "var(--tenue-carta)" }}>{t("ingresso.sfidaSotto")}</span>
-                </span>
-                <span className="freccia" aria-hidden="true">→</span>
-              </button>
+        {vista === "casa" ? (
+          <>
+            {/* Chi ha una partita a metà ha una sola intenzione: tornarci.
+                Sta prima di tutto il resto. */}
+            {aperte.length > 0 && (
+              <div className="carta partite-aperte">
+                <div className="etichetta">{t("ingresso.partiteAperte")}</div>
+                {aperte.map((p) => (
+                  <div key={p.codice} className="partita-aperta">
+                    <button onClick={() => suEntrato(p.codice)} className="riprendi">
+                      <span className="numeri grassetto">{p.codice}</span>
+                      <span className="f12 tenue">
+                        {t(`mercati.${p.mercatoId || "classico"}.nome`)}
+                        {p.giocatori ? ` · ${p.giocatori}` : ""}
+                      </span>
+                    </button>
+                    <button className="scarta" aria-label={t("ingresso.dimentica")}
+                      onClick={() => { dimenticaPartita(p.codice); setAperte(partiteAperte()); }}>×</button>
+                  </div>
+                ))}
+              </div>
             )}
 
-            <div className="gruppo-campo">
+            {/* Le destinazioni. Ognuna dice cosa succede se la scegli e
+                quanto dura: sono le due cose che si vogliono sapere prima
+                di cliccare. */}
+            <div className="destinazioni">
+              <button className="destinazione destinazione-prima"
+                onClick={() => setVista("modulo")}>
+                <span className="dest-icona" aria-hidden="true">🎲</span>
+                <span className="dest-testo">
+                  <span className="dest-titolo">{t("casa.tavolo")}</span>
+                  <span className="dest-nota">{t("casa.tavoloNota")}</span>
+                </span>
+                <span className="dest-freccia" aria-hidden="true">→</span>
+              </button>
+
+              {suSfida && (
+                <button className="destinazione" onClick={suSfida}>
+                  <span className="dest-icona" aria-hidden="true">⚡</span>
+                  <span className="dest-testo">
+                    <span className="dest-titolo">{t("casa.sfida")}</span>
+                    <span className="dest-nota">{t("casa.sfidaNota")}</span>
+                  </span>
+                  <span className="dest-freccia" aria-hidden="true">→</span>
+                </button>
+              )}
+
+              {suImpara && (
+                <button className="destinazione" onClick={() => suImpara("lezioni")}>
+                  <span className="dest-icona" aria-hidden="true">📘</span>
+                  <span className="dest-testo">
+                    <span className="dest-titolo">{t("casa.lezioni")}</span>
+                    <span className="dest-nota">{t("casa.lezioniNota")}</span>
+                  </span>
+                  <span className="dest-freccia" aria-hidden="true">→</span>
+                </button>
+              )}
+
+              {suImpara && (
+                <button className="destinazione" onClick={() => suImpara("quesiti")}>
+                  <span className="dest-icona" aria-hidden="true">🧩</span>
+                  <span className="dest-testo">
+                    <span className="dest-titolo">{t("casa.quesiti")}</span>
+                    <span className="dest-nota">{t("casa.quesitiNota")}</span>
+                  </span>
+                  <span className="dest-freccia" aria-hidden="true">→</span>
+                </button>
+              )}
+            </div>
+
+            {/* Cos'è, per chi non l'ha mai visto. Prima non lo diceva
+                nessuno: si arrivava su un modulo e basta. */}
+            <div className="carta spiegazione">
+              <div className="etichetta">{t("casa.comeFunziona")}</div>
+              <ol>
+                <li>{t("casa.passo1")}</li>
+                <li>{t("casa.passo2")}</li>
+                <li>{t("casa.passo3")}</li>
+              </ol>
+            </div>
+          </>
+        ) : (
+        <>
+        <div className="carta">
+          <button className="torna" onClick={() => setVista("casa")}>
+            <span aria-hidden="true">←</span> {t("casa.torna")}
+          </button>
+
+          <div className="gruppo-campo">
             <label className="etichetta" htmlFor="campo-nome">{t("ingresso.nome")}</label>
             <input id="campo-nome" className="campo" value={nome} maxLength={18}
               onChange={(e) => setNome(e.target.value)} placeholder={t("ingresso.nomeSegnaposto")} />
@@ -274,6 +328,9 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
               {occupato ? t("ingresso.entrando") : t("ingresso.entraNellaPartita")}
             </Bottone>
           </>
+        )}
+
+        </>
         )}
 
         <p className="f12 ta-c mt16" style={{ color: "rgba(244,241,230,.4)", lineHeight: 1.55 }}>

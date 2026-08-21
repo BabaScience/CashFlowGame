@@ -30,7 +30,7 @@ function Applicazione() {
   });
   const [avviso, setAvviso] = useState("");
   const [sfida, setSfida] = useState(false);
-  const [impara, setImpara] = useState(false);
+  const [impara, setImpara] = useState(null); // null | "lezioni" | "quesiti"
 
   const avvisa = useCallback((t) => {
     setAvviso(t);
@@ -102,14 +102,14 @@ function Applicazione() {
   /* ── Nessuna stanza: schermata d'ingresso ── */
   /* Sfida e lezioni non hanno stanza: girano tutte nel browser. */
   if (sfida) return <Sfida suEsci={() => setSfida(false)} />;
-  if (impara) return <Impara suEsci={() => setImpara(false)} />;
+  if (impara) return <Impara suEsci={() => setImpara(null)} modoIniziale={impara} />;
 
   if (!codice) {
     return (
       <MercatoProvider stato={stato}>
         <div className="schermo" style={{ paddingBottom: 24 }}>
           <Ingresso suEntrato={setCodice} avvisa={avvisa}
-            suSfida={() => setSfida(true)} suImpara={() => setImpara(true)} />
+            suSfida={() => setSfida(true)} suImpara={(dove) => setImpara(dove || "lezioni")} />
           <Avviso testo={avviso} />
         </div>
       </MercatoProvider>

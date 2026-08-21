@@ -19,6 +19,7 @@ import Registro from "../components/Registro.jsx";
 import { riepilogo } from "../game/finanze.js";
 import { traccia } from "../lib/traccia.js";
 import { useSuoni } from "../hooks/useSuoni.js";
+import Logo from "../components/Logo.jsx";
 
 /**
  * LA SFIDA DEL GIORNO.
@@ -61,7 +62,10 @@ function Presentazione({ giorno, gia, suGioca, suEsci }) {
   return (
     <div className="schermo">
       <div className="contenuto">
-        <div className="carta-scura mt20 ta-c">
+        <div className="flex tra cen mt20">
+          <Logo suCasa={suEsci} />
+        </div>
+        <div className="carta-scura mt12 ta-c">
           <div className="maiusc" style={{ color: "rgba(244,241,230,.45)" }}>Sfida del giorno</div>
           <h1 className="titolo f28 mb8" style={{ margin: "6px 0 8px" }}>{pacchetto.nome}</h1>
           <p className="f13 tenue" style={{ margin: "0 0 16px" }}>{giorno}</p>

@@ -14,12 +14,30 @@ Serve Pillow:  pip install pillow
 """
 import math
 import os
+import re
 from PIL import Image, ImageDraw, ImageFont
 
 QUI = os.path.dirname(os.path.abspath(__file__))
 RADICE = os.path.dirname(QUI)
 PUBLIC = os.path.join(RADICE, "public")
 FONT = os.path.join(QUI, "font")
+
+
+def _stringa(percorso, chiave):
+    """Legge una stringa da un modulo JS senza interpretarlo."""
+    testo = open(os.path.join(QUI, "..", percorso), encoding="utf-8").read()
+    m = re.search(chiave + r'\s*:\s*"((?:[^"\\]|\\.)*)"', testo)
+    if not m:
+        raise SystemExit(f"non trovo {chiave} in {percorso}")
+    return m.group(1)
+
+
+# Il nome del prodotto vive in un posto solo: src/marchio.js. Questo script
+# non l'aveva mai saputo, e infatti il banner mostrato in anteprima a ogni
+# link condiviso ha continuato a dire il nome vecchio per tutto il tempo.
+MARCHIO = _stringa("src/marchio.js", "nome")
+MOTTO = _stringa("src/i18n/it.js", "motto")
+SOTTOTITOLO = _stringa("src/i18n/it.js", "sottotitolo")
 os.makedirs(PUBLIC, exist_ok=True)
 
 # ── Colori, gli stessi di src/styles/globale.css ──
@@ -202,16 +220,28 @@ def banner():
     f_pic = font("Barlow-Regular.ttf", 40)
 
     x = int(D[0] * 0.058)
-    d.text((x, int(D[1] * 0.255)), "CASHFLOW", font=f_tit, fill=ORO_CHIARO)
-    d.text((x, int(D[1] * 0.435)), "Esci dalla Corsa dei Topi.", font=f_sot, fill=CARTA)
-    d.text((x, int(D[1] * 0.515)), "Il gioco da tavolo, online.", font=f_sot, fill=CARTA)
+    # Il titolo si adatta: "Quota Zero" è più lungo del nome di prima e a
+    # corpo fisso finirebbe sotto il tabellone disegnato a destra.
+    larghezza_utile = int(D[0] * 0.50)
+    corpo = 132
+    while corpo > 60:
+        f_tit = font("ArchivoBlack-Regular.ttf", corpo)
+        cassa = d.textbbox((0, 0), MARCHIO, font=f_tit)
+        if cassa[2] - cassa[0] <= larghezza_utile:
+            break
+        corpo -= 4
+    d.text((x, int(D[1] * 0.255)), MARCHIO, font=f_tit, fill=ORO_CHIARO)
+    d.text((x, int(D[1] * 0.435)), MOTTO, font=f_sot, fill=CARTA)
+    d.text((x, int(D[1] * 0.515)), SOTTOTITOLO, font=f_sot, fill=CARTA)
 
     # etichette in basso.
     # L'immagine è in RGB: un riempimento con canale alfa verrebbe ignorato e
     # le etichette uscirebbero bianche piene. Si usa quindi un colore già
     # mescolato col fondo.
     y = int(D[1] * 0.665)
-    for testo in ["Da 2 a 6 giocatori", "Regole complete", "Gratis"]:
+    # "Da 2 a 6 giocatori" lo dice già il sottotitolo qui sopra: ripeterlo
+    # sprecava l'unica riga in cui si può dire qualcosa di diverso.
+    for testo in ["Dati reali", "Regole complete", "Gratis"]:
         cassa = d.textbbox((0, 0), testo, font=f_pic)
         larg = cassa[2] - cassa[0] + 60
         alt = 80

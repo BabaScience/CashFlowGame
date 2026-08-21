@@ -4,6 +4,7 @@ import { Bottone } from "../components/Base.jsx";
 import { LEZIONI, AVVERTENZA } from "../contenuti/lezioni.js";
 import { QUESITI, testoDi, quesitoDelGiorno } from "../contenuti/quesiti.js";
 import { useLingua } from "../Lingua.jsx";
+import Logo from "../components/Logo.jsx";
 
 /**
  * IMPARA — lezioni e quesiti.
@@ -17,15 +18,18 @@ import { useLingua } from "../Lingua.jsx";
  * da sopportare: è la promessa che questo materiale spiega come funzionano
  * le cose e non dice a nessuno che cosa comprare.
  */
-export default function Impara({ suEsci }) {
+export default function Impara({ suEsci, modoIniziale }) {
   const { t } = useLingua();
-  const [modo, setModo] = useState("lezioni");
+  const [modo, setModo] = useState(modoIniziale || "lezioni");
   const [aperta, setAperta] = useState(null);
 
   return (
     <div className="schermo">
       <div className="contenuto">
-        <div className="flex tra cen mt20 mb12">
+        <div className="flex tra cen mt20">
+          <Logo suCasa={suEsci} />
+        </div>
+        <div className="flex tra cen mt12 mb12">
           <h1 className="titolo f22" style={{ margin: 0 }}>{t("impara.titolo")}</h1>
           <button className="f13 tenue" onClick={suEsci}
             style={{ textDecoration: "underline", textUnderlineOffset: 3 }}>

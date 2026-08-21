@@ -11,7 +11,7 @@ import { useLingua } from "../Lingua.jsx";
  */
 export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
   const { t } = useLingua();
-  const { etichetteSpese, debitiEstinguibili, trovaProfessione, trovaSogno, trovaAffare, obiettivo } = useMercato();
+  const { etichetteSpese, etichettePassivita, debitiEstinguibili, trovaProfessione, trovaSogno, trovaAffare, obiettivo } = useMercato();
   const [apri, setApri] = useState("conto");
   const [prestito, setPrestito] = useState(5000);
   const [errore, setErrore] = useState("");
@@ -81,6 +81,46 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
           </div>
         </div>
       </div>
+
+      {/* Il debito con la banca, se c'è.
+          Stava soltanto dentro due pannelli chiusi — una riga nello stato
+          patrimoniale e un pulsante in fondo alla Banca — quindi il
+          prestito che la banca concede d'ufficio arrivava senza che si
+          vedesse cambiare niente. È l'unica voce che nasce da sé, senza
+          che nessuno l'abbia scelta: è quella che va vista di più. */}
+      {mio && g.passivita.prestitoBanca > 0 && (
+        <div className="carta carta-debito">
+          <div className="flex tra cen">
+            <span className="etichetta" style={{ margin: 0 }}>{t("debito.titolo")}</span>
+            <span className="numeri f18 grassetto neg">{soldi(g.passivita.prestitoBanca)}</span>
+          </div>
+          <p className="f13" style={{ margin: "8px 0 0", lineHeight: 1.5 }}>
+            {etichettePassivita?.prestitoBanca ? etichettePassivita.prestitoBanca + " · " : ""}
+            {t("debito.costo", { importo: soldi(r.ratePrestito) })}
+          </p>
+          <p className="f12 tenue" style={{ margin: "6px 0 0", lineHeight: 1.5 }}>
+            {t("debito.comeNasce")} {t("debito.effetto")}
+          </p>
+          {(() => {
+            const passo = 1000;
+            const puo = Math.min(g.passivita.prestitoBanca, Math.floor(g.contanti / passo) * passo);
+            if (puo < passo) {
+              return (
+                <p className="f12 neg" style={{ margin: "10px 0 0" }}>
+                  {t("debito.servonoContanti", { importo: soldi(passo) })}
+                </p>
+              );
+            }
+            const tutto = puo >= g.passivita.prestitoBanca;
+            return (
+              <Bottone variante="btn-fantasma mt12" disabled={inAzione}
+                onClick={() => fai({ tipo: "estingui", chiave: "prestitoBanca", importo: puo })}>
+                {t(tutto ? "debito.rimborsaTutto" : "debito.rimborsa", { importo: soldi(puo) })}
+              </Bottone>
+            );
+          })()}
+        </div>
+      )}
 
       {/* Conto economico */}
       {sezione("conto", "Conto economico", (
