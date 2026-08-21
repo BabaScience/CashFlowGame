@@ -122,6 +122,11 @@ export function creaGiocatore(s, id, nome, professioneId, sognoId, indice) {
     // statistiche
     turniGiocati: 0,
     usciteDallaCorsa: null, // a quale dei SUOI turni è uscito dalla Ruota
+    /* Un Giorno di Paga = un mese. Vedi game/tempo.js: il tempo si conta
+       per giocatore, perché la domanda a cui risponde è "quanti mesi ho
+       lavorato per arrivare qui" e quella è personale. */
+    mesi: 0,
+    mesiAllUscita: null,
   };
 }
 
@@ -286,6 +291,9 @@ function pagaObbligatorio(s, g, importo, motivo) {
  * Restituisce true se il giocatore è finito in bancarotta.
  */
 function giornoDiPaga(s, g) {
+  /* Prima di tutto il resto: il mese è passato comunque, che si incassi,
+     che si paghi, o che si finisca in bancarotta proprio adesso. */
+  g.mesi = (g.mesi || 0) + 1;
   const f = flussoMensile(g);
   if (f >= 0) {
     g.contanti += f;
@@ -626,6 +634,7 @@ export function applicaAzione(stato, azione) {
     for (const p of s.giocatori) {
       const prof = getProfessione(s, p.professioneId);
       p.contanti = flussoMensile(p) + prof.risparmi;
+      p.mesi = 1; // quella prima paga è un mese lavorato come gli altri
     }
     // Ordine di gioco: si tira un dado, il più alto comincia.
     const tiri = s.giocatori.map((p) => ({ id: p.id, nome: p.nome, v: dado(s) }));
@@ -743,6 +752,7 @@ export function applicaAzione(stato, azione) {
     g.contanti += buyout;
     g.turniBeneficenza = 0;
     g.usciteDallaCorsa = g.turniGiocati;
+    g.mesiAllUscita = g.mesi;
     nota(
       s,
       `🎉 ${g.nome} esce dalla Ruota! Liquidazione ${den(s, buyout)} (100 × ${den(s, passivo)} di reddito passivo). Obiettivo: ${den(s, buyout + obiettivoDi(s))}.`, "r28", { nome: g.nome, importo: den(s, buyout), importo2: den(s, passivo), v: den(s, buyout + obiettivoDi(s)) },
@@ -796,6 +806,7 @@ export function applicaAzione(stato, azione) {
       g.posizione = (da + passi) % N_LARGO;
       nota(s, `${g.nome} tira ${valori.join(" + ")} = ${passi}.`, "r30", { nome: g.nome, v: valori.join(" + "), passi: passi }, "dado", g.id);
       for (let i = 0; i < giorni; i++) {
+        g.mesi = (g.mesi || 0) + 1; // fuori dalla Ruota il tempo passa uguale
         g.contanti += g.redditoRendita;
         nota(s, `${g.nome} incassa il Giorno di Rendita: +${den(s, g.redditoRendita)}.`, "r31", { nome: g.nome, importo: den(s, g.redditoRendita) }, "paga", g.id);
       }

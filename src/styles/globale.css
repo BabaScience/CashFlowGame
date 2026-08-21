@@ -779,3 +779,73 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
   /* Il foglio dal basso non si ribalta mai: è già ancorato dove serve. */
   .scelta-elenco.scelta-sopra { top: auto; bottom: 0; }
 }
+
+/* ══ la striscia del tempo ══
+   Un Giorno di Paga è un mese: vedi game/tempo.js. Sta sotto il tabellone,
+   accanto alla barra del progresso, perché risponde all'altra metà della
+   stessa domanda — non "quanto manca" ma "quanto è costato finora". ══ */
+.zona-tempo {
+  display: flex; align-items: baseline; justify-content: space-between; gap: 12px;
+}
+.zona-tempo .maiusc { color: rgba(244,241,230,.42); }
+.zona-tempo .numeri { color: var(--oro-chiaro); font-size: 13px; }
+
+/* ══ la colonna di destra, sulla scrivania ══
+   Prima i pannelli venivano impilati tutti: ~1.800px di contenuto in una
+   colonna alta 700, cioè metà del gioco raggiungibile solo scorrendo. Ora
+   le linguette restano ferme in cima e scorre soltanto il pannello. ══ */
+.colonna-pannello { display: contents; }
+
+@media (min-width: 1000px) {
+  .colonna-pannello {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 390px;
+    min-height: 0;
+  }
+  .colonna-pannello .zona-pannello {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 0 2px 8px 0;
+  }
+}
+
+.pannello-schede {
+  display: flex;
+  gap: 4px;
+  flex: none;
+  margin-bottom: 12px;
+  padding: 4px;
+  background: rgba(0,0,0,.24);
+  border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px;
+}
+.pannello-schede button {
+  flex: 1;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 9px 6px;
+  border-radius: 10px;
+  color: rgba(244,241,230,.55);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: .05em;
+  text-transform: uppercase;
+  position: relative;
+  transition: background .12s ease, color .12s ease;
+}
+.pannello-schede button:hover { color: var(--carta); background: rgba(255,255,255,.05); }
+/* L'oro da solo non basta a dire "sei qui": chi non distingue i colori
+   vedrebbe quattro linguette uguali. Il fondo pieno si vede comunque. */
+.pannello-schede button[data-attivo="true"] {
+  background: rgba(201,162,39,.20);
+  color: var(--oro-chiaro);
+  box-shadow: inset 0 0 0 1px rgba(201,162,39,.45);
+}
+.pannello-schede button:focus-visible { outline: 2px solid var(--oro); outline-offset: 1px; }
+.pannello-schede .icona { font-size: 14px; line-height: 1; }
+.pannello-schede .punto {
+  position: absolute; top: 5px; right: 6px;
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--rosso);
+}

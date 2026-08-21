@@ -188,4 +188,22 @@ export default {
     alTavolo: "Al tavolo",
     caricamento: "Un momento…",
   },
+  tempo: {
+    mese: "{n} mese",
+    mesi: "{n} mesi",
+    anno: "{n} anno",
+    anni: "{n} anni",
+    anniEMesi: "{anni} e {mesi}",
+    annoMese: "Anno {anno} · mese {mese}",
+    inGioco: "Tempo lavorato",
+    uscitoDopo: "fuori dalla Ruota dopo {durata}",
+    haLavorato: "ha lavorato {durata}",
+  },
+  sezioni: {
+    etichetta: "Sezioni del pannello",
+    conto: "Conto",
+    tavolo: "Tavolo",
+    registro: "Registro",
+    regole: "Regole",
+  },
 };

@@ -194,4 +194,22 @@ export default {
     alTavolo: "At the table",
     caricamento: "One moment…",
   },
+  tempo: {
+    mese: "{n} month",
+    mesi: "{n} months",
+    anno: "{n} year",
+    anni: "{n} years",
+    anniEMesi: "{anni}, {mesi}",
+    annoMese: "Year {anno} · month {mese}",
+    inGioco: "Time worked",
+    uscitoDopo: "off the Wheel after {durata}",
+    haLavorato: "worked {durata}",
+  },
+  sezioni: {
+    etichetta: "Panel sections",
+    conto: "Finances",
+    tavolo: "Table",
+    registro: "Log",
+    regole: "Rules",
+  },
 };

@@ -12,6 +12,7 @@ import { Bottone, NumeroAnimato, Barra } from "../components/Base.jsx";
 import { soldi, riepilogo, fuoriDallaCorsa } from "../game/finanze.js";
 import { PERCORSO_RUOTA, CASELLE_RUOTA, PERCORSO_LARGO, CASELLE_LARGO } from "../game/tabellone.js";
 import { useSchermoLargo } from "../hooks/useSchermo.js";
+import { orologio } from "../game/tempo.js";
 import { useSuoni } from "../hooks/useSuoni.js";
 import { avvisaTurno, chiediAvvisi, ricordaPartita, statoAvvisi } from "../lib/partite.js";
 import { audioAcceso, impostaAudio, sbloccaAudio } from "../lib/suoni.js";
@@ -19,6 +20,25 @@ import { useLingua } from "../Lingua.jsx";
 
 /* Il tabellone non è più una scheda fra le altre: resta sempre a schermo,
    quindi le linguette servono solo per ciò che gli sta sotto. */
+/**
+ * Le sezioni della colonna di destra, sulla scrivania.
+ *
+ * Su telefono le schede sono cinque e si sfogliano con la barra in basso.
+ * Sullo schermo grande la barra spariva e i pannelli venivano impilati
+ * tutti insieme: milleottocento pixel di contenuto in una colonna alta
+ * settecento, cioè la metà del gioco raggiungibile solo scorrendo.
+ *
+ * Quattro sezioni invece di cinque, perché sullo schermo grande c'è spazio
+ * per tenere insieme le cose che si guardano insieme: chi c'è al tavolo e
+ * cosa si stanno dicendo sono la stessa domanda.
+ */
+const SEZIONI = [
+  { id: "conto",    icona: "▤", chiave: "sezioni.conto" },
+  { id: "tavolo",   icona: "◉", chiave: "sezioni.tavolo" },
+  { id: "registro", icona: "☰", chiave: "sezioni.registro" },
+  { id: "regole",   icona: "?", chiave: "sezioni.regole" },
+];
+
 const SCHEDE = [
   { id: "scheda", icona: "▤", chiave: "schede.scheda" },
   { id: "gioc", icona: "◉", chiave: "schede.giocatori" },
@@ -174,6 +194,11 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
 export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci }) {
   const { t } = useLingua();
   const [scheda, setScheda] = useState("scheda");
+  /* Su telefono si sfoglia con la barra in basso (`scheda`), sulla
+     scrivania con le linguette in cima alla colonna (`sezione`). Due stati
+     separati perché i raggruppamenti sono diversi, e perché passando da
+     una forma all'altra ognuna deve ritrovarsi dove l'avevi lasciata. */
+  const [sezione, setSezione] = useState("conto");
   const [audio, setAudio] = useState(audioAcceso);
   useSuoni(stato, mioId);
 
@@ -183,7 +208,10 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
     window.addEventListener("pointerdown", apri, { once: true });
     return () => window.removeEventListener("pointerdown", apri);
   }, []);
-  const largo = useSchermoLargo(1000);
+  /* "scrivania", non "largo": in questo gioco il Largo è un tracciato, e
+     chiamare così anche lo schermo grande rendeva illeggibile ogni riga in
+     cui comparivano tutti e due. */
+  const scrivania = useSchermoLargo(1000);
   const io = stato.giocatori.find((g) => g.id === mioId);
   const diTurno = stato.giocatori[stato.turno];
   const mioTurno = diTurno?.id === mioId;
@@ -224,9 +252,12 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
   const [chatNuova, setChatNuova] = useState(false);
   useEffect(() => {
     const n = (stato.chat || []).length;
-    if (n > lettiChat.current && scheda !== "chat") setChatNuova(true);
-    if (scheda === "chat") { lettiChat.current = n; setChatNuova(false); }
-  }, [stato.chat, scheda]);
+    /* La chat è aperta se la stai guardando, comunque tu ci sia arrivato:
+       dalla scheda del telefono o dalla sezione della scrivania. */
+    const guardo = scheda === "chat" || sezione === "tavolo";
+    if (n > lettiChat.current && !guardo) setChatNuova(true);
+    if (guardo) { lettiChat.current = n; setChatNuova(false); }
+  }, [stato.chat, scheda, sezione]);
   const segnaLetti = useCallback((n) => { lettiChat.current = n; }, []);
 
   const nuoveRighe = useRef(stato.registro[0]?.id);
@@ -234,9 +265,9 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
   useEffect(() => {
     if (stato.registro[0]?.id !== nuoveRighe.current) {
       nuoveRighe.current = stato.registro[0]?.id;
-      if (scheda !== "log") setLogNuovo(true);
+      if (scheda !== "log" && sezione !== "registro") setLogNuovo(true);
     }
-  }, [stato.registro, scheda]);
+  }, [stato.registro, scheda, sezione]);
 
   if (!io) {
     return (
@@ -302,6 +333,16 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
             <Dadi tiro={stato.ultimoTiro} mioId={mioId} />
           </div>
 
+          {/* Il tempo passato. Sta qui e non nella barra in alto perché la
+              domanda "da quanto lavoro" è la stessa a cui risponde la barra
+              del progresso: quanto manca, e quanto è costato finora. */}
+          <div className="zona-progresso zona-tempo">
+            <span className="maiusc tenue">{t("tempo.inGioco")}</span>
+            <span className="numeri grassetto">
+              {t("tempo.annoMese", orologio(io.mesi))}
+            </span>
+          </div>
+
           {io.tracciato === "topi" && (
             <div className="zona-progresso">
               <div className="flex tra f12 mb4">
@@ -314,7 +355,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
             </div>
           )}
 
-          {largo && (
+          {scrivania && (
             <div className="zona-progresso"><Legenda tracciato={io.tracciato} /></div>
           )}
 
@@ -333,40 +374,55 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
           </div>
         </div>
 
-        {/* Unica zona che scorre. */}
-        <div className="zona-pannello">
-          {largo ? (
-            scheda === "regole" ? <Manuale /> : (
-              <>
-                <Giocatori stato={stato} mioId={mioId} />
-                <div className="mt12"><Scheda giocatore={io} invia={invia} inAzione={inAzione} mio /></div>
-                <div className="mt12"><Chat stato={stato} mioId={mioId} suLetto={segnaLetti} /></div>
-                <div className="mt12"><Registro stato={stato} limite={25} /></div>
-              </>
-            )
-          ) : (
-            <>
-              {scheda === "scheda" && <Scheda giocatore={io} invia={invia} inAzione={inAzione} mio />}
-              {scheda === "gioc" && <Giocatori stato={stato} mioId={mioId} />}
-              {scheda === "chat" && <Chat stato={stato} mioId={mioId} suLetto={segnaLetti} />}
-              {scheda === "log" && <Registro stato={stato} />}
-              {scheda === "regole" && <Manuale />}
-            </>
+        {/* La colonna di destra: le linguette non scorrono, il pannello sì. */}
+        <div className="colonna-pannello">
+          {scrivania && (
+            <nav className="pannello-schede" aria-label={t("sezioni.etichetta")}>
+              {SEZIONI.map((sz) => (
+                <button key={sz.id} data-attivo={sezione === sz.id}
+                  aria-current={sezione === sz.id ? "true" : undefined}
+                  onClick={() => {
+                    setSezione(sz.id);
+                    if (sz.id === "registro") setLogNuovo(false);
+                  }}>
+                  <span className="icona" aria-hidden="true">{sz.icona}</span>
+                  {t(sz.chiave)}
+                  {sz.id === "registro" && logNuovo && <span className="punto" />}
+                  {sz.id === "tavolo" && chatNuova && <span className="punto" />}
+                </button>
+              ))}
+            </nav>
           )}
+
+          <div className="zona-pannello">
+            {scrivania ? (
+              <>
+                {sezione === "conto" && <Scheda giocatore={io} invia={invia} inAzione={inAzione} mio />}
+                {sezione === "tavolo" && (
+                  <>
+                    <Giocatori stato={stato} mioId={mioId} />
+                    {/* Chi c'è al tavolo e cosa si stanno dicendo sono la
+                        stessa domanda: stanno bene nella stessa sezione. */}
+                    <div className="mt12"><Chat stato={stato} mioId={mioId} suLetto={segnaLetti} /></div>
+                  </>
+                )}
+                {sezione === "registro" && <Registro stato={stato} />}
+                {sezione === "regole" && <Manuale />}
+              </>
+            ) : (
+              <>
+                {scheda === "scheda" && <Scheda giocatore={io} invia={invia} inAzione={inAzione} mio />}
+                {scheda === "gioc" && <Giocatori stato={stato} mioId={mioId} />}
+                {scheda === "chat" && <Chat stato={stato} mioId={mioId} suLetto={segnaLetti} />}
+                {scheda === "log" && <Registro stato={stato} />}
+                {scheda === "regole" && <Manuale />}
+              </>
+            )}
+          </div>
         </div>
       </div>
 
       <Decisione stato={stato} mioId={mioId} invia={invia} inAzione={inAzione} />
-
-      {largo && (
-        <button
-          className="btn btn-chiaro btn-piccolo"
-          style={{ position: "fixed", right: 22, bottom: 22, width: "auto", zIndex: 35 }}
-          onClick={() => setScheda(scheda === "regole" ? "scheda" : "regole")}
-        >
-          {scheda === "regole" ? t("partita.tornaAlTavolo") : t("partita.regoleDelGioco")}
-        </button>
-      )}
 
       <nav className="navbar">
         {SCHEDE.map((sc) => (

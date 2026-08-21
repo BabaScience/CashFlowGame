@@ -205,6 +205,7 @@ function partita({ mercatoId, livello, professioneId, giocatori = 3, seme, maxAz
 
   /* Turni personali al momento dell'uscita dalla Ruota. */
   const uscita = new Map();
+  const mesiVisti = new Map();
   let azioni = 0, errori = 0;
 
   while (s.fase === "inCorso" && azioni < maxAzioni) {
@@ -232,6 +233,20 @@ function partita({ mercatoId, livello, professioneId, giocatori = 3, seme, maxAz
         if (!Number.isFinite(v)) throw new Error(`passività "${k}" non è un numero (${v}) su ${g.nome}`);
       }
       if (!Number.isFinite(g.contanti)) throw new Error(`contanti non numerici su ${g.nome}`);
+      /* Il tempo non torna indietro, e dopo l'avvio non è mai zero: sono le
+         due sole cose che il conto dei mesi deve garantire sempre. Qui si
+         verificano su decine di migliaia di mosse vere. */
+      if (!Number.isFinite(g.mesi) || g.mesi < 1) {
+        throw new Error(`mesi non validi (${g.mesi}) su ${g.nome}`);
+      }
+      const prima = mesiVisti.get(g.id);
+      if (prima !== undefined && g.mesi < prima) {
+        throw new Error(`i mesi di ${g.nome} sono tornati indietro: ${prima} → ${g.mesi}`);
+      }
+      mesiVisti.set(g.id, g.mesi);
+      if (g.tracciato === "veloce" && g.mesiAllUscita == null) {
+        throw new Error(`${g.nome} è uscito dalla Ruota senza registrare i mesi`);
+      }
     }
     for (const g of s.giocatori) {
       if (g.tracciato === "veloce" && !uscita.has(g.id)) uscita.set(g.id, g.turniGiocati);
