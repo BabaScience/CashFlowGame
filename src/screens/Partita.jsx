@@ -327,7 +327,8 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
         <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>
           {t(io.tracciato === "topi" ? "partita.ruota" : "partita.largo")}
         </div>
-        <div className="f13 grassetto" style={{ color: casella.colore === "#6B4423" ? "#C8A278" : casella.colore }}>
+        <div className="f13 grassetto riga-sola"
+          style={{ color: casella.colore === "#6B4423" ? "#C8A278" : casella.colore }}>
           {casella.emoji} {casella.nome}
         </div>
       </div>

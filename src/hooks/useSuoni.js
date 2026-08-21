@@ -21,6 +21,7 @@ export function useSuoni(stato, mioId) {
   const eraMioTurno = useRef(false);
   const eraAlLargo = useRef(false);
   const eraFinita = useRef(false);
+  const messaggiVisti = useRef(null);
 
   const io = stato?.giocatori?.find((g) => g.id === mioId) || null;
   const diTurno = stato?.giocatori?.[stato.turno]?.id;
@@ -37,6 +38,7 @@ export function useSuoni(stato, mioId) {
       eraMioTurno.current = diTurno === mioId;
       eraAlLargo.current = io.tracciato === "veloce";
       eraFinita.current = stato.fase === "finita";
+      messaggiVisti.current = (stato.chat || []).length;
       return;
     }
 
@@ -68,6 +70,16 @@ export function useSuoni(stato, mioId) {
     const alLargo = io.tracciato === "veloce";
     if (alLargo && !eraAlLargo.current) suona("largo");
     eraAlLargo.current = alLargo;
+
+    /* Un messaggio in chat. Solo se l'ha scritto qualcun altro: sentire
+       un suono per ciò che si è appena scritto è come sentirsi bussare da
+       dentro casa. */
+    const chat = stato.chat || [];
+    if (messaggiVisti.current !== null && chat.length > messaggiVisti.current) {
+      const nuovi = chat.slice(messaggiVisti.current);
+      if (nuovi.some((m) => m.di !== mioId)) suona("messaggio");
+    }
+    messaggiVisti.current = chat.length;
 
     // Partita finita.
     const finita = stato.fase === "finita";

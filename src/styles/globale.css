@@ -424,36 +424,60 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
   inset: 0;
   z-index: 20;
   display: grid;
-  place-items: center;
+  /* In fondo, non al centro. Al centro copriva il cuore del tabellone —
+     di chi è il turno, su che casella sei — e soprattutto nascondeva i
+     gettoni proprio nell'istante in cui si muovono, che è l'unica cosa che
+     si sta guardando quando qualcuno tira. */
+  place-items: end center;
+  padding-bottom: 4%;
+  /* Sempre nel documento, quindi non deve MAI intercettare un tocco:
+     copre tutto il tabellone. */
   pointer-events: none;
 }
 .tiro {
-  display: flex; flex-direction: column; align-items: center; gap: 10px;
-  padding: 18px 26px;
-  border-radius: var(--r-l);
+  /* Una pastiglia in riga invece di una colonna: occupa una fascia
+     sottile invece di un quadrato in mezzo allo schermo. */
+  display: flex; flex-direction: row; align-items: center; gap: 11px;
+  padding: 7px 15px 7px 11px;
+  border-radius: 999px;
   background: rgba(9, 18, 15, .93);
   border: 1px solid rgba(227, 197, 90, .35);
   box-shadow: var(--ombra-alta);
   backdrop-filter: blur(8px);
   pointer-events: none;
+  max-width: 92%;
 }
-.tiro-chi     { font-size: 12px; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; }
-.tiro-dadi    { display: flex; gap: 12px; }
-.tiro-totale  { font-size: 22px; font-weight: 700; color: var(--oro-chiaro); }
+.tiro-chi {
+  font-size: 11px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: .08em;
+  white-space: nowrap;
+}
+.tiro-dadi    { display: flex; gap: 7px; }
+.tiro-totale  { font-size: 17px; font-weight: 700; color: var(--oro-chiaro); white-space: nowrap; }
 
 /* ══ dadi ══ */
 .dado {
-  width: 54px; height: 54px;
-  border-radius: 12px;
+  /* Erano 54px su un tabellone che sul telefono ne misura 292: due dadi
+     più il riquadro coprivano un quinto della plancia. */
+  width: 34px; height: 34px;
+  border-radius: 9px;
   background: linear-gradient(160deg, #FFFDF6, #E4DFCE);
-  box-shadow: 0 4px 0 #B8B2A0, 0 10px 22px rgba(0,0,0,.4);
+  box-shadow: 0 3px 0 #B8B2A0, 0 6px 14px rgba(0,0,0,.4);
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   grid-template-rows: repeat(3, 1fr);
-  padding: 8px;
+  padding: 5px;
   flex: none;
 }
-.pip { width: 9px; height: 9px; border-radius: 50%; background: var(--inchiostro); align-self: center; justify-self: center; }
+.pip { width: 6px; height: 6px; border-radius: 50%; background: var(--inchiostro); align-self: center; justify-self: center; }
+
+/* Sullo schermo grande c'è spazio per dadi che si vedano. */
+@media (min-width: 1000px) {
+  .dado { width: 44px; height: 44px; border-radius: 11px; padding: 6px; }
+  .pip { width: 7.5px; height: 7.5px; }
+  .tiro { gap: 13px; padding: 9px 18px 9px 13px; }
+  .tiro-totale { font-size: 19px; }
+}
 
 /* ══ registro eventi ══ */
 .riga-log {
@@ -485,8 +509,12 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .avviso {
   position: fixed;
   left: 14px; right: 14px;
-  bottom: calc(var(--barra-basso) + 14px);
-  z-index: 80;
+  /* In alto, non in basso. In basso finiva sopra il foglio della
+     decisione — cioè proprio sopra i due pulsanti che l'avviso stesso
+     invitava a premere — e sopra il pannello del conto. In cima non c'è
+     niente da coprire tranne la barra, che intanto non si tocca. */
+  top: calc(env(safe-area-inset-top) + 12px);
+  z-index: 90;
   background: var(--inchiostro);
   color: var(--carta);
   border: 1px solid rgba(255,255,255,.14);
@@ -1087,3 +1115,14 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 }
 .mostra-tutte:hover { color: var(--inchiostro); background: rgba(0,0,0,.04); }
 .mostra-tutte:focus-visible { outline: 2px solid var(--oro); outline-offset: 2px; }
+
+/* L'entrata della pastiglia del tiro: la fa il CSS, così l'elemento può
+   essere semplicemente smesso di disegnare quando il turno è finito.
+   Vedi il commento in Dadi.jsx: con AnimatePresence i riquadri si
+   accumulavano sul tabellone e non se ne andavano più. */
+@keyframes tiro-entra {
+  from { opacity: 0; transform: translateY(6px) scale(.92); }
+  to   { opacity: 1; transform: none; }
+}
+.tiro { animation: tiro-entra .22s cubic-bezier(.2,.7,.3,1); }
+@media (prefers-reduced-motion: reduce) { .tiro { animation: none; } }

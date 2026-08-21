@@ -35,7 +35,8 @@ const vero = (v, m) => { if (!v) throw new Error(m || "atteso vero"); };
 
 /* Le voci che l'interfaccia si aspetta di poter chiamare. Se una sparisce
    il gioco resta muto in quel momento, senza nessun errore visibile. */
-const ATTESE = ["dado", "carta", "incasso", "esborso", "tuoTurno", "largo", "vittoria"];
+const ATTESE = ["dado", "carta", "incasso", "esborso", "tuoTurno", "largo", "vittoria", "messaggio",
+];
 
 console.log("\n── Fuori dal browser non deve fare danni ──");
 
@@ -88,6 +89,25 @@ prova("Non ce ne sono di sconosciute in giro", () => {
   for (const v of VOCI_DISPONIBILI) {
     vero(ATTESE.includes(v), `voce "${v}" non prevista da questo test: aggiornalo`);
   }
+});
+
+prova("Il messaggio in chat suona solo se l'ha scritto un altro", () => {
+  /* Sentire un suono per ciò che si è appena scritto è come sentirsi
+     bussare da dentro casa. */
+  const src = readFileSync(new URL("../src/hooks/useSuoni.js", import.meta.url), "utf8");
+  const blocco = src.match(/const chat = stato\.chat[\s\S]*?messaggiVisti\.current = chat\.length;/)?.[0] || "";
+  vero(blocco.length > 0, "manca il richiamo del suono della chat");
+  vero(/m\.di !== mioId/.test(blocco), "suona anche per i propri messaggi");
+  vero(/suona\("messaggio"\)/.test(blocco), "non suona niente");
+});
+
+prova("Chi entra a chat già piena non sente l'arretrato", () => {
+  /* Il primo giro prende nota e basta: chi entra a partita in corso non
+     deve sentire venti notifiche in fila. */
+  const src = readFileSync(new URL("../src/hooks/useSuoni.js", import.meta.url), "utf8");
+  const primo = src.match(/if \(primo\.current\)[\s\S]*?return;/)?.[0] || "";
+  vero(/messaggiVisti\.current = \(stato\.chat \|\| \[\]\)\.length/.test(primo),
+    "il primo giro non prende nota dei messaggi già presenti");
 });
 
 console.log("\n── Nessun file audio da tracciare ──");

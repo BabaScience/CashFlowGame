@@ -48,9 +48,11 @@ export function Avviso({ testo }) {
       {testo && (
         <motion.div
           className="avviso"
-          initial={{ opacity: 0, y: 24 }}
+          role="status"
+          aria-live="polite"
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 24 }}
+          exit={{ opacity: 0, y: -20 }}
         >
           {testo}
         </motion.div>

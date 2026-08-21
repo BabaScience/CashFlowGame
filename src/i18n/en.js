@@ -91,6 +91,8 @@ export default {
   },
 
   partita: {
+    haiTirato: "You rolled",
+    tira: "{nome} rolls",
     copiaFallita: "Copy the code by hand: {codice}",
     turnoDi: "{nome}'s turn",
     laTuaCasella: "your square",

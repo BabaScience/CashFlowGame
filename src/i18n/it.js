@@ -85,6 +85,8 @@ export default {
   },
 
   partita: {
+    haiTirato: "Hai tirato",
+    tira: "{nome} tira",
     copiaFallita: "Copia a mano il codice: {codice}",
     turnoDi: "Turno di {nome}",
     laTuaCasella: "la tua casella",

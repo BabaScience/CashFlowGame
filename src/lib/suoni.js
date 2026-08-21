@@ -108,6 +108,15 @@ const VOCI = {
   largo: (t) => [523, 659, 784].forEach((f, i) =>
     nota(t + i * 0.1, { freq: f, durata: 0.3, volume: 0.1 })),
 
+  /* Due colpetti brevi e chiari: è arrivato un messaggio. Volutamente
+     diverso da "tocca a te" — quello chiama, questo informa e basta — e
+     volutamente sottile: al tavolo si chiacchiera, e un suono squillante
+     ripetuto venti volte diventa il motivo per cui si spengono i suoni. */
+  messaggio: (t) => {
+    nota(t, { freq: 1180, durata: 0.05, volume: 0.05, forma: "triangle" });
+    nota(t + 0.07, { freq: 1560, durata: 0.07, volume: 0.045, forma: "triangle" });
+  },
+
   /* Arpeggio più lungo, con l'ottava in cima: partita vinta. */
   vittoria: (t) => [523, 659, 784, 1047].forEach((f, i) =>
     nota(t + i * 0.12, { freq: f, durata: 0.45, volume: 0.12, forma: "triangle" })),

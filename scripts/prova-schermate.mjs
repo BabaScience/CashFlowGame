@@ -509,6 +509,11 @@ console.log("\n── Copiare negli appunti ──");
    progetto: lo dice la directory di lavoro. */
 const RADICE = process.cwd();
 const relativo = (f) => relative(RADICE, f);
+/* Il codice senza i commenti: un commento che CITA una cosa per spiegare
+   perché non la si usa non è quella cosa. */
+const senzaCommenti = (t) => t
+  .replace(/\/\*[\s\S]*?\*\//g, " ")
+  .replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
 const JSXFILE = (function raccogli(dir, out = []) {
   for (const n of readdirSync(dir)) {
     const p = join(dir, n);
@@ -530,6 +535,36 @@ prova("Nessuno chiama più gli appunti a mano", () => {
     if (/navigator\.clipboard/.test(src)) guai.push(relativo(f));
   }
   if (guai.length) throw new Error("usano gli appunti senza ripiego: " + guai.join(", "));
+});
+
+console.log("\n── I dadi non restano sul tabellone ──");
+
+prova("Il riquadro del tiro non usa AnimatePresence", () => {
+  /* Ci è costato caro. `AnimatePresence` tiene in vita un figlio finché la
+     sua animazione d'uscita non dichiara d'essere finita; qui non lo
+     dichiarava mai. Ogni tiro lasciava un riquadro nel documento: dopo
+     qualche giro se ne trovavano due o tre sovrapposti sul tabellone, e
+     quando uno veniva rianimato compariva sopra la plancia senza motivo.
+     È il difetto per cui "si vedono i dadi e non si vede più il
+     tabellone". Un elemento che compare, sta due secondi e sparisce non ha
+     bisogno di presenza animata: basta non disegnarlo. */
+  /* Senza commenti: qui sopra AnimatePresence è CITATO per spiegare
+     perché non si usa, ed è esattamente il tranello in cui questo
+     controllo è già cascato una volta con `<select>`. */
+  const src = senzaCommenti(readFileSync(process.cwd() + "/src/components/Dadi.jsx", "utf8"));
+  vero(!/AnimatePresence/.test(src),
+    "AnimatePresence è tornato: i riquadri del tiro torneranno ad accumularsi");
+  vero(/\{visibile && tiro && \(/.test(src), "il riquadro non è più condizionato allo stato");
+});
+
+prova("Il timer del tiro non dipende dall'oggetto che arriva dal server", () => {
+  /* `stato.ultimoTiro` è un oggetto nuovo a ogni interrogazione, una ogni
+     1,4 secondi. Dipendendo da quello, l'effetto si rilanciava di
+     continuo: la pulizia spegneva il timer avviato, il corpo usciva subito
+     perché il numero non era cambiato, e il timer nuovo non partiva mai. */
+  const src = readFileSync(process.cwd() + "/src/components/Dadi.jsx", "utf8");
+  vero(/\}, \[tiro\?\.n\]\);/.test(src),
+    "l'effetto deve dipendere dal numero del tiro, non dall'oggetto");
 });
 
 console.log("\n── Il marchio ──");

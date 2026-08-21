@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
+import { useLingua } from "../Lingua.jsx";
 
 /* Posizione dei pallini per ogni faccia, su griglia 3×3. */
 const FACCE = {
@@ -71,6 +72,7 @@ function Dado({ valore, ritardo = 0 }) {
  * tempo minimo: il numero si legge anche se il turno è già passato.
  */
 export default function Dadi({ tiro, mioId }) {
+  const { t } = useLingua();
   const [visibile, setVisibile] = useState(false);
   const ultimoVisto = useRef(0);
   const montato = useRef(false);
@@ -90,25 +92,38 @@ export default function Dadi({ tiro, mioId }) {
     setVisibile(true);
     const t = setTimeout(() => setVisibile(false), 2600);
     return () => clearTimeout(t);
-  }, [tiro]);
+    /* Si dipende dal NUMERO del tiro, non dall'oggetto.
+       `stato.ultimoTiro` arriva dal server a ogni interrogazione — una ogni
+       1,4 secondi — ed è un oggetto nuovo ogni volta. Dipendendo
+       dall'oggetto, l'effetto si rilanciava di continuo: React eseguiva
+       prima la pulizia (che spegne il timer già avviato), poi il corpo
+       usciva subito perché il numero non era cambiato, e il timer nuovo non
+       veniva mai acceso. Risultato: i dadi restavano sul tabellone per
+       sempre, fino al tiro successivo. */
+  }, [tiro?.n]);
 
   const mio = tiro?.giocatoreId === mioId;
 
   return (
-    <AnimatePresence>
+    /* ═══ SENZA AnimatePresence, DI PROPOSITO ═══
+     *
+     * `AnimatePresence` tiene in vita un figlio finché la sua animazione
+     * d'uscita non dichiara di essere finita. Qui non lo dichiarava mai, e
+     * ogni tiro lasciava sul tabellone un riquadro invisibile che non se ne
+     * andava più: dopo qualche giro se ne trovavano due, tre, sovrapposti,
+     * e quando uno di quelli veniva rianimato compariva sopra la plancia
+     * senza motivo. È il difetto per cui "si vedono i dadi e non si vede
+     * più il tabellone".
+     *
+     * Un elemento che compare, sta due secondi e sparisce non ha bisogno di
+     * niente di tutto questo: basta non disegnarlo. L'entrata la fa il CSS;
+     * l'uscita è semplicemente la fine del suo turno.
+     */
+    <div className="tiro-velo" aria-hidden={!visibile}>
       {visibile && tiro && (
-        <div className="tiro-velo" key="velo">
-        <motion.div
-          className="tiro"
-          role="status"
-          aria-live="polite"
-          initial={{ opacity: 0, scale: 0.86 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.94, transition: { duration: 0.25 } }}
-          transition={{ type: "spring", stiffness: 320, damping: 24 }}
-        >
+        <div className="tiro" role="status" aria-live="polite">
           <div className="tiro-chi" style={{ color: tiro.colore }}>
-            {mio ? "Hai tirato" : `${tiro.nome} tira`}
+            {mio ? t("partita.haiTirato") : t("partita.tira", { nome: tiro.nome })}
           </div>
           <div className="tiro-dadi">
             {tiro.valori.map((v, i) => <Dado key={`${tiro.n}-${i}`} valore={v} ritardo={i} />)}
@@ -116,9 +131,8 @@ export default function Dadi({ tiro, mioId }) {
           <div className="tiro-totale numeri">
             {tiro.valori.length > 1 ? `${tiro.valori.join(" + ")} = ${tiro.totale}` : tiro.totale}
           </div>
-        </motion.div>
         </div>
       )}
-    </AnimatePresence>
+    </div>
   );
 }
