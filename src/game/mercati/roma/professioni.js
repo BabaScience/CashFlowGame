@@ -1,100 +1,106 @@
 /**
- * LE DODICI PROFESSIONI DI ROMA.
+ * LE TREDICI PROFESSIONI DI ROMA.
  *
- * Importi NETTI mensili. Lo stipendio è quello VERO della professione, per
- * una persona sola; il secondo reddito è dichiarato a parte.
+ * Importi NETTI mensili di UNA PERSONA SOLA. Non RAL, non reddito di nucleo.
  *
- * Prima erano fusi in un numero solo, di nucleo, e la scheda lo chiamava
- * "Stipendio": chi leggeva "Insegnante · 2.550 €" credeva che un insegnante
- * a Roma prendesse 2.550 € al mese, e non è vero — ne prende circa 1.650.
- * Un gioco che vuole insegnare come funziona il mondo non può cominciare
- * mentendo sulla prima riga della scheda.
+ * ═══ PERCHÉ UNA PERSONA SOLA ═══
  *
- * La distinzione conta, e ci è costata una diagnosi: le spese della scheda
- * — affitto, utenze, auto, spesa — sono di una famiglia, quindi accostarle
- * al reddito di una persona sola lasciava margini da 145 € al mese e rendeva
- * il gioco una macina. In Italia un nucleo ha in media circa un percettore e
- * mezzo, e quel mezzo adesso è una riga sua invece di essere nascosto dentro
- * lo stipendio. La professione indicata è quella principale. Le fasce vengono
- * dal Salary Outlook di JobPricing (RAL media nel privato 32.991 €, Lazio
- * 32.220 €) riportate al netto, e dalle tabelle contrattuali per il pubblico
- * impiego.
+ * Ci sono passate tutte e due le strade. Prima le spese erano di una famiglia
+ * accostate allo stipendio di un individuo, e i margini venivano da 145 € al
+ * mese: il gioco era una macina. Poi lo stipendio è diventato di nucleo per
+ * pareggiare i conti, e la scheda ha cominciato a dire che un insegnante a
+ * Roma prende 2.550 € al mese, che non è vero.
  *
- * Le spese sono costruite su Roma, non su una città media:
- *  - la casa è la voce che schiaccia tutto. Il canone medio comunale è di
- *    19,8 €/m² al mese, cioè circa 1.000 € per cinquanta metri quadri;
- *  - chi guadagna di più ha comprato, e paga una rata invece di un affitto,
- *    ma su un immobile più grande e più centrale;
- *  - trasporti, spesa, utenze e sanità integrativa seguono la fascia.
+ * La terza strada è l'unica onesta: una persona sola, con il suo stipendio
+ * vero e le SUE spese. Chi vive da solo a Roma non paga l'affitto di una
+ * famiglia — condivide, o prende un monolocale — e non ha le utenze, la
+ * spesa e l'auto di quattro persone.
  *
- * La cosa importante non sono i valori assoluti ma il rapporto fra reddito
- * e spese: a Roma il divario fra il netto e il costo del vivere è stretto
- * per quasi tutti, e il gioco deve farlo sentire.
+ * Coniuge e figli arriveranno, ma come cosa modellata per davvero: due
+ * redditi che possono sparire uno per volta, l'assegno unico, il costo vero
+ * di un bambino. Fino ad allora è meglio simulare bene una vita che
+ * simulare male due.
+ *
+ * ═══ DA DOVE VENGONO I NUMERI ═══
+ *
+ * Stipendi: rilevazioni 2026 sulle retribuzioni italiane, riportate al netto
+ * mensile su tredici mensilità. Un insegnante prende circa 1.650 €, un
+ * infermiere 1.750, un ingegnere 2.250, un avvocato 2.600.
+ *
+ * Casa: dalle quotazioni di `fonti.js`, non inventata. Un monolocale di
+ * 40 m² costa da 520 € a Tor Bella Monaca a 960 € a Prati; una stanza in
+ * condivisione poco più della metà. Chi guadagna meno condivide o sta in
+ * periferia, chi guadagna di più ha un bilocale suo e più centrale — che è
+ * quello che succede.
+ *
+ * Le altre voci — utenze, spesa, trasporti — sono di una persona sola e
+ * salgono con il tenore di vita, non con il numero di persone.
+ *
+ * La cosa importante non sono i valori assoluti ma il rapporto fra reddito e
+ * spese: a Roma, da soli, il margine è stretto per quasi tutti, e il gioco
+ * deve farlo sentire senza renderlo impossibile.
  *
  * Ogni scheda è verificata dai test: somma delle spese = speseTotali, e
  * stipendio − spese = flusso dichiarato.
  */
 
 /** Costruisce una scheda e ne calcola le voci derivate. */
-const scheda = (id, nome, emoji, stipendio, secondoReddito, risparmi, perFiglio, spese, passivita) => ({
-  id, nome, emoji, stipendio, secondoReddito, risparmi, perFiglio, spese, passivita,
+const scheda = (id, nome, emoji, stipendio, risparmi, perFiglio, spese, passivita) => ({
+  id, nome, emoji, stipendio, risparmi, perFiglio, spese, passivita,
 });
 
 export const PROFESSIONI = [
-  scheda("dirigente-medico", "Dirigente medico", "🩺", 3400, 2300, 9100, 530,
-    { casa: 1150, tasse: 0, prestitoStudio: 180, auto: 260, cartaCredito: 120, utenze: 210, vita: 860 },
-    { mutuo: 235000, prestitoStudio: 14000, auto: 12000, cartaCredito: 3500 }),
-
-  scheda("pilota", "Pilota di linea", "✈️", 4200, 2100, 10100, 560,
-    { casa: 1300, tasse: 0, prestitoStudio: 240, auto: 300, cartaCredito: 140, utenze: 220, vita: 970 },
+  scheda("pilota", "Pilota di linea", "✈️", 4200, 12600, 235,
+    { casa: 1300, tasse: 0, prestitoStudio: 240, auto: 300, cartaCredito: 140, utenze: 140, vita: 700 },
     { mutuo: 265000, prestitoStudio: 19000, auto: 14000, cartaCredito: 4000 }),
 
-  scheda("avvocato", "Avvocato", "⚖️", 2600, 1750, 7000, 370,
-    { casa: 980, tasse: 0, prestitoStudio: 150, auto: 220, cartaCredito: 110, utenze: 180, vita: 670 },
-    { mutuo: 198000, prestitoStudio: 11000, auto: 10000, cartaCredito: 3000 }),
+  scheda("dirigente-medico", "Dirigente medico", "🩺", 3400, 10200, 175,
+    { casa: 1050, tasse: 0, prestitoStudio: 180, auto: 260, cartaCredito: 120, utenze: 130, vita: 620 },
+    { mutuo: 235000, prestitoStudio: 14000, auto: 12000, cartaCredito: 3500 }),
 
-  scheda("architetto", "Architetto", "📐", 1900, 1250, 5000, 230,
-    { casa: 820, tasse: 0, prestitoStudio: 120, auto: 180, cartaCredito: 90, utenze: 160, vita: 500 },
-    { mutuo: 165000, prestitoStudio: 9000, auto: 8000, cartaCredito: 2500 }),
-
-  /* Ingegnere: 35.000–42.000 € di RAL secondo le rilevazioni 2026, cioè
-     circa 2.250 € netti al mese. Sta fra l'architetto e il quadro, ed è la
-     professione che più spesso chiede "quanto guadagno davvero". */
-  scheda("ingegnere", "Ingegnere", "⚙️", 2250, 1200, 5600, 260,
-    { casa: 880, tasse: 0, prestitoStudio: 130, auto: 200, cartaCredito: 95, utenze: 170, vita: 545 },
-    { mutuo: 178000, prestitoStudio: 10000, auto: 9000, cartaCredito: 2800 }),
-
-  scheda("quadro", "Quadro d'azienda", "📊", 2700, 1400, 6600, 340,
-    { casa: 950, tasse: 0, prestitoStudio: 110, auto: 240, cartaCredito: 110, utenze: 180, vita: 640 },
+  scheda("quadro", "Quadro d'azienda", "📊", 2700, 8100, 140,
+    { casa: 830, tasse: 0, prestitoStudio: 110, auto: 220, cartaCredito: 100, utenze: 110, vita: 500 },
     { mutuo: 192000, prestitoStudio: 8000, auto: 11000, cartaCredito: 3000 }),
 
-  scheda("insegnante", "Insegnante", "📚", 1650, 900, 4100, 190,
-    { casa: 700, tasse: 0, prestitoStudio: 60, auto: 130, cartaCredito: 70, utenze: 140, vita: 400 },
+  scheda("avvocato", "Avvocato", "⚖️", 2600, 7800, 125,
+    { casa: 820, tasse: 0, prestitoStudio: 150, auto: 200, cartaCredito: 100, utenze: 110, vita: 490 },
+    { mutuo: 198000, prestitoStudio: 11000, auto: 10000, cartaCredito: 3000 }),
+
+  scheda("ingegnere", "Ingegnere", "⚙️", 2250, 6800, 100,
+    { casa: 720, tasse: 0, prestitoStudio: 130, auto: 180, cartaCredito: 90, utenze: 100, vita: 440 },
+    { mutuo: 178000, prestitoStudio: 10000, auto: 9000, cartaCredito: 2800 }),
+
+  scheda("architetto", "Architetto", "📐", 1900, 5700, 70,
+    { casa: 640, tasse: 0, prestitoStudio: 120, auto: 70, cartaCredito: 80, utenze: 95, vita: 390 },
+    { mutuo: 165000, prestitoStudio: 9000, auto: 8000, cartaCredito: 2500 }),
+
+  scheda("autotrasportatore", "Autotrasportatore", "🚚", 1800, 5400, 80,
+    { casa: 590, tasse: 0, prestitoStudio: 40, auto: 60, cartaCredito: 75, utenze: 92, vita: 380 },
+    { mutuo: 132000, prestitoStudio: 2500, auto: 8500, cartaCredito: 2000 }),
+
+  scheda("infermiere", "Infermiere", "💉", 1750, 5200, 75,
+    { casa: 580, tasse: 0, prestitoStudio: 60, auto: 55, cartaCredito: 72, utenze: 90, vita: 370 },
+    { mutuo: 142000, prestitoStudio: 4500, auto: 7000, cartaCredito: 1900 }),
+
+  scheda("agente", "Agente di polizia", "🚓", 1700, 5100, 75,
+    { casa: 565, tasse: 0, prestitoStudio: 45, auto: 55, cartaCredito: 70, utenze: 88, vita: 360 },
+    { mutuo: 138000, prestitoStudio: 3500, auto: 6800, cartaCredito: 1800 }),
+
+  scheda("meccanico", "Meccanico", "🔧", 1700, 5100, 75,
+    { casa: 560, tasse: 0, prestitoStudio: 30, auto: 60, cartaCredito: 70, utenze: 88, vita: 360 },
+    { mutuo: 128000, prestitoStudio: 1800, auto: 7500, cartaCredito: 1800 }),
+
+  scheda("insegnante", "Insegnante", "📚", 1650, 5000, 70,
+    { casa: 545, tasse: 0, prestitoStudio: 60, auto: 50, cartaCredito: 68, utenze: 86, vita: 350 },
     { mutuo: 138000, prestitoStudio: 4500, auto: 6000, cartaCredito: 1800 }),
 
-  scheda("infermiere", "Infermiere", "💉", 1750, 850, 4200, 190,
-    { casa: 700, tasse: 0, prestitoStudio: 60, auto: 130, cartaCredito: 70, utenze: 140, vita: 420 },
-    { mutuo: 138000, prestitoStudio: 4500, auto: 6000, cartaCredito: 1800 }),
+  scheda("impiegato", "Impiegato amministrativo", "🗂️", 1550, 4600, 65,
+    { casa: 455, tasse: 0, prestitoStudio: 45, auto: 48, cartaCredito: 64, utenze: 83, vita: 330 },
+    { mutuo: 124000, prestitoStudio: 3200, auto: 5500, cartaCredito: 1600 }),
 
-  scheda("agente", "Agente di polizia", "🚓", 1700, 900, 4200, 210,
-    { casa: 690, tasse: 0, prestitoStudio: 0, auto: 140, cartaCredito: 70, utenze: 140, vita: 420 },
-    { mutuo: 135000, prestitoStudio: 0, auto: 6500, cartaCredito: 1800 }),
-
-  scheda("autotrasportatore", "Autotrasportatore", "🚚", 1800, 900, 4300, 220,
-    { casa: 660, tasse: 0, prestitoStudio: 0, auto: 170, cartaCredito: 70, utenze: 140, vita: 440 },
-    { mutuo: 128000, prestitoStudio: 0, auto: 8000, cartaCredito: 1800 }),
-
-  scheda("impiegato", "Impiegato amministrativo", "🗂️", 1550, 850, 3800, 180,
-    { casa: 660, tasse: 0, prestitoStudio: 50, auto: 110, cartaCredito: 70, utenze: 135, vita: 380 },
-    { mutuo: 128000, prestitoStudio: 3500, auto: 5000, cartaCredito: 1700 }),
-
-  scheda("meccanico", "Meccanico", "🔧", 1700, 800, 4000, 200,
-    { casa: 640, tasse: 0, prestitoStudio: 0, auto: 120, cartaCredito: 70, utenze: 135, vita: 400 },
-    { mutuo: 124000, prestitoStudio: 0, auto: 5500, cartaCredito: 1700 }),
-
-  scheda("operatore", "Operatore ecologico", "🧹", 1500, 750, 3600, 180,
-    { casa: 600, tasse: 0, prestitoStudio: 0, auto: 100, cartaCredito: 60, utenze: 130, vita: 350 },
-    { mutuo: 116000, prestitoStudio: 0, auto: 4500, cartaCredito: 1500 }),
+  scheda("operatore", "Operatore ecologico", "🧹", 1500, 4500, 70,
+    { casa: 435, tasse: 0, prestitoStudio: 25, auto: 45, cartaCredito: 62, utenze: 80, vita: 320 },
+    { mutuo: 118000, prestitoStudio: 1500, auto: 5200, cartaCredito: 1500 }),
 ];
 
 /**

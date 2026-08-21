@@ -216,7 +216,6 @@ export default {
   },
 
   scheda: {
-    secondoReddito: "Second household income",
     tiManca: "You still need {importo} a month of passive income. This market asks for twice your expenses: leaving at break-even means coming back at the first surprise.",
     prestitoSpiegazione: "You can borrow in multiples of {taglio}. Every {taglio} costs {rata} a month.",
     contanti: "Cash",

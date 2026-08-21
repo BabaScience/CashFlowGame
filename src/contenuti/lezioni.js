@@ -327,12 +327,12 @@ export const LEZIONI = [
       "delibera dei lavori. Le spese, intanto, si muovono anche loro — e quasi sempre in " +
       "su.",
       "Chi lascia il lavoro nel mese esatto in cui i conti si toccano è un imprevisto " +
-      "lontano dal tornare a cercarlo. Per questo il mercato di Roma chiede il doppio " +
-      "delle spese, non il pareggio: quel margine non è prudenza esagerata, è il costo " +
-      "di poter dire di no.",
+      "lontano dal tornare a cercarlo. Per questo il mercato di Roma chiede una volta e " +
+      "mezza le spese, non il pareggio: quel margine non è prudenza esagerata, è il " +
+      "costo di poter dire di no.",
       "È anche il motivo per cui prendere soldi a prestito per uscire prima raramente " +
-      "funziona. Ogni euro di rata alza le tue spese, e quindi alza di due euro il " +
-      "traguardo. Il debito accorcia la strada solo se ciò che compri rende molto più di " +
+      "funziona. Ogni euro di rata alza le tue spese, e quindi alza il traguardo di uno " +
+      "e mezzo. Il debito accorcia la strada solo se ciò che compri rende molto più di " +
       "quanto il debito costa — e nella realtà quello scarto è sottile, non enorme.",
     ],
   },
@@ -356,10 +356,11 @@ export const LEZIONI = [
       "ragione la voce «Imposte» resta a zero sullo stipendio: le hai già pagate. Compare " +
       "invece quando cominci a incassare affitti, perché quelli sono un reddito nuovo, e " +
       "su un reddito nuovo le imposte si pagano di nuovo.",
-      "Accanto allo stipendio la scheda mostra il secondo reddito del nucleo. In Italia " +
-      "una famiglia ha in media circa un percettore e mezzo, e le spese di casa sono di " +
-      "tutti: confrontare le spese di una famiglia con lo stipendio di una persona sola " +
-      "darebbe un quadro falso.",
+      "Le schede di Roma sono di una persona sola: il suo stipendio e le sue spese. È il " +
+      "motivo per cui l'affitto è quello di un monolocale o di una stanza condivisa, e " +
+      "non quello di una casa di famiglia. Confrontare le spese di una famiglia con lo " +
+      "stipendio di una persona darebbe un quadro falso, e per un po' il gioco l'ha " +
+      "fatto.",
     ],
   },
 

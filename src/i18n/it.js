@@ -210,7 +210,6 @@ export default {
   },
 
   scheda: {
-    secondoReddito: "Secondo reddito del nucleo",
     tiManca: "Ti manca ancora {importo} al mese di reddito passivo. Su questo mercato serve il doppio delle spese: uscire al pareggio significa rientrare al primo imprevisto.",
     prestitoSpiegazione: "Puoi chiedere prestiti a multipli di {taglio}. Ogni {taglio} costa {rata} al mese.",
     contanti: "Contanti",

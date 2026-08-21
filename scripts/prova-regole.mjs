@@ -493,12 +493,15 @@ test("Dopo cinque anni la plusvalenza non si tassa più", () => {
 
 console.log("\n── La soglia d'uscita ──");
 
-test("Su Roma serve il doppio delle spese", () => {
+test("Su Roma serve più del pareggio", () => {
+  /* Il doppio l'abbiamo provato: con i redditi veri di una persona sola la
+     soglia scappa più in fretta di quanto la rendita cresca, perché ogni
+     spesa nuova alza il traguardo del doppio. A 1,5× esce chiunque. */
   const s = tavoloRoma();
   const g = s.giocatori.find((x) => x.id === "a");
   const r = riepilogo(g);
-  eq(r.margineUscita, 2, "Roma deve chiedere il doppio:");
-  eq(r.soglia, r.speseTotali * 2, "la soglia:");
+  vero(r.margineUscita > 1, "Roma deve chiedere più del pareggio");
+  eq(r.soglia, Math.round(r.speseTotali * r.margineUscita), "la soglia:");
   vero(!fuoriDallaCorsa({ ...g, immobili: [], attivita: [], azioni: [] }), "non si esce da fermi");
 });
 
@@ -549,25 +552,38 @@ test("Il manuale spiega i costi di vendita", () => {
 test("Il manuale spiega la soglia d'uscita di ogni mercato", () => {
   for (const id of ["classico", "roma"]) {
     const m = getPacchetto(id).margineUscita ?? 1;
-    if (m > 1) vero(MANUALE.includes(`${m} × spese totali`), `non spiega la soglia ${m}× di ${id}`);
+    if (m > 1) {
+      /* Nel manuale i decimali si scrivono con la virgola, come in italiano. */
+      const scritto = String(m).replace(".", ",");
+      vero(MANUALE.includes(`${scritto} × spese totali`), `non spiega la soglia ${scritto}× di ${id}`);
+    }
   }
   vero(/reddito passivo > spese totali/i.test(MANUALE), "non spiega la soglia semplice");
 });
 
-test("Il manuale dice che le schede di Roma sono al netto", () => {
-  vero(/al netto/i.test(MANUALE), "non dice che gli importi sono netti");
-  vero(/secondo reddito/i.test(MANUALE), "non spiega il secondo reddito del nucleo");
+test("Il manuale dice che le schede di Roma sono nette e di una persona sola", () => {
+  vero(/nett[oi]/i.test(MANUALE), "non dice che gli importi sono netti");
+  vero(/una persona sola/i.test(MANUALE), "non dice che la scheda è di una persona sola");
 });
 
-test("Ogni professione di Roma dichiara stipendio e secondo reddito", () => {
+test("Le schede di Roma sono di una persona sola, e i conti tornano", () => {
+  /* Il numero sulla scheda deve essere verificabile su una busta paga vera:
+     niente redditi di nucleo mascherati da stipendio. Le rilevazioni 2026
+     danno l'insegnante intorno ai 1.650 € netti e il pilota sopra i 4.000. */
   for (const p of getPacchetto("roma").professioni) {
-    vero(p.stipendio > 0, `${p.nome}: stipendio mancante`);
-    vero(p.secondoReddito >= 0 && Number.isFinite(p.secondoReddito), `${p.nome}: secondo reddito non valido`);
-    /* Lo stipendio dichiarato è di una persona sola: se fosse più alto del
-       secondo reddito di tre volte non sarebbe più un nucleo con un
-       percettore e mezzo, sarebbe di nuovo un numero inventato. */
-    vero(p.secondoReddito === 0 || p.stipendio / p.secondoReddito < 3.5,
-      `${p.nome}: il secondo reddito è troppo piccolo per essere un secondo percettore`);
+    vero(p.stipendio >= 1400 && p.stipendio <= 4500,
+      `${p.nome}: ${p.stipendio} € non è un netto mensile credibile per una persona sola`);
+    vero(p.secondoReddito === undefined,
+      `${p.nome}: il secondo reddito è tornato, ma il modello è a persona sola`);
+    const spese = Object.values(p.spese).reduce((a, b) => a + b, 0);
+    const margine = p.stipendio - spese;
+    vero(margine > 0, `${p.nome}: margine negativo`);
+    /* Un margine sotto il 20% non lascia spazio per giocare, uno sopra il
+       55% non somiglia a Roma. */
+    vero(margine / spese > 0.2, `${p.nome}: margine del ${Math.round(margine / spese * 100)}%, troppo stretto`);
+    vero(margine / spese < 0.6, `${p.nome}: margine del ${Math.round(margine / spese * 100)}%, troppo largo per Roma`);
+    /* Tre figli non possono azzerare il margine da soli. */
+    vero(p.perFiglio * 3 < margine * 0.7, `${p.nome}: tre figli costano più del margine`);
   }
 });
 

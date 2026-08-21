@@ -38,6 +38,10 @@ export const SOGLIE = {
   /* Nessuna professione può essere una condanna: se partendo da qui non si
      esce mai, quella scheda è rotta e va ribilanciata. */
   usciteMinPerProfessione: 0.15,
+  /* Con poche partite per professione questa soglia diventa un lancio di
+     dadi: a 8 partite servono 2 uscite su 8, e una professione che sta
+     davvero al 19% falliva o passava a caso. La suite gira con 14, che è il
+     minimo perché il risultato smetta di dipendere dalla fortuna. */
   /* Il gioco deve concludersi con una vittoria vera, non per abbandono:
      "ultimo rimasto" significa che gli altri sono falliti, non che qualcuno
      ha giocato bene. */

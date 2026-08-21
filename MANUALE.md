@@ -100,21 +100,23 @@ Il Custode ha bisogno di molto meno reddito passivo per essere libero.
 | Meccanico | $2.000 | $1.300 | $700 |
 | Custode | $1.600 | $950 | $650 |
 
-#### Su Roma: stipendio vero e secondo reddito
+#### Su Roma: una persona sola, con numeri veri
 
-Il mercato di Roma usa importi **netti mensili reali**, rilevati sulle
-retribuzioni italiane del 2026. Sono due righe distinte, e la distinzione conta:
+Il mercato di Roma simula **una persona sola**: il suo stipendio e le sue
+spese. Gli importi sono **netti mensili reali**, rilevati sulle retribuzioni
+italiane del 2026 — un insegnante porta a casa circa 1.650 € al mese, un
+infermiere 1.750, un ingegnere 2.250, un pilota 4.200.
 
-- lo **stipendio** è quello vero della professione, per **una persona sola**:
-  un insegnante a Roma porta a casa circa 1.650 € al mese, non 2.550;
-- il **secondo reddito del nucleo** è quello di chi altro lavora in famiglia.
-  In Italia un nucleo ha in media circa un percettore e mezzo, e le spese della
-  scheda — affitto, utenze, spesa, auto — sono di tutta la famiglia.
+Anche le spese sono di una persona sola, e la casa viene dalle stesse
+quotazioni che alimentano le carte: un monolocale di 40 m² costa da 520 € a
+Tor Bella Monaca a 960 € a Prati, una stanza in condivisione poco più della
+metà. Chi guadagna meno condivide o sta in periferia, chi guadagna di più ha
+un bilocale suo e più centrale — che è quello che succede davvero.
 
-Confrontare le spese di una famiglia con lo stipendio di una persona sola
-darebbe un quadro falso, e all'inizio il gioco lo faceva: teneva le due cose
-fuse in un numero solo e lo chiamava "stipendio". Ora sono separate, così il
-numero che leggi è un numero che puoi verificare sulla tua busta paga.
+*Coniuge e figli come modello completo — due redditi che possono sparire uno
+per volta, l'assegno unico, il costo vero di un bambino — arriveranno in una
+versione successiva. Fino ad allora è meglio simulare bene una vita che
+simularne male due.*
 
 **Le schede sono al netto.** L'IRPEF e i contributi sono già stati tolti: è per
 questo che la voce *Imposte* parte da zero. Ricompare quando cominci a incassare
@@ -298,9 +300,9 @@ supera la soglia del mercato in cui giochi:
 | Mercato | Soglia |
 |---|---|
 | Classico | **reddito passivo > spese totali** (1×) |
-| Roma | **reddito passivo > 2 × spese totali** |
+| Roma | **reddito passivo > 1,5 × spese totali** |
 
-Perché il doppio, e non il pareggio? Perché le rendite non sono ferme: un
+Perché una volta e mezza, e non il pareggio? Perché le rendite non sono ferme: un
 inquilino se ne va, una caldaia si rompe, un'attività ha un'annata storta. Chi
 lascia il lavoro nel mese esatto in cui i conti si toccano è un imprevisto
 lontano dal doverlo cercare di nuovo. Quel margine non è prudenza esagerata: è

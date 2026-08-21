@@ -99,9 +99,6 @@ export function creaGiocatore(s, id, nome, professioneId, sognoId, indice) {
     posizione: 0,
     contanti: 0,
     stipendio: p.stipendio,
-    /* Il secondo percettore del nucleo, dichiarato invece che nascosto
-       dentro lo stipendio: vedi mercati/roma/professioni.js. */
-    secondoReddito: p.secondoReddito || 0,
     perFiglio: p.perFiglio,
     tassoPrestito: pacchettoDi(s).tassoPrestito,
     /* Il margine d'uscita viaggia col giocatore: `fuoriDallaCorsa` è
@@ -284,7 +281,7 @@ function massimoPrestabile(s, g) {
   const cc = pacchettoDi(s).creditoConsumo;
   if (!cc) return 500000;  // mercati che non lo dichiarano: com'era prima
   const tasso = g.tassoPrestito ?? TASSO_PRESTITO;
-  const reddito = g.stipendio + (g.secondoReddito || 0) + redditoPassivo(g);
+  const reddito = g.stipendio + redditoPassivo(g);
   /* Le rate già in corso: tutte le voci di spesa che sono rate, più il
      costo del fido già acceso. */
   const escluse = new Set(cc.vociEscluse || []);
@@ -625,7 +622,6 @@ export function applicaAzione(stato, azione) {
       g.sognoId = azione.sognoId || g.sognoId;
       const p = getProfessione(s, g.professioneId);
       g.stipendio = p.stipendio;
-      g.secondoReddito = p.secondoReddito || 0;
       g.perFiglio = p.perFiglio;
       g.spese = { ...p.spese };
       g.passivita = { ...p.passivita, prestitoBanca: 0 };

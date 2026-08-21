@@ -53,11 +53,18 @@ export default Object.freeze({
 
   /* I parametri del Livello 2. Al Livello 1 conta solo `quotaCostiL1`,
      che li riassume tutti in una trattenuta sola. */
-  /* Quanto reddito passivo serve per uscire dalla Ruota, in multipli
-     delle spese. A 1× si esce nel mese in cui i conti pareggiano, cioè
-     senza un margine: basta una rata nuova o un mese di sfitto per tornare
-     dentro. Chi lascia il lavoro davvero non lo fa al pareggio. */
-  margineUscita: 2,
+  /* Quanto reddito passivo serve per uscire, in multipli delle spese.
+     A 1× si esce nel mese in cui i conti pareggiano, senza margine: basta
+     una rata nuova o un mese di sfitto per tornare dentro.
+     Perché una volta e mezza e non due. Il doppio l'abbiamo provato, con
+     tredici professioni e i redditi veri di una persona sola: la soglia
+     scappa più in fretta di quanto la rendita cresca, perché ogni spesa
+     nuova — un figlio, un prestito forzato — al 2× alza il traguardo del
+     doppio. Le due professioni più povere non uscivano quasi mai.
+     A 1,5× esce chiunque (minimo 17%), le vittorie vere restano al 74% e
+     la mediana sta a 101 turni. È il margine più alto che questo mercato
+     regge con un reddito solo. */
+  margineUscita: 1.5,
   creditoConsumo: CREDITO_CONSUMO,
   costiVendita: COSTI_VENDITA,
 
