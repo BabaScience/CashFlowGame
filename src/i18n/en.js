@@ -53,6 +53,8 @@ export default {
   },
 
   attesa: {
+    copiaFallita: "Copy the code by hand: {codice}",
+    invito: "Let's play Quota Zero! Join with the code {codice}: {indirizzo}",
     partiraiCon: "You will start with {importo} in cash (payday + savings).",
     esciDallaStanza: "Leave the room",
     codiceStanza: "Room code",
@@ -68,6 +70,16 @@ export default {
   },
 
   partita: {
+    copiaFallita: "Copy the code by hand: {codice}",
+    turnoDi: "{nome}'s turn",
+    laTuaCasella: "your square",
+    copiaCodice: "Copy the room code",
+    accendiSuoni: "Turn sound on",
+    spegniSuoni: "Turn sound off",
+    esci: "Leave",
+    resta: "Stay at the table",
+    esciTitolo: "Leave the room?",
+    esciSpiegazione: "The game carries on without you and you can come back any time with the code {codice}.",
     stanza: "Room",
     contanti: "Cash",
     ruota: "The Wheel",

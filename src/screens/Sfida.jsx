@@ -20,6 +20,7 @@ import { riepilogo } from "../game/finanze.js";
 import { traccia } from "../lib/traccia.js";
 import { useSuoni } from "../hooks/useSuoni.js";
 import Logo from "../components/Logo.jsx";
+import { copiaTesto } from "../lib/appunti.js";
 
 /**
  * LA SFIDA DEL GIORNO.
@@ -236,11 +237,10 @@ function Esito({ stato, esito, giorno, suEsci }) {
     if (navigator.share) {
       try { await navigator.share({ text: testo }); return; } catch { /* annullato */ }
     }
-    try {
-      await navigator.clipboard.writeText(testo);
+    if (await copiaTesto(testo)) {
       setCopiato(true);
       setTimeout(() => setCopiato(false), 2200);
-    } catch { /* niente appunti */ }
+    }
   };
 
   return (

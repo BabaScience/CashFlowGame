@@ -47,6 +47,8 @@ export default {
   },
 
   attesa: {
+    copiaFallita: "Copia a mano il codice: {codice}",
+    invito: "Giochiamo a Quota Zero! Entra con il codice {codice}: {indirizzo}",
     partiraiCon: "Partirai con {importo} in contanti (giorno di paga + risparmi).",
     esciDallaStanza: "Esci dalla stanza",
     codiceStanza: "Codice della stanza",
@@ -62,6 +64,16 @@ export default {
   },
 
   partita: {
+    copiaFallita: "Copia a mano il codice: {codice}",
+    turnoDi: "Turno di {nome}",
+    laTuaCasella: "la tua casella",
+    copiaCodice: "Copia il codice della stanza",
+    accendiSuoni: "Accendi i suoni",
+    spegniSuoni: "Spegni i suoni",
+    esci: "Esci",
+    resta: "Resta al tavolo",
+    esciTitolo: "Uscire dalla stanza?",
+    esciSpiegazione: "La partita continua senza di te e puoi rientrare quando vuoi con il codice {codice}.",
     stanza: "Stanza",
     contanti: "Contanti",
     ruota: "La Ruota",

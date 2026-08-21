@@ -199,27 +199,43 @@ prova("Partita con una decisione in sospeso: chi decide vede la carta", () => {
   vero(html.includes(carta.nome), "chi deve decidere non vede la carta");
 });
 
-prova("Chi guarda vede una riga, non un riquadro che sposta il tabellone", () => {
-  /* Il riquadro «sul tavolo» stava nella colonna del tavolo, che dà al
-     tabellone lo spazio che avanza: ogni volta che qualcuno pescava una
-     carta il tabellone si rimpiccioliva sotto gli occhi di chi lo stava
-     guardando. L'informazione serve — il registro annota le cose quando
-     sono finite, non mentre succedono — ma sta in una riga del riquadro
-     del turno, che c'è già. */
+prova("Chi guarda lo legge nel tabellone, non in un riquadro sotto", () => {
+  /* Il riquadro «sul tavolo» e poi quello del turno stavano nella colonna
+     del tavolo, che dà al tabellone lo spazio che avanza: comparivano e il
+     tabellone si rimpiccioliva sotto gli occhi di chi lo guardava. Il
+     centro del tabellone è spazio già speso e non costa niente a nessuno. */
   const s = tavolo();
   const pacchetto = s.mercatoId === "roma" ? "roma" : "classico";
   const carta = (require_pacchetto(pacchetto)).mazzi.piccoli.find((c) => c.tipo === "immobile");
-  /* L'ordine di gioco lo decide un tiro di dado, quindi va fissato: senza,
-     metà delle volte il turno è di "b" e la riga giustamente non compare. */
+  /* L'ordine di gioco lo decide un tiro di dado, quindi va fissato. */
   s.turno = s.giocatori.findIndex((g) => g.id === "a");
   s.pending = { tipo: "carta", giocatoreId: "a", carta };
   const html = conMercato(s, React.createElement(Partita, {
     stato: s, mioId: "b", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
   }));
-  vero(html.includes("Ada"), "non si sa chi sta decidendo");
-  vero(html.includes(carta.nome), "non si sa cosa sta decidendo");
-  vero(html.includes("riga-sola"), "la riga deve essere troncata, non andare a capo");
+  vero(/TURNO DI ADA/i.test(html), "il tabellone non dice di chi è il turno");
+  vero(html.includes("Ada sta valutando"), "il tabellone non dice cosa sta facendo");
   vero(!/Sul tavolo|On the table/.test(html), "il riquadro è tornato");
+});
+
+prova("La nota nel tabellone non supera mai la larghezza del centro", () => {
+  /* In SVG il testo non va a capo e non si tronca da solo: esce dal
+     cerchio e finisce sopra le caselle. Si taglia a mano, quindi si
+     verifica a mano. */
+  const s = tavolo();
+  s.turno = s.giocatori.findIndex((g) => g.id === "a");
+  s.pending = {
+    tipo: "carta", giocatoreId: "a",
+    carta: { tipo: "immobile", nome: "Un nome di carta lunghissimo che non starebbe mai nel cerchio centrale", costo: 1, acconto: 1, flusso: 1 },
+  };
+  const html = conMercato(s, React.createElement(Partita, {
+    stato: s, mioId: "b", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
+  }));
+  const testi = [...html.matchAll(/<text[^>]*>([^<]{20,})<\/text>/g)].map((m) => m[1]);
+  for (const testo of testi) {
+    vero(testo.length <= 44, `riga di ${testo.length} caratteri nel tabellone: "${testo}"`);
+  }
+  vero(html.includes("…"), "la nota lunga non è stata troncata");
 });
 
 prova("Partita con una carta Mercato aperta", () => {
@@ -350,6 +366,38 @@ prova("La partita in corso", () => {
   })));
   const trovate = spieIn(html);
   vero(trovate.length === 0, "rimaste in italiano: " + trovate.join(", "));
+});
+
+console.log("\n── Copiare negli appunti ──");
+
+const { readFileSync, readdirSync, statSync } = await import("node:fs");
+const { join, relative } = await import("node:path");
+/* Questo file viene impacchettato in node_modules/.cache prima di girare
+   (vedi prova-schermate.sh), quindi `import.meta.url` non dice dove sta il
+   progetto: lo dice la directory di lavoro. */
+const RADICE = process.cwd();
+const relativo = (f) => relative(RADICE, f);
+const JSXFILE = (function raccogli(dir, out = []) {
+  for (const n of readdirSync(dir)) {
+    const p = join(dir, n);
+    if (statSync(p).isDirectory()) raccogli(p, out);
+    else if (/\.(jsx?|mjs)$/.test(p)) out.push(p);
+  }
+  return out;
+})(join(RADICE, "src"));
+
+
+prova("Nessuno chiama più gli appunti a mano", () => {
+  /* Tre pulsanti diversi lo facevano, e tutti e tre tacevano quando
+     fallivano: il codice stanza in partita, l'invito nella sala d'attesa
+     e la condivisione del risultato della sfida. */
+  const guai = [];
+  for (const f of JSXFILE) {
+    if (/lib\/appunti\.js$/.test(f)) continue;
+    const src = readFileSync(f, "utf8").replace(/\/\*[\s\S]*?\*\//g, " ").replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
+    if (/navigator\.clipboard/.test(src)) guai.push(relativo(f));
+  }
+  if (guai.length) throw new Error("usano gli appunti senza ripiego: " + guai.join(", "));
 });
 
 console.log("\n── Il marchio ──");

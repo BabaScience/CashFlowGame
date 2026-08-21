@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Bottone } from "../components/Base.jsx";
 import Scelta from "../components/Scelta.jsx";
 import Logo from "../components/Logo.jsx";
+import Icona from "../components/Icona.jsx";
 import { MercatoProvider, useMercato } from "../Mercato.jsx";
 import { MERCATI, MERCATO_PREDEFINITO, getPacchetto } from "../game/mercati/indice.js";
 import { LIVELLI, LIVELLO_PREDEFINITO } from "../game/regole/livelli.js";
@@ -154,44 +155,44 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
             <div className="destinazioni">
               <button className="destinazione destinazione-prima"
                 onClick={() => setVista("modulo")}>
-                <span className="dest-icona" aria-hidden="true">🎲</span>
+                <span className="dest-icona"><Icona nome="dado" dim={24} /></span>
                 <span className="dest-testo">
                   <span className="dest-titolo">{t("casa.tavolo")}</span>
                   <span className="dest-nota">{t("casa.tavoloNota")}</span>
                 </span>
-                <span className="dest-freccia" aria-hidden="true">→</span>
+                <span className="dest-freccia"><Icona nome="frecciaDestra" dim={18} /></span>
               </button>
 
               {suSfida && (
                 <button className="destinazione" onClick={suSfida}>
-                  <span className="dest-icona" aria-hidden="true">⚡</span>
+                  <span className="dest-icona"><Icona nome="fulmine" dim={24} /></span>
                   <span className="dest-testo">
                     <span className="dest-titolo">{t("casa.sfida")}</span>
                     <span className="dest-nota">{t("casa.sfidaNota")}</span>
                   </span>
-                  <span className="dest-freccia" aria-hidden="true">→</span>
+                  <span className="dest-freccia"><Icona nome="frecciaDestra" dim={18} /></span>
                 </button>
               )}
 
               {suImpara && (
                 <button className="destinazione" onClick={() => suImpara("lezioni")}>
-                  <span className="dest-icona" aria-hidden="true">📘</span>
+                  <span className="dest-icona"><Icona nome="libro" dim={24} /></span>
                   <span className="dest-testo">
                     <span className="dest-titolo">{t("casa.lezioni")}</span>
                     <span className="dest-nota">{t("casa.lezioniNota")}</span>
                   </span>
-                  <span className="dest-freccia" aria-hidden="true">→</span>
+                  <span className="dest-freccia"><Icona nome="frecciaDestra" dim={18} /></span>
                 </button>
               )}
 
               {suImpara && (
                 <button className="destinazione" onClick={() => suImpara("quesiti")}>
-                  <span className="dest-icona" aria-hidden="true">🧩</span>
+                  <span className="dest-icona"><Icona nome="quesito" dim={24} /></span>
                   <span className="dest-testo">
                     <span className="dest-titolo">{t("casa.quesiti")}</span>
                     <span className="dest-nota">{t("casa.quesitiNota")}</span>
                   </span>
-                  <span className="dest-freccia" aria-hidden="true">→</span>
+                  <span className="dest-freccia"><Icona nome="frecciaDestra" dim={18} /></span>
                 </button>
               )}
             </div>
@@ -211,7 +212,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
         <>
         <div className="carta">
           <button className="torna" onClick={() => setVista("casa")}>
-            <span aria-hidden="true">←</span> {t("casa.torna")}
+            <Icona nome="frecciaSinistra" dim={14} /> {t("casa.torna")}
           </button>
 
           <div className="gruppo-campo">

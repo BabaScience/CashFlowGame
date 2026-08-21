@@ -330,7 +330,7 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
   background: var(--rosso);
   border: 2px solid #0a1411;
 }
-.navbar .icona { font-size: 19px; line-height: 1; }
+.navbar .icona-svg { display: block; }
 /* Dentro il guscio di gioco la barra fa parte della colonna: se restasse
    fissa coprirebbe il pannello invece di delimitarlo. */
 .schermo-partita .navbar { position: static; padding-bottom: env(safe-area-inset-bottom); }
@@ -843,7 +843,7 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
   box-shadow: inset 0 0 0 1px rgba(201,162,39,.45);
 }
 .pannello-schede button:focus-visible { outline: 2px solid var(--oro); outline-offset: 1px; }
-.pannello-schede .icona { font-size: 14px; line-height: 1; }
+.pannello-schede .icona-svg { flex: none; }
 .pannello-schede .punto {
   position: absolute; top: 5px; right: 6px;
   width: 7px; height: 7px; border-radius: 50%;
@@ -953,3 +953,64 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
    riquadro del turno e il tabellone si rimpicciolirebbe — che è proprio il
    difetto per cui il riquadro «sul tavolo» è stato tolto. */
 .riga-sola { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* ══ la barra alta della partita ══ */
+.barra-codice {
+  display: flex; flex-direction: column; gap: 1px;
+  text-align: left; background: none;
+  border-radius: 10px; padding: 4px 8px; margin-left: -8px;
+}
+.barra-codice:hover { background: rgba(255,255,255,.06); }
+.barra-codice:focus-visible { outline: 2px solid var(--oro); outline-offset: 1px; }
+.barra-codice .icona-svg { color: rgba(244,241,230,.45); }
+
+.btn-barra {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 7px 11px;
+  border-radius: 10px;
+  background: rgba(255,255,255,.07);
+  border: 1px solid rgba(255,255,255,.13);
+  color: rgba(244,241,230,.82);
+  font-size: 11.5px; font-weight: 700;
+  letter-spacing: .04em; text-transform: uppercase;
+  white-space: nowrap;
+}
+.btn-barra:hover { background: rgba(255,255,255,.13); color: var(--carta); }
+.btn-barra:focus-visible { outline: 2px solid var(--oro); outline-offset: 2px; }
+/* Sotto i 900px restano le sole icone: l'etichetta c'è ancora per chi usa
+   un lettore di schermo, tolta agli occhi e non alla voce. */
+@media (max-width: 900px) {
+  .etichetta-barra {
+    position: absolute; width: 1px; height: 1px;
+    padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+  }
+  .btn-barra { padding: 8px; }
+}
+
+/* Sulla scrivania la zona delle azioni tiene la sua altezza anche quando è
+   vuota: lì il tabellone prende lo spazio che avanza (`flex: 1`), quindi
+   se questa collassasse il tabellone crescerebbe al turno degli altri e si
+   rimpicciolirebbe al tuo, muovendosi a ogni giro.
+   Sul telefono no: lì il tabellone è limitato dall'altezza dello schermo e
+   non dallo spazio che avanza, quindi non si muove comunque — e riservare
+   settantaquattro pixel vuoti sotto il tabellone sarebbe solo spazio
+   tolto a ciò che viene dopo. */
+@media (min-width: 1000px) {
+  .zona-azioni { min-height: 74px; }
+}
+
+/* ══ conferma d'uscita ══ */
+.velo-modale {
+  position: fixed; inset: 0; z-index: 70;
+  display: flex; align-items: center; justify-content: center;
+  padding: 20px;
+  background: rgba(6,14,11,.62);
+}
+.modale-uscita { max-width: 380px; width: 100%; }
+
+/* Le icone si allineano al testo come una lettera, non come un'immagine. */
+.icona-svg { flex: none; vertical-align: -0.15em; }
+.dest-icona { display: inline-flex; color: var(--oro); }
+.destinazione-prima .dest-icona { color: #2A2205; }
+.dest-freccia { display: inline-flex; }

@@ -4,6 +4,7 @@ import {
   PERCORSO_RUOTA, PERCORSO_LARGO, CASELLE_RUOTA, CASELLE_LARGO,
   N_RUOTA, N_LARGO,
 } from "../game/tabellone.js";
+import { useLingua } from "../Lingua.jsx";
 
 /* ── geometria ─────────────────────────────────────────────── */
 const L = 400, CX = L / 2, CY = L / 2;
@@ -144,7 +145,8 @@ function Gettone({ giocatore, n, raggio, ordine, totale, èTurno, mio, indice })
 }
 
 /* ── tabellone ─────────────────────────────────────────────── */
-export default function Tabellone({ stato, mioId }) {
+export default function Tabellone({ stato, mioId, nota }) {
+  const { t } = useLingua();
   const giocatori = stato.giocatori || [];
   const inTopi = giocatori.filter((g) => g.tracciato === "topi");
   const inVeloce = giocatori.filter((g) => g.tracciato === "veloce");
@@ -262,15 +264,28 @@ export default function Tabellone({ stato, mioId }) {
           </text>
           <text x={CX} y={CY + 31} textAnchor="middle"
             style={{ fontSize: 8, fill: "rgba(244,241,230,.45)", letterSpacing: .8 }}>
-            {io.tracciato === "topi" ? "la tua casella" : "Largo"}
+            {t(io.tracciato === "topi" ? "partita.laTuaCasella" : "partita.largo")}
           </text>
         </>
       )}
       {stato.fase === "inCorso" && (
-        <text x={CX} y={CY + 52} textAnchor="middle"
-          style={{ fontSize: 8.5, fill: giocatori[stato.turno]?.colore || "#E3C55A", fontWeight: 800, letterSpacing: .6 }}>
-          TURNO DI {(giocatori[stato.turno]?.nome || "").toUpperCase()}
-        </text>
+        <>
+          <text x={CX} y={CY + 52} textAnchor="middle"
+            style={{ fontSize: 8.5, fill: giocatori[stato.turno]?.colore || "#E3C55A", fontWeight: 800, letterSpacing: .6 }}>
+            {(t("partita.turnoDi", { nome: giocatori[stato.turno]?.nome || "" })).toUpperCase()}
+          </text>
+          {/* Cosa sta facendo, qui dentro invece che in un riquadro sotto:
+              il centro del tabellone è spazio già speso, e un riquadro in
+              più costringeva il tabellone a rimpicciolirsi per fargli
+              posto. In SVG il testo non va a capo né si tronca da solo,
+              quindi si taglia a mano. */}
+          {nota && (
+            <text x={CX} y={CY + 65} textAnchor="middle"
+              style={{ fontSize: 7, fill: "rgba(244,241,230,.5)", letterSpacing: .2 }}>
+              {nota.length > 42 ? nota.slice(0, 41).trimEnd() + "…" : nota}
+            </text>
+          )}
+        </>
       )}
 
       {/* ── Gettoni ── */}

@@ -13,6 +13,8 @@ import { soldi, riepilogo, fuoriDallaCorsa } from "../game/finanze.js";
 import { PERCORSO_RUOTA, CASELLE_RUOTA, PERCORSO_LARGO, CASELLE_LARGO } from "../game/tabellone.js";
 import { useSchermoLargo } from "../hooks/useSchermo.js";
 import { orologio } from "../game/tempo.js";
+import Icona from "../components/Icona.jsx";
+import { copiaTesto } from "../lib/appunti.js";
 import { useSuoni } from "../hooks/useSuoni.js";
 import { avvisaTurno, chiediAvvisi, ricordaPartita, statoAvvisi } from "../lib/partite.js";
 import { audioAcceso, impostaAudio, sbloccaAudio } from "../lib/suoni.js";
@@ -33,18 +35,18 @@ import { useLingua } from "../Lingua.jsx";
  * cosa si stanno dicendo sono la stessa domanda.
  */
 const SEZIONI = [
-  { id: "conto",    icona: "▤", chiave: "sezioni.conto" },
-  { id: "tavolo",   icona: "◉", chiave: "sezioni.tavolo" },
-  { id: "registro", icona: "☰", chiave: "sezioni.registro" },
-  { id: "regole",   icona: "?", chiave: "sezioni.regole" },
+  { id: "conto",    icona: "scheda",    chiave: "sezioni.conto" },
+  { id: "tavolo",   icona: "giocatori", chiave: "sezioni.tavolo" },
+  { id: "registro", icona: "registro",  chiave: "sezioni.registro" },
+  { id: "regole",   icona: "regole",    chiave: "sezioni.regole" },
 ];
 
 const SCHEDE = [
-  { id: "scheda", icona: "▤", chiave: "schede.scheda" },
-  { id: "gioc", icona: "◉", chiave: "schede.giocatori" },
-  { id: "chat", icona: "✉", chiave: "schede.chat" },
-  { id: "log", icona: "☰", chiave: "schede.registro" },
-  { id: "regole", icona: "?", chiave: "schede.regole" },
+  { id: "scheda", icona: "scheda",    chiave: "schede.scheda" },
+  { id: "gioc",   icona: "giocatori", chiave: "schede.giocatori" },
+  { id: "chat",   icona: "chat",      chiave: "schede.chat" },
+  { id: "log",    icona: "registro",  chiave: "schede.registro" },
+  { id: "regole", icona: "regole",    chiave: "schede.regole" },
 ];
 
 /**
@@ -108,7 +110,6 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
     );
   }
 
-  const sta = cheStaFacendo(stato, t);
   const libero = io.tracciato === "topi" && fuoriDallaCorsa(io);
   const fai = async (az) => {
     const r = await invia(az);
@@ -116,24 +117,20 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
   };
 
   if (!mioTurno) {
-    return (
-      <div className="carta-scura mt12 ta-c">
-        <div className="flex cen g8" style={{ justifyContent: "center" }}>
-          <motion.span
-            style={{ width: 9, height: 9, borderRadius: "50%", background: diTurno?.colore }}
-            animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.4, repeat: Infinity }} />
-          <span className="f14">{t("partita.toccaA", { nome: diTurno?.nome || "" })}</span>
-        </div>
-        {/* Una riga sola, troncata: non deve mai andare a capo, o
-            tornerebbe a spostare il tabellone come faceva il riquadro. */}
-        {sta && <p className="f12 tenue riga-sola" style={{ margin: "6px 0 0" }}>{sta}</p>}
-        {io.turniDaSaltare > 0 && (
-          <p className="f13 tenue" style={{ margin: "6px 0 0" }}>
+    /* Di chi sia il turno, e cosa stia facendo, lo dice il centro del
+       tabellone. Ripeterlo qui costava un riquadro, e il riquadro costava
+       spazio al tabellone. Resta solo ciò che riguarda te e che lì non
+       starebbe: i turni che salterai. */
+    if (io.turniDaSaltare > 0) {
+      return (
+        <div className="carta-scura ta-c">
+          <p className="f13 tenue" style={{ margin: 0 }}>
             {t("partita.salterai", { n: io.turniDaSaltare })}
           </p>
-        )}
-      </div>
-    );
+        </div>
+      );
+    }
+    return null;
   }
 
   return (
@@ -202,6 +199,27 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
      una forma all'altra ognuna deve ritrovarsi dove l'avevi lasciata. */
   const [sezione, setSezione] = useState("conto");
   const [audio, setAudio] = useState(audioAcceso);
+  const [copiato, setCopiato] = useState(false);
+  const [uscita, setUscita] = useState(false);
+
+  /**
+   * Copia il codice, e in ogni caso dice com'è andata.
+   *
+   * `navigator.clipboard` esiste solo in contesto sicuro: su HTTPS e su
+   * localhost sì, ma aprendo il gioco dal telefono sulla rete di casa —
+   * http://192.168.x.x:5173, che è come lo si prova davvero — è
+   * `undefined`. Lì il pulsante non faceva niente e non lo diceva, che è
+   * il difetto peggiore di tutti: sembra rotto il gioco, non il permesso.
+   */
+  const copiaCodice = async () => {
+    const riuscito = await copiaTesto(stato.codice);
+    if (riuscito) {
+      setCopiato(true);
+      setTimeout(() => setCopiato(false), 1600);
+    } else {
+      avvisa(t("partita.copiaFallita", { codice: stato.codice }));
+    }
+  };
   useSuoni(stato, mioId);
 
   // I browser aprono l'audio solo dentro un gesto: il primo tocco basta.
@@ -293,9 +311,17 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
       borderBottom: "1px solid rgba(255,255,255,.07)", position: "sticky", top: 0, zIndex: 30,
       backdropFilter: "blur(12px)",
     }}>
-      <button onClick={suEsci} className="f11 tenue" style={{ textAlign: "left", background: "none" }}>
-        <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("partita.stanza")}</div>
-        <div className="numeri grassetto f16" style={{ color: "var(--carta)", letterSpacing: 2 }}>{stato.codice}</div>
+      {/* Il codice era un pulsante che usciva dalla stanza. Sembrava
+          un'etichetta, si premeva per curiosità, e la partita spariva senza
+          che niente dicesse cos'era successo. Ora è quello che sembra: un
+          codice, che al massimo si copia per invitare qualcuno. */}
+      <button onClick={copiaCodice} className="barra-codice"
+        aria-label={t("partita.copiaCodice")}>
+        <span className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("partita.stanza")}</span>
+        <span className="flex cen g8">
+          <span className="numeri grassetto f16" style={{ color: "var(--carta)", letterSpacing: 2 }}>{stato.codice}</span>
+          <Icona nome={copiato ? "spunta" : "copia"} dim={14} />
+        </span>
       </button>
       <div className="ta-c" style={{ flex: 1, minWidth: 0 }}>
         <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>
@@ -306,14 +332,20 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
         </div>
       </div>
       <div className="flex cen g12">
-        <button
-          onClick={() => setAudio(impostaAudio(!audio))}
-          aria-label={audio ? "Spegni i suoni" : "Accendi i suoni"}
-          aria-pressed={audio}
-          title={audio ? t("partita.suoniAccesi") : t("partita.suoniSpenti")}
-          style={{ fontSize: 17, lineHeight: 1, opacity: audio ? 0.85 : 0.35, padding: 4 }}
-        >
-          {audio ? "\u{1F50A}" : "\u{1F507}"}
+        {/* Un pulsante che dice cosa fa se lo premi, non com'è messo
+            adesso: "Spegni i suoni" è un'azione, l'altoparlante barrato era
+            un indovinello. */}
+        <button className="btn-barra" onClick={() => setAudio(impostaAudio(!audio))}
+          aria-pressed={audio}>
+          <Icona nome={audio ? "suonoAcceso" : "suonoSpento"} dim={16} />
+          <span className="etichetta-barra">
+            {t(audio ? "partita.spegniSuoni" : "partita.accendiSuoni")}
+          </span>
+        </button>
+
+        <button className="btn-barra" onClick={() => setUscita(true)}>
+          <Icona nome="esci" dim={16} />
+          <span className="etichetta-barra">{t("partita.esci")}</span>
         </button>
         <div className="ta-r">
           <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("partita.contanti")}</div>
@@ -331,7 +363,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
         {/* Colonna del tavolo: non scorre mai. */}
         <div className="colonna-tavolo">
           <div className="zona-tavolo">
-            <Tabellone stato={stato} mioId={mioId} />
+            <Tabellone stato={stato} mioId={mioId} nota={cheStaFacendo(stato, t)} />
             <Dadi tiro={stato.ultimoTiro} mioId={mioId} />
           </div>
 
@@ -386,7 +418,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
                     setSezione(sz.id);
                     if (sz.id === "registro") setLogNuovo(false);
                   }}>
-                  <span className="icona" aria-hidden="true">{sz.icona}</span>
+                  <Icona nome={sz.icona} dim={15} />
                   {t(sz.chiave)}
                   {sz.id === "registro" && logNuovo && <span className="punto" />}
                   {sz.id === "tavolo" && chatNuova && <span className="punto" />}
@@ -425,11 +457,36 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
 
       <Decisione stato={stato} mioId={mioId} invia={invia} inAzione={inAzione} />
 
+      {/* Uscire non distrugge niente — si rientra col codice — ma sparire
+          dal tavolo senza preavviso è comunque una sorpresa. La conferma
+          dice anche come tornare, che è l'informazione che serve. */}
+      {uscita && (
+        <div className="velo-modale" role="dialog" aria-modal="true"
+          aria-labelledby="uscita-titolo">
+          <div className="carta modale-uscita">
+            <h2 id="uscita-titolo" className="titolo f18" style={{ margin: "0 0 8px" }}>
+              {t("partita.esciTitolo")}
+            </h2>
+            <p className="f13" style={{ margin: "0 0 16px", lineHeight: 1.5 }}>
+              {t("partita.esciSpiegazione", { codice: stato.codice })}
+            </p>
+            <div className="riga-btn">
+              <Bottone variante="btn-chiaro" onClick={() => setUscita(false)}>
+                {t("partita.resta")}
+              </Bottone>
+              <Bottone variante="btn-rosso" onClick={suEsci}>
+                {t("partita.esci")}
+              </Bottone>
+            </div>
+          </div>
+        </div>
+      )}
+
       <nav className="navbar">
         {SCHEDE.map((sc) => (
           <button key={sc.id} data-attivo={scheda === sc.id}
             onClick={() => { setScheda(sc.id); if (sc.id === "log") setLogNuovo(false); }}>
-            <span className="icona">{sc.icona}</span>
+            <Icona nome={sc.icona} dim={19} />
             {t(sc.chiave)}
             {sc.id === "log" && logNuovo && <span className="punto" />}
             {sc.id === "chat" && chatNuova && <span className="punto" />}

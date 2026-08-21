@@ -2,6 +2,8 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Bottone, GettoneGiocatore } from "../components/Base.jsx";
 import Scelta from "../components/Scelta.jsx";
+import { copiaTesto } from "../lib/appunti.js";
+import { MARCHIO } from "../marchio.js";
 import { useMercato } from "../Mercato.jsx";
 import { soldi, flussoMensile } from "../game/finanze.js";
 import { MAX_GIOCATORI } from "../game/tabellone.js";
@@ -16,16 +18,18 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
   const [modifica, setModifica] = useState(false);
 
   const copia = async () => {
-    try {
-      await navigator.clipboard.writeText(stato.codice);
-      avvisa(t("attesa.copiato"));
-    } catch { avvisa(`Il codice è ${stato.codice}`); }
+    /* È il pulsante con cui si invita davvero qualcuno: se non funziona,
+       non funziona il gioco a più giocatori. Vedi lib/appunti.js — dal
+       telefono sulla rete di casa l'API degli appunti non esiste. */
+    avvisa(await copiaTesto(stato.codice)
+      ? t("attesa.copiato")
+      : t("attesa.copiaFallita", { codice: stato.codice }));
   };
 
   const condividi = async () => {
-    const testo = `Giochiamo a Quota Zero! Entra con il codice ${stato.codice}: ${location.origin}?c=${stato.codice}`;
+    const testo = t("attesa.invito", { codice: stato.codice, indirizzo: `${location.origin}?c=${stato.codice}` });
     if (navigator.share) {
-      try { await navigator.share({ title: "Quota Zero", text: testo }); return; } catch { /* annullato */ }
+      try { await navigator.share({ title: MARCHIO.nome, text: testo }); return; } catch { /* annullato */ }
     }
     copia();
   };
