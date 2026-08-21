@@ -123,17 +123,23 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
   flex-direction: column;
 }
 .zona-tavolo {
-  flex: none;
+  /* Prende lo spazio che avanza: è il pezzo che si guarda. */
+  flex: 1 1 auto;
   min-height: 0;
   position: relative;
   display: flex;
+  align-items: center;
   justify-content: center;
   padding: 8px 14px 0;
 }
 .zona-tavolo .tabellone {
   width: auto;
   max-width: 100%;
-  max-height: 36vh;
+  /* Sul telefono il tabellone si tiene lo schermo: sotto non c'è più un
+     pannello con cui spartirselo, le sezioni si aprono come foglio. Era
+     limitato a 36vh perché doveva lasciare spazio a una metà che nessuno
+     riusciva comunque a leggere. */
+  max-height: 100%;
 }
 .zona-progresso { flex: none; padding: 6px 16px 0; }
 .zona-azioni    { flex: none; padding: 8px 14px 10px; }
@@ -147,7 +153,7 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 
 /* Tablet: stesso impianto, più respiro e un tabellone più generoso. */
 @media (min-width: 720px) {
-  .zona-tavolo .tabellone { max-height: 42vh; }
+  .zona-tavolo .tabellone { max-height: 42vh; max-height: 42dvh; }
   .zona-tavolo, .zona-azioni, .zona-pannello { padding-left: 22px; padding-right: 22px; }
 }
 
@@ -371,7 +377,9 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
   border-radius: var(--r-l) var(--r-l) 0 0;
   padding: 20px 18px calc(20px + env(safe-area-inset-bottom));
   box-shadow: var(--ombra-alta);
-  max-height: 92vh; overflow-y: auto;
+  max-height: 92vh;
+  max-height: calc(100dvh - 14px);
+  overflow-y: auto;
   animation: modaleEntra .34s cubic-bezier(.22,.8,.3,1);
 }
 .modale-centro { animation: modaleEntraCentro .34s cubic-bezier(.22,.8,.3,1); }
@@ -556,12 +564,24 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 
 /* ══ chat del tavolo ══ */
 .chat { display: flex; flex-direction: column; min-height: 0; }
-.chat-righe {
-  display: flex; flex-direction: column; gap: 9px;
-  max-height: 46vh; overflow-y: auto;
-  padding-right: 2px;
+/* La chat si comporta come una chat: la conversazione riempie lo spazio e
+   scorre, il campo per scrivere resta in fondo e non si muove. Prima era
+   una carta alta quanto il suo contenuto, quindi dentro un foglio alto il
+   campo galleggiava a metà schermo. */
+.chat {
+  display: flex; flex-direction: column;
+  height: 100%; min-height: 0;
 }
-@media (min-width: 1000px) { .chat-righe { max-height: 40vh; } }
+.chat-righe {
+  flex: 1 1 auto; min-height: 0;
+  display: flex; flex-direction: column; gap: 9px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+  /* I messaggi si appoggiano in basso: con due righe di conversazione si
+     sta vicino al campo, non in cima a un vuoto. */
+  justify-content: flex-end;
+}
 .chat-riga {
   background: rgba(255,255,255,.05);
   border-radius: 12px;
@@ -573,7 +593,7 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .chat-nome  { font-size: 11.5px; font-weight: 800; letter-spacing: .02em; }
 .chat-ora   { font-size: 10px; color: rgba(244,241,230,.35); flex: none; }
 .chat-corpo { font-size: 14px; line-height: 1.42; overflow-wrap: anywhere; }
-.chat-invio { display: flex; gap: 8px; align-items: center; margin-top: 10px; }
+.chat-invio { flex: none; display: flex; gap: 8px; align-items: center; margin-top: 10px; }
 .chat-invio input {
   flex: 1; min-width: 0;
   background: rgba(0,0,0,.28);
@@ -774,6 +794,7 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
     position: fixed; z-index: 61;
     left: 0; right: 0; top: auto; bottom: 0;
     max-height: 62vh;
+    max-height: min(62dvh, calc(100dvh - 120px));
     padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
     border-radius: 20px 20px 0 0;
     border-bottom: none;
@@ -986,7 +1007,7 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .barra-codice {
   display: flex; flex-direction: column; gap: 1px;
   text-align: left; background: none;
-  border-radius: 10px; padding: 4px 8px; margin-left: -8px;
+  border-radius: 10px; padding: 4px 8px;
 }
 .barra-codice:hover { background: rgba(255,255,255,.06); }
 .barra-codice:focus-visible { outline: 2px solid var(--oro); outline-offset: 1px; }
@@ -1126,3 +1147,126 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 }
 .tiro { animation: tiro-entra .22s cubic-bezier(.2,.7,.3,1); }
 @media (prefers-reduced-motion: reduce) { .tiro { animation: none; } }
+
+/* ══ il pulsante del tiro, dentro la ruota ══
+   Sul telefono stava sotto il tabellone, in un riquadro alto quasi
+   duecento pixel, e c'era solo quando toccava a te: il pannello sotto
+   cambiava altezza a ogni giro di turno. Il centro della ruota è spazio
+   già speso e sempre lì. ══ */
+.centro-azione {
+  position: absolute; inset: 0;
+  display: grid; place-items: center;
+  pointer-events: none;
+  z-index: 15;
+}
+.tira-centro {
+  pointer-events: auto;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 13px 20px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, var(--oro-chiaro), var(--oro));
+  color: #2A2205;
+  font-family: var(--f-titolo);
+  font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase;
+  box-shadow: 0 3px 0 rgba(0,0,0,.3), 0 8px 22px rgba(0,0,0,.45);
+  max-width: 74%;
+}
+.tira-centro:active:not(:disabled) { transform: translateY(2px); box-shadow: 0 1px 0 rgba(0,0,0,.3); }
+.tira-centro:disabled { opacity: .5; }
+.tira-centro:focus-visible { outline: 3px solid var(--carta); outline-offset: 3px; }
+
+/* ══ il foglio del telefono ══
+   Lo schermo diviso in due non bastava a nessuna delle due metà. Ora il
+   tabellone si tiene lo schermo e le sezioni si aprono come foglio. ══ */
+.velo-foglio {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(6,12,10,.6);
+  display: flex; align-items: flex-end;
+  animation: velo-foglio-entra .18s ease-out;
+}
+@keyframes velo-foglio-entra { from { opacity: 0 } to { opacity: 1 } }
+
+.foglio {
+  width: 100%;
+  /* Parte dal bordo basso dello schermo e sale sempre della stessa
+     altezza. Prima si adattava al contenuto: la chat, che è corta, apriva
+     un foglietto a metà schermo mentre la scheda ne apriva uno alto — due
+     gesti diversi per la stessa azione.
+     `dvh` e non `vh`: sul telefono `vh` è l'altezza dello schermo con la
+     barra dell'indirizzo già ritirata, cioè la più grande che possa
+     capitare, e finché quella barra si vede il foglio sborderebbe. */
+  height: 90vh;
+  height: 90dvh;
+  display: flex; flex-direction: column;
+  /* Verde come il tavolo: dentro ci vanno gli stessi riquadri di prima,
+     disegnati per stare su fondo scuro. Un foglio bianco con dentro una
+     carta verde sono due disegni sovrapposti. */
+  background: linear-gradient(180deg, var(--tavolo-alto), var(--tavolo));
+  color: var(--carta);
+  border-radius: 22px 22px 0 0;
+  border-top: 1px solid rgba(227,197,90,.22);
+  box-shadow: var(--ombra-alta);
+  animation: foglio-sale .24s cubic-bezier(.22,.68,.36,1);
+}
+
+/* Le regole sono l'unica sezione che si legge come un testo lungo, e un
+   testo lungo si legge meglio scuro su chiaro. */
+.foglio-chiaro {
+  background: var(--carta);
+  color: var(--inchiostro);
+  border-top: 1px solid var(--linea);
+}
+@keyframes foglio-sale { from { transform: translateY(100%) } to { transform: none } }
+
+.foglio-testa {
+  flex: none;
+  padding: 8px 16px 12px;
+  border-bottom: 1px solid rgba(255,255,255,.10);
+}
+.foglio-chiaro .foglio-testa { border-bottom-color: var(--linea); }
+.maniglia {
+  display: block; width: 38px; height: 4px; border-radius: 99px;
+  background: rgba(244,241,230,.28);
+  margin: 0 auto 10px;
+}
+.foglio-chiaro .maniglia { background: var(--linea); }
+.foglio-chiudi {
+  display: inline-flex; padding: 7px; border-radius: 9px;
+  color: rgba(244,241,230,.6); background: none;
+}
+.foglio-chiudi:hover { background: rgba(255,255,255,.08); color: var(--carta); }
+.foglio-chiaro .foglio-chiudi { color: var(--tenue-carta); }
+.foglio-chiaro .foglio-chiudi:hover { background: rgba(0,0,0,.06); color: var(--inchiostro); }
+.foglio-chiudi:focus-visible { outline: 2px solid var(--oro); outline-offset: 1px; }
+
+.foglio-corpo {
+  flex: 1 1 auto; min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 14px 14px calc(14px + env(safe-area-inset-bottom));
+  overscroll-behavior: contain;
+}
+/* Dentro il foglio le carte non hanno bisogno del proprio fondo chiaro:
+   il foglio è già chiaro. */
+.foglio-corpo > .carta:first-child { margin-top: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .velo-foglio, .foglio { animation: none; }
+}
+
+/* Sul telefono la colonna di destra non esiste più: le sezioni sono fogli. */
+@media (max-width: 999px) {
+  .colonna-pannello { display: none; }
+  .colonna-tavolo { flex: 1 1 auto; min-height: 0; }
+}
+
+/* La chat prende tutta l'altezza che ha: dentro il foglio del telefono e
+   dentro la colonna della scrivania. Le altre sezioni scorrono normalmente. */
+.foglio-corpo-pieno { overflow: hidden; display: flex; }
+.foglio-corpo-pieno > * { flex: 1 1 auto; min-height: 0; }
+@media (min-width: 1000px) {
+  .zona-pannello-pieno { display: flex; overflow: hidden; }
+  .zona-pannello-pieno > * { flex: 1 1 auto; min-height: 0; }
+}

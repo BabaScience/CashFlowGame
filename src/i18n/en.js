@@ -91,6 +91,11 @@ export default {
   },
 
   partita: {
+    chiudi: "Close",
+    tiraIlDado: "Roll the die",
+    tiraIDadi: "Roll the dice",
+    beneficenzaAttiva: "Charity active: you roll 2 dice ({n} turns left).",
+    uscendoRicevi: "Leaving pays you {importo} as a settlement.",
     haiTirato: "You rolled",
     tira: "{nome} rolls",
     copiaFallita: "Copy the code by hand: {codice}",
@@ -107,8 +112,6 @@ export default {
     contanti: "Cash",
     ruota: "The Wheel",
     largo: "Open Water",
-    tiraIlDado: "Roll the die",
-    tiraIDadi: "Roll the dice",
     toccaA: "{nome}'s turn",
     qualcuno: "Someone",
     salterai: "You will miss the next {n} turns.",
@@ -129,6 +132,7 @@ export default {
   },
 
   schede: {
+    etichetta: "Panel sections",
     scheda: "Sheet",
     giocatori: "Players",
     chat: "Chat",
@@ -244,13 +248,6 @@ export default {
     inGioco: "Time worked",
     uscitoDopo: "off the Wheel after {durata}",
     haLavorato: "worked {durata}",
-  },
-  sezioni: {
-    etichetta: "Panel sections",
-    conto: "Finances",
-    tavolo: "Table",
-    registro: "Log",
-    regole: "Rules",
   },
   casa: {
     tavolo: "Play at a table",

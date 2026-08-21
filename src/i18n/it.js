@@ -85,6 +85,11 @@ export default {
   },
 
   partita: {
+    chiudi: "Chiudi",
+    tiraIlDado: "Tira il dado",
+    tiraIDadi: "Tira i dadi",
+    beneficenzaAttiva: "Beneficenza attiva: tiri 2 dadi ({n} turni rimasti).",
+    uscendoRicevi: "Uscendo ricevi {importo} di liquidazione.",
     haiTirato: "Hai tirato",
     tira: "{nome} tira",
     copiaFallita: "Copia a mano il codice: {codice}",
@@ -101,8 +106,6 @@ export default {
     contanti: "Contanti",
     ruota: "La Ruota",
     largo: "Il Largo",
-    tiraIlDado: "Tira il dado",
-    tiraIDadi: "Tira i dadi",
     toccaA: "Tocca a {nome}",
     qualcuno: "Qualcuno",
     salterai: "Salterai i prossimi {n} turni.",
@@ -123,6 +126,7 @@ export default {
   },
 
   schede: {
+    etichetta: "Sezioni del pannello",
     scheda: "Scheda",
     giocatori: "Giocatori",
     chat: "Chat",
@@ -238,13 +242,6 @@ export default {
     inGioco: "Tempo lavorato",
     uscitoDopo: "fuori dalla Ruota dopo {durata}",
     haLavorato: "ha lavorato {durata}",
-  },
-  sezioni: {
-    etichetta: "Sezioni del pannello",
-    conto: "Conto",
-    tavolo: "Tavolo",
-    registro: "Registro",
-    regole: "Regole",
   },
   casa: {
     tavolo: "Gioca al tavolo",

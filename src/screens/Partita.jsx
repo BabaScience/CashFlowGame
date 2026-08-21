@@ -23,24 +23,13 @@ import { useLingua } from "../Lingua.jsx";
 /* Il tabellone non è più una scheda fra le altre: resta sempre a schermo,
    quindi le linguette servono solo per ciò che gli sta sotto. */
 /**
- * Le sezioni della colonna di destra, sulla scrivania.
+ * Le sezioni del gioco: le stesse sul telefono e sulla scrivania.
  *
- * Su telefono le schede sono cinque e si sfogliano con la barra in basso.
- * Sullo schermo grande la barra spariva e i pannelli venivano impilati
- * tutti insieme: milleottocento pixel di contenuto in una colonna alta
- * settecento, cioè la metà del gioco raggiungibile solo scorrendo.
- *
- * Quattro sezioni invece di cinque, perché sullo schermo grande c'è spazio
- * per tenere insieme le cose che si guardano insieme: chi c'è al tavolo e
- * cosa si stanno dicendo sono la stessa domanda.
+ * Per un po' la scrivania ne ha avute quattro, con "chi c'è al tavolo" e
+ * "cosa si stanno dicendo" tenute insieme. Aveva senso finché la chat sul
+ * telefono era una striscia; ora che è una sezione a sé, due elenchi
+ * diversi per le stesse cose sono solo due posti in cui sbagliarsi.
  */
-const SEZIONI = [
-  { id: "conto",    icona: "scheda",    chiave: "sezioni.conto" },
-  { id: "tavolo",   icona: "giocatori", chiave: "sezioni.tavolo" },
-  { id: "registro", icona: "registro",  chiave: "sezioni.registro" },
-  { id: "regole",   icona: "regole",    chiave: "sezioni.regole" },
-];
-
 const SCHEDE = [
   { id: "scheda", icona: "scheda",    chiave: "schede.scheda" },
   { id: "gioc",   icona: "giocatori", chiave: "schede.giocatori" },
@@ -93,8 +82,36 @@ function cheStaFacendo(stato, t) {
   }
 }
 
+/** Sulla Ruota si tira un dado solo, salvo beneficenza. */
+const unSoloDado = (g) => g.tracciato === "topi" && g.turniBeneficenza === 0;
+
+/**
+ * Il pulsante del tiro, dentro la ruota.
+ *
+ * Sul telefono stava sotto il tabellone, in un riquadro alto quasi
+ * duecento pixel: sommato alla barra del tempo e a quella del progresso,
+ * del pannello sotto — la scheda, la chat, il registro — restava una
+ * striscia. E quel riquadro c'è solo quando tocca a te, quindi il pannello
+ * cambiava altezza a ogni giro di turno.
+ *
+ * Il centro della ruota invece è spazio già speso e sempre lì. Quando
+ * tocca a te il cerchio smette di ripetere su che casella sei — lo dice il
+ * tuo gettone — e diventa la cosa da fare.
+ */
+function TiraAlCentro({ io, inAzione, suTira }) {
+  const { t } = useLingua();
+  return (
+    <div className="centro-azione">
+      <button className="tira-centro" disabled={inAzione} onClick={suTira}>
+        <Icona nome="dado" dim={19} />
+        <span>{t(unSoloDado(io) ? "partita.tiraIlDado" : "partita.tiraIDadi")}</span>
+      </button>
+    </div>
+  );
+}
+
 /** Il pannello delle azioni: cambia in base a cosa puoi fare adesso. */
-function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
+function Azioni({ stato, mioId, invia, inAzione, avvisa, tiroAltrove = false }) {
   const { t } = useLingua();
   const io = stato.giocatori.find((g) => g.id === mioId);
   const diTurno = stato.giocatori[stato.turno];
@@ -111,6 +128,14 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
   }
 
   const libero = io.tracciato === "topi" && fuoriDallaCorsa(io);
+  /* Col tiro spostato nel cerchio, questo riquadro può restare senza
+     niente dentro: un rettangolo scuro e vuoto sotto il tabellone. Se non
+     ha nulla da dire, non si disegna. */
+  const beneficenzaInCorso = io.tracciato === "topi" && io.turniBeneficenza > 0;
+  const sceltaDadi = io.tracciato === "veloce" && io.beneficenzaVeloce;
+  const vuoto = tiroAltrove && !libero && !beneficenzaInCorso && !sceltaDadi
+    && !stato.pending && !stato.dado;
+  if (vuoto) return null;
   const fai = async (az) => {
     const r = await invia(az);
     if (r.errore) avvisa(r.errore);
@@ -174,10 +199,15 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
               </div>
             </div>
           )}
-          <Bottone variante="btn-oro" className="mt12" disabled={inAzione}
-            onClick={() => fai({ tipo: "tira", nDadi: io.tracciato === "veloce" ? nDadi : 2 })}>
-            Tira {io.tracciato === "topi" && io.turniBeneficenza === 0 ? "il dado" : "i dadi"}
-          </Bottone>
+          {/* Sul telefono il pulsante sta dentro la ruota: vedi il
+              commento in `TiraAlCentro`. Qui resta tutto il contorno —
+              quanti dadi, la beneficenza — che nel cerchio non starebbe. */}
+          {!tiroAltrove && (
+            <Bottone variante="btn-oro" className="mt12" disabled={inAzione}
+              onClick={() => fai({ tipo: "tira", nDadi: io.tracciato === "veloce" ? nDadi : 2 })}>
+              {t(unSoloDado(io) ? "partita.tiraIlDado" : "partita.tiraIDadi")}
+            </Bottone>
+          )}
         </>
       )}
 
@@ -190,14 +220,16 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
   );
 }
 
-export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci }) {
+export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci, schedaIniziale = null }) {
   const { t } = useLingua();
-  const [scheda, setScheda] = useState("scheda");
+  /* Sul telefono nessuna scheda è aperta all'inizio: lo schermo è il
+     tabellone e basta. `null` vuol dire "nessun foglio aperto". */
+  const [scheda, setScheda] = useState(schedaIniziale);
   /* Su telefono si sfoglia con la barra in basso (`scheda`), sulla
      scrivania con le linguette in cima alla colonna (`sezione`). Due stati
      separati perché i raggruppamenti sono diversi, e perché passando da
      una forma all'altra ognuna deve ritrovarsi dove l'avevi lasciata. */
-  const [sezione, setSezione] = useState("conto");
+  const [sezione, setSezione] = useState("scheda");
   const [audio, setAudio] = useState(audioAcceso);
   const [copiato, setCopiato] = useState(false);
   const [uscita, setUscita] = useState(false);
@@ -235,6 +267,13 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
   const io = stato.giocatori.find((g) => g.id === mioId);
   const diTurno = stato.giocatori[stato.turno];
   const mioTurno = diTurno?.id === mioId;
+
+  /* Il tiro va nel cerchio solo sul telefono, e solo quando è davvero
+     l'unica cosa da fare: se ci sono dadi da scegliere o una beneficenza
+     in corso, quel contorno nel cerchio non ci starebbe. */
+  const tiroAlCentro = !scrivania && mioTurno && !stato.pending && !stato.dado
+    && io && !io.eliminato && !(io.tracciato === "veloce" && io.beneficenzaVeloce)
+    && !(io.tracciato === "topi" && fuoriDallaCorsa(io));
 
   // Notifica discreta quando arriva il tuo turno.
   const eraMio = useRef(mioTurno);
@@ -274,7 +313,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
     const n = (stato.chat || []).length;
     /* La chat è aperta se la stai guardando, comunque tu ci sia arrivato:
        dalla scheda del telefono o dalla sezione della scrivania. */
-    const guardo = scheda === "chat" || sezione === "tavolo";
+    const guardo = scheda === "chat" || sezione === "chat";
     if (n > lettiChat.current && !guardo) setChatNuova(true);
     if (guardo) { lettiChat.current = n; setChatNuova(false); }
   }, [stato.chat, scheda, sezione]);
@@ -285,7 +324,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
   useEffect(() => {
     if (stato.registro[0]?.id !== nuoveRighe.current) {
       nuoveRighe.current = stato.registro[0]?.id;
-      if (scheda !== "log" && sezione !== "registro") setLogNuovo(true);
+      if (scheda !== "log" && sezione !== "log") setLogNuovo(true);
     }
   }, [stato.registro, scheda, sezione]);
 
@@ -315,23 +354,40 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
           un'etichetta, si premeva per curiosità, e la partita spariva senza
           che niente dicesse cos'era successo. Ora è quello che sembra: un
           codice, che al massimo si copia per invitare qualcuno. */}
-      <button onClick={copiaCodice} className="barra-codice"
-        aria-label={t("partita.copiaCodice")}>
-        <span className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("partita.stanza")}</span>
-        <span className="flex cen g8">
-          <span className="numeri grassetto f16" style={{ color: "var(--carta)", letterSpacing: 2 }}>{stato.codice}</span>
-          <Icona nome={copiato ? "spunta" : "copia"} dim={14} />
-        </span>
-      </button>
-      <div className="ta-c" style={{ flex: 1, minWidth: 0 }}>
-        <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>
-          {t(io.tracciato === "topi" ? "partita.ruota" : "partita.largo")}
-        </div>
-        <div className="f13 grassetto riga-sola"
-          style={{ color: casella.colore === "#6B4423" ? "#C8A278" : casella.colore }}>
-          {casella.emoji} {casella.nome}
-        </div>
+      {/* Uscita accanto al codice: riguardano tutte e due la stanza, e
+          stanno insieme invece che agli estremi opposti della barra. */}
+      <div className="flex cen g8">
+        {/* L'uscita prima del codice: si legge da sinistra, e "indietro"
+            sta a sinistra in ogni schermata che si sia mai usata. */}
+        <button className="btn-barra" onClick={() => setUscita(true)}>
+          <Icona nome="esci" dim={16} />
+          <span className="etichetta-barra">{t("partita.esci")}</span>
+        </button>
+        <button onClick={copiaCodice} className="barra-codice"
+          aria-label={t("partita.copiaCodice")}>
+          <span className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("partita.stanza")}</span>
+          <span className="flex cen g8">
+            <span className="numeri grassetto f16" style={{ color: "var(--carta)", letterSpacing: 2 }}>{stato.codice}</span>
+            <Icona nome={copiato ? "spunta" : "copia"} dim={14} />
+          </span>
+        </button>
       </div>
+
+      {/* La casella su cui sei sta già al centro del tabellone, scritta per
+          intero. Quassù era una seconda copia che per giunta non ci stava
+          — "Giorno di ..." — e rubava spazio alle due cose che invece
+          esistono solo qui: il codice e i contanti. */}
+      {scrivania && (
+        <div className="ta-c" style={{ flex: 1, minWidth: 0 }}>
+          <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>
+            {t(io.tracciato === "topi" ? "partita.ruota" : "partita.largo")}
+          </div>
+          <div className="f13 grassetto riga-sola"
+            style={{ color: casella.colore === "#6B4423" ? "#C8A278" : casella.colore }}>
+            {casella.emoji} {casella.nome}
+          </div>
+        </div>
+      )}
       <div className="flex cen g12">
         {/* Un pulsante che dice cosa fa se lo premi, non com'è messo
             adesso: "Spegni i suoni" è un'azione, l'altoparlante barrato era
@@ -344,10 +400,6 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
           </span>
         </button>
 
-        <button className="btn-barra" onClick={() => setUscita(true)}>
-          <Icona nome="esci" dim={16} />
-          <span className="etichetta-barra">{t("partita.esci")}</span>
-        </button>
         <div className="ta-r">
           <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("partita.contanti")}</div>
           <div className="numeri grassetto f16"><NumeroAnimato valore={io.contanti} /></div>
@@ -364,8 +416,16 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
         {/* Colonna del tavolo: non scorre mai. */}
         <div className="colonna-tavolo">
           <div className="zona-tavolo">
-            <Tabellone stato={stato} mioId={mioId} nota={cheStaFacendo(stato, t)} />
+            <Tabellone stato={stato} mioId={mioId}
+              nota={cheStaFacendo(stato, t)} centroLibero={tiroAlCentro} />
             <Dadi tiro={stato.ultimoTiro} mioId={mioId} />
+            {tiroAlCentro && (
+              <TiraAlCentro io={io} inAzione={inAzione}
+                suTira={async () => {
+                  const r = await invia({ tipo: "tira", nDadi: io.tracciato === "veloce" ? 1 : 2 });
+                  if (r?.errore) avvisa(r.errore);
+                }} />
+            )}
           </div>
 
           {/* Il tempo passato. Sta qui e non nella barra in alto perché la
@@ -404,54 +464,40 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
                 {t("partita.avvisami")}
               </button>
             )}
-            <Azioni stato={stato} mioId={mioId} invia={invia} inAzione={inAzione} avvisa={avvisa} />
+            <Azioni stato={stato} mioId={mioId} invia={invia} inAzione={inAzione} avvisa={avvisa} tiroAltrove={tiroAlCentro} />
           </div>
         </div>
 
         {/* La colonna di destra: le linguette non scorrono, il pannello sì. */}
         <div className="colonna-pannello">
           {scrivania && (
-            <nav className="pannello-schede" aria-label={t("sezioni.etichetta")}>
-              {SEZIONI.map((sz) => (
+            <nav className="pannello-schede" aria-label={t("schede.etichetta")}>
+              {SCHEDE.map((sz) => (
                 <button key={sz.id} data-attivo={sezione === sz.id}
                   aria-current={sezione === sz.id ? "true" : undefined}
                   onClick={() => {
                     setSezione(sz.id);
-                    if (sz.id === "registro") setLogNuovo(false);
+                    if (sz.id === "log") setLogNuovo(false);
                   }}>
                   <Icona nome={sz.icona} dim={15} />
                   {t(sz.chiave)}
-                  {sz.id === "registro" && logNuovo && <span className="punto" />}
-                  {sz.id === "tavolo" && chatNuova && <span className="punto" />}
+                  {sz.id === "log" && logNuovo && <span className="punto" />}
+                  {sz.id === "chat" && chatNuova && <span className="punto" />}
                 </button>
               ))}
             </nav>
           )}
 
-          <div className="zona-pannello">
+          <div className={`zona-pannello ${scrivania && sezione === "chat" ? "zona-pannello-pieno" : ""}`}>
             {scrivania ? (
               <>
-                {sezione === "conto" && <Scheda giocatore={io} invia={invia} inAzione={inAzione} mio />}
-                {sezione === "tavolo" && (
-                  <>
-                    <Giocatori stato={stato} mioId={mioId} />
-                    {/* Chi c'è al tavolo e cosa si stanno dicendo sono la
-                        stessa domanda: stanno bene nella stessa sezione. */}
-                    <div className="mt12"><Chat stato={stato} mioId={mioId} suLetto={segnaLetti} /></div>
-                  </>
-                )}
-                {sezione === "registro" && <Registro stato={stato} />}
+                {sezione === "scheda" && <Scheda giocatore={io} invia={invia} inAzione={inAzione} mio />}
+                {sezione === "gioc" && <Giocatori stato={stato} mioId={mioId} />}
+                {sezione === "chat" && <Chat stato={stato} mioId={mioId} suLetto={segnaLetti} />}
+                {sezione === "log" && <Registro stato={stato} />}
                 {sezione === "regole" && <Manuale />}
               </>
-            ) : (
-              <>
-                {scheda === "scheda" && <Scheda giocatore={io} invia={invia} inAzione={inAzione} mio />}
-                {scheda === "gioc" && <Giocatori stato={stato} mioId={mioId} />}
-                {scheda === "chat" && <Chat stato={stato} mioId={mioId} suLetto={segnaLetti} />}
-                {scheda === "log" && <Registro stato={stato} />}
-                {scheda === "regole" && <Manuale />}
-              </>
-            )}
+            ) : null}
           </div>
         </div>
       </div>
@@ -483,10 +529,58 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
         </div>
       )}
 
+      {/* ═══ IL FOGLIO DEL TELEFONO ═══
+       *
+       * Prima lo schermo era diviso in due: tabellone sopra, pannello
+       * sotto. Nessuna delle due metà era abbastanza grande — il tabellone
+       * stava in un terzo di schermo e del pannello si vedeva una striscia
+       * — e l'altezza della striscia cambiava a ogni turno, perché il
+       * pulsante del tiro compare solo quando tocca a te.
+       *
+       * Ora il tabellone si tiene lo schermo. Le sezioni si aprono come
+       * foglio, si leggono per intero e si chiudono: è il gesto che sul
+       * telefono si conosce già, ed è lo stesso che il gioco usa per le
+       * decisioni. */}
+      {!scrivania && scheda && (
+        <div className="velo-foglio" onMouseDown={(e) => {
+          if (e.target === e.currentTarget) setScheda(null);
+        }}>
+          <div className={`foglio ${scheda === "regole" ? "foglio-chiaro" : ""}`}
+            role="dialog" aria-modal="true"
+            aria-label={t(SCHEDE.find((x) => x.id === scheda)?.chiave || "schede.scheda")}>
+            <div className="foglio-testa">
+              <span className="maniglia" aria-hidden="true" />
+              <div className="flex tra cen">
+                <h2 className="titolo f18" style={{ margin: 0 }}>
+                  {t(SCHEDE.find((x) => x.id === scheda)?.chiave || "schede.scheda")}
+                </h2>
+                <button className="foglio-chiudi" onClick={() => setScheda(null)}
+                  aria-label={t("partita.chiudi")}>
+                  <Icona nome="chiudi" dim={18} />
+                </button>
+              </div>
+            </div>
+            <div className={`foglio-corpo ${scheda === "chat" ? "foglio-corpo-pieno" : ""}`}>
+              {scheda === "scheda" && <Scheda giocatore={io} invia={invia} inAzione={inAzione} mio />}
+              {scheda === "gioc" && <Giocatori stato={stato} mioId={mioId} />}
+              {scheda === "chat" && <Chat stato={stato} mioId={mioId} suLetto={segnaLetti} />}
+              {scheda === "log" && <Registro stato={stato} />}
+              {scheda === "regole" && <Manuale />}
+            </div>
+          </div>
+        </div>
+      )}
+
       <nav className="navbar">
         {SCHEDE.map((sc) => (
           <button key={sc.id} data-attivo={scheda === sc.id}
-            onClick={() => { setScheda(sc.id); if (sc.id === "log") setLogNuovo(false); }}>
+            aria-expanded={scheda === sc.id}
+            onClick={() => {
+              /* Premere la scheda già aperta la chiude: è il modo più
+                 rapido per tornare al tabellone. */
+              setScheda((v) => (v === sc.id ? null : sc.id));
+              if (sc.id === "log") setLogNuovo(false);
+            }}>
             <Icona nome={sc.icona} dim={19} />
             {t(sc.chiave)}
             {sc.id === "log" && logNuovo && <span className="punto" />}

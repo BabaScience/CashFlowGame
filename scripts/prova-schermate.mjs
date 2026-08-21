@@ -537,6 +537,86 @@ prova("Nessuno chiama più gli appunti a mano", () => {
   if (guai.length) throw new Error("usano gli appunti senza ripiego: " + guai.join(", "));
 });
 
+console.log("\n── Sul telefono il tabellone è solo ──");
+
+/* Il banco di prova finge uno schermo stretto (`matchMedia` risponde
+   sempre "no"), quindi qui si disegna sempre la forma da telefono. */
+
+prova("A foglio chiuso non c'è nient'altro che il tabellone", () => {
+  /* Prima lo schermo era diviso in due e nessuna delle due metà bastava:
+     il tabellone in un terzo di schermo, del pannello una striscia. */
+  const s = tavolo();
+  const html = conMercato(s, React.createElement(Partita, {
+    stato: s, mioId: "a", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
+  }));
+  vero(html.includes("svg"), "manca il tabellone");
+  vero(!/class="foglio/.test(html), "un foglio è aperto senza che nessuno l'abbia chiesto");
+  vero(!html.includes("Conto economico"), "la scheda non deve stare in pagina");
+  vero(!html.includes("CHAT DEL TAVOLO") && !html.includes("Chat del tavolo"),
+    "la chat non deve stare in pagina");
+});
+
+prova("Aprendo una sezione si apre un foglio", () => {
+  const s = tavolo();
+  const html = conMercato(s, React.createElement(Partita, {
+    stato: s, mioId: "a", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
+    schedaIniziale: "scheda",
+  }));
+  vero(/class="foglio/.test(html), "il foglio non si è aperto");
+  vero(/role="dialog"/.test(html), "il foglio deve annunciarsi come finestra");
+  vero(/aria-modal="true"/.test(html), "manca aria-modal");
+  vero(html.includes("Conto economico"), "il foglio non contiene la sezione");
+});
+
+prova("Solo le regole hanno il foglio chiaro", () => {
+  /* Il resto sta sul verde del tavolo, perché dentro ci vanno gli stessi
+     riquadri disegnati per il fondo scuro. Le regole sono l'unica sezione
+     che si legge come un testo lungo. */
+  const s = tavolo();
+  const disegnaCon = (sez) => conMercato(s, React.createElement(Partita, {
+    stato: s, mioId: "a", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
+    schedaIniziale: sez,
+  }));
+  vero(/foglio foglio-chiaro/.test(disegnaCon("regole")), "le regole devono stare sul chiaro");
+  for (const sez of ["scheda", "gioc", "chat", "log"]) {
+    vero(!/foglio-chiaro/.test(disegnaCon(sez)), `"${sez}" non deve usare il foglio chiaro`);
+  }
+});
+
+prova("Il pulsante del tiro sta nella ruota, non sotto", () => {
+  /* Sotto il tabellone occupava quasi duecento pixel, e c'era solo quando
+     toccava a te: il resto della pagina cambiava altezza a ogni turno. */
+  const s = tavolo();
+  s.turno = s.giocatori.findIndex((g) => g.id === "a");
+  const html = conMercato(s, React.createElement(Partita, {
+    stato: s, mioId: "a", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
+  }));
+  vero(/class="tira-centro"/.test(html), "il pulsante non è nella ruota");
+  vero((html.match(/Tira il dado/g) || []).length === 1,
+    "il pulsante del tiro compare due volte");
+});
+
+prova("Quando il pulsante è nella ruota, la ruota si libera", () => {
+  /* Due cose nello stesso punto sono una cosa illeggibile. */
+  const s = tavolo();
+  s.turno = s.giocatori.findIndex((g) => g.id === "a");
+  const html = conMercato(s, React.createElement(Partita, {
+    stato: s, mioId: "a", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
+  }));
+  vero(!html.includes(">Quota Zero</text>"), "il marchio resta sotto il pulsante");
+});
+
+prova("La barra in alto non ripete la casella su cui sei", () => {
+  /* La dice già il centro del tabellone, per intero. Quassù non ci stava
+     — "Giorno di ..." — e rubava spazio a codice e contanti. */
+  const s = tavolo();
+  const html = conMercato(s, React.createElement(Partita, {
+    stato: s, mioId: "a", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
+  }));
+  const primaRiga = html.slice(0, html.indexOf("</svg>"));
+  vero(!/LA RUOTA<\/div>/.test(primaRiga), "la barra ripete il tracciato");
+});
+
 console.log("\n── I dadi non restano sul tabellone ──");
 
 prova("Il riquadro del tiro non usa AnimatePresence", () => {

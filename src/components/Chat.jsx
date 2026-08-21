@@ -55,10 +55,10 @@ export default function Chat({ stato, mioId, suLetto }) {
 
   return (
     <div className="carta-scura chat">
-      <div className="flex tra cen mb8">
-        <div className="sezione-tit" style={{ color: "rgba(244,241,230,.5)", margin: 0 }}>
-          {t("chat.titolo")}
-        </div>
+      {/* Niente titolo qui dentro: lo dice già la linguetta sopra, sulla
+          scrivania come sul telefono. Resta la sola cosa che non ha altro
+          posto dove stare, cioè l'interruttore dell'ospite. */}
+      <div className="flex cen mb8" style={{ justifyContent: "flex-end", minHeight: 18 }}>
         {sonoHost && (
           <button className="f11 tenue" onClick={cambiaInterruttore}
             style={{ textDecoration: "underline", textUnderlineOffset: 3 }}>

@@ -74,6 +74,29 @@ prova("Nessuna traduzione è vuota", () => {
   }
 });
 
+prova("Nessuna chiave dichiarata due volte", () => {
+  /* In un oggetto JavaScript la seconda dichiarazione vince e la prima
+     sparisce senza un fiato: né il compilatore né i test se ne accorgono.
+     Ci sono già cascato aggiungendo `tiraIlDado` una seconda volta senza
+     sapere che esisteva. */
+  for (const f of ["it", "en"]) {
+    const testo = readFileSync(new URL(`../src/i18n/${f}.js`, import.meta.url), "utf8");
+    const perSezione = new Map();
+    let sezione = "";
+    for (const riga of testo.split("\n")) {
+      const apre = riga.match(/^  (\w+): \{/);
+      if (apre) { sezione = apre[1]; continue; }
+      if (/^  \},?$/.test(riga)) { sezione = ""; continue; }
+      const chiave = riga.match(/^\s{4}(\w+):/);
+      if (!chiave || !sezione) continue;
+      const dove = `${sezione}.${chiave[1]}`;
+      perSezione.set(dove, (perSezione.get(dove) || 0) + 1);
+    }
+    const doppie = [...perSezione].filter(([, n]) => n > 1).map(([k]) => k);
+    vero(doppie.length === 0, `"${f}" dichiara due volte: ${doppie.join(", ")}`);
+  }
+});
+
 console.log("\n── I segnaposto ──");
 
 prova("Ogni lingua usa gli stessi segnaposto dell'italiano", () => {

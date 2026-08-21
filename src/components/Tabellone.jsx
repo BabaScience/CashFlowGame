@@ -145,7 +145,7 @@ function Gettone({ giocatore, n, raggio, ordine, totale, èTurno, mio, indice })
 }
 
 /* ── tabellone ─────────────────────────────────────────────── */
-export default function Tabellone({ stato, mioId, nota }) {
+export default function Tabellone({ stato, mioId, nota, centroLibero }) {
   const { t } = useLingua();
   const giocatori = stato.giocatori || [];
   const inTopi = giocatori.filter((g) => g.tracciato === "topi");
@@ -249,12 +249,19 @@ export default function Tabellone({ stato, mioId, nota }) {
 
       {/* ── Centro ── */}
       <circle cx={CX} cy={CY} r={R_INT - SP_INT / 2 - 6} fill="#132a22" stroke="rgba(201,162,39,.3)" strokeWidth="1.2" />
-      <text x={CX} y={CY - 26} textAnchor="middle" className="tab-etichetta" style={{ fontSize: 17, fill: "#E3C55A" }}>Quota Zero</text>
-      <text x={CX} y={CY - 8} textAnchor="middle" style={{ fontSize: 8.5, fill: "rgba(244,241,230,.55)", letterSpacing: 1.6, fontWeight: 700 }}>
-        LA RUOTA
-      </text>
+      {/* Quando il centro ospita il pulsante del tiro, il marchio si toglie
+          di mezzo: due cose nello stesso punto sono una sola cosa
+          illeggibile. */}
+      {!centroLibero && (
+        <>
+          <text x={CX} y={CY - 26} textAnchor="middle" className="tab-etichetta" style={{ fontSize: 17, fill: "#E3C55A" }}>Quota Zero</text>
+          <text x={CX} y={CY - 8} textAnchor="middle" style={{ fontSize: 8.5, fill: "rgba(244,241,230,.55)", letterSpacing: 1.6, fontWeight: 700 }}>
+            LA RUOTA
+          </text>
+        </>
+      )}
 
-      {io && (
+      {io && !centroLibero && (
         <>
           <text x={CX} y={CY + 16} textAnchor="middle"
             style={{ fontSize: 10.5, fill: "rgba(244,241,230,.85)", fontWeight: 700 }}>
@@ -268,7 +275,7 @@ export default function Tabellone({ stato, mioId, nota }) {
           </text>
         </>
       )}
-      {stato.fase === "inCorso" && (
+      {stato.fase === "inCorso" && !centroLibero && (
         <>
           <text x={CX} y={CY + 52} textAnchor="middle"
             style={{ fontSize: 8.5, fill: giocatori[stato.turno]?.colore || "#E3C55A", fontWeight: 800, letterSpacing: .6 }}>
