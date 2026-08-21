@@ -97,7 +97,7 @@ prova("Ingresso, visitatore nuovo", () => {
   }));
   vero(html.length > 500, "markup troppo corto: la schermata è vuota");
   vero(html.includes("Quota Zero"), "manca il nome del prodotto");
-  vero(/select/.test(html), "mancano i campi di scelta");
+  vero(/role="combobox"/.test(html), "mancano i campi di scelta");
 });
 
 prova("Ingresso con partite lasciate a metà", () => {
@@ -223,6 +223,94 @@ prova("Sfida già giocata oggi", () => {
   const html = disegna(React.createElement(Sfida, { suEsci: nulla }));
   vero(html.includes("42"), "manca il punteggio di oggi");
   memoria.delete("quotazero:sfida");
+});
+
+console.log("\n── La tendina ──");
+
+/* Disegnata da sola, per potersi guardare il contratto ARIA senza il
+   rumore di una schermata intera. */
+const modScelta = await import("../src/components/Scelta.jsx");
+const Scelta = modScelta.default;
+const { posizione } = modScelta;
+const OPZIONI = [
+  { valore: "a", emoji: "🧑‍🏫", etichetta: "Insegnante", dettaglio: "1.850 €/mese" },
+  { valore: "b", emoji: "🔧", etichetta: "Meccanico", dettaglio: "1.600 €/mese" },
+  { valore: "c", etichetta: "Quadro", nota: "stipendio più alto, spese più alte" },
+];
+const tendina = (extra = {}) => disegna(React.createElement(Scelta, {
+  id: "prova", etichetta: "Professione", valore: "b",
+  onCambia: nulla, opzioni: OPZIONI, ...extra,
+}));
+
+prova("Mostra il valore scelto, non il primo dell'elenco", () => {
+  const html = tendina();
+  vero(html.includes("Meccanico"), "non mostra ciò che è selezionato");
+  vero(!html.includes("Insegnante"), "chiusa non deve elencare le altre voci");
+});
+
+prova("Dichiara di essere una tendina, e di essere chiusa", () => {
+  const html = tendina();
+  vero(/role="combobox"/.test(html), "manca role=combobox");
+  vero(/aria-haspopup="listbox"/.test(html), "manca aria-haspopup");
+  vero(/aria-expanded="false"/.test(html), "chiusa deve dirsi chiusa");
+  vero(/aria-controls="prova-elenco"/.test(html), "non punta al proprio elenco");
+});
+
+prova("Il nome accessibile lega etichetta e valore", () => {
+  /* Senza questo un lettore di schermo annuncia solo "Meccanico" e non
+     dice di che campo si tratti. */
+  vero(/aria-labelledby="prova-etichetta prova"/.test(tendina()),
+    "l'etichetta non è legata al pulsante");
+});
+
+prova("Senza etichetta visibile ne resta una per chi non vede", () => {
+  const html = tendina({ etichetta: undefined, etichettaAria: "Professione" });
+  vero(/aria-label="Professione"/.test(html), "campo senza nome accessibile");
+  vero(!/aria-labelledby/.test(html), "non deve puntare a un'etichetta che non c'è");
+});
+
+prova("È un pulsante, non un campo che si può inviare", () => {
+  /* Senza type="button" dentro un form il primo clic invierebbe tutto. */
+  vero(/type="button"/.test(tendina()), 'manca type="button"');
+});
+
+prova("Disabilitata si dichiara tale", () => {
+  vero(/disabled/.test(tendina({ disabilitato: true })), "non risulta disabilitata");
+});
+
+prova("Regge un elenco vuoto e un valore che non esiste", () => {
+  /* Succede per un disegno solo quando si cambia mercato: la professione
+     scelta è ancora quella di prima e nel nuovo elenco non c'è. */
+  vero(tendina({ opzioni: [] }).length > 0, "elenco vuoto: si rompe");
+  vero(tendina({ valore: "inesistente" }).includes("Insegnante"),
+    "con un valore ignoto deve ripiegare sulla prima voce");
+});
+
+prova("Sotto ci sta: si apre in giù", () => {
+  const p = posizione({ spazioSopra: 200, spazioSotto: 400, altezza: 320 });
+  vero(!p.sopra, "non c'era ragione di ribaltare");
+});
+
+prova("Sotto non ci sta e sopra sì: si ribalta", () => {
+  /* Il caso visto per davvero nella sala d'attesa: l'elenco finiva cento
+     pixel sotto il bordo della finestra. */
+  const p = posizione({ spazioSopra: 500, spazioSotto: 90, altezza: 320 });
+  vero(p.sopra, "doveva aprirsi verso l'alto");
+});
+
+prova("Stretti da tutte e due le parti, non si ribalta per nulla", () => {
+  /* Ribaltare per guadagnare pochi pixel confonde: il campo resta fermo e
+     l'elenco salta da una parte all'altra senza un motivo visibile. */
+  vero(!posizione({ spazioSopra: 100, spazioSotto: 96, altezza: 320 }).sopra);
+});
+
+prova("L'altezza si adatta allo spazio, ma non sparisce", () => {
+  const stretto = posizione({ spazioSopra: 100, spazioSotto: 300, altezza: 320 });
+  vero(!stretto.sopra && stretto.altezzaMax === 288, "deve fermarsi allo spazio disponibile");
+  vero(posizione({ spazioSopra: 20, spazioSotto: 20, altezza: 320 }).altezzaMax >= 140,
+    "in uno spazio minimo resta comunque qualcosa da leggere");
+  vero(posizione({ spazioSopra: 900, spazioSotto: 900, altezza: 200 }).altezzaMax === 200,
+    "non deve crescere oltre il proprio contenuto");
 });
 
 console.log("\n── I componenti dentro la partita ──");

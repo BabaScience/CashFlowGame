@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Bottone } from "../components/Base.jsx";
+import Scelta from "../components/Scelta.jsx";
 import { MercatoProvider, useMercato } from "../Mercato.jsx";
 import { MERCATI, MERCATO_PREDEFINITO, getPacchetto } from "../game/mercati/indice.js";
 import { LIVELLI, LIVELLO_PREDEFINITO } from "../game/regole/livelli.js";
@@ -167,18 +168,20 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
 
           {/* Prima scelta di tutte: decide professioni, prezzi e valuta. */}
           <div className="gruppo-campo">
-            <label className="etichetta" htmlFor="campo-mercato">{t("ingresso.dovegiochi")}</label>
-            <select id="campo-mercato" className="campo" value={mercatoId}
-              onChange={(e) => {
-                setMercato(e.target.value);
-                localStorage.setItem("quotazero:mercato", e.target.value);
-              }}>
-              {MERCATI.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {t(`mercati.${m.id}.nome`)} — {t(`mercati.${m.id}.descrizione`)}
-                </option>
-              ))}
-            </select>
+            <Scelta
+              id="campo-mercato"
+              etichetta={t("ingresso.dovegiochi")}
+              valore={mercatoId}
+              onCambia={(v) => {
+                setMercato(v);
+                localStorage.setItem("quotazero:mercato", v);
+              }}
+              opzioni={MERCATI.map((m) => ({
+                valore: m.id,
+                etichetta: t(`mercati.${m.id}.nome`),
+                nota: t(`mercati.${m.id}.descrizione`),
+              }))}
+            />
             <p className="f12 tenue" style={{ margin: "6px 0 0", lineHeight: 1.45 }}>
               {t("ingresso.mercatoNota")}
             </p>
@@ -186,13 +189,13 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
 
           {haFisco && (
             <div className="gruppo-campo">
-              <label className="etichetta" htmlFor="campo-livello">{t("ingresso.livello")}</label>
-              <select id="campo-livello" className="campo" value={livello}
-                onChange={(e) => setLivello(Number(e.target.value))}>
-                {LIVELLI.map((l) => (
-                  <option key={l.id} value={l.id}>{l.nome} — {l.sommario}</option>
-                ))}
-              </select>
+              <Scelta
+                id="campo-livello"
+                etichetta={t("ingresso.livello")}
+                valore={livello}
+                onCambia={(v) => setLivello(Number(v))}
+                opzioni={LIVELLI.map((l) => ({ valore: l.id, etichetta: l.nome, nota: l.sommario }))}
+              />
               <p className="f12 tenue" style={{ margin: "6px 0 0", lineHeight: 1.45 }}>
                 {LIVELLI.find((l) => l.id === livello)?.descrizione}
               </p>
@@ -200,12 +203,16 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
           )}
 
           <div className="gruppo-campo">
-            <label className="etichetta" htmlFor="campo-professione">{t("ingresso.professione")}</label>
-            <select id="campo-professione" className="campo" value={professioneId} onChange={(e) => setProfessione(e.target.value)}>
-              {professioni.map((p) => (
-                <option key={p.id} value={p.id}>{p.emoji} {p.nome} — {soldi(p.stipendio)}/mese</option>
-              ))}
-            </select>
+            <Scelta
+              id="campo-professione"
+              etichetta={t("ingresso.professione")}
+              valore={professioneId}
+              onCambia={setProfessione}
+              opzioni={professioni.map((p) => ({
+                valore: p.id, emoji: p.emoji, etichetta: p.nome,
+                dettaglio: t("ingresso.alMese", { importo: soldi(p.stipendio) }),
+              }))}
+            />
             <div className="carta mt8" style={{ background: "#F2F0E6", padding: 12 }}>
               <div className="flex tra f13">
                 <span className="tenue">{t("ingresso.stipendio")}</span><span className="numeri">{soldi(prof.stipendio)}</span>
@@ -223,12 +230,15 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato })
           </div>
 
           <div className="gruppo-campo">
-            <label className="etichetta" htmlFor="campo-sogno">{t("ingresso.sogno")}</label>
-            <select id="campo-sogno" className="campo" value={sognoId} onChange={(e) => setSogno(e.target.value)}>
-              {sogni.map((s) => (
-                <option key={s.id} value={s.id}>{s.emoji} {s.nome} — {soldi(s.costo)}</option>
-              ))}
-            </select>
+            <Scelta
+              id="campo-sogno"
+              etichetta={t("ingresso.sogno")}
+              valore={sognoId}
+              onCambia={setSogno}
+              opzioni={sogni.map((s) => ({
+                valore: s.id, emoji: s.emoji, etichetta: s.nome, dettaglio: soldi(s.costo),
+              }))}
+            />
             <p className="f12 tenue mt8" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
               {t("ingresso.sognoNota")}
             </p>

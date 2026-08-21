@@ -23,6 +23,7 @@ export default {
     dovegiochi: "Dove giochi",
     mercatoNota: "Il mercato decide prezzi, stipendi, tassi e valuta. Vale per tutto il tavolo e non si cambia a partita iniziata.",
     professione: "Professione",
+    alMese: "{importo}/mese",
     stipendio: "Stipendio",
     speseTotali: "Spese totali",
     giornoDiPaga: "Giorno di paga",

@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Bottone, GettoneGiocatore } from "../components/Base.jsx";
+import Scelta from "../components/Scelta.jsx";
 import { useMercato } from "../Mercato.jsx";
 import { soldi, flussoMensile } from "../game/finanze.js";
 import { MAX_GIOCATORI } from "../game/tabellone.js";
@@ -109,20 +110,31 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
           )}
           {modifica && io && (
             <div className="mt12">
-              <label className="etichetta">Professione</label>
-              <select id="attesa-professione" aria-label={t("attesa.professione")} className="campo mb12" value={io.professioneId} disabled={inAzione}
-                onChange={(e) => cambia("prof", e.target.value)}>
-                {professioni.map((p) => (
-                  <option key={p.id} value={p.id}>{p.emoji} {p.nome} — {soldi(p.stipendio)}/mese</option>
-                ))}
-              </select>
-              <label className="etichetta">{t("attesa.sogno")}</label>
-              <select id="attesa-sogno" aria-label={t("attesa.sogno")} className="campo" value={io.sognoId} disabled={inAzione}
-                onChange={(e) => cambia("sogno", e.target.value)}>
-                {sogni.map((s) => (
-                  <option key={s.id} value={s.id}>{s.emoji} {s.nome} — {soldi(s.costo)}</option>
-                ))}
-              </select>
+              {/* L'etichetta della professione era scritta a mano in italiano
+                  mentre il nome per il lettore di schermo era tradotto: in
+                  inglese si leggeva "Professione" sopra un campo inglese. */}
+              <Scelta
+                id="attesa-professione"
+                className="mb12"
+                etichetta={t("attesa.professione")}
+                valore={io.professioneId}
+                disabilitato={inAzione}
+                onCambia={(v) => cambia("prof", v)}
+                opzioni={professioni.map((p) => ({
+                  valore: p.id, emoji: p.emoji, etichetta: p.nome,
+                  dettaglio: t("ingresso.alMese", { importo: soldi(p.stipendio) }),
+                }))}
+              />
+              <Scelta
+                id="attesa-sogno"
+                etichetta={t("attesa.sogno")}
+                valore={io.sognoId}
+                disabilitato={inAzione}
+                onCambia={(v) => cambia("sogno", v)}
+                opzioni={sogni.map((s) => ({
+                  valore: s.id, emoji: s.emoji, etichetta: s.nome, dettaglio: soldi(s.costo),
+                }))}
+              />
               {io && (
                 <p className="f12 tenue mt12" style={{ margin: "12px 0 0", lineHeight: 1.5 }}>
                   Partirai con <strong className="numeri">{soldi(flussoMensile(io) + trovaProfessione(io.professioneId).risparmi)}</strong> in

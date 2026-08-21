@@ -81,10 +81,18 @@ function sorgenti(dir = join(RADICE, "src"), out = []) {
 }
 const JSX = sorgenti();
 
+/* Il codice senza i commenti. Serve perché questi controlli cercano
+   frammenti di markup con espressioni regolari, e un commento che *cita*
+   `<select>` per spiegare perché non lo si usa risultava un `<select>`
+   vero. Il resto della suite già lo fa; qui mancava. */
+const codice = (f) => readFileSync(f, "utf8")
+  .replace(/\/\*[\s\S]*?\*\//g, " ")
+  .replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
+
 prova("Ogni campo ha un'etichetta associata", () => {
   const guai = [];
   for (const f of JSX) {
-    const src = readFileSync(f, "utf8");
+    const src = codice(f);
     for (const m of src.matchAll(/<(input|select|textarea)\b([^>]*)>/g)) {
       const attr = m[2];
       const ok = /\bid=/.test(attr) || /aria-label/.test(attr) || /aria-labelledby/.test(attr);
@@ -97,7 +105,7 @@ prova("Ogni campo ha un'etichetta associata", () => {
 prova("I pulsanti senza testo dichiarano un nome", () => {
   const guai = [];
   for (const f of JSX) {
-    const src = readFileSync(f, "utf8");
+    const src = codice(f);
     /* Un pulsante il cui contenuto è solo un'icona o un'emoji ha bisogno
        di aria-label, altrimenti un lettore di schermo legge "pulsante". */
     for (const m of src.matchAll(/<button\b([^>]*)>\s*([^<]{0,4})\s*</g)) {
@@ -187,6 +195,53 @@ prova("Nessun componente usa t() senza useLingua()", () => {
     }
   }
   if (guai.length) throw new Error(guai.join("\n       "));
+});
+
+console.log("\n── La tendina fatta in casa ──");
+
+prova("Nessuno rimette un <select> di sistema", () => {
+  /* Non è una questione di gusto: dentro un <option> ci va solo testo, e le
+     nostre scelte hanno emoji, nome e importo in colonne separate. Chi
+     tornasse al nativo li rischiaccerebbe in una riga. */
+  const guai = [];
+  for (const f of JSX) {
+    if (/<select\b/.test(codice(f))) guai.push(relative(RADICE, f));
+  }
+  if (guai.length) throw new Error("<select> nativo in: " + guai.join(", "));
+});
+
+prova("Ogni tendina porta il contratto completo", () => {
+  /* Una tendina a mano che dimentica uno di questi attributi si annuncia
+     come un pulsante qualunque: chi usa un lettore di schermo non sa che
+     c'è un elenco, né se è aperto. */
+  const dovuti = ["aria-haspopup", "aria-expanded", "aria-controls"];
+  for (const f of JSX) {
+    const src = codice(f);
+    for (const m of src.matchAll(/role="combobox"([\s\S]{0,400}?)>/g)) {
+      for (const a of dovuti) {
+        vero(m[1].includes(a), `${relative(RADICE, f)}: combobox senza ${a}`);
+      }
+    }
+  }
+});
+
+prova("L'opzione attiva non si distingue col solo colore", () => {
+  /* Il fondo dorato da solo sparisce per chi non distingue i colori: serve
+     qualcosa che si veda comunque, qui la barra a sinistra. */
+  const regola = CSS.match(/\.scelta-voce\.attiva\s*\{([^}]*)\}/)?.[1] || "";
+  vero(regola.length > 0, "manca lo stile dell'opzione attiva");
+  vero(/box-shadow|outline|border|text-decoration|font-weight/.test(regola),
+    "l'opzione attiva si distingue solo per colore");
+});
+
+prova("Il foglio su schermo stretto lascia spazio alla tacca", () => {
+  vero(/\.scelta-elenco[\s\S]{0,400}safe-area-inset-bottom/.test(CSS),
+    "sull'iPhone l'ultima voce finirebbe sotto la barra di sistema");
+});
+
+prova("Chi ha chiesto meno movimento non vede il foglio salire", () => {
+  const blocco = CSS.match(/prefers-reduced-motion[^{]*\{([\s\S]*?)\n\}/g)?.join(" ") || "";
+  vero(/scelta/.test(blocco), "la tendina ignora la preferenza di movimento ridotto");
 });
 
 console.log(`\n${passati} test superati, ${falliti} falliti\n`);

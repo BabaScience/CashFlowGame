@@ -240,6 +240,25 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       aggiungere una voce al mazzo senza aggiungere una casella la rende
       irraggiungibile. Documentato a caro prezzo.
 
+- [x] **Le tendine erano quelle di sistema** — fatto. `components/Scelta.jsx`
+      sostituisce i sei `<select>` nativi. Il motivo non era l'aspetto ma il
+      contenuto: dentro un `<option>` ci va solo testo, e le nostre scelte
+      hanno emoji, nome e un importo che serve a confrontare. Ora l'importo
+      sta in colonna e due professioni si confrontano guardandole.
+      Rifatti a mano tastiera e accessibilità (modello WAI-ARIA
+      "select-only combobox"): frecce, Home/Fine, Invio, Spazio, Esc, Tab e
+      ricerca scrivendo. Su schermo stretto è un foglio dal basso.
+      Trovati per strada: la stringa "/mese" era scritta a mano e restava
+      italiana in inglese; l'etichetta "Professione" nella sala d'attesa era
+      anch'essa fissa in italiano mentre il nome per il lettore di schermo
+      era tradotto; e l'elenco non si ribaltava, quindi in fondo alla pagina
+      usciva dalla finestra.
+- [ ] **Due stringhe italiane nella sala d'attesa** — `Attesa.jsx:140`
+      ("Partirai con … in contanti") e `Attesa.jsx:161` ("Esci dalla
+      stanza") non passano da `t()`: con l'interfaccia in inglese restano
+      in italiano. Viste aprendo la sala d'attesa in inglese. Sono due
+      chiavi, non è un lavoro di traduzione.
+
 ## 7 · Quando funzionerà
 
 - [-] **7.1 Costo del polling** — sei giocatori a 1,4 s fanno ~15.400 chiamate

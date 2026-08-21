@@ -653,3 +653,129 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .opzione[data-stato="giusta"]   { border-color: var(--verde); background: rgba(78,139,61,.16); font-weight: 700; }
 .opzione[data-stato="sbagliata"]{ border-color: var(--rosso); background: rgba(178,58,46,.13); }
 .opzione:disabled { cursor: default; }
+
+/* ══ la nostra tendina ══
+   Sostituisce il `<select>` di sistema, che su ogni piattaforma si disegna
+   a modo suo e dentro un'opzione accetta solo testo. Qui il dettaglio —
+   stipendio, costo, sommario — sta nella sua colonna e si può confrontare
+   a colpo d'occhio. Il perché sta per esteso in `components/Scelta.jsx`. ══ */
+.scelta { position: relative; }
+
+.scelta-innesco {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  text-align: left;
+  font-family: var(--f-testo);
+  font-size: 15px;
+  cursor: pointer;
+  /* `.campo` è pensato per un input: un pulsante porta con sé un font e un
+     allineamento suoi, e senza questi si vede la differenza. */
+  -webkit-appearance: none; appearance: none;
+}
+.scelta-innesco:disabled { opacity: .55; cursor: not-allowed; }
+.scelta-innesco:hover:not(:disabled) { border-color: var(--oro); }
+.scelta-valore {
+  display: flex; align-items: center; gap: 8px;
+  min-width: 0; flex: 1;
+}
+.scelta-nome {
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.scelta-valore .scelta-nome { flex: 0 1 auto; }
+.scelta-emoji { flex: none; font-size: 17px; line-height: 1; }
+.scelta-dettaglio {
+  flex: none;
+  font-size: 13px;
+  color: var(--tenue-carta);
+  font-variant-numeric: tabular-nums;
+}
+.scelta-freccia {
+  flex: none; color: var(--tenue-carta); font-size: 13px;
+  transition: transform .16s ease;
+}
+.scelta-aperta .scelta-freccia { transform: rotate(180deg); }
+
+.scelta-elenco {
+  position: absolute; z-index: 40; left: 0; right: 0; top: calc(100% + 6px);
+  margin: 0; padding: 6px; list-style: none;
+  max-height: 320px; overflow-y: auto;
+  background: #fff;
+  border: 1.5px solid var(--linea);
+  border-radius: 14px;
+  box-shadow: var(--ombra-carta);
+  animation: scelta-entra .13s ease-out;
+  overscroll-behavior: contain;
+}
+@keyframes scelta-entra {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.scelta-voce {
+  display: flex; align-items: center; gap: 9px;
+  padding: 10px 10px;
+  border-radius: 9px;
+  cursor: pointer;
+  font-size: 14.5px;
+  line-height: 1.3;
+}
+.scelta-voce .scelta-testo { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.scelta-voce .scelta-nome { font-weight: 600; }
+.scelta-nota {
+  font-size: 12px; color: var(--tenue-carta); font-weight: 400;
+  white-space: normal;
+}
+.scelta-segno { flex: none; width: 14px; color: var(--verde-testo); font-weight: 700; font-size: 13px; }
+/* Il colore da solo non basta a dire "qui sei": chi non distingue i colori
+   vedrebbe un elenco piatto. Perciò l'attiva porta anche una barra. */
+.scelta-voce.attiva { background: rgba(201,162,39,.16); box-shadow: inset 3px 0 0 var(--oro); }
+.scelta-voce.scelta-corrente .scelta-nome { color: var(--verde-testo); }
+
+.scelta-velo { display: none; }
+
+/* Sotto il pollice una tendina ancorata si apre dove la mano la copre, o
+   esce dallo schermo. Da qui in giù diventa un foglio che sale dal basso. */
+@media (max-width: 640px) {
+  .scelta-velo {
+    display: block; position: fixed; inset: 0; z-index: 60;
+    background: rgba(6,14,11,.5);
+    animation: scelta-velo-entra .16s ease-out;
+  }
+  @keyframes scelta-velo-entra { from { opacity: 0 } to { opacity: 1 } }
+
+  .scelta-elenco {
+    position: fixed; z-index: 61;
+    left: 0; right: 0; top: auto; bottom: 0;
+    max-height: 62vh;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom));
+    border-radius: 20px 20px 0 0;
+    border-bottom: none;
+    box-shadow: var(--ombra-alta);
+    animation: scelta-foglio .2s cubic-bezier(.22,.68,.36,1);
+    -webkit-overflow-scrolling: touch;
+  }
+  @keyframes scelta-foglio {
+    from { transform: translateY(100%); }
+    to   { transform: none; }
+  }
+  /* Il dito merita un bersaglio più alto del cursore. */
+  .scelta-voce { padding: 13px 12px; font-size: 15.5px; }
+}
+
+/* Chi ha chiesto meno movimento non riceve né tendina che scivola né
+   foglio che sale: compaiono e basta. */
+@media (prefers-reduced-motion: reduce) {
+  .scelta-elenco, .scelta-velo { animation: none; }
+  .scelta-freccia { transition: none; }
+}
+
+/* Quando sotto non ci sta, l'elenco si apre verso l'alto — come fa il
+   nativo. Senza questo, un campo in fondo alla pagina apre un elenco che
+   esce dalla finestra e costringe a scorrere per leggere le ultime voci. */
+.scelta-elenco.scelta-sopra {
+  top: auto;
+  bottom: calc(100% + 6px);
+}
+@media (max-width: 640px) {
+  /* Il foglio dal basso non si ribalta mai: è già ancorato dove serve. */
+  .scelta-elenco.scelta-sopra { top: auto; bottom: 0; }
+}

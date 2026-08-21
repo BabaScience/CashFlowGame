@@ -29,6 +29,7 @@ export default {
     dovegiochi: "Where you play",
     mercatoNota: "The market sets prices, salaries, rates and currency. It applies to the whole table and cannot be changed once the game starts.",
     professione: "Profession",
+    alMese: "{importo}/mo",
     stipendio: "Income",
     speseTotali: "Total expenses",
     giornoDiPaga: "Payday",
