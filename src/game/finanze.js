@@ -47,7 +47,7 @@ export function redditoPassivo(g) {
 }
 
 export function redditoTotale(g) {
-  return g.stipendio + redditoPassivo(g);
+  return g.stipendio + (g.secondoReddito || 0) + redditoPassivo(g);
 }
 
 /** Rata del prestito bancario: $100 al mese ogni $1.000 presi in prestito. */
@@ -126,13 +126,14 @@ export function riepilogo(g) {
   const imm = flussoImmobili(g);
   const att = flussoAttivita(g);
   const passivo = div + imm + att;
-  const totEntrate = g.stipendio + passivo;
+  const totEntrate = g.stipendio + (g.secondoReddito || 0) + passivo;
   const rataPrestito = ratePrestito(g);
   const figli = speseFigli(g);
   const totUscite = arrotonda(
     Object.values(g.spese).reduce((s, v) => s + v, 0) + figli + rataPrestito
   );
   return {
+    secondoReddito: g.secondoReddito || 0,
     dividendi: div,
     flussoImmobili: imm,
     flussoAttivita: att,

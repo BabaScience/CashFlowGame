@@ -100,6 +100,27 @@ Il Custode ha bisogno di molto meno reddito passivo per essere libero.
 | Meccanico | $2.000 | $1.300 | $700 |
 | Custode | $1.600 | $950 | $650 |
 
+#### Su Roma: stipendio vero e secondo reddito
+
+Il mercato di Roma usa importi **netti mensili reali**, rilevati sulle
+retribuzioni italiane del 2026. Sono due righe distinte, e la distinzione conta:
+
+- lo **stipendio** è quello vero della professione, per **una persona sola**:
+  un insegnante a Roma porta a casa circa 1.650 € al mese, non 2.550;
+- il **secondo reddito del nucleo** è quello di chi altro lavora in famiglia.
+  In Italia un nucleo ha in media circa un percettore e mezzo, e le spese della
+  scheda — affitto, utenze, spesa, auto — sono di tutta la famiglia.
+
+Confrontare le spese di una famiglia con lo stipendio di una persona sola
+darebbe un quadro falso, e all'inizio il gioco lo faceva: teneva le due cose
+fuse in un numero solo e lo chiamava "stipendio". Ora sono separate, così il
+numero che leggi è un numero che puoi verificare sulla tua busta paga.
+
+**Le schede sono al netto.** L'IRPEF e i contributi sono già stati tolti: è per
+questo che la voce *Imposte* parte da zero. Ricompare quando cominci a incassare
+affitti, perché quello è reddito nuovo — vedi §6, e la lezione «RAL, lordo,
+netto» nella sezione Impara.
+
 ---
 
 ## 4. La tua scheda finanziaria
@@ -174,8 +195,22 @@ Si pesca una carta che può essere:
 - un **evento economico** che colpisce tutti.
 
 **Tutti i giocatori che possiedono l'attivo indicato possono vendere**, non solo
-chi ha pescato la carta. Vendendo un immobile incassi il prezzo **meno il mutuo**
-residuo, e perdi il relativo flusso mensile.
+chi ha pescato la carta. Vendendo un immobile perdi il relativo flusso mensile
+e incassi il prezzo **meno il mutuo residuo, meno i costi di vendita**.
+
+Sul mercato di Roma i costi di vendita ci sono per davvero:
+
+| Voce | Quanto | Quando |
+|---|---|---|
+| Provvigione d'agenzia | 3% del prezzo | sempre |
+| Imposta sulla plusvalenza | 26% sul guadagno | solo entro **5 anni** dall'acquisto |
+
+Il guadagno tassato è *prezzo di vendita − prezzo d'acquisto*: il mutuo non
+c'entra, era solo il modo in cui avevi pagato. **Dopo cinque anni la plusvalenza
+non si tassa più**: è la regola che separa l'investimento dalla speculazione, e
+può cambiare il risultato di una compravendita di venti punti percentuali.
+
+Il registro della partita elenca ogni voce, così i conti si possono rifare.
 
 Il turno riprende quando tutti i giocatori interessati hanno risposto. Chi ha
 pescato la carta può chiudere la fase se qualcuno tarda troppo.
@@ -205,11 +240,24 @@ Annulla anche l'effetto della Beneficenza.
 Puoi farlo in qualsiasi momento del tuo turno, tranne quando sei in bancarotta.
 
 - Solo a **multipli di $1.000**.
-- Interesse del **10% al mese**: ogni $1.000 presi in prestito aggiungono
-  **$100** alle tue spese mensili, per sempre, finché non li restituisci.
+- L'interesse dipende dal mercato: sul mercato classico è il **10% al mese**;
+  su Roma è l'**1,2% al mese** (14,4% l'anno), che è quanto costa davvero un
+  fido di conto corrente.
+- **La banca guarda quanto puoi restituire.** Non presta a chiunque e non
+  presta quanto vuoi: la rata — sommata a quelle che paghi già — non può
+  superare **un terzo del tuo reddito netto mensile**, e c'è comunque un
+  tetto (su Roma, 75.000 €). È la regola vera degli istituti italiani.
+  Il canone di casa resta fuori dal conto: non è un finanziamento e non
+  compare nelle centrali rischi, anche se la banca lo considera.
 
-Un prestito ha senso solo se l'affare che ci compri rende **più di $100 al mese
-ogni $1.000 presi**. Altrimenti stai peggiorando la tua posizione.
+Se chiedi più di quanto il tuo reddito regge, il gioco te lo dice e ti indica
+la cifra massima. Non è un ostacolo inventato: è quello che ti risponderebbero
+allo sportello.
+
+Un prestito ha senso solo se l'affare che ci compri rende **più di quanto il
+prestito costa**. E attenzione: dove serve un margine per uscire (vedi §9),
+ogni euro di rata alza il traguardo di due. Il debito accorcia la strada molto
+meno spesso di quanto sembri.
 
 ### Estinguere un debito
 In qualsiasi momento del tuo turno puoi estinguere un debito per **ridurre le
@@ -244,9 +292,19 @@ Se anche così il flusso resta negativo, **sei fuori dalla partita**.
 
 ## 9. Uscire dalla Ruota
 
-Puoi uscire **all'inizio di un tuo turno**, non appena:
+Puoi uscire **all'inizio di un tuo turno**, non appena il tuo reddito passivo
+supera la soglia del mercato in cui giochi:
 
-> **Reddito passivo > Spese totali**
+| Mercato | Soglia |
+|---|---|
+| Classico | **reddito passivo > spese totali** (1×) |
+| Roma | **reddito passivo > 2 × spese totali** |
+
+Perché il doppio, e non il pareggio? Perché le rendite non sono ferme: un
+inquilino se ne va, una caldaia si rompe, un'attività ha un'annata storta. Chi
+lascia il lavoro nel mese esatto in cui i conti si toccano è un imprevisto
+lontano dal doverlo cercare di nuovo. Quel margine non è prudenza esagerata: è
+il costo di poter dire di no.
 
 Nel momento in cui esci:
 

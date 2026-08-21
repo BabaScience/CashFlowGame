@@ -94,6 +94,19 @@ prova("Nessuna chiave dichiarata due volte", () => {
     }
     const doppie = [...perSezione].filter(([, n]) => n > 1).map(([k]) => k);
     vero(doppie.length === 0, `"${f}" dichiara due volte: ${doppie.join(", ")}`);
+
+    /* E nemmeno due volte la stessa SEZIONE. È successo: aggiungendo un
+       blocco `scheda:` senza sapere che ce n'era già uno, il secondo ha
+       vinto e le chiavi del primo sono sparite — fra cui una che
+       l'interfaccia usava davvero, che da allora mostrava il nome della
+       chiave al posto della frase. */
+    const sezioni = new Map();
+    for (const riga of testo.split("\n")) {
+      const apre = riga.match(/^  (\w+): \{/);
+      if (apre) sezioni.set(apre[1], (sezioni.get(apre[1]) || 0) + 1);
+    }
+    const sezDoppie = [...sezioni].filter(([, n]) => n > 1).map(([k]) => k);
+    vero(sezDoppie.length === 0, `"${f}" dichiara due volte la sezione: ${sezDoppie.join(", ")}`);
   }
 });
 

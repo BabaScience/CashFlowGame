@@ -523,5 +523,53 @@ test("Il mercato classico resta all'1×", () => {
   eq(riepilogo(s.giocatori[0]).margineUscita, 1);
 });
 
+console.log("\n── Il manuale dice quello che il gioco fa ──");
+
+/* Il manuale è la stessa fonte del testo mostrato in-app (MANUALE.md, letto
+   da components/Manuale.jsx). Se una regola cambia nel motore e non nel
+   manuale, il gioco spiega una cosa e ne fa un'altra — che per un gioco
+   che vuole insegnare è il difetto peggiore possibile. */
+import { readFileSync as leggi_ } from "node:fs";
+const MANUALE = leggi_(new URL("../MANUALE.md", import.meta.url), "utf8");
+
+test("Il manuale spiega il limite del prestito", () => {
+  vero(/un terzo del tuo reddito/i.test(MANUALE), "non cita la regola del terzo");
+  const cc = getPacchetto("roma").creditoConsumo;
+  vero(MANUALE.includes(String(cc.importoMassimo / 1000)), `non cita il tetto (${cc.importoMassimo})`);
+});
+
+test("Il manuale spiega i costi di vendita", () => {
+  const cv = getPacchetto("roma").costiVendita;
+  vero(/plusvalenza/i.test(MANUALE), "non cita la plusvalenza");
+  vero(MANUALE.includes(`${Math.round(cv.plusvalenza * 100)}%`), "non cita l'aliquota");
+  vero(MANUALE.includes(`${cv.mesiEsenzione / 12}`), "non cita i cinque anni");
+  vero(MANUALE.includes(`${Math.round(cv.agenzia * 100)}%`), "non cita la provvigione");
+});
+
+test("Il manuale spiega la soglia d'uscita di ogni mercato", () => {
+  for (const id of ["classico", "roma"]) {
+    const m = getPacchetto(id).margineUscita ?? 1;
+    if (m > 1) vero(MANUALE.includes(`${m} × spese totali`), `non spiega la soglia ${m}× di ${id}`);
+  }
+  vero(/reddito passivo > spese totali/i.test(MANUALE), "non spiega la soglia semplice");
+});
+
+test("Il manuale dice che le schede di Roma sono al netto", () => {
+  vero(/al netto/i.test(MANUALE), "non dice che gli importi sono netti");
+  vero(/secondo reddito/i.test(MANUALE), "non spiega il secondo reddito del nucleo");
+});
+
+test("Ogni professione di Roma dichiara stipendio e secondo reddito", () => {
+  for (const p of getPacchetto("roma").professioni) {
+    vero(p.stipendio > 0, `${p.nome}: stipendio mancante`);
+    vero(p.secondoReddito >= 0 && Number.isFinite(p.secondoReddito), `${p.nome}: secondo reddito non valido`);
+    /* Lo stipendio dichiarato è di una persona sola: se fosse più alto del
+       secondo reddito di tre volte non sarebbe più un nucleo con un
+       percettore e mezzo, sarebbe di nuovo un numero inventato. */
+    vero(p.secondoReddito === 0 || p.stipendio / p.secondoReddito < 3.5,
+      `${p.nome}: il secondo reddito è troppo piccolo per essere un secondo percettore`);
+  }
+});
+
 console.log(`\n${passati} test superati, ${falliti} falliti\n`);
 process.exit(falliti ? 1 : 0);

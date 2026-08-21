@@ -127,6 +127,9 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
         <>
           <div className="sezione-tit">{t("scheda.entrate")}</div>
           <KV k={t("scheda.stipendio")} v={soldi(g.stipendio)} />
+          {r.secondoReddito > 0 && (
+            <KV k={t("scheda.secondoReddito")} v={soldi(r.secondoReddito)} />
+          )}
           <KV k={t("scheda.dividendi")} v={soldi(r.dividendi)} colore={r.dividendi ? "pos" : ""} />
           <KV k={t("scheda.immobili")} v={soldi(r.flussoImmobili)} colore={r.flussoImmobili ? "pos" : ""} />
           <KV k={t("scheda.attivita")} v={soldi(r.flussoAttivita)} colore={r.flussoAttivita ? "pos" : ""} />

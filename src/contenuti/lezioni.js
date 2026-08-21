@@ -264,6 +264,105 @@ export const LEZIONI = [
       "invece di mostrarti solo il saldo.",
     ],
   },
+  {
+    id: "banca-presta",
+    titolo: "Perché la banca ti presta (e quanto)",
+    minuti: 3,
+    sommario: "La regola del terzo, e perché nessuno ti dà mezzo milione a parola.",
+    corpo: () => [
+      "Una banca non presta guardando quanto ti serve: guarda quanto puoi restituire. " +
+      "La misura che usa quasi sempre è il rapporto fra la rata e il reddito netto " +
+      "mensile, e la soglia comune in Italia sta fra il 30 e il 35 per cento. Un terzo, " +
+      "in pratica.",
+      "Il conto si fa su TUTTE le rate insieme, non solo su quella nuova: se paghi già " +
+      "un finanziamento per l'auto e uno per gli studi, quello spazio è occupato. È il " +
+      "motivo per cui due persone con lo stesso stipendio ottengono cifre diverse.",
+      "Il canone d'affitto di solito non entra in quel conto — non è un debito e non " +
+      "compare nelle centrali rischi come CRIF — ma la banca lo vede lo stesso, perché " +
+      "riduce quello che ti resta.",
+      "Poi c'è il tipo di credito. Un mutuo è garantito dalla casa, quindi costa poco " +
+      "(intorno al 4% l'anno) e arriva fino all'80% del valore dell'immobile. Un " +
+      "prestito personale non è garantito da niente, costa il doppio o il triplo, e le " +
+      "finanziarie si fermano fra i 30.000 e i 60.000 euro. Un fido di conto corrente " +
+      "costa ancora di più.",
+      "Nel gioco funziona così: prova a chiedere più di quanto il tuo reddito regge e la " +
+      "banca dice di no, spiegando perché. Non è un ostacolo messo lì per rallentare: è " +
+      "la cosa che ti succederà davvero allo sportello.",
+    ],
+  },
+  {
+    id: "vendere-costa",
+    titolo: "Quanto costa vendere una casa",
+    minuti: 3,
+    sommario: "L'agenzia, la plusvalenza, e la regola dei cinque anni.",
+    corpo: () => [
+      "Comprare costa più del prezzo — imposta di registro, notaio, agenzia — e questa è " +
+      "una cosa che quasi tutti sanno. Che anche VENDERE costi, lo scopre di solito chi " +
+      "vende la prima volta.",
+      "Due voci. La provvigione dell'agenzia, di norma intorno al 3% più IVA, la paga " +
+      "anche il venditore. E se vendi entro cinque anni dall'acquisto, sul guadagno paghi " +
+      "un'imposta sostitutiva del 26 per cento, che il notaio trattiene direttamente al " +
+      "rogito e versa allo Stato.",
+      "Il guadagno tassato è la differenza fra quanto incassi e quanto avevi pagato. Il " +
+      "mutuo non c'entra: quello era solo il modo in cui avevi pagato l'acquisto.",
+      "Dopo cinque anni quella tassa non si applica più. È una regola scritta apposta per " +
+      "distinguere chi investe da chi specula, e cambia i conti in modo brutale: la " +
+      "stessa identica compravendita può rendere il 29% se la chiudi subito e più del " +
+      "50% se aspetti. Fa eccezione la prima casa in cui hai davvero abitato, che è " +
+      "esente comunque.",
+      "Nel gioco è esattamente così, e si vede nel registro: ogni vendita elenca il " +
+      "mutuo estinto, l'agenzia e l'imposta, prima di dirti quanto ti resta in mano.",
+    ],
+  },
+  {
+    id: "margine",
+    titolo: "Perché non basta pareggiare",
+    minuti: 2,
+    sommario: "Uscire dalla Ruota al pareggio significa rientrarci al primo imprevisto.",
+    corpo: () => [
+      "Il conto ovvio è: quando le rendite coprono le spese, il lavoro diventa " +
+      "facoltativo. È vero in aritmetica e falso nella vita.",
+      "Le rendite non sono ferme. Un inquilino se ne va e l'appartamento resta vuoto due " +
+      "mesi; una caldaia si rompe; un'attività ha un'annata storta; il condominio " +
+      "delibera dei lavori. Le spese, intanto, si muovono anche loro — e quasi sempre in " +
+      "su.",
+      "Chi lascia il lavoro nel mese esatto in cui i conti si toccano è un imprevisto " +
+      "lontano dal tornare a cercarlo. Per questo il mercato di Roma chiede il doppio " +
+      "delle spese, non il pareggio: quel margine non è prudenza esagerata, è il costo " +
+      "di poter dire di no.",
+      "È anche il motivo per cui prendere soldi a prestito per uscire prima raramente " +
+      "funziona. Ogni euro di rata alza le tue spese, e quindi alza di due euro il " +
+      "traguardo. Il debito accorcia la strada solo se ciò che compri rende molto più di " +
+      "quanto il debito costa — e nella realtà quello scarto è sottile, non enorme.",
+    ],
+  },
+  {
+    id: "ral-netto",
+    titolo: "RAL, lordo, netto: tre numeri diversi",
+    minuti: 3,
+    sommario: "Perché lo stipendio di cui si parla non è quello che arriva.",
+    corpo: () => [
+      "Quando qualcuno dice «guadagno 35.000 euro» quasi sempre intende la RAL, cioè la " +
+      "retribuzione annua lorda: il costo del tuo contratto prima di qualunque " +
+      "trattenuta. Non è quello che ti arriva.",
+      "Dalla RAL si tolgono i contributi previdenziali (circa il 9-10% a carico del " +
+      "lavoratore) e poi l'IRPEF, che è a scaglioni: più guadagni, più alta è l'aliquota " +
+      "sull'ultima fetta di reddito — non su tutto. Si aggiungono addizionali regionali e " +
+      "comunali, che a Roma non sono trascurabili.",
+      "Il risultato è che una RAL di 35.000 euro diventa circa 2.200-2.300 euro netti al " +
+      "mese su tredici mensilità. Il rapporto non è costante: più si sale, più la " +
+      "distanza fra lordo e netto si allarga.",
+      "Nel gioco le schede sono già al NETTO, perché è quello che si spende. Per la stessa " +
+      "ragione la voce «Imposte» resta a zero sullo stipendio: le hai già pagate. Compare " +
+      "invece quando cominci a incassare affitti, perché quelli sono un reddito nuovo, e " +
+      "su un reddito nuovo le imposte si pagano di nuovo.",
+      "Accanto allo stipendio la scheda mostra il secondo reddito del nucleo. In Italia " +
+      "una famiglia ha in media circa un percettore e mezzo, e le spese di casa sono di " +
+      "tutti: confrontare le spese di una famiglia con lo stipendio di una persona sola " +
+      "darebbe un quadro falso.",
+    ],
+  },
+
 ];
 
 export const perId = (id) => LEZIONI.find((l) => l.id === id);
