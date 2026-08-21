@@ -253,7 +253,7 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       anch'essa fissa in italiano mentre il nome per il lettore di schermo
       era tradotto; e l'elenco non si ribaltava, quindi in fondo alla pagina
       usciva dalla finestra.
-- [ ] **Due stringhe italiane nella sala d'attesa** — `Attesa.jsx:140`
+- [x] **Due stringhe italiane nella sala d'attesa** — fatto. — `Attesa.jsx:140`
       ("Partirai con … in contanti") e `Attesa.jsx:161` ("Esci dalla
       stanza") non passano da `t()`: con l'interfaccia in inglese restano
       in italiano. Viste aprendo la sala d'attesa in inglese. Sono due
@@ -270,13 +270,13 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       lì — perché lì non c'è codice, c'è un PNG. Ora il generatore legge
       `src/marchio.js` e `prova-marchio.mjs` sorveglia che nessun testo
       spedito porti i nomi vecchi.
-- [ ] **La scheda finanziaria è tutta in italiano** — `components/Scheda.jsx`
+- [x] **La scheda finanziaria è tutta in italiano** — fatto. — `components/Scheda.jsx`
       scrive a mano "Conto economico", "Entrate", "Uscite", "Attivi",
       "Passività", "Contanti", "Giorno di paga", "Estingui un debito" e una
       ventina d'altre. Con l'interfaccia in inglese restano in italiano, ed è
       il pannello che si guarda più di ogni altro. Circa 30 chiavi: è lavoro
       meccanico, non traduzione difficile.
-- [ ] **Lo stato patrimoniale elenca voci che a Roma non esistono** —
+- [x] **Lo stato patrimoniale elenca voci che a Roma non esistono** — fatto. —
       `Scheda.jsx` scrive a mano le righe delle passività, fra cui "Debiti
       negozi" (`rate`), che è una categoria del mercato classico. A Roma quel
       campo non c'è e la riga mostra zero. Le etichette per mercato esistono

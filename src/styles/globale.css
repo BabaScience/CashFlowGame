@@ -948,3 +948,8 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .logo-grande { flex-direction: column; gap: 6px; }
 .logo-grande .logo-rombo { font-size: 34px; color: var(--carta); }
 .logo-grande .logo-nome { font-size: 32px; }
+
+/* Una riga che non va mai a capo: se lo facesse, cambierebbe l'altezza del
+   riquadro del turno e il tabellone si rimpicciolirebbe — che è proprio il
+   difetto per cui il riquadro «sul tavolo» è stato tolto. */
+.riga-sola { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

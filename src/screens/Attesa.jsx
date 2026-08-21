@@ -137,8 +137,9 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
               />
               {io && (
                 <p className="f12 tenue mt12" style={{ margin: "12px 0 0", lineHeight: 1.5 }}>
-                  Partirai con <strong className="numeri">{soldi(flussoMensile(io) + trovaProfessione(io.professioneId).risparmi)}</strong> in
-                  contanti (giorno di paga + risparmi).
+                  {t("attesa.partiraiCon", {
+                    importo: soldi(flussoMensile(io) + trovaProfessione(io.professioneId).risparmi),
+                  })}
                 </p>
               )}
             </div>
@@ -158,7 +159,7 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
             </div>
           )}
           <Bottone variante="btn-fantasma mt8" style={{ color: "rgba(244,241,230,.6)" }} onClick={suEsci}>
-            Esci dalla stanza
+            {t("attesa.esciDallaStanza")}
           </Bottone>
         </div>
       </motion.div>

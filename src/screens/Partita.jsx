@@ -47,50 +47,48 @@ const SCHEDE = [
   { id: "regole", icona: "?", chiave: "schede.regole" },
 ];
 
-/** Riquadro che racconta agli altri cosa sta succedendo sul tavolo. */
-function SulTavolo({ stato }) {
-  const { t } = useLingua();
+/**
+ * Cosa sta facendo, in una riga.
+ *
+ * Prima era un riquadro sotto il tabellone. Il guaio non era il testo ma
+ * dove stava: la colonna del tavolo dà al tabellone lo spazio che avanza,
+ * quindi ogni volta che qualcuno pescava una carta compariva un riquadro e
+ * il tabellone si rimpiccioliva — si muoveva sotto gli occhi di chi lo
+ * stava guardando, e per la sola durata di una decisione altrui.
+ *
+ * L'informazione però serviva: il registro annota le cose quando sono
+ * finite, non mentre stanno succedendo, e senza questa riga chi guarda non
+ * sa perché il turno non avanza. Quindi resta, ma dentro il riquadro del
+ * turno che c'è già: una riga sola, che non cambia l'altezza di niente.
+ */
+function cheStaFacendo(stato, t) {
   const p = stato.pending;
   if (!p) return null;
   const chi = stato.giocatori.find((g) => g.id === p.giocatoreId);
-  const nome = chi?.nome || "Qualcuno";
+  const nome = chi?.nome || t("partita.qualcuno");
 
-  // Calcolato con uno switch e non con un oggetto: un oggetto valuterebbe
-  // subito tutti i rami, e quello del Mercato legge campi che esistono
-  // soltanto sulle carte Mercato.
-  let testo;
+  /* Con uno switch e non con un oggetto: un oggetto valuterebbe subito
+     tutti i rami, e quello del Mercato legge campi che esistono soltanto
+     sulle carte Mercato. */
   switch (p.tipo) {
-    case "sceltaTaglia": testo = `${nome} sta scegliendo fra Piccolo e Grande Affare.`; break;
-    case "carta": testo = `${nome} sta valutando "${p.carta?.nome}".`; break;
+    case "sceltaTaglia": return t("sulTavolo.taglia", { nome });
+    case "carta": return t("sulTavolo.carta", { nome, carta: p.carta?.nome || "" });
     case "mercato": {
       const mancanti = (p.idonei?.length || 0) - (p.risposto?.length || 0);
-      testo = `Carta Mercato: "${p.carta?.nome}". In attesa di ${mancanti} giocator${mancanti === 1 ? "e" : "i"}.`;
-      break;
+      return t(mancanti === 1 ? "sulTavolo.mercatoUno" : "sulTavolo.mercato",
+        { carta: p.carta?.nome || "", n: mancanti });
     }
-    case "extra": testo = `${nome} ha pescato una Spesa Extra: "${p.carta?.nome}".`; break;
+    case "extra": return t("sulTavolo.extra", { nome, carta: p.carta?.nome || "" });
     case "beneficenza":
-    case "beneficenzaVeloce": testo = `${nome} decide se donare in beneficenza.`; break;
-    case "figlio": testo = `${nome} è atterrato su "Un figlio".`; break;
-    case "licenziamento": testo = `${nome} è stato licenziato.`; break;
-    case "bancarotta": testo = `${nome} è in bancarotta e sta vendendo attivi.`; break;
-    case "affareVeloce": testo = `${nome} valuta l'affare "${p.affare?.nome}".`; break;
-    case "sogno": testo = `${nome} è atterrato su un sogno: "${p.sogno?.nome}".`; break;
-    case "penalitaVeloce": testo = `${nome}: ${p.nome}.`; break;
-    default: testo = `${nome} sta decidendo.`;
+    case "beneficenzaVeloce": return t("sulTavolo.beneficenza", { nome });
+    case "figlio": return t("sulTavolo.figlio", { nome });
+    case "licenziamento": return t("sulTavolo.licenziamento", { nome });
+    case "bancarotta": return t("sulTavolo.bancarotta", { nome });
+    case "affareVeloce": return t("sulTavolo.affare", { nome, carta: p.affare?.nome || "" });
+    case "sogno": return t("sulTavolo.sogno", { nome, carta: p.sogno?.nome || "" });
+    case "penalitaVeloce": return `${nome}: ${p.nome}`;
+    default: return t("sulTavolo.decide", { nome });
   }
-
-  return (
-    <motion.div className="carta-scura mt12"
-      initial={false} animate={{ opacity: 1, y: 0 }}>
-      <div className="sezione-tit" style={{ color: "rgba(244,241,230,.5)" }}>{t("partita.sulTavolo")}</div>
-      <p className="f14" style={{ margin: 0, lineHeight: 1.5 }}>{testo}</p>
-      {p.carta?.testo && (
-        <p className="f13 tenue mt8" style={{ margin: "8px 0 0", fontStyle: "italic", lineHeight: 1.5 }}>
-          «{p.carta.testo}»
-        </p>
-      )}
-    </motion.div>
-  );
 }
 
 /** Il pannello delle azioni: cambia in base a cosa puoi fare adesso. */
@@ -110,6 +108,7 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
     );
   }
 
+  const sta = cheStaFacendo(stato, t);
   const libero = io.tracciato === "topi" && fuoriDallaCorsa(io);
   const fai = async (az) => {
     const r = await invia(az);
@@ -123,11 +122,14 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa }) {
           <motion.span
             style={{ width: 9, height: 9, borderRadius: "50%", background: diTurno?.colore }}
             animate={{ opacity: [1, 0.3, 1] }} transition={{ duration: 1.4, repeat: Infinity }} />
-          <span className="f14">Tocca a <strong>{diTurno?.nome}</strong></span>
+          <span className="f14">{t("partita.toccaA", { nome: diTurno?.nome || "" })}</span>
         </div>
+        {/* Una riga sola, troncata: non deve mai andare a capo, o
+            tornerebbe a spostare il tabellone come faceva il riquadro. */}
+        {sta && <p className="f12 tenue riga-sola" style={{ margin: "6px 0 0" }}>{sta}</p>}
         {io.turniDaSaltare > 0 && (
-          <p className="f13 tenue mt8" style={{ margin: "8px 0 0" }}>
-            Salterai i prossimi {io.turniDaSaltare} turni.
+          <p className="f13 tenue" style={{ margin: "6px 0 0" }}>
+            {t("partita.salterai", { n: io.turniDaSaltare })}
           </p>
         )}
       </div>
@@ -370,7 +372,6 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci 
               </button>
             )}
             <Azioni stato={stato} mioId={mioId} invia={invia} inAzione={inAzione} avvisa={avvisa} />
-            <SulTavolo stato={stato} />
           </div>
         </div>
 

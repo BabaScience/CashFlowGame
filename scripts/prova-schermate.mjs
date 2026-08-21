@@ -188,10 +188,7 @@ prova("Partita sul mercato classico", () => {
   vero(html.includes("$"), "il mercato classico deve restare in dollari");
 });
 
-prova("Partita con una decisione in sospeso", () => {
-  /* Il caso che ci è sfuggito: `SulTavolo` e il pannello di decisione
-     compaiono solo quando c'è un pending, quindi un difetto lì non si vede
-     all'apertura ma a metà partita. */
+prova("Partita con una decisione in sospeso: chi decide vede la carta", () => {
   const s = tavolo();
   const pacchetto = s.mercatoId === "roma" ? "roma" : "classico";
   const carta = (require_pacchetto(pacchetto)).mazzi.piccoli.find((c) => c.tipo === "immobile");
@@ -199,7 +196,30 @@ prova("Partita con una decisione in sospeso", () => {
   const html = conMercato(s, React.createElement(Partita, {
     stato: s, mioId: "a", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
   }));
-  vero(html.includes("Sul tavolo") || html.includes("On the table"), "manca il riquadro della decisione");
+  vero(html.includes(carta.nome), "chi deve decidere non vede la carta");
+});
+
+prova("Chi guarda vede una riga, non un riquadro che sposta il tabellone", () => {
+  /* Il riquadro «sul tavolo» stava nella colonna del tavolo, che dà al
+     tabellone lo spazio che avanza: ogni volta che qualcuno pescava una
+     carta il tabellone si rimpiccioliva sotto gli occhi di chi lo stava
+     guardando. L'informazione serve — il registro annota le cose quando
+     sono finite, non mentre succedono — ma sta in una riga del riquadro
+     del turno, che c'è già. */
+  const s = tavolo();
+  const pacchetto = s.mercatoId === "roma" ? "roma" : "classico";
+  const carta = (require_pacchetto(pacchetto)).mazzi.piccoli.find((c) => c.tipo === "immobile");
+  /* L'ordine di gioco lo decide un tiro di dado, quindi va fissato: senza,
+     metà delle volte il turno è di "b" e la riga giustamente non compare. */
+  s.turno = s.giocatori.findIndex((g) => g.id === "a");
+  s.pending = { tipo: "carta", giocatoreId: "a", carta };
+  const html = conMercato(s, React.createElement(Partita, {
+    stato: s, mioId: "b", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
+  }));
+  vero(html.includes("Ada"), "non si sa chi sta decidendo");
+  vero(html.includes(carta.nome), "non si sa cosa sta decidendo");
+  vero(html.includes("riga-sola"), "la riga deve essere troncata, non andare a capo");
+  vero(!/Sul tavolo|On the table/.test(html), "il riquadro è tornato");
 });
 
 prova("Partita con una carta Mercato aperta", () => {
@@ -256,6 +276,80 @@ prova("Sfida già giocata oggi", () => {
   const html = disegna(React.createElement(Sfida, { suEsci: nulla }));
   vero(html.includes("42"), "manca il punteggio di oggi");
   memoria.delete("quotazero:sfida");
+});
+
+console.log("\n── Con l'interfaccia in inglese non resta italiano ──");
+
+/* Il difetto che questa sezione insegue non è "una traduzione manca": è
+   "una stringa non passa da t()". Non si vede leggendo il codice, perché
+   una frase scritta a mano è indistinguibile da una tradotta finché non si
+   cambia lingua. Si vede disegnando le schermate in inglese e cercandoci
+   dentro parole che in inglese non esistono. */
+/* Solo parole dell'INTERFACCIA. I contenuti del mercato — "Mutuo o
+   affitto", "Prestito studi", i nomi delle professioni e dei sogni —
+   restano in italiano di proposito: sono circa 150 stringhe per mercato e
+   vanno tradotte da qualcuno che conosca il posto, non a macchina (vedi
+   TODO). Pretenderle qui renderebbe questo controllo impossibile da
+   passare, e un controllo impossibile da passare viene disattivato. */
+const SPIE = [
+  "Contanti", "Entrate", "Uscite", "Passività", "Attivi", "Stipendio",
+  "Giorno di paga", "Tocca a", "Salterai", "Estingui", "Rimborsa",
+  "Patrimonio netto", "Spese totali", "Reddito", "Professione",
+  "Partirai", "Esci dalla stanza", "Il tuo sogno", "Conto economico",
+  "Stato patrimoniale", "Valore degli attivi", "Spese figli",
+];
+
+/** Le parole italiane rimaste dentro un markup disegnato in inglese. */
+function spieIn(html) {
+  const nudo = html.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&quot;/g, '"');
+  return SPIE.filter((w) => nudo.includes(w));
+}
+
+function inInglese(fn) {
+  memoria.set("quotazero:lingua", "en");
+  try { return fn(); } finally { memoria.set("quotazero:lingua", "it"); }
+}
+
+prova("La scheda finanziaria", () => {
+  const s = tavolo();
+  const io = s.giocatori[0];
+  const html = inInglese(() => conMercato(s, React.createElement(Scheda, {
+    giocatore: io, invia: nulla, inAzione: false, mio: true,
+  })));
+  const trovate = spieIn(html);
+  vero(trovate.length === 0, "rimaste in italiano: " + trovate.join(", "));
+});
+
+prova("La scheda finanziaria con un debito in banca", () => {
+  /* Il riquadro del debito compare solo quando c'è un debito: senza uno
+     stato apposta non verrebbe mai disegnato, e quindi mai verificato. */
+  const s = tavolo();
+  const io = s.giocatori[0];
+  io.passivita.prestitoBanca = 9000;
+  io.contanti = 20000;
+  const html = inInglese(() => conMercato(s, React.createElement(Scheda, {
+    giocatore: io, invia: nulla, inAzione: false, mio: true,
+  })));
+  const trovate = spieIn(html);
+  vero(trovate.length === 0, "rimaste in italiano: " + trovate.join(", "));
+});
+
+prova("La sala d'attesa", () => {
+  const s = tavolo({ avviata: false });
+  const html = inInglese(() => conMercato(s, React.createElement(Attesa, {
+    stato: s, mioId: "a", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
+  })));
+  const trovate = spieIn(html);
+  vero(trovate.length === 0, "rimaste in italiano: " + trovate.join(", "));
+});
+
+prova("La partita in corso", () => {
+  const s = tavolo();
+  const html = inInglese(() => conMercato(s, React.createElement(Partita, {
+    stato: s, mioId: "b", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
+  })));
+  const trovate = spieIn(html);
+  vero(trovate.length === 0, "rimaste in italiano: " + trovate.join(", "));
 });
 
 console.log("\n── Il marchio ──");
