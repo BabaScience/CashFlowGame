@@ -29,7 +29,17 @@ const {
 
 let passati = 0, falliti = 0;
 const prova = (nome, fn) => {
-  try { fn(); console.log("  ✅ " + nome); passati++; }
+  try {
+    const r = fn();
+    /* Una prova asincrona qui passerebbe SEMPRE: `fn()` restituisce una
+       promessa, nessuno l'aspetta, e le sue verifiche non vengono mai
+       eseguite. È già successo — sette prove in sei file non controllavano
+       più niente da settimane. Meglio rumore che silenzio. */
+    if (r && typeof r.then === "function") {
+      throw new Error("prova asincrona: questo banco è sincrono, le sue verifiche non verrebbero eseguite");
+    }
+    console.log("  ✅ " + nome); passati++;
+  }
   catch (e) { console.log("  ❌ " + nome + "\n       " + e.message); falliti++; }
 };
 const eq = (a, b, m = "") => {
@@ -124,7 +134,7 @@ prova("Senza le notifiche del browser non si rompe niente", () => {
   eq(avvisaTurno({ codice: "ABCD", titolo: "x", testo: "y" }), false);
 });
 
-prova("Il permesso non si chiede all'avvio", async () => {
+prova("Il permesso non si chiede all'avvio", () => {
   const src = readFileSync(new URL("../src/lib/partite.js", import.meta.url), "utf8");
   vero(/non si chiede all'avvio/i.test(src),
     "va dichiarato: chiedere il permesso prima che si capisca perché serve se lo prende un no");

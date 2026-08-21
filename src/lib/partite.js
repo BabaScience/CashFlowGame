@@ -108,3 +108,20 @@ export function avvisaTurno({ codice, titolo, testo }) {
     return true;
   } catch { return false; }
 }
+
+/**
+ * Da quanto non tocchi questa partita, a parole.
+ *
+ * Senza, l'elenco è una colonna di codici a quattro lettere tutti uguali e
+ * non si riconosce quello che si stava giocando cinque minuti fa. Le stanze
+ * durano 48 ore, quindi non serve andare oltre i giorni.
+ */
+export function daQuanto(vista, t) {
+  const min = Math.max(0, Math.round((Date.now() - (vista || 0)) / 60000));
+  if (min < 2) return t("ingresso.adesso");
+  if (min < 60) return t("ingresso.minutiFa", { n: min });
+  const ore = Math.round(min / 60);
+  if (ore < 24) return t(ore === 1 ? "ingresso.oraFa" : "ingresso.oreFa", { n: ore });
+  const giorni = Math.round(ore / 24);
+  return t(giorni === 1 ? "ingresso.giornoFa" : "ingresso.giorniFa", { n: giorni });
+}

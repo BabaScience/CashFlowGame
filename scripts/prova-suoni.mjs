@@ -10,11 +10,22 @@
  * Qui si verifica proprio quello: che il modulo sia innocuo senza browser,
  * che l'interruttore sia coerente, e che nessuna voce sia sparita.
  */
+import { readFileSync, readdirSync, statSync } from "node:fs";
 import { suona, audioAcceso, impostaAudio, sbloccaAudio, VOCI_DISPONIBILI } from "../src/lib/suoni.js";
 
 let passati = 0, falliti = 0;
 const prova = (nome, fn) => {
-  try { fn(); console.log("  ✅ " + nome); passati++; }
+  try {
+    const r = fn();
+    /* Una prova asincrona qui passerebbe SEMPRE: `fn()` restituisce una
+       promessa, nessuno l'aspetta, e le sue verifiche non vengono mai
+       eseguite. È già successo — sette prove in sei file non controllavano
+       più niente da settimane. Meglio rumore che silenzio. */
+    if (r && typeof r.then === "function") {
+      throw new Error("prova asincrona: questo banco è sincrono, le sue verifiche non verrebbero eseguite");
+    }
+    console.log("  ✅ " + nome); passati++;
+  }
   catch (e) { console.log("  ❌ " + nome + "\n       " + e.message); falliti++; }
 };
 const eq = (a, b, m = "") => {
@@ -81,8 +92,7 @@ prova("Non ce ne sono di sconosciute in giro", () => {
 
 console.log("\n── Nessun file audio da tracciare ──");
 
-prova("I suoni sono sintetizzati, non campionati", async () => {
-  const { readFileSync } = await import("node:fs");
+prova("I suoni sono sintetizzati, non campionati", () => {
   const src = readFileSync(new URL("../src/lib/suoni.js", import.meta.url), "utf8");
   vero(!/\.(mp3|wav|ogg|m4a|aac)/i.test(src),
     "è comparso un file audio: va aggiunto un registro delle licenze");

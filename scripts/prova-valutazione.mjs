@@ -11,6 +11,8 @@
  * Perciò quasi tutti i test qui misurano la stessa cosa da angoli diversi:
  * che giocare peggio faccia scendere e giocare meglio faccia salire.
  */
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
 import {
   riferimentoDelGiorno, nuovaValutazione, esitoControRiferimento,
   fasciaValutazione, VALUTAZIONE_INIZIALE, VALUTAZIONE_RIFERIMENTO,
@@ -18,7 +20,17 @@ import {
 
 let passati = 0, falliti = 0;
 const prova = (nome, fn) => {
-  try { fn(); console.log("  ✅ " + nome); passati++; }
+  try {
+    const r = fn();
+    /* Una prova asincrona qui passerebbe SEMPRE: `fn()` restituisce una
+       promessa, nessuno l'aspetta, e le sue verifiche non vengono mai
+       eseguite. È già successo — sette prove in sei file non controllavano
+       più niente da settimane. Meglio rumore che silenzio. */
+    if (r && typeof r.then === "function") {
+      throw new Error("prova asincrona: questo banco è sincrono, le sue verifiche non verrebbero eseguite");
+    }
+    console.log("  ✅ " + nome); passati++;
+  }
   catch (e) { console.log("  ❌ " + nome + "\n       " + e.message); falliti++; }
 };
 const vero = (v, m) => { if (!v) throw new Error(m || "atteso vero"); };
@@ -140,8 +152,7 @@ prova("Le fasce non tornano indietro salendo", () => {
 
 console.log("\n── Nessun identificativo ──");
 
-prova("La valutazione vive sul dispositivo, non sul server", async () => {
-  const { readFileSync } = await import("node:fs");
+prova("La valutazione vive sul dispositivo, non sul server", () => {
   const src = readFileSync(new URL("../src/game/valutazione.js", import.meta.url), "utf8");
   vero(src.includes("localStorage"), "deve stare in locale");
   vero(!/fetch\(|\/api\//.test(src), "non deve parlare con nessun server");

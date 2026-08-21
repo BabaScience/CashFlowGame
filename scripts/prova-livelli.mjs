@@ -13,13 +13,25 @@
  * al Livello 2 risultavano esenti da imposte. Un box si affitta e
  * l'affitto si tassa: l'esenzione era un difetto, non una scelta.
  */
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
 import { creaStanza, applicaAzione } from "../src/game/motore.js";
 import { getPacchetto, MERCATI } from "../src/game/mercati/indice.js";
 import { LIVELLI, LIVELLO_PREDEFINITO, vociFlusso, flussoAlLivello, confrontoCanone } from "../src/game/regole/livelli.js";
 
 let passati = 0, falliti = 0;
 const prova = (nome, fn) => {
-  try { fn(); console.log("  ✅ " + nome); passati++; }
+  try {
+    const r = fn();
+    /* Una prova asincrona qui passerebbe SEMPRE: `fn()` restituisce una
+       promessa, nessuno l'aspetta, e le sue verifiche non vengono mai
+       eseguite. È già successo — sette prove in sei file non controllavano
+       più niente da settimane. Meglio rumore che silenzio. */
+    if (r && typeof r.then === "function") {
+      throw new Error("prova asincrona: questo banco è sincrono, le sue verifiche non verrebbero eseguite");
+    }
+    console.log("  ✅ " + nome); passati++;
+  }
   catch (e) { console.log("  ❌ " + nome + "\n       " + e.message); falliti++; }
 };
 const vero = (v, m) => { if (!v) throw new Error(m || "atteso vero"); };
@@ -161,8 +173,7 @@ prova("Chi ha un fisco lo ha completo", () => {
 
 console.log("\n── Dal modulo alla stanza ──");
 
-prova("Il client passa il livello, e la firma non è andata fuori sincrono", async () => {
-  const { readFileSync } = await import("node:fs");
+prova("Il client passa il livello, e la firma non è andata fuori sincrono", () => {
   const api = readFileSync(new URL("../src/lib/api.js", import.meta.url), "utf8");
   const ingresso = readFileSync(new URL("../src/screens/Ingresso.jsx", import.meta.url), "utf8");
   const locale = readFileSync(new URL("../scripts/api-locale.js", import.meta.url), "utf8");
@@ -183,12 +194,10 @@ prova("Il client passa il livello, e la firma non è andata fuori sincrono", asy
   }
 });
 
-prova("L'interfaccia non scrive a mano il tasso del prestito", async () => {
+prova("L'interfaccia non scrive a mano il tasso del prestito", () => {
   /* Mostrava "18.000 € costano 1.800 € al mese" anche su Roma, dove il
      fido costa l'1,2%: il consiglio era sbagliato di otto volte. Il tasso
      viaggia col giocatore, come lo stipendio. */
-  const { readFileSync, readdirSync, statSync } = await import("node:fs");
-  const { join, relative } = await import("node:path");
   const RADICE = new URL("..", import.meta.url).pathname;
   const file = (dir, out = []) => {
     for (const n of readdirSync(dir)) {

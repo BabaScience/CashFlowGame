@@ -8,9 +8,10 @@ import { MercatoProvider, useMercato } from "../Mercato.jsx";
 import { MERCATI, MERCATO_PREDEFINITO, getPacchetto } from "../game/mercati/indice.js";
 import { LIVELLI, LIVELLO_PREDEFINITO } from "../game/regole/livelli.js";
 import { soldi } from "../game/finanze.js";
+import { MAX_GIOCATORI } from "../game/tabellone.js";
 import * as api from "../lib/api.js";
 import { traccia } from "../lib/traccia.js";
-import { partiteAperte, dimenticaPartita } from "../lib/partite.js";
+import { partiteAperte, dimenticaPartita, daQuanto } from "../lib/partite.js";
 import { useLingua } from "../Lingua.jsx";
 
 /**
@@ -22,22 +23,106 @@ import { useLingua } from "../Lingua.jsx";
  * piedi a chi l'ha appena letta. Chi entra con un codice non sceglie nulla:
  * il mercato è quello della stanza, uno per tavolo.
  */
-export default function Ingresso({ suEntrato, avvisa, suSfida, suImpara, vistaIniziale, modoIniziale }) {
+export default function Ingresso({ suEntrato, avvisa, suSfida, suImpara, vistaIniziale, modoIniziale, stanzaIniziale }) {
   const [mercatoId, setMercato] = useState(
     () => localStorage.getItem("quotazero:mercato") || MERCATO_PREDEFINITO
   );
   return (
     <MercatoProvider mercatoId={mercatoId}>
       <Modulo suEntrato={suEntrato} avvisa={avvisa} suSfida={suSfida} suImpara={suImpara}
-        mercatoId={mercatoId} setMercato={setMercato} vistaIniziale={vistaIniziale} modoIniziale={modoIniziale} />
+        mercatoId={mercatoId} setMercato={setMercato} vistaIniziale={vistaIniziale} modoIniziale={modoIniziale} stanzaIniziale={stanzaIniziale} />
     </MercatoProvider>
   );
 }
 
-function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, vistaIniziale = "casa", modoIniziale = "crea" }) {
+/**
+ * Il secondo passo di chi entra: la stanza è stata trovata, quindi si sa
+ * finalmente su quale mercato si gioca e si possono offrire professioni che
+ * esistono davvero lì dentro.
+ *
+ * Sta in un componente suo perché deve leggere il mercato DELLA STANZA, e
+ * un componente non può consumare un contesto che apre lui stesso.
+ */
+function SceltaDIngresso({ stanza, professioneId, setProfessione, sognoId, setSogno, suCambiaCodice }) {
+  const { t } = useLingua();
+  const { professioni, sogni, soldi: money } = useMercato();
+  const prof = professioni.find((p) => p.id === professioneId) || professioni[0];
+  const speseProf = Object.values(prof.spese).reduce((a, b) => a + b, 0);
+  const liv = LIVELLI.find((l) => l.id === stanza.livello);
+
+  return (
+    <>
+      <div className="stanza-trovata">
+        <div className="flex tra cen">
+          <span className="etichetta" style={{ margin: 0 }}>{t("ingresso.stanzaTrovata")}</span>
+          <button className="cambia-codice" onClick={suCambiaCodice}>
+            <Icona nome="frecciaSinistra" dim={13} /> {t("ingresso.altroCodice")}
+          </button>
+        </div>
+        <div className="numeri grassetto f22" style={{ letterSpacing: 3, margin: "4px 0 6px" }}>
+          {stanza.codice}
+        </div>
+        <p className="f12 tenue" style={{ margin: 0, lineHeight: 1.45 }}>
+          {t(`mercati.${stanza.mercatoId}.nome`)}
+          {liv ? ` · ${liv.nome}` : ""}
+          {" · "}
+          {stanza.giocatori.length === 1
+            ? t("ingresso.giaDentroUno", { nomi: stanza.giocatori[0] })
+            : t("ingresso.giaDentro", { nomi: stanza.giocatori.join(", ") })}
+        </p>
+      </div>
+
+      <div className="gruppo-campo">
+        <Scelta
+          id="campo-professione"
+          etichetta={t("ingresso.professione")}
+          valore={professioneId}
+          onCambia={setProfessione}
+          opzioni={professioni.map((p) => ({
+            valore: p.id, emoji: p.emoji, etichetta: p.nome,
+            dettaglio: t("ingresso.alMese", { importo: money(p.stipendio) }),
+          }))}
+        />
+        <div className="carta mt8" style={{ background: "#F2F0E6", padding: 12 }}>
+          <div className="flex tra f13">
+            <span className="tenue">{t("ingresso.stipendio")}</span>
+            <span className="numeri">{money(prof.stipendio)}</span>
+          </div>
+          <div className="flex tra f13">
+            <span className="tenue">{t("ingresso.speseTotali")}</span>
+            <span className="numeri">{money(speseProf)}</span>
+          </div>
+          <div className="flex tra f13 grassetto" style={{ borderTop: "1px dashed var(--linea)", paddingTop: 6, marginTop: 6 }}>
+            <span>{t("ingresso.giornoDiPaga")}</span>
+            <span className="numeri pos">{money(prof.stipendio - speseProf)}</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="gruppo-campo">
+        <Scelta
+          id="campo-sogno"
+          etichetta={t("ingresso.sogno")}
+          valore={sognoId}
+          onCambia={setSogno}
+          opzioni={sogni.map((x) => ({
+            valore: x.id, emoji: x.emoji, etichetta: x.nome, dettaglio: money(x.costo),
+          }))}
+        />
+      </div>
+    </>
+  );
+}
+
+function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, vistaIniziale = "casa", modoIniziale = "crea", stanzaIniziale = null }) {
   /* Le partite lasciate a metà. Il gioco a turni distanziati serve a poco
      se poi non si ritrova la strada per tornarci. */
   const [aperte, setAperte] = useState(() => partiteAperte());
+  /* Sei partite salvate spingevano sotto la piega il pulsante per cui si è
+     qui. Se ne mostrano tre, che sono le ultime toccate; le altre restano
+     raggiungibili ma non in mezzo ai piedi. */
+  const [tutteLePartite, setTutteLePartite] = useState(false);
+  const VISIBILI = 3;
   /* Il livello di realismo esiste solo dove esiste un fisco da mostrare:
      "classico" è un'economia astratta e non ha imposte da aprire. */
   const [livello, setLivello] = useState(LIVELLO_PREDEFINITO);
@@ -62,6 +147,14 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
      otto campi prima di sapere che gioco fosse, e chi voleva solo i
      quesiti doveva scorrere oltre tutto. */
   const [vista, setVista] = useState(vistaIniziale);
+  /* Entrare è in due passi. Il primo trova la stanza, il secondo fa
+     scegliere professione e sogno — ma del mercato GIUSTO, che è quello
+     della stanza e si conosce solo dopo averla trovata. Prima il modulo
+     offriva le professioni del mercato scelto in locale e il motore le
+     sostituiva in silenzio; poi non le ho più chieste affatto, e chi
+     entrava si trovava assegnata una professione senza averla scelta. */
+  const [stanza, setStanza] = useState(stanzaIniziale);
+  const [cercando, setCercando] = useState(false);
 
   /* Il ripiego non è pigrizia: cambiando mercato, `professioneId` resta per
      un attimo quello del mercato precedente. L'effetto che lo corregge gira
@@ -86,6 +179,30 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
     finally { setOccupato(false); }
   };
 
+  const trovaStanza = async () => {
+    if (!nome.trim()) return avvisa(t("ingresso.scriviNome"));
+    const c = codice.trim().toUpperCase();
+    if (c.length < 4) return avvisa(t("ingresso.codiceCorto"));
+    setCercando(true);
+    try {
+      const { stato } = await api.leggiStato(c);
+      if (stato.fase !== "attesa") return avvisa(t("ingresso.giaIniziata"));
+      if (stato.giocatori.length >= MAX_GIOCATORI) return avvisa(t("ingresso.stanzaPiena"));
+      /* La professione scelta finora è di un altro mercato: si riparte da
+         quelle che esistono davvero in questa stanza. */
+      const pac = getPacchetto(stato.mercatoId, stato.versioneDati);
+      setProfessione(pac.professioni[0].id);
+      setSogno(pac.sogni[0].id);
+      setStanza({
+        codice: c,
+        mercatoId: stato.mercatoId,
+        livello: stato.livello,
+        giocatori: stato.giocatori.map((g) => g.nome),
+      });
+    } catch (e) { avvisa(e.message); }
+    finally { setCercando(false); }
+  };
+
   const entra = async () => {
     if (!nome.trim()) return avvisa(t("ingresso.scriviNome"));
     const c = codice.trim().toUpperCase();
@@ -93,13 +210,10 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
     setOccupato(true);
     try {
       ricorda();
-      /* Niente professione né sogno: qui l'elenco è quello del mercato
-         scelto in locale, che non è detto sia quello della stanza. Il
-         motore in quel caso sostituiva in silenzio con la prima voce del
-         mercato giusto — quindi si sceglieva una professione e se ne
-         otteneva un'altra. Si scelgono nella sala d'attesa, dove l'elenco
-         è quello della stanza. */
-      await api.azione(c, { tipo: "entra", nome: nome.trim() });
+      /* Professione e sogno vengono dal mercato della stanza, non da
+         quello scelto in locale: è il secondo passo che li ha raccolti,
+         dopo aver saputo su che mercato si gioca. */
+      await api.azione(c, { tipo: "entra", nome: nome.trim(), professioneId, sognoId });
       traccia("stanzaRaggiunta");
       suEntrato(c);
     } catch (e) { avvisa(e.message); }
@@ -139,19 +253,27 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
             {aperte.length > 0 && (
               <div className="carta partite-aperte">
                 <div className="etichetta">{t("ingresso.partiteAperte")}</div>
-                {aperte.map((p) => (
+                {(tutteLePartite ? aperte : aperte.slice(0, VISIBILI)).map((p) => (
                   <div key={p.codice} className="partita-aperta">
                     <button onClick={() => suEntrato(p.codice)} className="riprendi">
                       <span className="numeri grassetto">{p.codice}</span>
                       <span className="f12 tenue">
                         {t(`mercati.${p.mercatoId || "classico"}.nome`)}
-                        {p.giocatori ? ` · ${p.giocatori}` : ""}
+                        {p.giocatori ? ` · ${t("ingresso.nGiocatori", { n: p.giocatori })}` : ""}
+                        {" · "}{daQuanto(p.vista, t)}
                       </span>
                     </button>
                     <button className="scarta" aria-label={t("ingresso.dimentica")}
                       onClick={() => { dimenticaPartita(p.codice); setAperte(partiteAperte()); }}>×</button>
                   </div>
                 ))}
+                {aperte.length > VISIBILI && (
+                  <button className="mostra-tutte" onClick={() => setTutteLePartite(!tutteLePartite)}>
+                    {tutteLePartite
+                      ? t("ingresso.mostraMeno")
+                      : t("ingresso.mostraTutte", { n: aperte.length })}
+                  </button>
+                )}
               </div>
             )}
 
@@ -235,7 +357,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
                 <span className="modo-nota">{t("ingresso.creaNota")}</span>
               </span>
             </button>
-            <button data-attivo={modo === "entra"} onClick={() => setModo("entra")}>
+            <button data-attivo={modo === "entra"} onClick={() => { setModo("entra"); setStanza(null); }}>
               <Icona nome="frecciaDestra" dim={17} />
               <span>
                 <strong>{t("ingresso.entraConCodice")}</strong>
@@ -253,7 +375,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
           {/* Chi entra ha bisogno solo del codice: lo mette qui, accanto al
               nome, invece che in fondo dopo quattro campi che non lo
               riguardano. */}
-          {modo === "entra" && (
+          {modo === "entra" && !stanza && (
             <div className="gruppo-campo">
               <label className="etichetta" htmlFor="campo-codice">{t("ingresso.codice")}</label>
               <input
@@ -261,6 +383,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
                 className="campo campo-codice"
                 value={codice}
                 onChange={(e) => setCodice(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+                onKeyDown={(e) => { if (e.key === "Enter" && codice.trim().length === 4) trovaStanza(); }}
                 placeholder="····"
                 maxLength={4}
                 autoComplete="off"
@@ -270,6 +393,19 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
                 {t("ingresso.codiceNota")}
               </p>
             </div>
+          )}
+
+          {/* Trovata la stanza si sa su che mercato si gioca, e solo allora
+              si possono offrire professioni che esistono davvero. */}
+          {modo === "entra" && stanza && (
+            <MercatoProvider mercatoId={stanza.mercatoId}>
+              <SceltaDIngresso
+                stanza={stanza}
+                professioneId={professioneId} setProfessione={setProfessione}
+                sognoId={sognoId} setSogno={setSogno}
+                suCambiaCodice={() => setStanza(null)}
+              />
+            </MercatoProvider>
           )}
 
           {modo === "crea" && (<>
@@ -358,9 +494,14 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
             <Bottone variante="btn-verde" disabled={occupato} onClick={crea}>
               {occupato ? t("ingresso.creando") : t("ingresso.creaEInvita")}
             </Bottone>
-          ) : (
-            <Bottone variante="btn-verde" disabled={occupato || codice.trim().length < 4} onClick={entra}>
+          ) : stanza ? (
+            <Bottone variante="btn-verde" disabled={occupato} onClick={entra}>
               {occupato ? t("ingresso.entrando") : t("ingresso.entraNellaPartita")}
+            </Bottone>
+          ) : (
+            <Bottone variante="btn-oro" disabled={cercando || codice.trim().length < 4}
+              onClick={trovaStanza}>
+              {cercando ? t("ingresso.cerco") : t("ingresso.trovaStanza")}
             </Bottone>
           )}
         </div>

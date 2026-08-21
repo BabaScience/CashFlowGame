@@ -22,6 +22,8 @@
  * che la schermata esista, che è il minimo sindacale e che ci è mancato
  * tre volte.
  */
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
 import { renderToStaticMarkup } from "react-dom/server";
 import React from "react";
 import { creaStanza, applicaAzione } from "../src/game/motore.js";
@@ -60,6 +62,7 @@ const { traduci } = await import("../src/i18n/index.js");
 const { LinguaProvider } = await import("../src/Lingua.jsx");
 const { MercatoProvider } = await import("../src/Mercato.jsx");
 const Ingresso = (await import("../src/screens/Ingresso.jsx")).default;
+const require_partite = await import("../src/lib/partite.js");
 const Attesa = (await import("../src/screens/Attesa.jsx")).default;
 const Partita = (await import("../src/screens/Partita.jsx")).default;
 const Impara = (await import("../src/screens/Impara.jsx")).default;
@@ -73,7 +76,17 @@ const Tabellone = (await import("../src/components/Tabellone.jsx")).default;
 
 let passati = 0, falliti = 0;
 const prova = (nome, fn) => {
-  try { fn(); console.log("  ✅ " + nome); passati++; }
+  try {
+    const r = fn();
+    /* Una prova asincrona qui passerebbe SEMPRE: `fn()` restituisce una
+       promessa, nessuno l'aspetta, e le sue verifiche non vengono mai
+       eseguite. È già successo — sette prove in sei file non controllavano
+       più niente da settimane. Meglio rumore che silenzio. */
+    if (r && typeof r.then === "function") {
+      throw new Error("prova asincrona: questo banco è sincrono, le sue verifiche non verrebbero eseguite");
+    }
+    console.log("  ✅ " + nome); passati++;
+  }
   catch (e) { console.log("  ❌ " + nome + "\n       " + (e.message || e)); if (process.env.STACK) console.log(e.stack); falliti++; }
 };
 const vero = (v, m) => { if (!v) throw new Error(m || "atteso vero"); };
@@ -172,17 +185,87 @@ prova("La scelta fra creare ed entrare viene prima dei campi", () => {
   vero(scelta < primoCampo, "la scelta sta dopo i campi che governa");
 });
 
-prova("Entrando non si manda una professione di un altro mercato", async () => {
-  /* Il modulo offriva le professioni del mercato scelto in locale, che non
-     è detto sia quello della stanza. Il motore sostituiva in silenzio con
-     la prima del mercato giusto: si sceglieva una professione e se ne
-     otteneva un'altra. */
-  const { readFileSync } = await import("node:fs");
+prova("La professione mandata è quella del mercato della stanza", () => {
+  /* Il difetto originale: il modulo offriva le professioni del mercato
+     scelto in locale e il motore, non trovandole, sostituiva in silenzio
+     con la prima del mercato giusto — si sceglieva una cosa e se ne
+     otteneva un'altra. La correzione non è smettere di mandarla (per un
+     po' è stato così, e chi entrava si ritrovava assegnata una professione
+     senza averla scelta): è chiedere PRIMA su che mercato si gioca. */
   const src = readFileSync(process.cwd() + "/src/screens/Ingresso.jsx", "utf8");
+
   const chiamata = src.match(/api\.azione\([^;]*?tipo: "entra"[^;]*?\);/s)?.[0] || "";
   vero(chiamata.length > 0, "non trovo la chiamata d'ingresso");
-  vero(!/professioneId/.test(chiamata), "manda ancora una professione");
-  vero(!/sognoId/.test(chiamata), "manda ancora un sogno");
+  vero(/professioneId/.test(chiamata), "chi entra deve poter scegliere la professione");
+
+  const trova = src.match(/const trovaStanza[\s\S]*?\n  \};/)?.[0] || "";
+  vero(trova.length > 0, "manca il passo che cerca la stanza");
+  vero(/leggiStato/.test(trova), "non legge lo stato della stanza prima di entrare");
+  vero(/getPacchetto\(stato\.mercatoId/.test(trova),
+    "non riparte dalle professioni del mercato della stanza");
+  vero(/setProfessione\(/.test(trova) && /setSogno\(/.test(trova),
+    "non azzera le scelte fatte su un altro mercato");
+});
+
+prova("Trovata la stanza, si sceglie dal mercato di QUELLA stanza", () => {
+  /* Il punto di tutto il secondo passo. Il mercato scelto in locale è
+     "classico"; la stanza è su Roma. Le professioni offerte devono essere
+     quelle romane, in euro. */
+  memoria.set("quotazero:mercato", "classico");
+  const html = disegna(React.createElement(Ingresso, {
+    suEntrato: nulla, avvisa: nulla, suSfida: nulla, suImpara: nulla,
+    vistaIniziale: "modulo", modoIniziale: "entra",
+    stanzaIniziale: { codice: "ABCD", mercatoId: "roma", livello: 2, giocatori: ["Ada"] },
+  }));
+  const roma = require_pacchetto("roma").professioni[0].nome;
+  const classico = require_pacchetto("classico").professioni[0].nome;
+  vero(html.includes(roma), `manca la professione romana "${roma}"`);
+  vero(!html.includes(classico), `offre "${classico}", che a Roma non esiste`);
+  vero(html.includes("€"), "gli stipendi devono essere in euro");
+  vero(html.includes("ABCD"), "non dice in che stanza si sta entrando");
+  memoria.delete("quotazero:mercato");
+});
+
+prova("Chi entra può cambiare idea sul codice", () => {
+  const html = disegna(React.createElement(Ingresso, {
+    suEntrato: nulla, avvisa: nulla, suSfida: nulla, suImpara: nulla,
+    vistaIniziale: "modulo", modoIniziale: "entra",
+    stanzaIniziale: { codice: "ABCD", mercatoId: "roma", livello: 1, giocatori: ["Ada"] },
+  }));
+  vero(html.includes(traduci("it", "ingresso.altroCodice")), "non si può tornare al codice");
+});
+
+prova("Le partite salvate non seppelliscono il pulsante per giocare", () => {
+  /* Sei partite spingevano "Gioca al tavolo" sotto la piega: il pulsante
+     per cui si è sulla pagina finiva sotto un elenco di codici. */
+  const ora = Date.now();
+  memoria.set("quotazero:partite", JSON.stringify(
+    ["AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF"].map((c, i) => ({
+      codice: c, vista: ora - i * 3600e3, mercatoId: "roma", giocatori: 2, n: 10 - i,
+      scadeIl: ora + 40 * 3600e3,
+    }))
+  ));
+  const html = disegna(React.createElement(Ingresso, {
+    suEntrato: nulla, avvisa: nulla, suSfida: nulla, suImpara: nulla,
+  }));
+  const mostrate = ["AAAA", "BBBB", "CCCC", "DDDD", "EEEE", "FFFF"].filter((c) => html.includes(c));
+  vero(mostrate.length === 3, `ne mostra ${mostrate.length} invece di 3`);
+  vero(html.includes(traduci("it", "ingresso.mostraTutte", { n: 6 })), "non si possono vedere le altre");
+  memoria.delete("quotazero:partite");
+});
+
+prova("Ogni partita salvata dice da quanto non la tocchi", () => {
+  /* Senza, è una colonna di codici a quattro lettere tutti uguali. */
+  const { daQuanto } = require_partite;
+  const t = (k, v) => traduci("it", k, v);
+  vero(daQuanto(Date.now(), t) === traduci("it", "ingresso.adesso"));
+  vero(daQuanto(Date.now() - 25 * 60000, t).includes("25"));
+  vero(daQuanto(Date.now() - 3 * 3600e3, t).includes("3"));
+  vero(daQuanto(Date.now() - 30 * 3600e3, t) === traduci("it", "ingresso.giornoFa"));
+  for (const ms of [0, Date.now(), Date.now() - 1e9]) {
+    vero(!/\{\w+\}/.test(daQuanto(ms, t)), "segnaposto non sostituito");
+    vero(!/NaN/.test(daQuanto(ms, t)), "NaN in un'etichetta");
+  }
 });
 
 prova("Ingresso con partite lasciate a metà", () => {
@@ -421,9 +504,6 @@ prova("La partita in corso", () => {
 });
 
 console.log("\n── Copiare negli appunti ──");
-
-const { readFileSync, readdirSync, statSync } = await import("node:fs");
-const { join, relative } = await import("node:path");
 /* Questo file viene impacchettato in node_modules/.cache prima di girare
    (vedi prova-schermate.sh), quindi `import.meta.url` non dice dove sta il
    progetto: lo dice la directory di lavoro. */

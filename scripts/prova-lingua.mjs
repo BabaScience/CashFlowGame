@@ -9,13 +9,25 @@
  * Verificano anche la separazione fra lingua e mercato, che è il motivo per
  * cui esiste tutto questo: cambiare lingua non deve toccare un prezzo.
  */
+import { readFileSync, readdirSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
 import { traduci, chiaviMancanti, dizionari, LINGUE } from "../src/i18n/index.js";
 import { getPacchetto } from "../src/game/mercati/indice.js";
 import { soldi } from "../src/game/finanze.js";
 
 let passati = 0, falliti = 0;
 const prova = (nome, fn) => {
-  try { fn(); console.log("  ✅ " + nome); passati++; }
+  try {
+    const r = fn();
+    /* Una prova asincrona qui passerebbe SEMPRE: `fn()` restituisce una
+       promessa, nessuno l'aspetta, e le sue verifiche non vengono mai
+       eseguite. È già successo — sette prove in sei file non controllavano
+       più niente da settimane. Meglio rumore che silenzio. */
+    if (r && typeof r.then === "function") {
+      throw new Error("prova asincrona: questo banco è sincrono, le sue verifiche non verrebbero eseguite");
+    }
+    console.log("  ✅ " + nome); passati++;
+  }
   catch (e) { console.log("  ❌ " + nome + "\n       " + e.message); falliti++; }
 };
 const eq = (a, b, m = "") => {
@@ -203,12 +215,10 @@ prova("Nessun messaggio scrive un simbolo di valuta a mano", () => {
   }
 });
 
-prova("Nessun componente scrive un simbolo di valuta a mano", async () => {
+prova("Nessun componente scrive un simbolo di valuta a mano", () => {
   /* La spiegazione delle taglie diceva "$5.000" dentro una partita in euro,
      e la nota sui prestiti "$1.000 costa $100". La valuta viene dal mercato:
      scriverla a mano funziona finché il gioco ha una valuta sola. */
-  const { readdirSync, statSync, readFileSync } = await import("node:fs");
-  const { join, relative } = await import("node:path");
   const RADICE = new URL("..", import.meta.url).pathname;
   const file = (dir, out = []) => {
     for (const n of readdirSync(dir)) {
