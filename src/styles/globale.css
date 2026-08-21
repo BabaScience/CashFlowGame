@@ -1014,3 +1014,44 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .dest-icona { display: inline-flex; color: var(--oro); }
 .destinazione-prima .dest-icona { color: #2A2205; }
 .dest-freccia { display: inline-flex; }
+
+/* ══ creare o entrare ══
+   Stava in fondo, dopo i campi che decide: si compilavano mercato,
+   livello, professione e sogno, e solo allora si scopriva che entrando con
+   un codice non servivano. ══ */
+.scelta-modo { display: grid; gap: 8px; margin-bottom: 18px; }
+@media (min-width: 560px) { .scelta-modo { grid-template-columns: 1fr 1fr; } }
+
+.scelta-modo button {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 13px;
+  text-align: left;
+  border-radius: 12px;
+  border: 1.5px solid var(--linea);
+  background: #fff;
+  color: var(--inchiostro);
+}
+.scelta-modo button > span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.scelta-modo strong { font-size: 14px; line-height: 1.25; }
+.scelta-modo .modo-nota { font-size: 12px; line-height: 1.35; color: var(--tenue-carta); }
+.scelta-modo .icona-svg { margin-top: 2px; color: var(--tenue-carta); }
+.scelta-modo button:hover { border-color: var(--oro); }
+.scelta-modo button:focus-visible { outline: 2px solid var(--oro); outline-offset: 2px; }
+/* Non solo il colore: il bordo spesso e l'icona dorata si vedono comunque. */
+.scelta-modo button[data-attivo="true"] {
+  border-color: var(--oro);
+  border-width: 2px;
+  background: rgba(201,162,39,.10);
+  padding: 12px;
+}
+.scelta-modo button[data-attivo="true"] .icona-svg { color: var(--oro); }
+
+/* Il codice è quattro caratteri: si legge meglio grande e spaziato. */
+.campo-codice {
+  text-align: center;
+  font-family: var(--f-numeri);
+  font-size: 26px;
+  letter-spacing: 10px;
+  text-indent: 10px;
+  height: 62px;
+}

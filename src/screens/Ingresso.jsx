@@ -22,19 +22,19 @@ import { useLingua } from "../Lingua.jsx";
  * piedi a chi l'ha appena letta. Chi entra con un codice non sceglie nulla:
  * il mercato è quello della stanza, uno per tavolo.
  */
-export default function Ingresso({ suEntrato, avvisa, suSfida, suImpara, vistaIniziale }) {
+export default function Ingresso({ suEntrato, avvisa, suSfida, suImpara, vistaIniziale, modoIniziale }) {
   const [mercatoId, setMercato] = useState(
     () => localStorage.getItem("quotazero:mercato") || MERCATO_PREDEFINITO
   );
   return (
     <MercatoProvider mercatoId={mercatoId}>
       <Modulo suEntrato={suEntrato} avvisa={avvisa} suSfida={suSfida} suImpara={suImpara}
-        mercatoId={mercatoId} setMercato={setMercato} vistaIniziale={vistaIniziale} />
+        mercatoId={mercatoId} setMercato={setMercato} vistaIniziale={vistaIniziale} modoIniziale={modoIniziale} />
     </MercatoProvider>
   );
 }
 
-function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, vistaIniziale = "casa" }) {
+function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, vistaIniziale = "casa", modoIniziale = "crea" }) {
   /* Le partite lasciate a metà. Il gioco a turni distanziati serve a poco
      se poi non si ritrova la strada per tornarci. */
   const [aperte, setAperte] = useState(() => partiteAperte());
@@ -56,7 +56,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
   }, [professioni, sogni, professioneId, sognoId]);
   const [codice, setCodice] = useState("");
   const [occupato, setOccupato] = useState(false);
-  const [modo, setModo] = useState("crea");
+  const [modo, setModo] = useState(modoIniziale);
   /* "casa" mostra le destinazioni, "modulo" la configurazione della
      partita. Prima erano la stessa cosa: chi arrivava trovava un modulo di
      otto campi prima di sapere che gioco fosse, e chi voleva solo i
@@ -93,7 +93,13 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
     setOccupato(true);
     try {
       ricorda();
-      await api.azione(c, { tipo: "entra", nome: nome.trim(), professioneId, sognoId });
+      /* Niente professione né sogno: qui l'elenco è quello del mercato
+         scelto in locale, che non è detto sia quello della stanza. Il
+         motore in quel caso sostituiva in silenzio con la prima voce del
+         mercato giusto — quindi si sceglieva una professione e se ne
+         otteneva un'altra. Si scelgono nella sala d'attesa, dove l'elenco
+         è quello della stanza. */
+      await api.azione(c, { tipo: "entra", nome: nome.trim() });
       traccia("stanzaRaggiunta");
       suEntrato(c);
     } catch (e) { avvisa(e.message); }
@@ -215,12 +221,58 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
             <Icona nome="frecciaSinistra" dim={14} /> {t("casa.torna")}
           </button>
 
+          {/* La scelta stava in fondo, dopo i campi che decide: si
+              compilavano mercato, livello, professione e sogno, e solo
+              allora si scopriva che entrando con un codice non servivano.
+              Nessuno dei quattro vale per chi entra — il mercato lo decide
+              la stanza, e professione e sogno si scelgono nella sala
+              d'attesa, dove l'elenco è finalmente quello giusto. */}
+          <div className="scelta-modo" role="group" aria-label={t("ingresso.cosaVuoiFare")}>
+            <button data-attivo={modo === "crea"} onClick={() => setModo("crea")}>
+              <Icona nome="dado" dim={17} />
+              <span>
+                <strong>{t("ingresso.creaStanza")}</strong>
+                <span className="modo-nota">{t("ingresso.creaNota")}</span>
+              </span>
+            </button>
+            <button data-attivo={modo === "entra"} onClick={() => setModo("entra")}>
+              <Icona nome="frecciaDestra" dim={17} />
+              <span>
+                <strong>{t("ingresso.entraConCodice")}</strong>
+                <span className="modo-nota">{t("ingresso.entraNota")}</span>
+              </span>
+            </button>
+          </div>
+
           <div className="gruppo-campo">
             <label className="etichetta" htmlFor="campo-nome">{t("ingresso.nome")}</label>
             <input id="campo-nome" className="campo" value={nome} maxLength={18}
               onChange={(e) => setNome(e.target.value)} placeholder={t("ingresso.nomeSegnaposto")} />
           </div>
 
+          {/* Chi entra ha bisogno solo del codice: lo mette qui, accanto al
+              nome, invece che in fondo dopo quattro campi che non lo
+              riguardano. */}
+          {modo === "entra" && (
+            <div className="gruppo-campo">
+              <label className="etichetta" htmlFor="campo-codice">{t("ingresso.codice")}</label>
+              <input
+                id="campo-codice"
+                className="campo campo-codice"
+                value={codice}
+                onChange={(e) => setCodice(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
+                placeholder="····"
+                maxLength={4}
+                autoComplete="off"
+                autoCapitalize="characters"
+              />
+              <p className="f12 tenue" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
+                {t("ingresso.codiceNota")}
+              </p>
+            </div>
+          )}
+
+          {modo === "crea" && (<>
           {/* Prima scelta di tutte: decide professioni, prezzi e valuta. */}
           <div className="gruppo-campo">
             <Scelta
@@ -298,38 +350,20 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
               {t("ingresso.sognoNota")}
             </p>
           </div>
+          </>)}
         </div>
 
-        <div className="flex g8 mt16 mb12">
-          <button className={`btn ${modo === "crea" ? "btn-oro" : "btn-chiaro"}`} onClick={() => setModo("crea")}>
-            {t("ingresso.creaStanza")}
-          </button>
-          <button className={`btn ${modo === "entra" ? "btn-oro" : "btn-chiaro"}`} onClick={() => setModo("entra")}>
-            {t("ingresso.entraConCodice")}
-          </button>
-        </div>
-
-        {modo === "crea" ? (
-          <Bottone variante="btn-verde" disabled={occupato} onClick={crea}>
-            {occupato ? t("ingresso.creando") : t("ingresso.creaEInvita")}
-          </Bottone>
-        ) : (
-          <>
-            <input
-              id="campo-codice"
-              aria-label={t("ingresso.codice")}
-              className="campo mb12"
-              value={codice}
-              onChange={(e) => setCodice(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ""))}
-              placeholder="CODICE"
-              maxLength={4}
-              style={{ textAlign: "center", fontFamily: "var(--f-numeri)", fontSize: 24, letterSpacing: 8, height: 60 }}
-            />
-            <Bottone variante="btn-verde" disabled={occupato} onClick={entra}>
+        <div className="mt16 mb12">
+          {modo === "crea" ? (
+            <Bottone variante="btn-verde" disabled={occupato} onClick={crea}>
+              {occupato ? t("ingresso.creando") : t("ingresso.creaEInvita")}
+            </Bottone>
+          ) : (
+            <Bottone variante="btn-verde" disabled={occupato || codice.trim().length < 4} onClick={entra}>
               {occupato ? t("ingresso.entrando") : t("ingresso.entraNellaPartita")}
             </Bottone>
-          </>
-        )}
+          )}
+        </div>
 
         </>
         )}

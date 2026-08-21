@@ -16,6 +16,10 @@ export default {
   },
 
   ingresso: {
+    cosaVuoiFare: "Cosa vuoi fare",
+    creaNota: "Apri un tavolo e invita chi vuoi",
+    entraNota: "Hai già un codice da qualcuno",
+    codiceNota: "Quattro caratteri, te li dà chi ha aperto il tavolo. Professione e sogno li scegli dopo, dentro la stanza.",
     sfidaTitolo: "Sfida del giorno",
     sfidaSotto: "Da solo, cinque minuti. Stessa partita per tutti.",
     sfidaAria: "Gioca la sfida del giorno: da solo, cinque minuti",

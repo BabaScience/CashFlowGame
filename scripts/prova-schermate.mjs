@@ -133,6 +133,58 @@ prova("Ingresso, chi ha scelto di giocare trova il modulo", () => {
   vero(html.includes(traduci("it", "casa.torna")), "non si può tornare indietro");
 });
 
+prova("Chi entra con un codice non vede la configurazione", () => {
+  /* Mercato, livello, professione e sogno non riguardano chi entra: il
+     mercato lo decide la stanza, e gli altri due si scelgono nella sala
+     d'attesa, dove l'elenco è quello giusto. Prima si compilavano tutti e
+     quattro e solo in fondo si scopriva che non servivano. */
+  const html = disegna(React.createElement(Ingresso, {
+    suEntrato: nulla, avvisa: nulla, suSfida: nulla, suImpara: nulla,
+    vistaIniziale: "modulo", modoIniziale: "entra",
+  }));
+  vero(html.includes('id="campo-codice"'), "manca il campo del codice");
+  vero(html.includes('id="campo-nome"'), "manca il nome");
+  for (const campo of ["campo-mercato", "campo-professione", "campo-sogno", "campo-livello"]) {
+    vero(!html.includes(`id="${campo}"`), `"${campo}" non riguarda chi entra`);
+  }
+});
+
+prova("Chi crea vede tutto quello che gli serve, e nessun codice", () => {
+  const html = disegna(React.createElement(Ingresso, {
+    suEntrato: nulla, avvisa: nulla, suSfida: nulla, suImpara: nulla,
+    vistaIniziale: "modulo", modoIniziale: "crea",
+  }));
+  for (const campo of ["campo-nome", "campo-mercato", "campo-professione", "campo-sogno"]) {
+    vero(html.includes(`id="${campo}"`), `manca "${campo}"`);
+  }
+  vero(!html.includes('id="campo-codice"'), "chi crea non ha un codice da inserire");
+});
+
+prova("La scelta fra creare ed entrare viene prima dei campi", () => {
+  /* Se sta dopo, si compila e poi si scopre di aver compilato per niente. */
+  const html = disegna(React.createElement(Ingresso, {
+    suEntrato: nulla, avvisa: nulla, suSfida: nulla, suImpara: nulla,
+    vistaIniziale: "modulo",
+  }));
+  const scelta = html.indexOf("scelta-modo");
+  const primoCampo = html.indexOf('id="campo-nome"');
+  vero(scelta >= 0, "manca la scelta fra creare ed entrare");
+  vero(scelta < primoCampo, "la scelta sta dopo i campi che governa");
+});
+
+prova("Entrando non si manda una professione di un altro mercato", async () => {
+  /* Il modulo offriva le professioni del mercato scelto in locale, che non
+     è detto sia quello della stanza. Il motore sostituiva in silenzio con
+     la prima del mercato giusto: si sceglieva una professione e se ne
+     otteneva un'altra. */
+  const { readFileSync } = await import("node:fs");
+  const src = readFileSync(process.cwd() + "/src/screens/Ingresso.jsx", "utf8");
+  const chiamata = src.match(/api\.azione\([^;]*?tipo: "entra"[^;]*?\);/s)?.[0] || "";
+  vero(chiamata.length > 0, "non trovo la chiamata d'ingresso");
+  vero(!/professioneId/.test(chiamata), "manda ancora una professione");
+  vero(!/sognoId/.test(chiamata), "manda ancora un sogno");
+});
+
 prova("Ingresso con partite lasciate a metà", () => {
   memoria.set("quotazero:partite", JSON.stringify([{ codice: "ABCD", vista: Date.now(), mercatoId: "roma", giocatori: 3, n: 1 }]));
   const html = disegna(React.createElement(Ingresso, {

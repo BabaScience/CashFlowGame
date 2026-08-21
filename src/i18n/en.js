@@ -22,6 +22,10 @@ export default {
   },
 
   ingresso: {
+    cosaVuoiFare: "What would you like to do",
+    creaNota: "Open a table and invite whoever you like",
+    entraNota: "You already have a code from someone",
+    codiceNota: "Four characters, from whoever opened the table. You pick your job and dream later, inside the room.",
     sfidaTitolo: "Daily challenge",
     sfidaSotto: "On your own, five minutes. Same game for everyone.",
     sfidaAria: "Play today's challenge: on your own, five minutes",
