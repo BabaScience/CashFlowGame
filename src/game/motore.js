@@ -96,11 +96,14 @@ function pesca(s, nomeMazzo) {
 
 /* ═══════════════ creazione ═══════════════ */
 
-export function creaGiocatore(s, id, nome, professioneId, sognoId, indice) {
+export function creaGiocatore(s, id, nome, professioneId, sognoId, indice, bot = false) {
   const p = getProfessione(s, professioneId);
   return {
     id,
     nome: (nome || "Giocatore").slice(0, 18),
+    /* Un avversario automatico. Il server non lo tratta diversamente: è il
+       client di chi gioca a calcolarne le mosse e a mandarle. */
+    bot: Boolean(bot),
     colore: COLORI[indice % COLORI.length],
     professioneId: p.id,
     sognoId: sognoId || sogniDi(s)[0].id,
@@ -676,7 +679,7 @@ export function applicaAzione(stato, azione) {
       return ok();
     }
     if (s.giocatori.length >= MAX_GIOCATORI) return err(`Massimo ${MAX_GIOCATORI} giocatori.`);
-    const nuovo = creaGiocatore(s, giocatoreId, azione.nome, azione.professioneId, azione.sognoId, s.giocatori.length);
+    const nuovo = creaGiocatore(s, giocatoreId, azione.nome, azione.professioneId, azione.sognoId, s.giocatori.length, azione.bot);
     s.giocatori.push(nuovo);
     nota(s, `${nuovo.nome} entra nella stanza.`, "r19", { nuovoNome: nuovo.nome }, "lobby", nuovo.id);
     return ok();

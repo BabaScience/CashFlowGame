@@ -16,6 +16,11 @@ export default {
   },
 
   ingresso: {
+    conChi: "Con chi giochi",
+    conAmici: "Con gli amici",
+    controIlComputer: "{n} contro il computer",
+    conAmiciNota: "Ti diamo un codice da mandare a chi vuoi. Si comincia quando siete almeno in due.",
+    controIlComputerNota: "Si parte subito. Il computer gioca i suoi turni da solo: serve per imparare, o per provare una strategia senza far aspettare nessuno.",
     adesso: "poco fa",
     minutiFa: "{n} min fa",
     oraFa: "1 ora fa",

@@ -338,3 +338,31 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       immobile, obbligatorio in compravendita); **consulente del lavoro**, se
       un'attività assume qualcuno. Notaio, agenzia e amministratore di
       condominio sono già dentro i costi d'acquisto e le quote sul canone.
+
+- [ ] **Commercialista e avvocato oggi non convengono mai** — misurato dopo
+      averli costruiti, ed è una risposta che non mi aspettavo.
+      Assumendoli dal primo turno (Roma L2, quadro, 60 partite per scenario)
+      si peggiora e basta: si esce dalla Ruota nell'83% delle partite senza
+      nessuno, nel 65% col commercialista, nel 60% con l'avvocato, nel 47%
+      con entrambi. Le vittorie scendono dal 68% al 38%.
+
+      Due cause, e la seconda è quella vera.
+
+      La prima: il compenso entra nelle spese, e con la soglia d'uscita a
+      1,5× ogni euro di parcella allontana il traguardo di un euro e mezzo.
+      È la stessa aritmetica del prestito.
+
+      La seconda: **il risparmio è agganciato ai canoni d'affitto, ma la
+      partita si vince con le attività.** A Roma L2 gli immobili rendono
+      fra il −1% e il −3% e le attività il 32%, quindi chi gioca bene compra
+      attività — che non hanno canone e non sono tassate. Un giocatore che
+      assume "solo quando si ripaga" non assume mai: in 60 partite, zero
+      volte.
+
+      Non si aggiusta spostando una costante. Il commercialista fa risparmiare
+      imposte, e nel gioco l'unica cosa tassata sono gli affitti: farlo
+      risparmiare anche sulle attività significherebbe premiare il giocatore
+      per una tassa che non paga. La strada giusta è **tassare le attività**
+      — il buco già annotato del Livello 3 — e allora il commercialista avrà
+      qualcosa da ottimizzare. Prima di allora restano una decisione che ha
+      una sola risposta giusta, cioè non una decisione.

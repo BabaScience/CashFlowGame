@@ -147,6 +147,8 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
      otto campi prima di sapere che gioco fosse, e chi voleva solo i
      quesiti doveva scorrere oltre tutto. */
   const [vista, setVista] = useState(vistaIniziale);
+  /* Quanti avversari automatici. Zero = si gioca con gli amici. */
+  const [avversari, setAvversari] = useState(0);
   /* Entrare è in due passi. Il primo trova la stanza, il secondo fa
      scegliere professione e sogno — ma del mercato GIUSTO, che è quello
      della stanza e si conosce solo dopo averla trovata. Prima il modulo
@@ -172,7 +174,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
     setOccupato(true);
     try {
       ricorda();
-      const r = await api.creaStanza(nome.trim(), professioneId, sognoId, mercatoId, haFisco ? livello : 1);
+      const r = await api.creaStanza(nome.trim(), professioneId, sognoId, mercatoId, haFisco ? livello : 1, avversari);
       traccia("stanzaCreata", { mercato: mercatoId });
       suEntrato(r.stato.codice);
     } catch (e) { avvisa(e.message); }
@@ -406,6 +408,22 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
                 suCambiaCodice={() => setStanza(null)}
               />
             </MercatoProvider>
+          )}
+
+          {modo === "crea" && (
+            <div className="gruppo-campo">
+              <label className="etichetta">{t("ingresso.conChi")}</label>
+              <div className="scelta-avversari" role="group" aria-label={t("ingresso.conChi")}>
+                {[0, 1, 2, 3].map((n) => (
+                  <button key={n} data-attivo={avversari === n} onClick={() => setAvversari(n)}>
+                    {n === 0 ? t("ingresso.conAmici") : t("ingresso.controIlComputer", { n })}
+                  </button>
+                ))}
+              </div>
+              <p className="f12 tenue" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
+                {t(avversari === 0 ? "ingresso.conAmiciNota" : "ingresso.controIlComputerNota")}
+              </p>
+            </div>
           )}
 
           {modo === "crea" && (<>

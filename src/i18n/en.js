@@ -22,6 +22,11 @@ export default {
   },
 
   ingresso: {
+    conChi: "Who you play with",
+    conAmici: "With friends",
+    controIlComputer: "{n} against the computer",
+    conAmiciNota: "We give you a code to send to whoever you like. You start once there are at least two of you.",
+    controIlComputerNota: "Starts right away. The computer plays its own turns: good for learning, or for trying a strategy without keeping anyone waiting.",
     adesso: "just now",
     minutiFa: "{n} min ago",
     oraFa: "1 hour ago",

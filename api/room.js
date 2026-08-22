@@ -14,6 +14,9 @@ import { stanze, statoConfigurazione, scadenza } from "./_lib/db.js";
 import { json, errore, corpo, normalizzaCodice, validoId } from "./_lib/http.js";
 import { creaStanza, codiceStanza, applicaAzione } from "../src/game/motore.js";
 
+/** Nomi degli avversari automatici: italiani, corti, riconoscibili. */
+const NOMI_BOT = ["Bea", "Nico", "Rosa", "Furio", "Lella"];
+
 const MAX_TENTATIVI = 5;
 
 export default async function handler(req, res) {
@@ -40,6 +43,22 @@ export default async function handler(req, res) {
         });
         if (r.errore) return errore(res, 400, r.errore);
         stato = r.stato;
+
+        /* Avversari automatici: si aggiungono qui, come giocatori normali.
+           Il server non li tratta in modo speciale — le mosse gliele manda
+           il browser di chi gioca (vedi src/hooks/useAvversari.js). */
+        const quanti = Math.max(0, Math.min(5, Number(body.avversari) || 0));
+        const pac = pacchettoDi(stato);
+        for (let n = 0; n < quanti; n++) {
+          const b = applicaAzione(stato, {
+            tipo: "entra", giocatoreId: `bot${n + 1}`, bot: true,
+            nome: NOMI_BOT[n],
+            professioneId: pac.professioni[(n + 1) % pac.professioni.length].id,
+            sognoId: pac.sogni[(n + 1) % pac.sogni.length].id,
+          });
+          if (b.errore) return errore(res, 400, b.errore);
+          stato = b.stato;
+        }
         try {
           await col.insertOne({ ...stato, scadeIl: scadenza(stato) });
           return json(res, 200, { stato });
@@ -72,7 +91,19 @@ export default async function handler(req, res) {
         const attuale = await col.findOne({ codice }, { projection: { _id: 0, scadeIl: 0 } });
         if (!attuale) return errore(res, 404, "Stanza non trovata o scaduta.");
 
-        const r = applicaAzione(attuale, { ...azione, giocatoreId });
+        /* Chi agisce.
+           Di norma vale solo la propria identità: `giocatoreId` arriva dal
+           corpo autenticato e sovrascrive quello dell'azione, così nessuno
+           può giocare al posto di un altro.
+           L'eccezione sono gli avversari automatici: non hanno un client
+           che li muova, quindi le loro mosse le manda il browser di chi sta
+           giocando. Si concede solo per chi è marcato `bot` in QUESTA
+           stanza — un umano resta impersonabile da nessuno. */
+        const bersaglio = azione.giocatoreId;
+        const eBotDiQui = bersaglio
+          && attuale.giocatori.some((g) => g.id === bersaglio && g.bot);
+        const attore = eBotDiQui ? bersaglio : giocatoreId;
+        const r = applicaAzione(attuale, { ...azione, giocatoreId: attore });
         if (r.errore) return json(res, 409, { errore: r.errore, stato: attuale });
 
         const nuovo = r.stato;

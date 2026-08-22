@@ -28,8 +28,8 @@ async function invia(corpo) {
   return dati;
 }
 
-export const creaStanza = (nome, professioneId, sognoId, mercatoId, livello) =>
-  invia({ op: "crea", nome, professioneId, sognoId, mercatoId, livello });
+export const creaStanza = (nome, professioneId, sognoId, mercatoId, livello, avversari = 0) =>
+  invia({ op: "crea", nome, professioneId, sognoId, mercatoId, livello, avversari });
 
 export const azione = (codice, azione) =>
   invia({ op: "azione", codice, azione });

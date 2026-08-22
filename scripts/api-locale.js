@@ -9,6 +9,10 @@
 import { creaStanza, codiceStanza, applicaAzione } from "../src/game/motore.js";
 import { preparaMessaggio, accoda } from "../src/game/chat.js";
 import { incrementiPer } from "../src/game/metriche.js";
+import { pacchettoDi } from "../src/game/mercati/indice.js";
+
+/** Nomi degli avversari automatici: italiani, corti, riconoscibili. */
+const NOMI_BOT = ["Bea", "Nico", "Rosa", "Furio", "Lella"];
 
 const TTL = { attesa: 6 * 3600e3, inCorso: 48 * 3600e3, finita: 6 * 3600e3 };
 const stanze = new Map();
@@ -72,8 +76,23 @@ export default function apiLocale() {
                 professioneId: b.professioneId, sognoId: b.sognoId,
               });
               if (r.errore) return invia(res, 400, { errore: r.errore });
-              salva(r.stato);
-              return invia(res, 200, { stato: r.stato });
+              /* Avversari automatici, come nell'API vera: giocatori normali
+                 con un flag. Le mosse gliele manda il client. */
+              let stato = r.stato;
+              const quanti = Math.max(0, Math.min(5, Number(b.avversari) || 0));
+              const pac = pacchettoDi(stato);
+              for (let n = 0; n < quanti; n++) {
+                const bb = applicaAzione(stato, {
+                  tipo: "entra", giocatoreId: `bot${n + 1}`, bot: true,
+                  nome: NOMI_BOT[n],
+                  professioneId: pac.professioni[(n + 1) % pac.professioni.length].id,
+                  sognoId: pac.sogni[(n + 1) % pac.sogni.length].id,
+                });
+                if (bb.errore) return invia(res, 400, { errore: bb.errore });
+                stato = bb.stato;
+              }
+              salva(stato);
+              return invia(res, 200, { stato });
             }
 
             if (op === "chiudi") {
@@ -89,7 +108,14 @@ export default function apiLocale() {
               const codice = (b.codice || "").toUpperCase();
               const rec = stanze.get(codice);
               if (!rec || scaduta(rec)) return invia(res, 404, { errore: "Stanza non trovata o scaduta." });
-              const r = applicaAzione(rec.stato, { ...b.azione, giocatoreId });
+              /* Come nell'API vera: vale solo la propria identità, tranne
+                 per gli avversari automatici, che non hanno un client. */
+              const bersaglio = b.azione?.giocatoreId;
+              const eBotDiQui = bersaglio
+                && rec.stato.giocatori.some((g) => g.id === bersaglio && g.bot);
+              const r = applicaAzione(rec.stato, {
+                ...b.azione, giocatoreId: eBotDiQui ? bersaglio : giocatoreId,
+              });
               if (r.errore) return invia(res, 409, { errore: r.errore, stato: rec.stato });
               salva(r.stato);
               return invia(res, 200, { stato: r.stato });

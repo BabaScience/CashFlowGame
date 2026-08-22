@@ -8,6 +8,7 @@ import Attesa from "./screens/Attesa.jsx";
 import Partita from "./screens/Partita.jsx";
 import Vittoria from "./components/Vittoria.jsx";
 import * as api from "./lib/api.js";
+import { useAvversari } from "./hooks/useAvversari.js";
 import { traccia, tracciaSessione } from "./lib/traccia.js";
 import { MercatoProvider } from "./Mercato.jsx";
 import { LinguaProvider } from "./Lingua.jsx";
@@ -38,6 +39,10 @@ function Applicazione() {
   }, []);
 
   const { stato, errore, caricamento, inAzione, invia } = useStanza(codice, mioId);
+
+  /* Gli avversari automatici li muove il browser di chi sta giocando: vedi
+     hooks/useAvversari.js. Se al tavolo non ce ne sono, non fa nulla. */
+  useAvversari(stato, invia, Boolean(stato?.giocatori?.some((g) => g.bot)));
 
   /* ── Misure d'uso: solo contatori, nessun identificativo. Vedi traccia.js ── */
   useEffect(() => { tracciaSessione(); }, []);

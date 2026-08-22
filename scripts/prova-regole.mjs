@@ -4,6 +4,7 @@
  *   node scripts/prova-regole.mjs
  */
 import { creaStanza, applicaAzione, codiceStanza } from "../src/game/motore.js";
+import { mossaBot } from "../src/game/avversario.js";
 import { getPacchetto } from "../src/game/mercati/indice.js";
 
 /* Il pacchetto di riferimento delle prove: le regole si verificano contro
@@ -781,6 +782,36 @@ test("I compensi stanno nelle fasce di mercato rilevate", () => {
     const anno = p.costoMensile * 12;
     vero(anno >= 500 && anno <= 2500,
       `${p.nome}: ${anno} € l'anno è fuori dalle fasce rilevate`);
+  }
+});
+
+console.log("\n── Giocare contro il computer ──");
+
+test("Un avversario automatico è un giocatore come gli altri", () => {
+  let s = creaStanza(codiceStanza(), "io");
+  s = app(s, { tipo: "entra", giocatoreId: "io", nome: "Io", professioneId: "medico", sognoId: "sg01" });
+  s = app(s, { tipo: "entra", giocatoreId: "bot1", bot: true, nome: "Bea", professioneId: "meccanico", sognoId: "sg02" });
+  const bot = s.giocatori.find((g) => g.id === "bot1");
+  eq(bot.bot, true, "il flag non è arrivato");
+  eq(bot.tracciato, "topi", "parte come tutti");
+  vero(bot.stipendio > 0, "ha una scheda vera");
+  const umano = s.giocatori.find((g) => g.id === "io");
+  eq(umano.bot, false, "un umano non deve risultare automatico");
+});
+
+test("Il computer trova sempre una mossa", () => {
+  /* È l'unica cosa che gli si chiede: se resta senza, la partita si pianta
+     e chi gioca da solo non ha modo di sbloccarla. */
+  let s = creaStanza(codiceStanza(), "io");
+  s = app(s, { tipo: "entra", giocatoreId: "io", nome: "Io", professioneId: "medico", sognoId: "sg01" });
+  s = app(s, { tipo: "entra", giocatoreId: "bot1", bot: true, nome: "Bea", professioneId: "meccanico", sognoId: "sg02" });
+  s = app(s, { tipo: "avvia", giocatoreId: "io" });
+  for (let i = 0; i < 200 && s.fase === "inCorso"; i++) {
+    const az = mossaBot(s);
+    vero(az, `nessuna mossa disponibile al giro ${i}`);
+    const r = applicaAzione(s, az);
+    if (r.errore) { if (s.pending?.tipo === "mercato") { s = applicaAzione(s, { tipo: "chiudiMercato", giocatoreId: s.giocatori[s.turno].id }).stato || s; continue; } break; }
+    s = r.stato;
   }
 });
 
