@@ -186,33 +186,58 @@ test("Non puoi uscire finché il passivo non supera le spese", () => {
   vero(appErr(turnoDi(s, "p0"), { tipo: "esciDallaCorsa", giocatoreId: "p0" }), "uscita prematura doveva fallire");
 });
 
-test("Liquidazione = 100 × reddito passivo, e diventa il Reddito del Giorno di Rendita", () => {
+test("Uscire dalla Ruota significa smettere di lavorare, non cambiare gioco", () => {
+  /* Prima uscire moltiplicava per cento: la liquidazione entrava in
+     contanti E diventava l'incasso di ogni Giorno di Rendita. Il
+     portafoglio costruito in tutta la prima metà smetteva di contare, le
+     spese sparivano, e la seconda metà era un altro gioco attaccato al
+     primo. Ora l'unica cosa che cambia è che lo stipendio finisce. */
   let s = tavolo();
   s = turnoDi(s, "p0");
   const g = G(s, 0);
   g.attivita.push({ rid: "x1", nome: "Test", costo: 1, acconto: 1, passivita: 0, flusso: 10000 });
   const passivo = redditoPassivo(g);
-  eq(passivo, 10000);
-  vero(passivo > speseTotali(g), "il passivo deve superare le spese");
   const contantiPrima = g.contanti;
+  const speseP = speseTotali(g);
+  const quantiAttivi = g.attivita.length + g.immobili.length;
+  vero(passivo > speseP, "il passivo deve superare le spese");
+
   s = app(s, { tipo: "esciDallaCorsa", giocatoreId: "p0" });
   const dopo = G(s, 0);
+
   eq(dopo.tracciato, "veloce");
-  eq(dopo.redditoRendita, 1000000, "liquidazione 100x");
-  eq(dopo.redditoInizialeVeloce, 1000000);
-  eq(dopo.contanti, contantiPrima + 1000000, "la liquidazione è versata in contanti");
+  eq(dopo.stipendio, 0, "lo stipendio deve finire: hai lasciato il lavoro");
+  eq(dopo.contanti, contantiPrima, "niente liquidazione piovuta dal cielo");
+  eq(dopo.redditoInizialeVeloce, passivo, "si parte dalla rendita vera");
+  eq(dopo.attivita.length + dopo.immobili.length, quantiAttivi, "il portafoglio resta");
+  eq(speseTotali(dopo), speseP, "le spese non spariscono: si continua a vivere");
+  eq(redditoPassivo(dopo), passivo, "la rendita è la stessa di un minuto prima");
   eq(dopo.posizione, 0);
+});
+
+test("Sul Largo il Giorno di Rendita paga il flusso vero", () => {
+  let s = tavolo();
+  s = turnoDi(s, "p0");
+  const g = G(s, 0);
+  g.attivita.push({ rid: "x1", nome: "Test", costo: 1, acconto: 1, passivita: 0, flusso: 10000 });
+  s = app(s, { tipo: "esciDallaCorsa", giocatoreId: "p0" });
+  const dopo = G(s, 0);
+  /* Rendita meno spese, che è esattamente il conto del Giorno di Paga
+     senza la busta paga. */
+  eq(flussoMensile(dopo), redditoPassivo(dopo) - speseTotali(dopo));
+  vero(flussoMensile(dopo) > 0, "chi è uscito deve stare in piedi");
 });
 
 console.log("\n── Largo e vittoria ──");
 
-test("Vittoria col flusso: reddito iniziale + 50.000", () => {
+test("Vittoria col flusso: rendita all'uscita + l'obiettivo", () => {
   let s = tavolo();
   s = turnoDi(s, "p0");
   const g = G(s, 0);
   g.tracciato = "veloce";
-  g.redditoRendita = 100000;
-  g.redditoInizialeVeloce = 100000;
+  g.stipendio = 0;
+  g.attivita = [{ rid: "base", nome: "Base", costo: 1, acconto: 1, passivita: 0, flusso: 10000 }];
+  g.redditoInizialeVeloce = 10000;
   g.contanti = 500000;
   g.posizione = 1;
   s.pending = { tipo: "affareVeloce", giocatoreId: "p0",
@@ -584,6 +609,78 @@ test("Le schede di Roma sono di una persona sola, e i conti tornano", () => {
     vero(margine / spese < 0.6, `${p.nome}: margine del ${Math.round(margine / spese * 100)}%, troppo largo per Roma`);
     /* Tre figli non possono azzerare il margine da soli. */
     vero(p.perFiglio * 3 < margine * 0.7, `${p.nome}: tre figli costano più del margine`);
+  }
+});
+
+console.log("\n── Il Largo è la stessa economia, senza busta paga ──");
+
+import { PERCORSO_LARGO } from "../src/game/tabellone.js";
+
+test("Sul Largo si incassa più spesso di quanto si venga puniti", () => {
+  /* Prima: 4 caselle d'incasso e 7 di penalità grave su 48. Con un Giorno
+     di Rendita da centosettantamila euro erano graffi; con il flusso vero
+     erano una catastrofe ogni sette turni, e il capitale non arrivava mai
+     al primo affare. */
+  const conta = {};
+  for (const c of PERCORSO_LARGO) conta[c.tipo] = (conta[c.tipo] || 0) + 1;
+  const penalita = (conta.verificaFiscale || 0) + (conta.causa || 0) + (conta.divorzio || 0);
+  vero(conta.rendita > penalita,
+    `${conta.rendita} caselle d'incasso contro ${penalita} di penalità: non si accumula niente`);
+  vero(conta.affare >= 20, "gli affari sono il senso del Largo, non si toccano");
+});
+
+test("Le penalità del Largo costano una cifra, non i risparmi", () => {
+  /* "Metà di tutto quello che hai da parte" puniva esattamente chi stava
+     risparmiando per il primo affare. */
+  const conConti = (contanti) => {
+    let s = tavolo();
+    s = turnoDi(s, "p0");
+    const g = G(s, 0);
+    g.tracciato = "veloce";
+    g.stipendio = 0;
+    g.attivita = [{ rid: "b", nome: "B", costo: 1, acconto: 1, passivita: 0, flusso: 4000 }];
+    g.redditoInizialeVeloce = 4000;
+    g.contanti = contanti;
+    g.posizione = PERCORSO_LARGO.findIndex((c) => c.tipo === "causa") - 1;
+    const r = applicaAzione(s, { tipo: "tira", giocatoreId: "p0", nDadi: 1 });
+    return r.stato ? G(r.stato, 0).contanti : contanti;
+  };
+  /* Chi ha molto e chi ha poco perdono la stessa cifra, non la stessa
+     percentuale. Si confrontano due patrimoni molto diversi. */
+  const persoRicco = 400000 - conConti(400000);
+  const persoPovero = 200000 - conConti(200000);
+  if (persoRicco > 0 && persoPovero > 0) {
+    eq(persoRicco, persoPovero, "la penalità dipende ancora dal patrimonio:");
+  }
+});
+
+test("Un affare del Largo entra nel portafoglio", () => {
+  /* Prima si sommava a un contatore separato che nessun'altra regola del
+     gioco sapeva leggere: il portafoglio diventava decorativo. */
+  let s = tavolo();
+  s = turnoDi(s, "p0");
+  const g = G(s, 0);
+  g.tracciato = "veloce";
+  g.stipendio = 0;
+  g.contanti = 500000;
+  g.redditoInizialeVeloce = 1000;
+  const quantiPrima = g.attivita.length;
+  const passivoPrima = redditoPassivo(g);
+  s.pending = { tipo: "affareVeloce", giocatoreId: "p0",
+    affare: { id: "avX", nome: "Prova", acconto: 50000, costo: 50000, flusso: 900 } };
+  s = app(s, { tipo: "compraAffareVeloce", giocatoreId: "p0" });
+  const dopo = G(s, 0);
+  eq(dopo.attivita.length, quantiPrima + 1, "l'affare non è finito fra le attività");
+  eq(redditoPassivo(dopo), passivoPrima + 900, "il flusso non entra nel reddito passivo");
+});
+
+test("Il traguardo del Largo scala con la rendita d'uscita", () => {
+  /* Una cifra fissa aveva senso solo con il moltiplicatore per cento: chi
+     esce da 1.739 € non arriverà mai a +5.000 €, chi esce da 50.000 li
+     supera per caso. */
+  for (const id of ["classico", "roma"]) {
+    const molt = getPacchetto(id).obiettivoLargo;
+    vero(molt && molt > 1, `${id}: manca il traguardo proporzionale del Largo`);
   }
 });
 

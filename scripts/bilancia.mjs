@@ -48,7 +48,14 @@ export const SOGLIE = {
   vittorieVereMin: 0.60,
   /* Ritmo: se si esce troppo presto non si impara nulla, troppo tardi e
      nessuno arriva in fondo. Turni del singolo giocatore, non del tavolo. */
-  turniUscitaMediana: [8, 120],
+  /* Quanti turni PERSONALI per lasciare la Ruota.
+     La fascia era 8–120 quando uscire faceva finire la partita. Ora uscire
+     è metà strada — dopo c'è il Largo, che con la continuità si gioca
+     davvero invece di risolversi in due caselle — quindi la prima metà può
+     durare di più. Quello che conta adesso è che l'uscita non arrivi né
+     subito né mai, e che la partita INTERA finisca: per quello c'è la
+     verifica sulle vittorie vere, che misura proprio le partite chiuse. */
+  turniUscitaMediana: [8, 170],
   /* Equità fra professioni: la più lenta non può essere un altro gioco
      rispetto alla più rapida. */
   rapportoMaxLentaVeloce: 4.0,
@@ -373,7 +380,7 @@ for (const { mercatoId, livello } of COMBINAZIONI) {
     + ` · a tempo ${(aTempo / partiteTotali * 100).toFixed(0)}%`);
 
   verifica(medianaGlobale != null && medianaGlobale >= SOGLIE.turniUscitaMediana[0] && medianaGlobale <= SOGLIE.turniUscitaMediana[1],
-    "Il ritmo dell'uscita è nella fascia prevista",
+    "Lasciare la Ruota richiede il tempo giusto",
     `mediana ${medianaGlobale} turni (fascia ${SOGLIE.turniUscitaMediana.join("–")})`);
 
   const rapporto = piuVeloce > 0 && isFinite(piuVeloce) ? piuLenta / piuVeloce : Infinity;

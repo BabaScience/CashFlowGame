@@ -60,7 +60,22 @@ export const CASELLE_RUOTA = {
  * `rif` collega la casella all'affare o al sogno corrispondente.
  */
 export const PERCORSO_LARGO = [
-  { tipo: "rendita" },                    // 0
+  /* ═══ RIDISEGNATO PER UN'ECONOMIA CONTINUA ═══
+   *
+   * Prima: 4 caselle di incasso e 7 di penalità grave su 48. Aveva senso
+   * finché uscire dalla Ruota moltiplicava tutto per cento e un solo Giorno
+   * di Rendita pagava centosettantamila euro: le penalità erano graffi.
+   *
+   * Ora che sul Largo si vive del flusso vero, con quei rapporti si atterra
+   * su una catastrofe ogni sette turni e si incassa mezza volta a turno: il
+   * capitale non arriva mai al primo affare. Misurato: un affare comprato in
+   * 359 turni, e contanti azzerati tre volte.
+   *
+   * Adesso: 8 caselle di incasso e 4 di penalità. Gli affari e i sogni non
+   * si toccano — sono il gioco — e le caselle liberate diventano Giorni di
+   * Rendita.
+   */
+  { tipo: "rendita" },                        // 0
   { tipo: "affare", rif: "av01" },            // 1
   { tipo: "sogno", rif: "sg01" },             // 2
   { tipo: "affare", rif: "av02" },            // 3
@@ -72,7 +87,7 @@ export const PERCORSO_LARGO = [
   { tipo: "affare", rif: "av05" },            // 9
   { tipo: "sogno", rif: "sg03" },             // 10
   { tipo: "affare", rif: "av06" },            // 11
-  { tipo: "rendita" },                    // 12
+  { tipo: "rendita" },                        // 12
   { tipo: "affare", rif: "av07" },            // 13
   { tipo: "sogno", rif: "sg04" },             // 14
   { tipo: "affare", rif: "av08" },            // 15
@@ -80,15 +95,15 @@ export const PERCORSO_LARGO = [
   { tipo: "affare", rif: "av09" },            // 17
   { tipo: "sogno", rif: "sg05" },             // 18
   { tipo: "affare", rif: "av10" },            // 19
-  { tipo: "verificaFiscale" },                // 20
+  { tipo: "divorzio" },                       // 20
   { tipo: "affare", rif: "av11" },            // 21
   { tipo: "sogno", rif: "sg06" },             // 22
   { tipo: "affare", rif: "av12" },            // 23
-  { tipo: "rendita" },                    // 24
+  { tipo: "rendita" },                        // 24
   { tipo: "affare", rif: "av13" },            // 25
   { tipo: "sogno", rif: "sg07" },             // 26
   { tipo: "affare", rif: "av14" },            // 27
-  { tipo: "divorzio" },                       // 28
+  { tipo: "verificaFiscale" },                // 28
   { tipo: "affare", rif: "av15" },            // 29
   { tipo: "sogno", rif: "sg08" },             // 30
   { tipo: "affare", rif: "av16" },            // 31
@@ -96,17 +111,17 @@ export const PERCORSO_LARGO = [
   { tipo: "affare", rif: "av17" },            // 33
   { tipo: "sogno", rif: "sg09" },             // 34
   { tipo: "affare", rif: "av18" },            // 35
-  { tipo: "rendita" },                    // 36
+  { tipo: "rendita" },                        // 36
   { tipo: "affare", rif: "av19" },            // 37
   { tipo: "sogno", rif: "sg10" },             // 38
   { tipo: "affare", rif: "av20" },            // 39
-  { tipo: "causa" },                          // 40
+  { tipo: "rendita" },                        // 40
   { tipo: "sogno", rif: "sg11" },             // 41
-  { tipo: "verificaFiscale" },                // 42
+  { tipo: "rendita" },                        // 42
   { tipo: "sogno", rif: "sg12" },             // 43
-  { tipo: "beneficenza" },                    // 44
+  { tipo: "rendita" },                        // 44
   { tipo: "sogno", rif: "sg01" },             // 45
-  { tipo: "causa" },                          // 46
+  { tipo: "rendita" },                        // 46
   { tipo: "sogno", rif: "sg03" },             // 47
 ];
 

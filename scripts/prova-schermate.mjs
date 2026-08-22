@@ -383,6 +383,25 @@ prova("Partita con una carta Mercato aperta", () => {
   vero(html.length > 2000);
 });
 
+prova("La scheda del Largo mostra la rendita vera", () => {
+  /* Prima mostrava un contatore separato che partiva da cento volte la
+     rendita. Ora sul Largo si vive del portafoglio, e la scheda deve dire
+     quello che il portafoglio produce. */
+  const s = tavolo();
+  const io = s.giocatori.find((g) => g.id === "a");
+  io.tracciato = "veloce";
+  io.stipendio = 0;
+  io.attivita = [{ rid: "k", nome: "Impianto", costo: 40000, acconto: 40000, passivita: 0, flusso: 1200 }];
+  io.redditoInizialeVeloce = 1200;
+  const html = conMercato(s, React.createElement(Scheda, {
+    giocatore: io, invia: nulla, inAzione: false, mio: true,
+  }));
+  vero(html.length > 300, "la scheda del Largo non si disegna");
+  /* 1.200 € formattati dal mercato romano. */
+  vero(html.includes("1.200"), "non mostra la rendita vera del portafoglio");
+  vero(!html.includes("120.000"), "mostra ancora il contatore moltiplicato per cento");
+});
+
 prova("Partita quando puoi prendere il largo", () => {
   const s = tavolo();
   /* Rendita che supera le spese: compare il riquadro "Sei libero". Il

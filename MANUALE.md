@@ -308,19 +308,29 @@ lascia il lavoro nel mese esatto in cui i conti si toccano è un imprevisto
 lontano dal doverlo cercare di nuovo. Quel margine non è prudenza esagerata: è
 il costo di poter dire di no.
 
-Nel momento in cui esci:
+Uscire vuol dire **una cosa sola: smetti di lavorare.**
 
-1. Ricevi la **liquidazione**: **100 × il tuo reddito passivo**, in contanti.
-   (Il gioco lo spiega così: hai dimostrato di saper investire, e i tuoi
-   investimenti hanno reso cento volte tanto.)
-2. Quella stessa cifra diventa il tuo **Reddito del Giorno di Rendita**:
-   la incassi ogni volta che atterri o passi su una casella Giorno di Rendita.
-3. Il tuo obiettivo diventa: **reddito iniziale + $50.000**.
-4. Conto economico e stato patrimoniale della Ruota non contano più.
-5. **Non puoi più chiedere prestiti alla banca.**
+1. Lo **stipendio va a zero**. Hai lasciato il lavoro.
+2. **Tutto il resto resta com'è**: le case, le attività, i debiti, l'affitto,
+   la spesa. Non c'è nessuna liquidazione e nessun premio.
+3. Il **Giorno di Rendita** incassa quello che il tuo portafoglio produce
+   davvero, meno quello che ti costa vivere — lo stesso conto del Giorno di
+   Paga, senza la busta paga.
+4. Il tuo obiettivo diventa **raddoppiare la rendita** con cui sei uscito.
+5. La banca continua a valutarti con le stesse regole: adesso il tuo reddito
+   è la rendita.
 
-Chi esce prima ha un vantaggio enorme. Ma chi esce con un reddito passivo più
-alto parte da un Giorno di Rendita più grande.
+> **Perché non c'è un premio.** Nelle prime versioni uscire moltiplicava tutto
+> per cento: chi lasciava il lavoro con 1.739 € di rendita riceveva 173.900 €
+> in contanti e incassava la stessa cifra a ogni Giorno di Rendita. È la regola
+> del gioco da tavolo originale, ma spezzava la partita in due: il portafoglio
+> costruito in tutta la prima metà smetteva di contare, le spese sparivano, e
+> la seconda metà era un altro gioco. Qui la seconda metà è la stessa
+> economia, senza più la busta paga.
+
+Chi esce prima ha un vantaggio. Chi esce con una rendita più alta ha un
+traguardo più alto: la domanda è la stessa per tutti — sai raddoppiare quello
+che ti sei costruito?
 
 ---
 
@@ -335,13 +345,15 @@ Qui si gioca solo per due cose: il tuo sogno e il tuo flusso mensile.
 
 ## 11. Le caselle del Largo
 
-### 💰 Giorno di Rendita (4 caselle)
-Atterrando o passando incassi il tuo Reddito del Giorno di Rendita.
+### 💰 Giorno di Rendita (8 caselle)
+Atterrando o passando incassi il tuo flusso mensile: quello che rendono le tue
+cose, meno quello che ti costa vivere.
 
 ### ◆ Affare (20 caselle)
 Ogni casella verde è un investimento unico: una piantagione di caffè, un parco
-eolico, una squadra sportiva. Paghi l'**acconto** indicato e il suo flusso
-mensile si aggiunge al tuo Reddito del Giorno di Rendita.
+eolico, una squadra sportiva. Paghi l'**acconto** indicato ed
+entra nel tuo portafoglio come qualunque altra attività, aumentando il tuo
+reddito passivo.
 
 **Una volta comprato, quell'affare non è più disponibile per gli altri.**
 Sul tabellone appare sbiadito.
@@ -354,19 +366,20 @@ Sul tabellone appare sbiadito.
 
 È l'unico modo che hai per rallentare chi sta per vincere col sogno.
 
-### ❤️ Beneficenza (3 caselle)
+### ❤️ Beneficenza (2 caselle)
 Facoltativa. Donando il **10% del tuo reddito** puoi scegliere se tirare
 **1, 2 o 3 dadi** per il resto della partita, cambiando idea a ogni turno.
 Serve a fermarti esattamente sulla casella che ti interessa.
 
-### 🧾 Verifica fiscale (3 caselle)
-Perdi **metà dei contanti**. Il flusso mensile non cambia.
-
-### ⚖️ Causa legale (3 caselle)
-Perdi **metà dei contanti**.
+### 🧾 Verifica fiscale (2 caselle) · ⚖️ Causa legale (1 casella)
+Costano **due o tre mesi di rendita**. Sono cifre, non quote del patrimonio:
+prima costavano metà dei contanti, e punivano esattamente chi stava
+risparmiando per il primo affare.
 
 ### 💔 Divorzio (1 casella)
-Perdi **tutti i contanti**. Gli affari restano tuoi e continuano a produrre.
+La casella peggiore del tabellone: **sei mesi di rendita**. Nella realtà un
+divorzio divide un patrimonio, non lo brucia.
+
 
 ---
 

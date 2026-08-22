@@ -266,7 +266,8 @@ function SchedaVeloce({ giocatore: g }) {
   const { t } = useLingua();
   const { obiettivo, trovaSogno, trovaAffare } = useMercato();
   const traguardo = g.redditoInizialeVeloce + obiettivo;
-  const fatto = g.redditoRendita - g.redditoInizialeVeloce;
+  const r = riepilogo(g);
+  const fatto = r.redditoPassivo - g.redditoInizialeVeloce;
   const sogno = trovaSogno(g.sognoId);
   return (
     <>
@@ -274,7 +275,7 @@ function SchedaVeloce({ giocatore: g }) {
         <div className="maiusc tenue mb4">{t("scheda.largo")}</div>
         <div className="titolo f22 mb12">{g.nome}</div>
         <KV k={t("scheda.contanti")} v={soldi(g.contanti)} forte />
-        <KV k={t("scheda.redditoRendita")} v={soldi(g.redditoRendita)} forte />
+        <KV k={t("scheda.redditoRendita")} v={soldi(r.redditoPassivo)} forte />
         <KV k={t("scheda.redditoIniziale")} v={soldi(g.redditoInizialeVeloce)} />
         <KV k={t("scheda.obiettivoVincere")} v={soldi(traguardo)} />
         <div className="mt12">

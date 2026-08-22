@@ -44,7 +44,7 @@ export default Object.freeze({
 
   /* Regola da gioco da tavolo: 100 di rata ogni 1.000 presi in prestito. */
   /* Una partita deve stare in una serata, e deve comunque finire. */
-  turniMassimi: 400,
+  turniMassimi: 700,
 
   tassoPrestito: 0.1,
 
@@ -55,6 +55,10 @@ export default Object.freeze({
      La regola più severa vive su Roma, che è il mercato che promette di
      somigliare alla realtà. */
   margineUscita: 1,
+  /* Come su Roma: raddoppiare la rendita con cui si è usciti. La vecchia
+     cifra fissa aveva senso solo finché uscire moltiplicava tutto per
+     cento. */
+  obiettivoLargo: 1.5,
 
   fisco: null,
 

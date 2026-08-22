@@ -29,6 +29,18 @@ const getSogno = (s, id) => sogniDi(s).find((x) => x.id === id) || sogniDi(s)[0]
 const affariLargoDi = (s) => pacchettoDi(s).affariLargo;
 const getAffareVeloce = (s, id) => affariLargoDi(s).find((a) => a.id === id);
 const obiettivoDi = (s) => pacchettoDi(s).obiettivoRendita;
+/**
+ * Quanta rendita serve per vincere, per questo giocatore.
+ *
+ * Un multiplo di quella che aveva quando ha lasciato il lavoro, se il
+ * mercato lo dichiara; altrimenti la vecchia cifra fissa sommata.
+ */
+const traguardoLargo = (s, g) => {
+  const molt = pacchettoDi(s).obiettivoLargo;
+  return molt
+    ? Math.round(g.redditoInizialeVeloce * molt)
+    : g.redditoInizialeVeloce + obiettivoDi(s);
+};
 const debitiEstinguibiliDi = (s) => pacchettoDi(s).debitiEstinguibili;
 const valutaDi = (s) => pacchettoDi(s).valuta;
 /** Un importo nella valuta del mercato di questa partita. */
@@ -116,7 +128,10 @@ export function creaGiocatore(s, id, nome, professioneId, sognoId, indice) {
     eliminato: false,
 
     // Largo
-    redditoRendita: 0,
+    /* Non c'è più un "reddito del Largo" separato: sul Largo si vive di
+       quello che il portafoglio rende davvero. Resta solo la fotografia di
+       quanto rendeva il giorno in cui hai lasciato il lavoro, perché è da
+       lì che si misura quanto sei cresciuto dopo. */
     redditoInizialeVeloce: 0,
     affariVeloci: [],       // id degli affari comprati
     beneficenzaVeloce: false,
@@ -207,7 +222,7 @@ function fineATempo(s) {
   const progresso = (g) => {
     if (g.tracciato === "veloce") {
       const traguardo = obiettivoDi(s);
-      const fatto = g.redditoRendita - g.redditoInizialeVeloce;
+      const fatto = redditoPassivo(g) - g.redditoInizialeVeloce;
       return 1 + Math.max(0, fatto) / Math.max(1, traguardo);
     }
     const r = riepilogo(g);
@@ -552,18 +567,41 @@ function risolviVeloce(s, g) {
   }
 
   if (casella.tipo === "verificaFiscale" || casella.tipo === "causa") {
-    const perso = Math.floor(g.contanti / 2);
+    /* ═══ PROPORZIONALE AL REDDITO, NON AI RISPARMI ═══
+     *
+     * Prima costava metà dei contanti, e con la vecchia economia del Largo
+     * — dove un solo Giorno di Rendita pagava centosettantamila euro — era
+     * una scalfittura. Adesso che sul Largo si vive del proprio flusso
+     * vero, "metà di tutto quello che hai messo da parte" ogni volta che si
+     * passa di lì significa non mettere mai da parte niente: il capitale
+     * non arrivava mai al primo affare.
+     *
+     * Una verifica fiscale o una causa costano una cifra, non una quota del
+     * tuo patrimonio. Sei mesi di rendita è una stangata seria e
+     * sopravvivibile, e non punisce chi ha risparmiato più degli altri. */
+    /* Una verifica fiscale o una causa costano una cifra, non una quota del
+       patrimonio: "metà di tutto quello che hai messo da parte" puniva
+       esattamente chi stava risparmiando per il primo affare. Due o tre
+       mesi di rendita sono una stangata seria e sopravvivibile. */
+    const mesi = casella.tipo === "verificaFiscale" ? 2 : 3;
+    const perso = Math.min(g.contanti, arrotonda(redditoPassivo(g) * mesi));
     g.contanti -= perso;
     const nome = casella.tipo === "verificaFiscale" ? "Verifica fiscale" : "Causa legale";
-    nota(s, `${g.nome}: ${nome}. Perde metà dei contanti (${den(s, perso)}).`, "r15", { nome: g.nome, nome2: nome, importo: den(s, perso) }, "penalita", g.id);
+    nota(s, `${g.nome}: ${nome}. Costa ${den(s, perso)}.`, "r15", { nome: g.nome, nome2: nome, importo: den(s, perso) }, "penalita", g.id);
     s.pending = { tipo: "penalitaVeloce", giocatoreId: g.id, nome, perso };
     return;
   }
 
   if (casella.tipo === "divorzio") {
-    const perso = g.contanti;
-    g.contanti = 0;
-    nota(s, `${g.nome}: Divorzio. Perde tutti i contanti (${den(s, perso)}).`, "r16", { nome: g.nome, importo: den(s, perso) }, "penalita", g.id);
+    /* Il divorzio resta la casella peggiore del tabellone, ma un anno di
+       rendita invece di tutto: azzerare i contanti rendeva impossibile
+       ripartire, e nella realtà si divide un patrimonio, non lo si brucia. */
+    /* Il divorzio resta la casella peggiore, ma sei mesi invece di tutto:
+       azzerare i contanti rendeva impossibile ripartire, e nella realtà si
+       divide un patrimonio, non lo si brucia. */
+    const perso = Math.min(g.contanti, arrotonda(redditoPassivo(g) * 6));
+    g.contanti -= perso;
+    nota(s, `${g.nome}: Divorzio. Costa ${den(s, perso)}.`, "r16", { nome: g.nome, importo: den(s, perso) }, "penalita", g.id);
     s.pending = { tipo: "penalitaVeloce", giocatoreId: g.id, nome: "Divorzio", perso };
     return;
   }
@@ -583,14 +621,14 @@ function controllaVittoria(s, g) {
   }
   if (
     g.tracciato === "veloce" &&
-    g.redditoRendita >= g.redditoInizialeVeloce + obiettivoDi(s)
+    redditoPassivo(g) >= traguardoLargo(s, g)
   ) {
     s.fase = "finita";
     s.vincitore = g.id;
     s.motivoVittoria = "rendita";
     nota(
       s,
-      `🏆 ${g.nome} raggiunge +${den(s, obiettivoDi(s))} di flusso al Largo e vince!`, "r18", { nome: g.nome, v: den(s, obiettivoDi(s)) },
+      `🏆 ${g.nome} raddoppia la sua rendita al Largo e vince!`, "r18", { nome: g.nome, v: den(s, obiettivoDi(s)) },
       "vittoria", g.id
     );
     return true;
@@ -789,18 +827,33 @@ export function applicaAzione(stato, azione) {
     if (s.pending) return err("Concludi prima l'azione in corso.");
     if (!fuoriDallaCorsa(g)) return err("Il tuo reddito passivo non supera ancora le spese totali.");
     const passivo = redditoPassivo(g);
-    const buyout = passivo * 100;
+    /* ═══ NIENTE LIQUIDAZIONE, NIENTE SALTO DI SCALA ═══
+     *
+     * Prima uscire moltiplicava per cento: chi lasciava la Ruota con 1.739 €
+     * di rendita si trovava 173.900 € in contanti E 173.900 € a ogni Giorno
+     * di Rendita. Il portafoglio costruito in tutta la prima metà smetteva
+     * di contare — l'incasso non veniva più dagli immobili e dalle attività
+     * ma da un numero astratto — e le spese sparivano del tutto. Erano due
+     * giochi diversi attaccati con lo scotch, ed è il gioco da tavolo
+     * originale a farlo così.
+     *
+     * Qui no. Uscire vuol dire una cosa sola e concreta: **smetti di
+     * lavorare**. Lo stipendio va a zero; tutto il resto resta com'è — le
+     * case, le attività, i debiti, l'affitto, la spesa. Il Giorno di Rendita
+     * incassa quello che il tuo portafoglio produce davvero, meno quello che
+     * ti costa vivere. La seconda metà non è un altro gioco: è la stessa
+     * economia senza più la busta paga. */
     g.tracciato = "veloce";
     g.posizione = 0;
-    g.redditoRendita = buyout;
-    g.redditoInizialeVeloce = buyout;
-    g.contanti += buyout;
+    g.stipendioPrimaDiUscire = g.stipendio;
+    g.stipendio = 0;
+    g.redditoInizialeVeloce = passivo;
     g.turniBeneficenza = 0;
     g.usciteDallaCorsa = g.turniGiocati;
     g.mesiAllUscita = g.mesi;
     nota(
       s,
-      `🎉 ${g.nome} esce dalla Ruota! Liquidazione ${den(s, buyout)} (100 × ${den(s, passivo)} di reddito passivo). Obiettivo: ${den(s, buyout + obiettivoDi(s))}.`, "r28", { nome: g.nome, importo: den(s, buyout), importo2: den(s, passivo), v: den(s, buyout + obiettivoDi(s)) },
+      `🎉 ${g.nome} lascia il lavoro! Vive di ${den(s, passivo)} al mese di rendita. Obiettivo: ${den(s, traguardoLargo(s, g))}.`, "r28", { nome: g.nome, importo: den(s, passivo), importo2: den(s, passivo), v: den(s, passivo + obiettivoDi(s)) },
       "liberta", g.id
     );
     return ok();
@@ -852,8 +905,11 @@ export function applicaAzione(stato, azione) {
       nota(s, `${g.nome} tira ${valori.join(" + ")} = ${passi}.`, "r30", { nome: g.nome, v: valori.join(" + "), passi: passi }, "dado", g.id);
       for (let i = 0; i < giorni; i++) {
         g.mesi = (g.mesi || 0) + 1; // fuori dalla Ruota il tempo passa uguale
-        g.contanti += g.redditoRendita;
-        nota(s, `${g.nome} incassa il Giorno di Rendita: +${den(s, g.redditoRendita)}.`, "r31", { nome: g.nome, importo: den(s, g.redditoRendita) }, "paga", g.id);
+        /* Lo stesso conto del Giorno di Paga, senza lo stipendio: quello
+           che rendono le tue cose, meno quello che ti costa vivere. */
+        const flusso = flussoMensile(g);
+        g.contanti += flusso;
+        nota(s, `${g.nome} incassa il Giorno di Rendita: ${flusso >= 0 ? "+" : ""}${den(s, flusso)}.`, "r31", { nome: g.nome, importo: den(s, flusso) }, "paga", g.id);
       }
       risolviVeloce(s, g);
     }
@@ -1013,11 +1069,19 @@ export function applicaAzione(stato, azione) {
       if (g.contanti < affare.acconto) return err("Contanti insufficienti.");
       g.contanti -= affare.acconto;
       g.affariVeloci.push(affare.id);
-      g.redditoRendita += affare.flusso;
+      /* Un affare del Largo è un attivo come gli altri: entra nel
+         portafoglio e da lì produce, invece di sommarsi a un contatore
+         separato che nessun'altra regola del gioco sa leggere. */
+      g.attivita.push({
+        rid: idBreve(s), categoria: "largo", nome: affare.nome,
+        costo: affare.costo ?? affare.acconto, acconto: affare.acconto,
+        passivita: Math.max(0, (affare.costo ?? affare.acconto) - affare.acconto),
+        flusso: affare.flusso, mesiAcquisto: g.mesi ?? 0,
+      });
       s.affariVenduti[affare.id] = g.id;
       nota(
         s,
-        `${g.nome} compra "${affare.nome}" per ${den(s, affare.acconto)}: flusso +${den(s, affare.flusso)}/mese (totale ${den(s, g.redditoRendita)}).`, "r45", { nome: g.nome, affareNome: affare.nome, importo: den(s, affare.acconto), importo2: den(s, affare.flusso), importo3: den(s, g.redditoRendita) },
+        `${g.nome} compra "${affare.nome}" per ${den(s, affare.acconto)}: flusso +${den(s, affare.flusso)}/mese (totale ${den(s, redditoPassivo(g))}).`, "r45", { nome: g.nome, affareNome: affare.nome, importo: den(s, affare.acconto), importo2: den(s, affare.flusso), importo3: den(s, redditoPassivo(g)) },
         "veloce", g.id
       );
       if (controllaVittoria(s, g)) return ok();
@@ -1046,7 +1110,7 @@ export function applicaAzione(stato, azione) {
   if (tipo === "beneficenzaVeloce") {
     if (s.pending.tipo !== "beneficenzaVeloce") return err("Azione non valida ora.");
     if (azione.accetta) {
-      const costo = arrotonda(g.redditoRendita * 0.1);
+      const costo = arrotonda(redditoPassivo(g) * 0.1);
       if (g.contanti < costo) return err("Contanti insufficienti.");
       g.contanti -= costo;
       g.beneficenzaVeloce = true;
@@ -1270,8 +1334,8 @@ export function classifica(s) {
         valoreAttivi: r.valoreAttivi,
         passivitaTotali: r.passivitaTotali,
         patrimonioNetto: g.contanti + r.valoreAttivi - r.passivitaTotali,
-        redditoRendita: g.redditoRendita,
-        guadagnoVeloce: g.redditoRendita - g.redditoInizialeVeloce,
+        redditoRendita: redditoPassivo(g),
+        guadagnoVeloce: redditoPassivo(g) - g.redditoInizialeVeloce,
         affariVeloci: g.affariVeloci.length,
         sognoComprato: g.sognoComprato,
         figli: g.figli,

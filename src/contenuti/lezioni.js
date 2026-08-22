@@ -364,6 +364,31 @@ export const LEZIONI = [
     ],
   },
 
+  {
+    id: "dopo-la-liberta",
+    titolo: "Cosa succede il giorno dopo",
+    minuti: 2,
+    sommario: "Smettere di lavorare non è un traguardo: è un cambio di reddito.",
+    corpo: () => [
+      "Nell'immaginario, raggiungere l'indipendenza finanziaria è una linea che si " +
+      "taglia: prima di qua, dopo di là. Nei conti non funziona così. Il giorno dopo " +
+      "hai esattamente le stesse case, le stesse attività, gli stessi debiti e le " +
+      "stesse spese del giorno prima. L'unica riga che cambia è lo stipendio, che va " +
+      "a zero.",
+      "È per questo che il margine conta. Finché lavori, uno sfitto o una caldaia rotta " +
+      "li assorbe la busta paga. Dopo, li assorbe il tuo portafoglio — e se il " +
+      "portafoglio copriva le spese e basta, non c'è niente da cui assorbirli.",
+      "Cambia anche il modo in cui ti guarda una banca. Il reddito da dimostrare non è " +
+      "più la busta paga ma la rendita, e le regole restano quelle: la rata non può " +
+      "superare un terzo di quello che entra. Chi ha smesso di lavorare non ha smesso " +
+      "di essere valutato.",
+      "Nel gioco è la stessa cosa: uscire dalla Ruota non regala niente e non azzera " +
+      "niente. Il Giorno di Rendita incassa quello che le tue cose producono davvero, " +
+      "meno quello che ti costa vivere, e da lì si riparte — con l'obiettivo di " +
+      "raddoppiare quello che ti sei costruito.",
+    ],
+  },
+
 ];
 
 export const perId = (id) => LEZIONI.find((l) => l.id === id);

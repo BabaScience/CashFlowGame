@@ -47,7 +47,7 @@ export default Object.freeze({
   /* Un fido bancario italiano, non una regola da tabellone: circa il 14%
      annuo, che è quanto costa davvero il credito al consumo non garantito. */
   /* Una partita deve stare in una serata, e deve comunque finire. */
-  turniMassimi: 400,
+  turniMassimi: 700,
 
   tassoPrestito: 0.012,
 
@@ -65,6 +65,16 @@ export default Object.freeze({
      la mediana sta a 101 turni. È il margine più alto che questo mercato
      regge con un reddito solo. */
   margineUscita: 1.5,
+
+  /* L'obiettivo del Largo, in multipli della rendita che avevi il giorno in
+     cui hai lasciato il lavoro: raddoppiarla.
+     Prima era una cifra fissa (5.000 € al mese) che aveva senso solo nella
+     vecchia economia, dove uscire moltiplicava tutto per cento. Con la
+     continuità quella cifra è diventata irraggiungibile per chi esce da
+     1.739 €: servirebbero 240.000 € di capitale. Un multiplo invece scala
+     da solo — chi esce piccolo ha un traguardo piccolo, e la domanda resta
+     la stessa per tutti: sai raddoppiare quello che ti sei costruito? */
+  obiettivoLargo: 1.5,
   creditoConsumo: CREDITO_CONSUMO,
   costiVendita: COSTI_VENDITA,
 

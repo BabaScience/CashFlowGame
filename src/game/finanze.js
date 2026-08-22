@@ -157,9 +157,9 @@ export function riepilogo(g) {
 /** Riepilogo per un giocatore già al Largo. */
 export function riepilogoVeloce(g) {
   return {
-    redditoRendita: g.redditoRendita,
+    redditoRendita: redditoPassivo(g),
     redditoIniziale: g.redditoInizialeVeloce,
-    guadagnato: g.redditoRendita - g.redditoInizialeVeloce,
+    guadagnato: redditoPassivo(g) - g.redditoInizialeVeloce,
     numeroAffari: g.affariVeloci.length,
   };
 }
