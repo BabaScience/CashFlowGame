@@ -116,6 +116,13 @@ export function creaGiocatore(s, id, nome, professioneId, sognoId, indice) {
     /* Il margine d'uscita viaggia col giocatore: `fuoriDallaCorsa` è
        chiamata da mezza interfaccia e non deve risalire allo stato. */
     margineUscita: pacchettoDi(s).margineUscita ?? 1,
+    /* Le aliquote che servono a calcolare quanto fa risparmiare un
+       professionista, senza dover risalire allo stato. */
+    cedolare: pacchettoDi(s).fisco?.cedolare ?? 0,
+    quotaSfitto: pacchettoDi(s).fisco?.quotaSfitto ?? 0,
+    /* Chi hai assunto. Costano tutti i mesi e servono qualche volta: è
+       quello che li rende una decisione. */
+    professionisti: [],
     figli: 0,
     spese: { ...p.spese },
     passivita: { ...p.passivita, prestitoBanca: 0 },
@@ -584,10 +591,13 @@ function risolviVeloce(s, g) {
        esattamente chi stava risparmiando per il primo affare. Due o tre
        mesi di rendita sono una stangata seria e sopravvivibile. */
     const mesi = casella.tipo === "verificaFiscale" ? 2 : 3;
-    const perso = Math.min(g.contanti, arrotonda(redditoPassivo(g) * mesi));
+    /* Chi ha il professionista giusto paga la metà: è quello che si compra
+       pagandolo tutti i mesi anche quando non serve. */
+    const difeso = (g.professionisti || []).some((p) => (p.dimezza || []).includes(casella.tipo));
+    const perso = Math.min(g.contanti, arrotonda(redditoPassivo(g) * mesi * (difeso ? 0.5 : 1)));
     g.contanti -= perso;
     const nome = casella.tipo === "verificaFiscale" ? "Verifica fiscale" : "Causa legale";
-    nota(s, `${g.nome}: ${nome}. Costa ${den(s, perso)}.`, "r15", { nome: g.nome, nome2: nome, importo: den(s, perso) }, "penalita", g.id);
+    nota(s, `${g.nome}: ${nome}. Costa ${den(s, perso)}${difeso ? " (dimezzata: il professionista se n'è occupato)" : ""}.`, "r15", { nome: g.nome, nome2: nome, importo: den(s, perso) }, "penalita", g.id);
     s.pending = { tipo: "penalitaVeloce", giocatoreId: g.id, nome, perso };
     return;
   }
@@ -795,6 +805,26 @@ export function applicaAzione(stato, azione) {
     g.passivita.prestitoBanca += imp;
     g.contanti += imp;
     nota(s, `${g.nome} chiede un prestito di ${den(s, imp)} (rata +${den(s, imp / 10)}/mese).`, "r25", { nome: g.nome, importo: den(s, imp), importo2: den(s, imp / 10) }, "prestito", g.id);
+    return ok();
+  }
+
+  if (tipo === "professionista") {
+    const elenco = pacchettoDi(s).professionisti || [];
+    const scelto = elenco.find((x) => x.id === azione.id);
+    if (!scelto) return err("Professionista sconosciuto.");
+    const gia = (g.professionisti || []).some((x) => x.id === scelto.id);
+    if (gia) {
+      g.professionisti = g.professionisti.filter((x) => x.id !== scelto.id);
+      nota(s, `${g.nome} congeda ${scelto.nome.toLowerCase()}.`, "r61",
+        { nome: g.nome, chi: scelto.nome }, "professionista", g.id);
+    } else {
+      /* Si porta dietro la scheda intera: il costo e gli sconti devono
+         restare quelli del giorno in cui l'hai assunto, anche se il
+         pacchetto del mercato cambia mentre la partita è in corso. */
+      g.professionisti = [...(g.professionisti || []), { ...scelto }];
+      nota(s, `${g.nome} assume ${scelto.nome.toLowerCase()} (${den(s, scelto.costoMensile)}/mese).`, "r62",
+        { nome: g.nome, chi: scelto.nome, importo: den(s, scelto.costoMensile) }, "professionista", g.id);
+    }
     return ok();
   }
 

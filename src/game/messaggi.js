@@ -15,6 +15,8 @@
 
 export const MESSAGGI = {
   it: {
+    r61: "{nome} congeda {chi}.",
+    r62: "{nome} assume {chi} ({importo}/mese).",
     r00: "⏳ Tempo scaduto dopo {numeroTurno} turni. Vince {capofilaNome}, il più vicino al proprio obiettivo.",
     r01: "{nome} salta il turno (ne restano {turniDaSaltare}).",
     r02: "{nome} non ha contanti a sufficienza: la banca gli presta {importo} (rata +{importo2}/mese) per pagare {motivo}.",
@@ -81,6 +83,8 @@ export const MESSAGGI = {
   },
 
   en: {
+    r61: "{nome} lets {chi} go.",
+    r62: "{nome} hires {chi} ({importo}/mo).",
     r00: "⏳ Time is up after {numeroTurno} turns. {capofilaNome} wins, closest to their goal.",
     r01: "{nome} misses a turn ({turniDaSaltare} left).",
     r02: "{nome} is short of cash: the bank lends {importo} (payment +{importo2}/month) to cover {motivo}.",

@@ -28,7 +28,7 @@
 import { PROFESSIONI, ETICHETTE_SPESE, ETICHETTE_PASSIVITA, DEBITI_ESTINGUIBILI } from "./professioni.js";
 import { MAZZI, PICCOLI_AFFARI, GRANDI_AFFARI, MERCATO, EXTRA, CATEGORIE } from "./mazzi.js";
 import { AFFARI_LARGO, SOGNI } from "./largo.js";
-import { FONTI, CREDITO_CONSUMO, COSTI_VENDITA } from "./fonti.js";
+import { FONTI, CREDITO_CONSUMO, COSTI_VENDITA, PROFESSIONISTI } from "./fonti.js";
 
 export default Object.freeze({
   id: "roma",
@@ -77,6 +77,7 @@ export default Object.freeze({
   obiettivoLargo: 1.5,
   creditoConsumo: CREDITO_CONSUMO,
   costiVendita: COSTI_VENDITA,
+  professionisti: PROFESSIONISTI,
 
   fisco: {
     quotaCostiL1: 0.28,

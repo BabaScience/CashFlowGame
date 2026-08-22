@@ -11,7 +11,7 @@ import { getPacchetto } from "../src/game/mercati/indice.js";
 const PACCHETTO = getPacchetto();
 const getProfessione = (id) => PACCHETTO.professioni.find((p) => p.id === id) || PACCHETTO.professioni[0];
 const OBIETTIVO_RENDITA = PACCHETTO.obiettivoRendita;
-import { flussoMensile, speseTotali, redditoTotale, redditoPassivo, riepilogo, fuoriDallaCorsa } from "../src/game/finanze.js";
+import { flussoMensile, speseTotali, redditoTotale, redditoPassivo, riepilogo, fuoriDallaCorsa, contoProfessionisti } from "../src/game/finanze.js";
 
 
 let passati = 0, falliti = 0;
@@ -707,6 +707,81 @@ test("Anche dopo aver lasciato il lavoro la banca presta", () => {
   vero(concesso > 0, "sul Largo la banca non presta più niente");
   vero(concesso <= getPacchetto("roma").creditoConsumo.importoMassimo,
     "presta oltre il tetto del credito al consumo");
+});
+
+test("riepilogo() e speseTotali() danno lo stesso totale", () => {
+  /* Sono due strade allo stesso numero: quando divergono, l'interfaccia
+     mostra un conto e il motore ne usa un altro. È successo aggiungendo i
+     professionisti — la spesa entrava in speseTotali e non in riepilogo. */
+  let s = tavoloRoma("quadro");
+  const varianti = [
+    (g) => {},
+    (g) => { g.figli = 2; },
+    (g) => { g.passivita.prestitoBanca = 20000; },
+    (g) => { g.professionisti = [{ id: "avvocato", costoMensile: 90, scontoSfitto: 0.4 }]; },
+    (g) => {
+      g.professionisti = [{ id: "commercialista", costoMensile: 120, scontoImposte: 0.15 }];
+      g.immobili = [{ rid: "x", nome: "p", costo: 1, acconto: 1, mutuo: 0, flusso: 0, canone: 5000, rata: 0 }];
+    },
+  ];
+  for (const applica of varianti) {
+    const g = { ...s.giocatori.find((x) => x.id === "a") };
+    g.spese = { ...g.spese }; g.passivita = { ...g.passivita };
+    g.immobili = [...g.immobili]; g.attivita = [...g.attivita];
+    applica(g);
+    eq(riepilogo(g).speseTotali, speseTotali(g), "i due totali divergono:");
+  }
+});
+
+console.log("\n── Chi lavora per te ──");
+
+test("Il commercialista conviene solo sopra una certa dimensione", () => {
+  /* È il punto della cosa, e viene dalla realtà: 1.440 € l'anno sono
+     un'assurdità per chi ha un bilocale e un affare per chi ha uno stabile. */
+  const conCanoni = (canone) => {
+    let s = tavoloRoma("insegnante");
+    const g = s.giocatori.find((x) => x.id === "a");
+    g.immobili = [{ rid: "x", nome: "p", costo: 1, acconto: 1, mutuo: 0, flusso: 0, canone, rata: 0 }];
+    s = applicaAzione(s, { tipo: "professionista", giocatoreId: "a", id: "commercialista" }).stato;
+    return contoProfessionisti(s.giocatori.find((x) => x.id === "a")).netto;
+  };
+  vero(conCanoni(700) > 0, "con un bilocale il commercialista deve costare più di quanto rende");
+  vero(conCanoni(6000) < 0, "con un portafoglio deve ripagarsi");
+});
+
+test("Assumere e congedare è reversibile e si vede nelle spese", () => {
+  let s = tavoloRoma("quadro");
+  const prima = riepilogo(s.giocatori.find((x) => x.id === "a")).speseTotali;
+  s = applicaAzione(s, { tipo: "professionista", giocatoreId: "a", id: "avvocato" }).stato;
+  const conAvvocato = s.giocatori.find((x) => x.id === "a");
+  eq(conAvvocato.professionisti.length, 1, "non risulta assunto");
+  vero(riepilogo(conAvvocato).speseTotali > prima, "il compenso non compare nelle spese");
+  s = applicaAzione(s, { tipo: "professionista", giocatoreId: "a", id: "avvocato" }).stato;
+  const dopo = s.giocatori.find((x) => x.id === "a");
+  eq(dopo.professionisti.length, 0, "non si può congedare");
+  eq(riepilogo(dopo).speseTotali, prima, "le spese non tornano come prima");
+});
+
+test("Il professionista giusto dimezza la sua penalità", () => {
+  /* Il commercialista dimezza la verifica fiscale, l'avvocato la causa:
+     è quello che si compra pagandoli anche quando non serve. */
+  const P = getPacchetto("roma");
+  const comm = P.professionisti.find((x) => x.id === "commercialista");
+  const avv = P.professionisti.find((x) => x.id === "avvocato");
+  vero(comm.dimezza.includes("verificaFiscale"), "il commercialista non difende dalla verifica");
+  vero(avv.dimezza.includes("causa"), "l'avvocato non difende dalla causa");
+  vero(!comm.dimezza.includes("causa"), "il commercialista non deve difendere in tribunale");
+  vero(!avv.dimezza.includes("verificaFiscale"), "l'avvocato non deve tenere i conti");
+});
+
+test("I compensi stanno nelle fasce di mercato rilevate", () => {
+  /* Commercialista: 500–1.500 € l'anno per una gestione completa.
+     Avvocato: un incarico a Roma va dai 400 ai 2.000 €. */
+  for (const p of getPacchetto("roma").professionisti) {
+    const anno = p.costoMensile * 12;
+    vero(anno >= 500 && anno <= 2500,
+      `${p.nome}: ${anno} € l'anno è fuori dalle fasce rilevate`);
+  }
 });
 
 console.log(`\n${passati} test superati, ${falliti} falliti\n`);

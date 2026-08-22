@@ -39,6 +39,7 @@ export function MercatoProvider({ stato, mercatoId, children }) {
       debitiEstinguibili: pacchetto.debitiEstinguibili,
       obiettivo: pacchetto.obiettivoRendita,
     obiettivoLargo: pacchetto.obiettivoLargo,
+    professionisti: pacchetto.professionisti || [],
       livello,
       /* Il flusso di una carta al livello di QUESTA stanza. La carta porta
          stampato il numero del Livello 1: mostrarlo così com'è al Livello 2

@@ -216,6 +216,18 @@ export default {
   },
 
   scheda: {
+    professionisti: "People who work for you",
+    professionistiSpiegazione: "They cost every month and are needed now and then. Below a certain size they are not worth it: that is the point.",
+    assumi: "Hire",
+    congeda: "Let go",
+    alMese: "mo",
+    cosaFa_commercialista: "Picks the right tax regime and does not miss deductions: you pay less tax on rents. And if an audit comes, the books are in order — it costs half.",
+    cosaFa_avvocato: "Leases drafted properly and evictions started at once: you lose less to arrears and empty months. And a lawsuit costs half.",
+    professionistiCosto: "What they cost you",
+    professionistiRisparmio: "What they save you",
+    professionistiNetto: "Net per month",
+    siRipagano: "They pay for themselves: with this portfolio they cost less than they save.",
+    nonSiRipagano: "For now they cost more than they save. With more property the sum turns around.",
     nessunAffare: "None yet. Every green deal raises your monthly income.",
     largoSpiegazione: "You have left your job: the salary is gone, everything else is not. Below are the same expenses, the same debts and the same bank as before.",
     tiManca: "You still need {importo} a month of passive income. This market asks for twice your expenses: leaving at break-even means coming back at the first surprise.",

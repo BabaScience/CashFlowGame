@@ -134,3 +134,59 @@ export const CREDITO = {
   anni: 25,
   ltvMax: 0.80,            // di norma non si finanzia oltre l'80%
 };
+
+
+/**
+ * I PROFESSIONISTI CHE SI POSSONO ASSUMERE.
+ *
+ * Chi mette insieme qualche affitto e un'attività, in Italia, non lo fa da
+ * solo: c'è un commercialista che sceglie il regime fiscale e tiene i conti,
+ * e prima o poi un avvocato che scrive i contratti e recupera i canoni non
+ * pagati. Costano tutti i mesi e servono solo qualche volta — ed è
+ * esattamente quello che li rende una decisione invece di una spesa.
+ *
+ * ═══ I COSTI VERI (rilevazioni 2026) ═══
+ *
+ * Commercialista: la gestione completa di una partita IVA in forfettario sta
+ * fra 500 e 1.500 € l'anno; la sola dichiarazione dei redditi fra 300 e 800.
+ * Chi ha più immobili e un'attività sta nella fascia alta: 1.440 € l'anno,
+ * cioè 120 € al mese, è una cifra centrale e onesta.
+ *
+ * Avvocato: a Roma un incarico va dai 400 ai 2.000 €, e uno sfratto per
+ * morosità dai 600 ai 1.400. A ore si va da 100 a oltre 500 €. Qui è
+ * modellato come un rapporto continuativo — 90 € al mese, poco più di
+ * mille l'anno — che è quello che fa chi ha inquilini: non lo chiama
+ * quando serve, ce l'ha già.
+ *
+ * ═══ COSA FANNO, IN TERMINI DI GIOCO ═══
+ *
+ * Niente magie: fanno le due cose che fanno nella realtà.
+ *
+ * Il commercialista **paga meno imposte** — sceglie il regime giusto, non
+ * dimentica le deduzioni — e ti tiene in ordine davanti a una verifica.
+ * L'avvocato **riduce le perdite da morosità** — contratti scritti bene,
+ * sfratti avviati subito — e ti difende in causa.
+ *
+ * E come nella realtà, sotto una certa dimensione non convengono: con un
+ * solo bilocale il commercialista costa più di quanto fa risparmiare. È il
+ * punto della cosa.
+ */
+export const PROFESSIONISTI = [
+  {
+    id: "commercialista",
+    nome: "Commercialista",
+    costoMensile: 120,
+    /* Quanta parte della cedolare secca ti fa risparmiare scegliendo bene. */
+    scontoImposte: 0.15,
+    /* Dimezza la verifica fiscale: i conti sono in ordine. */
+    dimezza: ["verificaFiscale"],
+  },
+  {
+    id: "avvocato",
+    nome: "Avvocato",
+    costoMensile: 90,
+    /* Quanta parte delle perdite da sfitto e morosità eviti. */
+    scontoSfitto: 0.40,
+    dimezza: ["causa"],
+  },
+];

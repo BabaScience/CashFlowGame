@@ -210,6 +210,18 @@ export default {
   },
 
   scheda: {
+    professionisti: "Chi lavora per te",
+    professionistiSpiegazione: "Costano tutti i mesi e servono qualche volta. Sotto una certa dimensione non convengono: è il punto.",
+    assumi: "Assumi",
+    congeda: "Congeda",
+    alMese: "mese",
+    cosaFa_commercialista: "Sceglie il regime fiscale giusto e non dimentica le deduzioni: paghi meno imposte sugli affitti. E se arriva una verifica fiscale, i conti sono in ordine — costa la metà.",
+    cosaFa_avvocato: "Contratti scritti bene e sfratti avviati subito: perdi meno per morosità e mesi vuoti. E in causa costa la metà.",
+    professionistiCosto: "Quanto ti costano",
+    professionistiRisparmio: "Quanto ti fanno risparmiare",
+    professionistiNetto: "Netto al mese",
+    siRipagano: "Si ripagano: con questo portafoglio ti costano meno di quanto ti fanno risparmiare.",
+    nonSiRipagano: "Per ora ti costano più di quanto ti fanno risparmiare. Con più immobili il conto si gira.",
     nessunAffare: "Nessuno ancora. Ogni affare verde aumenta il tuo reddito mensile.",
     largoSpiegazione: "Hai lasciato il lavoro: lo stipendio non c'è più, tutto il resto sì. Sotto trovi le stesse uscite, gli stessi debiti e la stessa banca di prima.",
     tiManca: "Ti manca ancora {importo} al mese di reddito passivo. Su questo mercato serve il doppio delle spese: uscire al pareggio significa rientrare al primo imprevisto.",

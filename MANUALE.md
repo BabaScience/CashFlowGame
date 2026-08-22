@@ -272,6 +272,32 @@ spese** e alzare il flusso mensile.
 
 ---
 
+## 7-bis. Chi lavora per te
+
+Sul mercato di Roma puoi **assumere due professionisti**. Costano tutti i mesi
+e servono qualche volta — ed è esattamente quello che li rende una decisione
+invece di una spesa.
+
+| | Costo | Cosa fa |
+|---|---:|---|
+| **Commercialista** | 120 €/mese | Sceglie il regime fiscale giusto e non dimentica le deduzioni: **paghi il 15% in meno di cedolare** sugli affitti. Dimezza la **Verifica fiscale**. |
+| **Avvocato** | 90 €/mese | Contratti scritti bene e sfratti avviati subito: **eviti il 40% delle perdite** da sfitto e morosità. Dimezza la **Causa legale**. |
+
+I compensi vengono dalle tariffe reali: la gestione completa di una posizione
+fiscale sta fra 500 e 1.500 € l'anno, e a Roma un incarico legale va dai 400
+ai 2.000 €, con uno sfratto per morosità fra i 600 e i 1.400.
+
+**Sotto una certa dimensione non convengono, ed è il punto.** Con un bilocale
+da 700 € di canone il commercialista ti costa 120 € e te ne fa risparmiare 22.
+Con un portafoglio da 6.000 € te ne fa risparmiare 189 e si ripaga. La scheda
+te lo dice a chiare lettere: *quanto ti costano*, *quanto ti fanno
+risparmiare*, *netto al mese*.
+
+È la stessa domanda del resto del gioco, applicata a un servizio invece che a
+un immobile: questa spesa produce più di quanto costa?
+
+---
+
 ## 8. La bancarotta
 
 Sei in bancarotta se, **passando dal Giorno di Paga**, il tuo flusso mensile è
