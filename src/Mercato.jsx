@@ -2,6 +2,7 @@ import React, { createContext, useContext, useMemo } from "react";
 import { getPacchetto, pacchettoDi } from "./game/mercati/indice.js";
 import { flussoAlLivello, vociFlusso, LIVELLO_PREDEFINITO } from "./game/regole/livelli.js";
 import { soldi as formatta, impostaValutaCorrente } from "./game/finanze.js";
+import { useLingua } from "./Lingua.jsx";
 
 /**
  * IL MERCATO CORRENTE, A DISPOSIZIONE DI TUTTA L'INTERFACCIA.
@@ -19,9 +20,45 @@ import { soldi as formatta, impostaValutaCorrente } from "./game/finanze.js";
  */
 const Contesto = createContext(null);
 
+/**
+ * TRADURRE I CONTENUTI DEL MERCATO.
+ *
+ * Le carte, le professioni e i sogni sono dati del pacchetto, scritti in
+ * italiano. Tradurli qui — una volta, all'ingresso del contesto — significa
+ * che tutto quello che sta sotto riceve già i nomi giusti senza saperne
+ * niente: nessun componente deve ricordarsi di chiamare una funzione.
+ *
+ * Quello che NON si traduce sono i numeri. Un mercato resta il suo mercato:
+ * Roma costa quello che costa a Roma, in euro, anche letta in francese.
+ */
+function tradotto(elenco, tavola) {
+  if (!tavola) return elenco;
+  return elenco.map((x) => {
+    const t = tavola[x.id];
+    return t ? { ...x, ...t } : x;
+  });
+}
+
 export function MercatoProvider({ stato, mercatoId, children }) {
+  const { lingua } = useLingua();
   const valore = useMemo(() => {
-    const pacchetto = stato ? pacchettoDi(stato) : getPacchetto(mercatoId);
+    const grezzo = stato ? pacchettoDi(stato) : getPacchetto(mercatoId);
+    const tav = grezzo.lingue?.[lingua];
+    const pacchetto = tav ? {
+      ...grezzo,
+      professioni: tradotto(grezzo.professioni, tav.professioni),
+      sogni: tradotto(grezzo.sogni, tav.sogni),
+      affariLargo: tradotto(grezzo.affariLargo, tav.carte),
+      mazzi: Object.fromEntries(
+        Object.entries(grezzo.mazzi).map(([k, m]) => [k, tradotto(m, tav.carte)])
+      ),
+      etichetteSpese: { ...grezzo.etichetteSpese, ...(tav.etichetteSpese || {}) },
+      etichettePassivita: { ...grezzo.etichettePassivita, ...(tav.etichettePassivita || {}) },
+      debitiEstinguibili: (grezzo.debitiEstinguibili || []).map((d) => ({
+        ...d, nome: tav.etichettePassivita?.[d.chiave] || d.nome,
+      })),
+      professionisti: tradotto(grezzo.professionisti || [], tav.professionisti),
+    } : grezzo;
     const { valuta } = pacchetto;
     const livello = stato?.livello ?? LIVELLO_PREDEFINITO;
     // Da qui in poi ogni soldi() dell'interfaccia parla la valuta giusta.
@@ -52,7 +89,7 @@ export function MercatoProvider({ stato, mercatoId, children }) {
       trovaSogno: (id) => pacchetto.sogni.find((x) => x.id === id) || pacchetto.sogni[0],
       trovaAffare: (id) => pacchetto.affariLargo.find((a) => a.id === id),
     };
-  }, [stato, mercatoId]);
+  }, [stato, mercatoId, lingua]);
 
   return <Contesto.Provider value={valore}>{children}</Contesto.Provider>;
 }

@@ -219,7 +219,16 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       così; la tensione ora è strategica.
       Da fare in un secondo momento: una perdita del lavoro modellata sul
       serio (NASpI, durata, percentuale) è materia da Livello 2.
-- [ ] **I contenuti dei mercati non sono tradotti** — vale ora anche per il francese: — con l'interfaccia in
+- [-] **I contenuti dei mercati** — lo strato c'è e le cose che si leggono
+      prima di cominciare sono tradotte in inglese e in francese: professioni,
+      sogni, voci del conto economico, professionisti. La traduzione passa dal
+      contesto del mercato, una volta sola, così nessun componente deve
+      ricordarsi di chiamare una funzione, e quattro prove verificano che non
+      manchi niente e che tradurre non tocchi mai un numero.
+      Restano i **nomi e i testi delle carte** — 308 fra i due mercati, circa
+      600 stringhe per lingua. Si aggiungono a `lingue/<id>.js` sotto `carte`,
+      chiave per chiave, senza toccare altro. Erano già annotate come lavoro
+      da chi conosce il posto: — con l'interfaccia in
       inglese, professioni, sogni e testi delle carte restano in italiano.
       Difendibile per Roma (il mercato è romano, il suo lessico anche), ma
       diventa un problema col terzo mercato. La soluzione giusta è che il

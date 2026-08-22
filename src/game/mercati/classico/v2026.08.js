@@ -23,6 +23,8 @@
 import { PROFESSIONI, ETICHETTE_SPESE, ETICHETTE_PASSIVITA, DEBITI_ESTINGUIBILI } from "./professioni.js";
 import { MAZZI, PICCOLI_AFFARI, GRANDI_AFFARI, MERCATO, EXTRA, CATEGORIE } from "./mazzi.js";
 import { AFFARI_LARGO, SOGNI } from "./largo.js";
+import en from "./lingue/en.js";
+import fr from "./lingue/fr.js";
 
 export default Object.freeze({
   id: "classico",
@@ -55,6 +57,7 @@ export default Object.freeze({
      La regola più severa vive su Roma, che è il mercato che promette di
      somigliare alla realtà. */
   margineUscita: 1,
+  lingue: { en, fr },
   /* Come su Roma: raddoppiare la rendita con cui si è usciti. La vecchia
      cifra fissa aveva senso solo finché uscire moltiplicava tutto per
      cento. */

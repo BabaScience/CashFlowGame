@@ -12,7 +12,7 @@
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { traduci, chiaviMancanti, dizionari, LINGUE } from "../src/i18n/index.js";
-import { getPacchetto } from "../src/game/mercati/indice.js";
+import { getPacchetto, MERCATI } from "../src/game/mercati/indice.js";
 import { soldi } from "../src/game/finanze.js";
 
 let passati = 0, falliti = 0;
@@ -283,6 +283,67 @@ prova("Nessun componente scrive un simbolo di valuta a mano", () => {
     }
   }
   if (guai.length) throw new Error(guai.join("\n       "));
+});
+
+console.log("\n── I contenuti dei mercati ──");
+
+prova("Ogni mercato dichiara le stesse lingue del gioco", () => {
+  for (const m of MERCATI) {
+    const p = getPacchetto(m.id);
+    for (const l of LINGUE.filter((x) => x.id !== "it")) {
+      vero(p.lingue?.[l.id], `${m.id} non ha i contenuti in "${l.id}"`);
+    }
+  }
+});
+
+prova("Professioni e sogni sono tradotti in ogni lingua", () => {
+  /* Sono le due cose che si leggono prima di cominciare: se restano in
+     italiano, l'interfaccia tradotta non serve a niente. */
+  for (const m of MERCATI) {
+    const p = getPacchetto(m.id);
+    for (const [id, tav] of Object.entries(p.lingue || {})) {
+      for (const prof of p.professioni) {
+        vero(tav.professioni?.[prof.id]?.nome,
+          `${m.id}/${id}: manca la professione "${prof.id}"`);
+      }
+      for (const s of p.sogni) {
+        vero(tav.sogni?.[s.id]?.nome, `${m.id}/${id}: manca il sogno "${s.id}"`);
+      }
+    }
+  }
+});
+
+prova("Le voci del conto economico sono tradotte", () => {
+  for (const m of MERCATI) {
+    const p = getPacchetto(m.id);
+    for (const [id, tav] of Object.entries(p.lingue || {})) {
+      for (const k of Object.keys(p.etichetteSpese)) {
+        vero(tav.etichetteSpese?.[k], `${m.id}/${id}: manca la spesa "${k}"`);
+      }
+      for (const k of Object.keys(p.etichettePassivita)) {
+        vero(tav.etichettePassivita?.[k], `${m.id}/${id}: manca la passività "${k}"`);
+      }
+    }
+  }
+});
+
+prova("Tradurre non tocca i numeri", () => {
+  /* Un mercato resta il suo mercato: Roma costa quello che costa a Roma,
+     in euro, anche letta in francese. */
+  for (const m of MERCATI) {
+    const p = getPacchetto(m.id);
+    for (const tav of Object.values(p.lingue || {})) {
+      for (const voce of Object.values(tav.professioni || {})) {
+        vero(voce.stipendio === undefined, "una traduzione non può cambiare uno stipendio");
+        vero(voce.spese === undefined, "una traduzione non può cambiare le spese");
+      }
+      for (const voce of Object.values(tav.carte || {})) {
+        for (const k of ["costo", "acconto", "flusso", "mutuo", "canone"]) {
+          vero(voce[k] === undefined, `una traduzione non può cambiare "${k}"`);
+        }
+      }
+    }
+  }
 });
 
 console.log(`\n${passati} test superati, ${falliti} falliti\n`);
