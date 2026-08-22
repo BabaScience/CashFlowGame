@@ -216,6 +216,8 @@ export default {
   },
 
   scheda: {
+    nessunAffare: "None yet. Every green deal raises your monthly income.",
+    largoSpiegazione: "You have left your job: the salary is gone, everything else is not. Below are the same expenses, the same debts and the same bank as before.",
     tiManca: "You still need {importo} a month of passive income. This market asks for twice your expenses: leaving at break-even means coming back at the first surprise.",
     prestitoSpiegazione: "You can borrow in multiples of {taglio}. Every {taglio} costs {rata} a month.",
     contanti: "Cash",

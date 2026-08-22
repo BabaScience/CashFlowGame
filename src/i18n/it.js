@@ -210,6 +210,8 @@ export default {
   },
 
   scheda: {
+    nessunAffare: "Nessuno ancora. Ogni affare verde aumenta il tuo reddito mensile.",
+    largoSpiegazione: "Hai lasciato il lavoro: lo stipendio non c'è più, tutto il resto sì. Sotto trovi le stesse uscite, gli stessi debiti e la stessa banca di prima.",
     tiManca: "Ti manca ancora {importo} al mese di reddito passivo. Su questo mercato serve il doppio delle spese: uscire al pareggio significa rientrare al primo imprevisto.",
     prestitoSpiegazione: "Puoi chiedere prestiti a multipli di {taglio}. Ogni {taglio} costa {rata} al mese.",
     contanti: "Contanti",

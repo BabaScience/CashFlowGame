@@ -631,27 +631,32 @@ test("Sul Largo si incassa più spesso di quanto si venga puniti", () => {
 
 test("Le penalità del Largo costano una cifra, non i risparmi", () => {
   /* "Metà di tutto quello che hai da parte" puniva esattamente chi stava
-     risparmiando per il primo affare. */
-  const conConti = (contanti) => {
+     risparmiando per il primo affare: più risparmiavi, più perdevi. Ora la
+     penalità è un multiplo della rendita, quindi non cresce col patrimonio.
+     Si tira davvero, quindi non si sa su che casella si finisce: si
+     verifica il tetto, che vale per tutte. */
+  const rendita = 4000;
+  const prova = (contanti) => {
     let s = tavolo();
     s = turnoDi(s, "p0");
     const g = G(s, 0);
     g.tracciato = "veloce";
     g.stipendio = 0;
-    g.attivita = [{ rid: "b", nome: "B", costo: 1, acconto: 1, passivita: 0, flusso: 4000 }];
-    g.redditoInizialeVeloce = 4000;
+    g.attivita = [{ rid: "b", nome: "B", costo: 1, acconto: 1, passivita: 0, flusso: rendita }];
+    g.redditoInizialeVeloce = rendita;
     g.contanti = contanti;
-    g.posizione = PERCORSO_LARGO.findIndex((c) => c.tipo === "causa") - 1;
     const r = applicaAzione(s, { tipo: "tira", giocatoreId: "p0", nDadi: 1 });
-    return r.stato ? G(r.stato, 0).contanti : contanti;
+    return r.stato ? contanti - G(r.stato, 0).contanti : 0;
   };
-  /* Chi ha molto e chi ha poco perdono la stessa cifra, non la stessa
-     percentuale. Si confrontano due patrimoni molto diversi. */
-  const persoRicco = 400000 - conConti(400000);
-  const persoPovero = 200000 - conConti(200000);
-  if (persoRicco > 0 && persoPovero > 0) {
-    eq(persoRicco, persoPovero, "la penalità dipende ancora dal patrimonio:");
+  /* Il massimo previsto è il divorzio: sei mesi di rendita. */
+  const tetto = rendita * 6;
+  for (const contanti of [50000, 200000, 800000]) {
+    const perso = prova(contanti);
+    vero(perso <= tetto,
+      `con ${contanti} € in cassa la penalità è ${perso}, oltre il tetto di ${tetto}`);
   }
+  /* E con un patrimonio enorme non si perde comunque una frazione di esso. */
+  vero(prova(2000000) <= tetto, "la penalità cresce ancora col patrimonio");
 });
 
 test("Un affare del Largo entra nel portafoglio", () => {
@@ -682,6 +687,26 @@ test("Il traguardo del Largo scala con la rendita d'uscita", () => {
     const molt = getPacchetto(id).obiettivoLargo;
     vero(molt && molt > 1, `${id}: manca il traguardo proporzionale del Largo`);
   }
+});
+
+test("Anche dopo aver lasciato il lavoro la banca presta", () => {
+  /* È la conseguenza della continuità, e nella realtà è così: un
+     proprietario con affitti documentati viene valutato su quelli. Prima
+     il manuale diceva che sul Largo non si poteva più chiedere credito. */
+  let s = tavoloRoma("quadro");
+  const g = s.giocatori.find((x) => x.id === "a");
+  g.attivita.push({ rid: "k", nome: "K", costo: 1, acconto: 1, passivita: 0, flusso: 5000 });
+  s = applicaAzione(s, { tipo: "esciDallaCorsa", giocatoreId: "a" }).stato;
+  s.turno = s.giocatori.findIndex((x) => x.id === "a");
+  const dopo = s.giocatori.find((x) => x.id === "a");
+  eq(dopo.stipendio, 0, "deve aver lasciato il lavoro");
+  let concesso = 0;
+  for (const imp of [200000, 100000, 75000, 50000, 30000, 10000, 5000]) {
+    if (!applicaAzione(s, { tipo: "prestito", giocatoreId: "a", importo: imp }).errore) { concesso = imp; break; }
+  }
+  vero(concesso > 0, "sul Largo la banca non presta più niente");
+  vero(concesso <= getPacchetto("roma").creditoConsumo.importoMassimo,
+    "presta oltre il tetto del credito al consumo");
 });
 
 console.log(`\n${passati} test superati, ${falliti} falliti\n`);

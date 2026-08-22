@@ -38,6 +38,7 @@ export function MercatoProvider({ stato, mercatoId, children }) {
       etichettePassivita: pacchetto.etichettePassivita,
       debitiEstinguibili: pacchetto.debitiEstinguibili,
       obiettivo: pacchetto.obiettivoRendita,
+    obiettivoLargo: pacchetto.obiettivoLargo,
       livello,
       /* Il flusso di una carta al livello di QUESTA stanza. La carta porta
          stampato il numero del Livello 1: mostrarlo così com'è al Livello 2
@@ -76,6 +77,7 @@ export function useMercato() {
     etichettePassivita: pacchetto.etichettePassivita,
     debitiEstinguibili: pacchetto.debitiEstinguibili,
     obiettivo: pacchetto.obiettivoRendita,
+    obiettivoLargo: pacchetto.obiettivoLargo,
     trovaProfessione: (id) => pacchetto.professioni.find((p) => p.id === id) || pacchetto.professioni[0],
     trovaSogno: (id) => pacchetto.sogni.find((x) => x.id === id) || pacchetto.sogni[0],
     trovaAffare: (id) => pacchetto.affariLargo.find((a) => a.id === id),

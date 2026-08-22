@@ -383,6 +383,50 @@ prova("Partita con una carta Mercato aperta", () => {
   vero(html.length > 2000);
 });
 
+prova("Sul Largo si vedono ancora mutui, debiti e banca", () => {
+  /* Chi aveva lasciato il lavoro vedeva una scheda di quattro righe: niente
+     uscite, niente mutui, niente prestito bancario, nessun pannello Banca.
+     Con la vecchia economia sul Largo non esistevano né spese né debiti;
+     ora esistono, e nasconderli lasciava senza metà dei propri conti e
+     senza il modo di chiedere credito, che il motore invece consente. */
+  const s = tavolo();
+  const io = s.giocatori.find((g) => g.id === "a");
+  io.tracciato = "veloce";
+  io.stipendio = 0;
+  io.passivita.prestitoBanca = 12000;
+  io.attivita = [{ rid: "k", nome: "Impianto", costo: 40000, acconto: 40000, passivita: 0, flusso: 3000 }];
+  io.redditoInizialeVeloce = 3000;
+  const html = conMercato(s, React.createElement(Scheda, {
+    giocatore: io, invia: nulla, inAzione: false, mio: true,
+  }));
+  /* Le sezioni sono a fisarmonica: chiuse, il corpo non viene disegnato.
+     Si verifica che ci SIANO — cioè che il giocatore possa aprirle — non
+     che siano aperte. */
+  for (const chiave of ["scheda.contoEconomico", "scheda.statoPatrimoniale", "scheda.banca"]) {
+    vero(html.includes(traduci("it", chiave)), `manca la sezione "${traduci("it", chiave)}"`);
+  }
+  vero(html.includes(traduci("it", "debito.titolo")), "non mostra il debito con la banca");
+  vero(html.includes(traduci("it", "scheda.uscite")), "mancano le uscite");
+});
+
+prova("Il traguardo del Largo mostrato è quello che il motore usa", () => {
+  /* La scheda calcolava ancora `rendita iniziale + obiettivo`, la vecchia
+     formula: mostrava un traguardo che non era quello per cui si vince. */
+  const s = tavolo();
+  const io = s.giocatori.find((g) => g.id === "a");
+  io.tracciato = "veloce";
+  io.stipendio = 0;
+  io.attivita = [{ rid: "k", nome: "K", costo: 1, acconto: 1, passivita: 0, flusso: 3000 }];
+  io.redditoInizialeVeloce = 3000;
+  const pac = require_pacchetto(s.mercatoId);
+  const atteso = Math.round(3000 * pac.obiettivoLargo);
+  const html = conMercato(s, React.createElement(Scheda, {
+    giocatore: io, invia: nulla, inAzione: false, mio: true,
+  }));
+  const scritto = atteso.toLocaleString("it-IT");
+  vero(html.includes(scritto), `il traguardo mostrato non è ${scritto}`);
+});
+
 prova("La scheda del Largo mostra la rendita vera", () => {
   /* Prima mostrava un contatore separato che partiva da cento volte la
      rendita. Ora sul Largo si vive del portafoglio, e la scheda deve dire

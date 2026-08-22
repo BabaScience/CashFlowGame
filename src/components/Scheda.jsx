@@ -11,7 +11,9 @@ import { useLingua } from "../Lingua.jsx";
  */
 export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
   const { t } = useLingua();
-  const { etichetteSpese, etichettePassivita, debitiEstinguibili, trovaProfessione, trovaSogno, trovaAffare, obiettivo } = useMercato();
+  const { etichetteSpese, etichettePassivita, debitiEstinguibili, trovaProfessione,
+    trovaSogno, trovaAffare, obiettivo, obiettivoLargo } = useMercato();
+  const alLargo = g.tracciato === "veloce";
   const [apri, setApri] = useState("conto");
   const [prestito, setPrestito] = useState(5000);
   const [errore, setErrore] = useState("");
@@ -25,7 +27,6 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
     if (res.errore) setErrore(res.errore);
   };
 
-  if (g.tracciato === "veloce") return <SchedaVeloce giocatore={g} />;
 
   const sezione = (id, titolo, corpo) => (
     <div className="carta">
@@ -81,6 +82,43 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
           </div>
         </div>
       </div>
+
+      {/* ═══ IL CAPPELLO DEL LARGO ═══
+       *
+       * Chi ha lasciato il lavoro vedeva una scheda ridotta a quattro righe:
+       * niente uscite, niente mutui, niente prestito bancario, nessun
+       * pannello Banca. Con la vecchia economia aveva un senso — sul Largo
+       * non esistevano né spese né debiti — ma adesso esistono eccome, e
+       * nasconderli lasciava il giocatore senza la metà dei suoi conti e
+       * senza il modo di chiedere credito, che il motore invece consente.
+       *
+       * Ora il Largo aggiunge un cappello e tiene tutto il resto. */}
+      {alLargo && (() => {
+        const traguardo = obiettivoLargo
+          ? Math.round(g.redditoInizialeVeloce * obiettivoLargo)
+          : g.redditoInizialeVeloce + obiettivo;
+        const daFare = Math.max(1, traguardo - g.redditoInizialeVeloce);
+        const fatto = Math.max(0, r.redditoPassivo - g.redditoInizialeVeloce);
+        return (
+          <div className="carta" style={{ background: "linear-gradient(165deg,#FBF4E4,#F1E3BE)" }}>
+            <div className="maiusc tenue mb4">{t("scheda.largo")}</div>
+            <div className="titolo f22 mb12">{g.nome}</div>
+            <KV k={t("scheda.redditoRendita")} v={soldi(r.redditoPassivo)} forte />
+            <KV k={t("scheda.redditoIniziale")} v={soldi(g.redditoInizialeVeloce)} />
+            <KV k={t("scheda.obiettivoVincere")} v={soldi(traguardo)} />
+            <div className="mt12">
+              <div className="flex tra f12 mb4">
+                <span className="tenue">{t("scheda.progressoVerso", { importo: soldi(traguardo) })}</span>
+                <span className="numeri grassetto">{soldi(fatto)}</span>
+              </div>
+              <Barra valore={fatto / daFare} />
+            </div>
+            <p className="f12 tenue mt12" style={{ margin: "12px 0 0", lineHeight: 1.5 }}>
+              {t("scheda.largoSpiegazione")}
+            </p>
+          </div>
+        );
+      })()}
 
       {/* Il debito con la banca, se c'è.
           Stava soltanto dentro due pannelli chiusi — una riga nello stato
@@ -189,6 +227,43 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
       ))}
 
       {/* Banca — solo per la propria scheda */}
+      {alLargo && (
+        <>
+          <div className="carta">
+            <div className="sezione-tit">{t("scheda.ilTuoSogno")}</div>
+            <div className="flex cen g12">
+              <span style={{ fontSize: 30 }}>{sogno.emoji}</span>
+              <div>
+                <div className="grassetto f16">{sogno.nome}</div>
+                <div className="f13 tenue numeri">
+                  {soldi(sogno.costo * (1 + g.segnaliniSogno))}
+                  {g.segnaliniSogno > 0 && " " + t("scheda.rincarato", { n: g.segnaliniSogno })}
+                </div>
+              </div>
+            </div>
+            <p className="f12 tenue mt12" style={{ margin: "12px 0 0", lineHeight: 1.5 }}>
+              {t("scheda.sognoSpiegazione")}
+            </p>
+          </div>
+
+          <div className="carta">
+            <div className="sezione-tit">{t("scheda.affariAcquistati", { n: g.affariVeloci.length })}</div>
+            {g.affariVeloci.length === 0 && (
+              <p className="f13 tenue" style={{ margin: 0 }}>{t("scheda.nessunAffare")}</p>
+            )}
+            {g.affariVeloci.map((id) => {
+              const a = trovaAffare(id);
+              return (
+                <div key={id} className="flex tra cen" style={{ padding: "7px 0", borderTop: "1px dashed var(--linea)" }}>
+                  <span className="f14">◆ {a?.nome || id}</span>
+                  <span className="numeri f13 pos">+{soldi(a?.flusso || 0)}</span>
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
       {mio && sezione("banca", t("scheda.banca"), (
         <>
           <p className="f13 tenue" style={{ margin: "0 0 12px", lineHeight: 1.5 }}>
@@ -258,69 +333,3 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
 }
 
 /** Scheda ridotta per chi è già al Largo. */
-function SchedaVeloce({ giocatore: g }) {
-  /* `obiettivo` arriva dal mercato. La rinomina da OBIETTIVO_RENDITA aveva
-     prodotto `const obiettivo = ... + obiettivo`, cioè una costante che
-     citava sé stessa: la scheda esplodeva per chiunque avesse preso il
-     largo, e nessun test la disegnava in quello stato. */
-  const { t } = useLingua();
-  const { obiettivo, trovaSogno, trovaAffare } = useMercato();
-  const traguardo = g.redditoInizialeVeloce + obiettivo;
-  const r = riepilogo(g);
-  const fatto = r.redditoPassivo - g.redditoInizialeVeloce;
-  const sogno = trovaSogno(g.sognoId);
-  return (
-    <>
-      <div className="carta" style={{ background: "linear-gradient(165deg,#FBF4E4,#F1E3BE)" }}>
-        <div className="maiusc tenue mb4">{t("scheda.largo")}</div>
-        <div className="titolo f22 mb12">{g.nome}</div>
-        <KV k={t("scheda.contanti")} v={soldi(g.contanti)} forte />
-        <KV k={t("scheda.redditoRendita")} v={soldi(r.redditoPassivo)} forte />
-        <KV k={t("scheda.redditoIniziale")} v={soldi(g.redditoInizialeVeloce)} />
-        <KV k={t("scheda.obiettivoVincere")} v={soldi(traguardo)} />
-        <div className="mt12">
-          <div className="flex tra f12 mb4">
-            <span className="tenue">{t("scheda.progressoVerso", { importo: soldi(traguardo) })}</span>
-            <span className="numeri grassetto">{soldi(fatto)}</span>
-          </div>
-          <Barra valore={fatto / obiettivo} />
-        </div>
-      </div>
-
-      <div className="carta">
-        <div className="sezione-tit">{t("scheda.ilTuoSogno")}</div>
-        <div className="flex cen g12">
-          <span style={{ fontSize: 30 }}>{sogno.emoji}</span>
-          <div>
-            <div className="grassetto f16">{sogno.nome}</div>
-            <div className="f13 tenue numeri">
-              {soldi(sogno.costo * (1 + g.segnaliniSogno))}
-              {g.segnaliniSogno > 0 && " " + t("scheda.rincarato", { n: g.segnaliniSogno })}
-            </div>
-          </div>
-        </div>
-        <p className="f12 tenue mt12" style={{ margin: "12px 0 0", lineHeight: 1.5 }}>
-          {t("scheda.sognoSpiegazione")}
-        </p>
-      </div>
-
-      <div className="carta">
-        <div className="sezione-tit">{t("scheda.affariAcquistati", { n: g.affariVeloci.length })}</div>
-        {g.affariVeloci.length === 0 && (
-          <p className="f13 tenue" style={{ margin: 0 }}>
-            Nessuno ancora. Ogni affare verde aumenta il tuo reddito mensile.
-          </p>
-        )}
-        {g.affariVeloci.map((id) => {
-          const a = trovaAffare(id);
-          return (
-            <div key={id} className="flex tra cen" style={{ padding: "7px 0", borderTop: "1px dashed var(--linea)" }}>
-              <span className="f14">◆ {a?.nome || id}</span>
-              <span className="numeri f13 pos">+{soldi(a?.flusso || 0)}</span>
-            </div>
-          );
-        })}
-      </div>
-    </>
-  );
-}

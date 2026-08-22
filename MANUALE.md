@@ -317,8 +317,16 @@ Uscire vuol dire **una cosa sola: smetti di lavorare.**
    davvero, meno quello che ti costa vivere — lo stesso conto del Giorno di
    Paga, senza la busta paga.
 4. Il tuo obiettivo diventa **raddoppiare la rendita** con cui sei uscito.
-5. La banca continua a valutarti con le stesse regole: adesso il tuo reddito
-   è la rendita.
+5. **La banca continua a prestarti**, con le stesse regole di prima: la rata
+   non può superare un terzo di quello che entra. Solo che adesso quello che
+   entra è la rendita, non lo stipendio — ed è esattamente come funziona
+   nella realtà, dove un proprietario con affitti documentati viene valutato
+   su quelli. La sezione **Banca** della scheda resta dov'era.
+
+La scheda non cambia forma: conto economico, stato patrimoniale, mutui,
+debiti e banca sono tutti ancora lì. Cambia solo che la riga *Stipendio* è a
+zero. In cima si aggiunge il quadro del Largo, con il traguardo e quanta
+strada hai fatto.
 
 > **Perché non c'è un premio.** Nelle prime versioni uscire moltiplicava tutto
 > per cento: chi lasciava il lavoro con 1.739 € di rendita riceveva 173.900 €
