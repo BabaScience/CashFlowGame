@@ -311,6 +311,47 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       insieme alla decisione sopra: da solo azzera quasi tutte le attività e
       Roma diventa invincibile.
 
+- [ ] **Il Largo è un altro gioco attaccato al primo** — diagnosticato a
+      fondo, tentato, e messo da parte perché è una riprogettazione, non una
+      correzione. Il lavoro è in `git stash` ("continuità Largo").
+
+      **Il difetto.** Uscendo dalla Ruota il gioco moltiplica per cento: chi
+      esce con 1.739 € di rendita riceve 173.900 € in contanti *e* incassa
+      173.900 € a ogni Giorno di Rendita. Il portafoglio costruito in tutta
+      la prima metà smette di contare — l'incasso non viene più dagli
+      immobili e dalle attività ma da un contatore astratto — e le spese
+      spariscono del tutto. È fedele al gioco da tavolo originale, ma
+      contraddice tutto quello che questa versione dice di essere.
+
+      **Cosa ho provato.** Uscire = smettere di lavorare: stipendio a zero,
+      portafoglio e spese intatti, il Giorno di Rendita paga il flusso vero,
+      gli affari del Largo entrano fra le attività, obiettivo proporzionale
+      alla rendita d'uscita invece che una cifra fissa. Il motore funziona e
+      le prove delle regole passano.
+
+      **Perché non basta.** Con la continuità l'intera seconda metà resta
+      tarata sull'economia vecchia, e non è una costante da girare:
+
+      - il *tabellone* del Largo ha 6 caselle di penalità gravi (verifica
+        fiscale, causa, divorzio) su 24. Con un Giorno di Rendita da
+        173.900 € erano graffi; con un flusso da 2.130 € al mese sono
+        catastrofi ogni quattro turni, e il capitale non arriva mai al primo
+        affare. Misurato: dopo 359 turni sul Largo, un affare comprato e
+        contanti a zero tre volte;
+      - il *mazzo* del Largo classico ha affari da 150.000 € che rendono
+        18.000 € al mese (144% l'anno): numeri che hanno senso solo dopo un
+        moltiplicatore per cento;
+      - il *tempo*: uscire dalla Ruota costa già ~100 turni personali, e
+        raddoppiare la rendita dopo ne chiede altrettanti. Il tetto di 400
+        turni non basta, e alzarlo fa partite da tre ore.
+
+      **Cosa servirebbe davvero**, in ordine: ridisegnare le caselle di
+      penalità del Largo (proporzionali e molto più rare), riprezzare il
+      mazzo del Largo classico sulla stessa economia della Ruota, e decidere
+      quanto deve durare la seconda metà — probabilmente accorciando la
+      prima. È mezza giornata di lavoro e va fatta tutta insieme, perché
+      ogni pezzo da solo peggiora il bilanciamento invece di migliorarlo.
+
 ## 7 · Quando funzionerà
 
 - [-] **7.1 Costo del polling** — sei giocatori a 1,4 s fanno ~15.400 chiamate
