@@ -329,3 +329,12 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       Rimandato di proposito: con pochi giocatori non costa nulla, e si risolve
       passando agli eventi dal server. Da riprendere prima di spingere sul
       traffico, non adesso.
+
+- [ ] **Gli altri professionisti che servirebbero** — commercialista e avvocato
+      sono fatti. Restano fuori, in ordine di quanto contano:
+      **assicurazione** sul fabbricato e responsabilità civile (150–400 € l'anno
+      per immobile: la cosa che evita di perdere tutto una volta sola);
+      **tecnico/geometra** per APE e conformità catastale (300–800 € per
+      immobile, obbligatorio in compravendita); **consulente del lavoro**, se
+      un'attività assume qualcuno. Notaio, agenzia e amministratore di
+      condominio sono già dentro i costi d'acquisto e le quote sul canone.
