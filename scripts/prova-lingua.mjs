@@ -194,6 +194,15 @@ import { creaStanza, applicaAzione } from "../src/game/motore.js";
 
 console.log("\n── Il registro parla la lingua scelta ──");
 
+prova("Il registro esiste in ogni lingua dichiarata", () => {
+  /* Il controllo qui sotto passa in rassegna le lingue PRESENTI in MESSAGGI:
+     una lingua aggiunta all'interfaccia ma dimenticata nel registro non
+     verrebbe vista, e chi la sceglie leggerebbe la partita in italiano. */
+  for (const l of LINGUE) {
+    vero(MESSAGGI[l.id], `"${l.id}" è fra le lingue del gioco ma non nel registro`);
+  }
+});
+
 prova("Ogni messaggio esiste in tutte le lingue", () => {
   const chiavi = Object.keys(MESSAGGI.it);
   vero(chiavi.length > 40, `solo ${chiavi.length} messaggi`);

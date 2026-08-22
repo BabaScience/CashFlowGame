@@ -17,12 +17,14 @@
  */
 import it from "./it.js";
 import en from "./en.js";
+import fr from "./fr.js";
 
-const DIZIONARI = { it, en };
+const DIZIONARI = { it, en, fr };
 
 export const LINGUE = [
   { id: "it", nome: "Italiano", bandiera: "🇮🇹" },
   { id: "en", nome: "English", bandiera: "🇬🇧" },
+  { id: "fr", nome: "Français", bandiera: "🇫🇷" },
 ];
 
 const CHIAVE = "quotazero:lingua";

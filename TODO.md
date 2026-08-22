@@ -219,7 +219,7 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       così; la tensione ora è strategica.
       Da fare in un secondo momento: una perdita del lavoro modellata sul
       serio (NASpI, durata, percentuale) è materia da Livello 2.
-- [ ] **I contenuti dei mercati non sono tradotti** — con l'interfaccia in
+- [ ] **I contenuti dei mercati non sono tradotti** — vale ora anche per il francese: — con l'interfaccia in
       inglese, professioni, sogni e testi delle carte restano in italiano.
       Difendibile per Roma (il mercato è romano, il suo lessico anche), ma
       diventa un problema col terzo mercato. La soluzione giusta è che il
