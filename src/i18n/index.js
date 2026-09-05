@@ -74,6 +74,22 @@ export function traduci(lingua, chiave, valori) {
   return v.replace(/\{(\w+)\}/g, (_, k) => (valori[k] ?? `{${k}}`));
 }
 
+/**
+ * I nomi delle caselle, dall'italiano alla lingua scelta.
+ *
+ * Il motore gira sul server e scrive in italiano: nel registro finiscono
+ * "Verifica fiscale" e "Causa legale" così come sono. Questa tabella li
+ * riporta indietro, senza che il motore debba sapere che esistono le
+ * lingue.
+ */
+export function nomiCaselle(lingua) {
+  const mappa = {};
+  for (const [k, v] of Object.entries(DIZIONARI.it.caselle || {})) {
+    mappa[v.nome] = DIZIONARI[lingua]?.caselle?.[k]?.nome || v.nome;
+  }
+  return mappa;
+}
+
 /** Le chiavi mancanti in una lingua, per i test. */
 export function chiaviMancanti(lingua) {
   const mancanti = [];

@@ -5,6 +5,7 @@ import {
   N_RUOTA, N_LARGO,
 } from "../game/tabellone.js";
 import { useLingua } from "../Lingua.jsx";
+import { MARCHIO } from "../marchio.js";
 
 /* ── geometria ─────────────────────────────────────────────── */
 const L = 400, CX = L / 2, CY = L / 2;
@@ -146,7 +147,7 @@ function Gettone({ giocatore, n, raggio, ordine, totale, èTurno, mio, indice })
 
 /* ── tabellone ─────────────────────────────────────────────── */
 export default function Tabellone({ stato, mioId, nota, centroLibero }) {
-  const { t } = useLingua();
+  const { t: tr } = useLingua();
   const giocatori = stato.giocatori || [];
   const inTopi = giocatori.filter((g) => g.tracciato === "topi");
   const inVeloce = giocatori.filter((g) => g.tracciato === "veloce");
@@ -168,7 +169,7 @@ export default function Tabellone({ stato, mioId, nota, centroLibero }) {
   const io = giocatori.find((g) => g.id === mioId);
 
   return (
-    <svg className="tabellone" viewBox={`0 0 ${L} ${L}`} role="img" aria-label="Tabellone di gioco">
+    <svg className="tabellone" viewBox={`0 0 ${L} ${L}`} role="img" aria-label={tr("comune.tabelloneDiGioco")}>
       <defs>
         <radialGradient id="feltro" cx="50%" cy="42%">
           <stop offset="0%" stopColor="#265244" />
@@ -228,7 +229,7 @@ export default function Tabellone({ stato, mioId, nota, centroLibero }) {
             textAnchor="middle" dominantBaseline="central"
             style={{ fontSize: 7.2, fontWeight: 800, fill: "rgba(255,255,255,.92)", letterSpacing: .2 }}
           >
-            {CASELLE_RUOTA[t].breve}
+            {tr(`caselle.${t}.breve`)}
           </text>
         );
       })}
@@ -254,9 +255,9 @@ export default function Tabellone({ stato, mioId, nota, centroLibero }) {
           illeggibile. */}
       {!centroLibero && (
         <>
-          <text x={CX} y={CY - 26} textAnchor="middle" className="tab-etichetta" style={{ fontSize: 17, fill: "#E3C55A" }}>Quota Zero</text>
+          <text x={CX} y={CY - 26} textAnchor="middle" className="tab-etichetta" style={{ fontSize: 17, fill: "#E3C55A" }}>{MARCHIO.nome}</text>
           <text x={CX} y={CY - 8} textAnchor="middle" style={{ fontSize: 8.5, fill: "rgba(244,241,230,.55)", letterSpacing: 1.6, fontWeight: 700 }}>
-            LA RUOTA
+            {tr("partita.ruota")}
           </text>
         </>
       )}
@@ -266,12 +267,12 @@ export default function Tabellone({ stato, mioId, nota, centroLibero }) {
           <text x={CX} y={CY + 16} textAnchor="middle"
             style={{ fontSize: 10.5, fill: "rgba(244,241,230,.85)", fontWeight: 700 }}>
             {io.tracciato === "topi"
-              ? CASELLE_RUOTA[PERCORSO_RUOTA[io.posizione]].nome
-              : CASELLE_LARGO[PERCORSO_LARGO[io.posizione].tipo].nome}
+              ? tr(`caselle.${PERCORSO_RUOTA[io.posizione]}.nome`)
+              : tr(`caselle.${PERCORSO_LARGO[io.posizione].tipo}.nome`)}
           </text>
           <text x={CX} y={CY + 31} textAnchor="middle"
             style={{ fontSize: 8, fill: "rgba(244,241,230,.45)", letterSpacing: .8 }}>
-            {t(io.tracciato === "topi" ? "partita.laTuaCasella" : "partita.largo")}
+            {tr(io.tracciato === "topi" ? "partita.laTuaCasella" : "partita.largo")}
           </text>
         </>
       )}
@@ -279,7 +280,7 @@ export default function Tabellone({ stato, mioId, nota, centroLibero }) {
         <>
           <text x={CX} y={CY + 52} textAnchor="middle"
             style={{ fontSize: 8.5, fill: giocatori[stato.turno]?.colore || "#E3C55A", fontWeight: 800, letterSpacing: .6 }}>
-            {(t("partita.turnoDi", { nome: giocatori[stato.turno]?.nome || "" })).toUpperCase()}
+            {(tr("partita.turnoDi", { nome: giocatori[stato.turno]?.nome || "" })).toUpperCase()}
           </text>
           {/* Cosa sta facendo, qui dentro invece che in un riquadro sotto:
               il centro del tabellone è spazio già speso, e un riquadro in
@@ -318,6 +319,7 @@ export default function Tabellone({ stato, mioId, nota, centroLibero }) {
 
 /** Legenda dei colori, mostrata sotto al tabellone. */
 export function Legenda({ tracciato = "topi" }) {
+  const { t } = useLingua();
   const voci = tracciato === "topi"
     ? Object.entries(CASELLE_RUOTA)
     : Object.entries(CASELLE_LARGO);
@@ -326,7 +328,7 @@ export function Legenda({ tracciato = "topi" }) {
       {voci.map(([k, v]) => (
         <span key={k} className="tag tag-scuro" style={{ gap: 6 }}>
           <span style={{ width: 8, height: 8, borderRadius: 2, background: v.colore, display: "inline-block" }} />
-          {v.nome}
+          {t(`caselle.${k}.nome`)}
         </span>
       ))}
     </div>

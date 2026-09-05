@@ -19,6 +19,7 @@ import { useSuoni } from "../hooks/useSuoni.js";
 import { avvisaTurno, chiediAvvisi, ricordaPartita, statoAvvisi } from "../lib/partite.js";
 import { audioAcceso, impostaAudio, sbloccaAudio } from "../lib/suoni.js";
 import { useLingua } from "../Lingua.jsx";
+import { useMercato } from "../Mercato.jsx";
 
 /* Il tabellone non è più una scheda fra le altre: resta sempre a schermo,
    quindi le linguette servono solo per ciò che gli sta sotto. */
@@ -52,7 +53,7 @@ const SCHEDE = [
  * sa perché il turno non avanza. Quindi resta, ma dentro il riquadro del
  * turno che c'è già: una riga sola, che non cambia l'altezza di niente.
  */
-function cheStaFacendo(stato, t) {
+function cheStaFacendo(stato, t, tc, trovaSogno) {
   const p = stato.pending;
   if (!p) return null;
   const chi = stato.giocatori.find((g) => g.id === p.giocatoreId);
@@ -63,20 +64,20 @@ function cheStaFacendo(stato, t) {
      sulle carte Mercato. */
   switch (p.tipo) {
     case "sceltaTaglia": return t("sulTavolo.taglia", { nome });
-    case "carta": return t("sulTavolo.carta", { nome, carta: p.carta?.nome || "" });
+    case "carta": return t("sulTavolo.carta", { nome, carta: tc(p.carta)?.nome || "" });
     case "mercato": {
       const mancanti = (p.idonei?.length || 0) - (p.risposto?.length || 0);
       return t(mancanti === 1 ? "sulTavolo.mercatoUno" : "sulTavolo.mercato",
-        { carta: p.carta?.nome || "", n: mancanti });
+        { carta: tc(p.carta)?.nome || "", n: mancanti });
     }
-    case "extra": return t("sulTavolo.extra", { nome, carta: p.carta?.nome || "" });
+    case "extra": return t("sulTavolo.extra", { nome, carta: tc(p.carta)?.nome || "" });
     case "beneficenza":
     case "beneficenzaVeloce": return t("sulTavolo.beneficenza", { nome });
     case "figlio": return t("sulTavolo.figlio", { nome });
     case "licenziamento": return t("sulTavolo.licenziamento", { nome });
     case "bancarotta": return t("sulTavolo.bancarotta", { nome });
-    case "affareVeloce": return t("sulTavolo.affare", { nome, carta: p.affare?.nome || "" });
-    case "sogno": return t("sulTavolo.sogno", { nome, carta: p.sogno?.nome || "" });
+    case "affareVeloce": return t("sulTavolo.affare", { nome, carta: tc(p.affare)?.nome || "" });
+    case "sogno": return t("sulTavolo.sogno", { nome, carta: (trovaSogno(p.sogno?.id) || p.sogno)?.nome || "" });
     case "penalitaVeloce": return `${nome}: ${p.nome}`;
     default: return t("sulTavolo.decide", { nome });
   }
@@ -222,6 +223,7 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa, tiroAltrove = false }) 
 
 export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci, schedaIniziale = null }) {
   const { t } = useLingua();
+  const { traduciCarta, trovaSogno } = useMercato();
   /* Sul telefono nessuna scheda è aperta all'inizio: lo schermo è il
      tabellone e basta. `null` vuol dire "nessun foglio aperto". */
   const [scheda, setScheda] = useState(schedaIniziale);
@@ -332,17 +334,18 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
     return (
       <div className="contenuto ta-c">
         <div className="carta mt20">
-          <p className="f14" style={{ margin: 0 }}>Non fai parte di questa partita.</p>
-          <Bottone variante="btn-fantasma mt12" onClick={suEsci}>Torna all'inizio</Bottone>
+          <p className="f14" style={{ margin: 0 }}>{t("partita.nonFaiParte")}</p>
+          <Bottone variante="btn-fantasma mt12" onClick={suEsci}>{t("partita.tornaInizio")}</Bottone>
         </div>
       </div>
     );
   }
 
   const r = riepilogo(io);
-  const casella = io.tracciato === "topi"
-    ? CASELLE_RUOTA[PERCORSO_RUOTA[io.posizione]]
-    : CASELLE_LARGO[PERCORSO_LARGO[io.posizione].tipo];
+  const tipoCasella = io.tracciato === "topi"
+    ? PERCORSO_RUOTA[io.posizione]
+    : PERCORSO_LARGO[io.posizione].tipo;
+  const casella = io.tracciato === "topi" ? CASELLE_RUOTA[tipoCasella] : CASELLE_LARGO[tipoCasella];
 
   const barraAlta = (
     <div className="flex tra cen g12" style={{
@@ -384,7 +387,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
           </div>
           <div className="f13 grassetto riga-sola"
             style={{ color: casella.colore === "#6B4423" ? "#C8A278" : casella.colore }}>
-            {casella.emoji} {casella.nome}
+            {casella.emoji} {t(`caselle.${tipoCasella}.nome`)}
           </div>
         </div>
       )}
@@ -417,7 +420,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
         <div className="colonna-tavolo">
           <div className="zona-tavolo">
             <Tabellone stato={stato} mioId={mioId}
-              nota={cheStaFacendo(stato, t)} centroLibero={tiroAlCentro} />
+              nota={cheStaFacendo(stato, t, traduciCarta, trovaSogno)} centroLibero={tiroAlCentro} />
             <Dadi tiro={stato.ultimoTiro} mioId={mioId} />
             {tiroAlCentro && (
               <TiraAlCentro io={io} inAzione={inAzione}

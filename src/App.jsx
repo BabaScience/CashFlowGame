@@ -11,7 +11,7 @@ import * as api from "./lib/api.js";
 import { useAvversari } from "./hooks/useAvversari.js";
 import { traccia, tracciaSessione } from "./lib/traccia.js";
 import { MercatoProvider } from "./Mercato.jsx";
-import { LinguaProvider } from "./Lingua.jsx";
+import { LinguaProvider, useLingua } from "./Lingua.jsx";
 
 const CHIAVE_STANZA = "quotazero:stanza";
 
@@ -22,6 +22,7 @@ export default function App() {
 }
 
 function Applicazione() {
+  const { t } = useLingua();
   const mioId = api.mioId();
   const [codice, setCodice] = useState(() => {
     // Un link con ?c=ABCD porta dritto nella stanza.
@@ -99,7 +100,7 @@ function Applicazione() {
   const chiudiStanza = useCallback(async () => {
     try {
       await api.chiudiStanza(codice);
-      avvisa("Stanza chiusa, dati cancellati.");
+      avvisa(t("app.stanzaChiusa"));
     } catch (e) { avvisa(e.message); }
     setCodice(null);
   }, [codice, avvisa]);
@@ -131,9 +132,9 @@ function Applicazione() {
               <div style={{ fontSize: 30 }}>⚠️</div>
               <h2 className="titolo f18 mt12" style={{ margin: "12px 0 8px" }}>{errore}</h2>
               <p className="f13 tenue" style={{ margin: "0 0 16px", lineHeight: 1.5 }}>
-                Le stanze inattive vengono cancellate dopo 48 ore per non occupare spazio inutilmente.
+                {t("app.stanzaScaduta")}
               </p>
-              <Bottone variante="btn-oro" onClick={() => setCodice(null)}>Torna all'inizio</Bottone>
+              <Bottone variante="btn-oro" onClick={() => setCodice(null)}>{t("comune.tornaInizio")}</Bottone>
             </div>
           </div>
           <Avviso testo={avviso} />

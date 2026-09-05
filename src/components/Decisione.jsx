@@ -4,6 +4,7 @@ import CartaGioco, { CorpoAffare, Voce } from "./CartaGioco.jsx";
 import { soldi, flussoMensile, riepilogo } from "../game/finanze.js";
 import { useMercato } from "../Mercato.jsx";
 import { useLingua } from "../Lingua.jsx";
+import { nomiCaselle } from "../i18n/index.js";
 import { TASSO_PRESTITO } from "../game/finanze.js";
 
 /**
@@ -12,11 +13,14 @@ import { TASSO_PRESTITO } from "../game/finanze.js";
  * vedono la stessa carta nel riquadro "sul tavolo" della schermata di gioco.
  */
 export default function Decisione({ stato, mioId, invia, inAzione }) {
-  const { t } = useLingua();
+  const { t, lingua } = useLingua();
+  /* "Verifica fiscale" arriva dal motore, che parla italiano: il titolo
+     della carta è l'unica cosa che il giocatore legge, e restava lì. */
+  const nomeCasella = (n) => nomiCaselle(lingua)[n] || n;
   /* Il tasso del fido viaggia col giocatore, come lo stipendio: scriverlo a
      mano significava mostrare il tasso di un altro mercato. */
   const rataDi = (importo) => Math.round(importo * (io?.tassoPrestito ?? TASSO_PRESTITO));
-  const { categorie, debitiEstinguibili, pacchetto, flussoDi } = useMercato();
+  const { categorie, debitiEstinguibili, pacchetto, flussoDi, traduciCarta, trovaSogno } = useMercato();
   /* Le due taglie non sono separate da una soglia netta: su Roma i mazzi
      si sovrappongono nei prezzi e si distinguono per tipo, non per cifra.
      Annunciare una soglia produceva una frase falsa ("i piccoli costano al
@@ -53,8 +57,8 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
   if (p.tipo === "sceltaTaglia") {
     return (
       <Foglio aperto>
-        <div className="maiusc tenue mb8">Opportunità</div>
-        <h3 className="titolo f22 mb12" style={{ margin: "0 0 12px" }}>Che affare vuoi guardare?</h3>
+        <div className="maiusc tenue mb8">{t("decisione.opportunita")}</div>
+        <h3 className="titolo f22 mb12" style={{ margin: "0 0 12px" }}>{t("decisione.cheAffare")}</h3>
         <p className="f14 tenue mb16" style={{ margin: "0 0 16px", lineHeight: 1.5 }}>
           {/* Le soglie sono in valuta del mercato: scritte a mano restavano
               in dollari dentro una partita in euro. */}
@@ -65,11 +69,11 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
         <div className="riga-btn">
           <Bottone variante="btn-verde" disabled={inAzione}
             onClick={() => fai({ tipo: "scegliTaglia", taglia: "piccoli" })}>
-            Piccolo affare
+            {t("decisione.piccoloAffare")}
           </Bottone>
           <Bottone variante="btn-blu" disabled={inAzione}
             onClick={() => fai({ tipo: "scegliTaglia", taglia: "grandi" })}>
-            Grande affare
+            {t("decisione.grandeAffare")}
           </Bottone>
         </div>
         {errore && <p className="f13 neg mt12" style={{ margin: "12px 0 0" }}>{errore}</p>}
@@ -79,7 +83,7 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
 
   /* ── Carta Opportunità pescata ── */
   if (p.tipo === "carta") {
-    const c = p.carta;
+    const c = traduciCarta(p.carta);
     const azione = c.tipo === "azione";
     const q = Math.max(0, Math.floor(Number(quantita) || 0));
     const costo = azione ? q * c.prezzo : (c.acconto ?? c.importo ?? 0);
@@ -93,20 +97,20 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
         <CartaGioco
           chiave={chiave}
           classe={p.taglia === "grandi" ? "c-grandi" : "c-piccoli"}
-          etichetta={p.taglia === "grandi" ? "Grande affare" : "Piccolo affare"}
+          etichetta={t(p.taglia === "grandi" ? "decisione.grandeAffare" : "decisione.piccoloAffare")}
           titolo={c.nome}
         >
           <CorpoAffare carta={c} />
         </CartaGioco>
 
         <div className="flex tra f13 mb12">
-          <span className="tenue">I tuoi contanti</span>
+          <span className="tenue">{t("decisione.iTuoiContanti")}</span>
           <span className="numeri grassetto">{soldi(io.contanti)}</span>
         </div>
 
         {azione && (
           <div className="mb12">
-            <label className="etichetta" htmlFor="campo-quantita">Quante azioni?</label>
+            <label className="etichetta" htmlFor="campo-quantita">{t("decisione.quanteAzioni")}</label>
             <div className="flex g8">
               <input
                 id="campo-quantita"
@@ -116,13 +120,13 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
               />
               <Bottone variante="btn-fantasma btn-piccolo" style={{ height: 50, width: "auto" }}
                 onClick={() => setQuantita(String(maxQ))}>
-                Max {maxQ}
+                {t("decisione.max", { n: maxQ })}
               </Bottone>
             </div>
             {q > 0 && (
               <p className="f13 tenue mt8" style={{ margin: "8px 0 0" }}>
-                Costo: <strong className="numeri">{soldi(costo)}</strong>
-                {c.dividendo > 0 && <> · dividendo <strong className="numeri">+{soldi(q * c.dividendo)}</strong>/mese</>}
+                {t("decisione.costoRiga", { importo: soldi(costo) })}
+                {c.dividendo > 0 && <> · {t("decisione.dividendoAlMese", { importo: `+${soldi(q * c.dividendo)}` })}</>}
               </p>
             )}
           </div>
@@ -131,17 +135,17 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
         {!azione && c.tipo !== "spesa" && mancano > 0 && prestitoUtile <= 200000 && (
           <div className="carta mb12" style={{ background: "#FBF4E4", borderColor: "#E4CE8F" }}>
             <p className="f13" style={{ margin: 0, lineHeight: 1.5 }}>
-              Ti mancano <strong className="numeri">{soldi(mancano)}</strong>.
-              Puoi chiedere un prestito di <strong className="numeri">{soldi(prestitoUtile)}</strong>:
-              costerebbe <strong className="numeri">{soldi(rataDi(prestitoUtile))}</strong> al mese
+              {t("decisione.tiMancanoPrestito", {
+                importo: soldi(mancano), prestito: soldi(prestitoUtile), rata: soldi(rataDi(prestitoUtile)),
+              })}
               {flussoDi(c) > 0 && (
-                <> contro un flusso di <strong className="numeri">+{soldi(flussoDi(c))}</strong>
-                  {flussoDi(c) > rataDi(prestitoUtile) ? " — conviene." : " — non conviene."}</>
+                <> {t("decisione.controUnFlusso")} <strong className="numeri">+{soldi(flussoDi(c))}</strong>
+                  {t(flussoDi(c) > rataDi(prestitoUtile) ? "decisione.conviene" : "decisione.nonConviene")}</>
               )}
             </p>
             <Bottone variante="btn-fantasma btn-piccolo pieno mt12" disabled={inAzione}
               onClick={() => fai({ tipo: "prestito", importo: prestitoUtile })}>
-              Chiedi {soldi(prestitoUtile)} alla banca
+              {t("decisione.chiediAllaBanca", { importo: soldi(prestitoUtile) })}
             </Bottone>
           </div>
         )}
@@ -149,24 +153,24 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
         {c.tipo === "spesa" ? (
           <Bottone variante={c.opzionale ? "btn-fantasma" : "btn-rosso"} disabled={inAzione}
             onClick={() => fai({ tipo: c.opzionale ? "passaCarta" : "compraCarta" })}>
-            {c.opzionale ? "Rifiuta" : `Paga ${soldi(c.importo)}`}
+            {c.opzionale ? t("decisione.rifiuta") : t("decisione.paga", { importo: soldi(c.importo) })}
           </Bottone>
         ) : (
           <div className="riga-btn">
             <Bottone variante="btn-fantasma" disabled={inAzione}
               onClick={() => fai({ tipo: "passaCarta" })}>
-              Lascia perdere
+              {t("decisione.lasciaPerdere")}
             </Bottone>
             <Bottone variante="btn-verde" disabled={inAzione || !puoi}
               onClick={() => fai({ tipo: "compraCarta", quantita: q })}>
-              {puoi ? `Compra · ${soldi(costo)}` : "Contanti insufficienti"}
+              {puoi ? t("decisione.compra", { importo: soldi(costo) }) : t("decisione.contantiInsufficienti")}
             </Bottone>
           </div>
         )}
         {c.opzionale && c.tipo === "spesa" && (
           <Bottone variante="btn-fantasma mt8" disabled={inAzione}
             onClick={() => fai({ tipo: "compraCarta" })}>
-            Presta comunque {soldi(c.importo)}
+            {t("decisione.prestaComunque", { importo: soldi(c.importo) })}
           </Bottone>
         )}
         {errore && <p className="f13 neg mt12" style={{ margin: "12px 0 0" }}>{errore}</p>}
@@ -176,7 +180,7 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
 
   /* ── Il Mercato: possono rispondere più giocatori ── */
   if (p.tipo === "mercato") {
-    const c = p.carta;
+    const c = traduciCarta(p.carta);
     let vendibili = [];
     if (c.tipo === "offerta") {
       vendibili = c.categoria === "attivita"
@@ -195,36 +199,39 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
 
     return (
       <Foglio aperto>
-        <CartaGioco chiave={chiave} classe="c-mercato" etichetta="Il Mercato" titolo={c.nome}>
+        <CartaGioco chiave={chiave} classe="c-mercato" etichetta={t("decisione.ilMercato")} titolo={c.nome}>
           <p className="f14" style={{ margin: 0, lineHeight: 1.45 }}>{c.testo}</p>
           {c.tipo === "offerta" && (
             <div className="mt12">
-              <Voce k="Cercano" v={categorie[c.categoria] || c.categoria} />
-              <Voce k="Offerta" v={c.moltiplicatore ? `${Math.round(c.moltiplicatore * 100)}% del costo` : soldi(c.prezzo)} />
+              <Voce k={t("decisione.cercano")} v={categorie[c.categoria] || c.categoria} />
+              <Voce k={t("decisione.offerta")} v={c.moltiplicatore
+                ? t("decisione.percentualeDelCosto", { n: Math.round(c.moltiplicatore * 100) })
+                : soldi(c.prezzo)} />
             </div>
           )}
           {c.tipo === "prezzo" && (
             <div className="mt12">
-              <Voce k="Titolo" v={c.simbolo} />
-              <Voce k="Prezzo di vendita" v={soldi(c.prezzo)} forte />
+              <Voce k={t("decisione.titoloAzionario")} v={c.simbolo} />
+              <Voce k={t("decisione.prezzoDiVendita")} v={soldi(c.prezzo)} forte />
             </div>
           )}
         </CartaGioco>
 
         {c.tipo === "offerta" && vendibili.length > 0 && (
           <>
-            <div className="sezione-tit">Puoi vendere</div>
+            <div className="sezione-tit">{t("decisione.puoiVendere")}</div>
             {vendibili.map((v) => (
               <div key={v.rid} className="carta mb8" style={{ padding: 12 }}>
                 <div className="grassetto f14 mb4">{v.nome}</div>
                 <div className="f12 tenue mb8">
-                  Prezzo {soldi(v.prezzo)} − debito {soldi(v.debito)} =
-                  <strong className="numeri"> {soldi(v.prezzo - v.debito)}</strong> in contanti,
-                  perdi {soldi(v.flusso)}/mese di flusso.
+                  {t("decisione.prezzoMenoDebito", {
+                    prezzo: soldi(v.prezzo), debito: soldi(v.debito),
+                    netto: soldi(v.prezzo - v.debito), flusso: soldi(v.flusso),
+                  })}
                 </div>
                 <Bottone variante="btn-blu btn-piccolo pieno" disabled={inAzione}
                   onClick={() => fai({ tipo: "vendiAlMercato", rid: v.rid, ultima: true })}>
-                  Vendi · +{soldi(v.prezzo - v.debito)}
+                  {t("decisione.vendi", { importo: soldi(v.prezzo - v.debito) })}
                 </Bottone>
               </div>
             ))}
@@ -235,26 +242,29 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
           <div className="carta mb8" style={{ padding: 12 }}>
             <div className="grassetto f14 mb4">{titolo.quantita} × {titolo.simbolo}</div>
             <div className="f12 tenue mb8">
-              Comprate a {soldi(titolo.prezzoAcquisto)} · oggi valgono {soldi(c.prezzo)} ciascuna.
-              Vendendo tutto incassi <strong className="numeri">{soldi(titolo.quantita * c.prezzo)}</strong>
-              {" "}({titolo.quantita * (c.prezzo - titolo.prezzoAcquisto) >= 0 ? "guadagno" : "perdita"}
+              {t("decisione.azioniRiepilogo", {
+                prezzo: soldi(titolo.prezzoAcquisto), oggi: soldi(c.prezzo),
+                totale: soldi(titolo.quantita * c.prezzo),
+              })}
+              {" "}({t(titolo.quantita * (c.prezzo - titolo.prezzoAcquisto) >= 0 ? "decisione.guadagno" : "decisione.perdita")}
               {" "}<Denaro v={titolo.quantita * (c.prezzo - titolo.prezzoAcquisto)} segno />).
             </div>
             <Bottone variante="btn-blu btn-piccolo pieno" disabled={inAzione}
               onClick={() => fai({ tipo: "vendiAlMercato", quantita: titolo.quantita, ultima: true })}>
-              Vendi tutto · +{soldi(titolo.quantita * c.prezzo)}
+              {t("decisione.vendiTutto", { importo: soldi(titolo.quantita * c.prezzo) })}
             </Bottone>
           </div>
         )}
 
         <Bottone variante="btn-fantasma mt8" disabled={inAzione}
           onClick={() => fai({ tipo: "passaMercato" })}>
-          {vendibili.length || titolo ? "Non vendo niente" : "Ho capito"}
+          {t(vendibili.length || titolo ? "decisione.nonVendoNiente" : "decisione.hoCapito")}
         </Bottone>
 
         <p className="f12 tenue ta-c mt12" style={{ margin: "12px 0 0" }}>
-          In attesa di {p.idonei.length - p.risposto.length} giocator
-          {p.idonei.length - p.risposto.length === 1 ? "e" : "i"}.
+          {p.idonei.length - p.risposto.length === 1
+            ? t("decisione.inAttesaUno")
+            : t("decisione.inAttesaMolti", { n: p.idonei.length - p.risposto.length })}
         </p>
         {errore && <p className="f13 neg mt8" style={{ margin: "8px 0 0" }}>{errore}</p>}
       </Foglio>
@@ -265,28 +275,28 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
   if (p.tipo === "extra") {
     return (
       <Foglio aperto>
-        <CartaGioco chiave={chiave} classe="c-extra" etichetta="Spesa Extra" titolo={p.carta.nome}>
-          <p className="f14" style={{ margin: 0, lineHeight: 1.45 }}>{p.carta.testo}</p>
+        <CartaGioco chiave={chiave} classe="c-extra" etichetta={t("decisione.spesaExtra")} titolo={traduciCarta(p.carta).nome}>
+          <p className="f14" style={{ margin: 0, lineHeight: 1.45 }}>{traduciCarta(p.carta).testo}</p>
           <div className="mt12">
-            <Voce k="Da pagare" v={soldi(p.importo)} forte />
+            <Voce k={t("decisione.daPagare")} v={soldi(p.importo)} forte />
           </div>
           {p.importo === 0 && (
             <p className="f12 tenue mt8" style={{ margin: "8px 0 0" }}>
-              Non hai figli: questa spesa non ti tocca.
+              {t("decisione.nonHaiFigli")}
             </p>
           )}
         </CartaGioco>
         <p className="f13 tenue mb12" style={{ margin: "0 0 12px" }}>
-          Le Spese Extra sono obbligatorie. Se non hai contanti puoi chiedere un prestito.
+          {t("decisione.extraObbligatorie")}
         </p>
         {p.importo > io.contanti && (
           <Bottone variante="btn-fantasma mb8" disabled={inAzione}
             onClick={() => fai({ tipo: "prestito", importo: Math.ceil((p.importo - io.contanti) / 1000) * 1000 })}>
-            Chiedi {soldi(Math.ceil((p.importo - io.contanti) / 1000) * 1000)} alla banca
+            {t("decisione.chiediAllaBanca", { importo: soldi(Math.ceil((p.importo - io.contanti) / 1000) * 1000) })}
           </Bottone>
         )}
         <Bottone variante="btn-rosso" disabled={inAzione} onClick={() => fai({ tipo: "confermaExtra" })}>
-          {p.importo > 0 ? `Paga ${soldi(p.importo)}` : "Avanti"}
+          {p.importo > 0 ? t("decisione.paga", { importo: soldi(p.importo) }) : t("comune.avanti")}
         </Bottone>
         {errore && <p className="f13 neg mt12" style={{ margin: "12px 0 0" }}>{errore}</p>}
       </Foglio>
@@ -297,21 +307,20 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
   if (p.tipo === "beneficenza") {
     return (
       <Foglio aperto>
-        <CartaGioco chiave={chiave} classe="c-benef" etichetta="Beneficenza" titolo="Vuoi donare?">
+        <CartaGioco chiave={chiave} classe="c-benef" etichetta={t("decisione.beneficenza")} titolo={t("decisione.vuoiDonare")}>
           <p className="f14" style={{ margin: 0, lineHeight: 1.5 }}>
-            Donando il 10% del tuo reddito totale potrai tirare <strong>2 dadi</strong> invece
-            di uno per i prossimi <strong>3 turni</strong>: ti muovi di più e incontri più opportunità.
+            {t("decisione.beneficenzaSpiegazione")}
           </p>
-          <div className="mt12"><Voce k="Costo della donazione" v={soldi(p.costo)} forte /></div>
+          <div className="mt12"><Voce k={t("decisione.costoDonazione")} v={soldi(p.costo)} forte /></div>
         </CartaGioco>
         <div className="riga-btn">
           <Bottone variante="btn-fantasma" disabled={inAzione}
             onClick={() => fai({ tipo: "beneficenza", accetta: false })}>
-            No, grazie
+            {t("decisione.noGrazie")}
           </Bottone>
           <Bottone variante="btn-oro" disabled={inAzione || io.contanti < p.costo}
             onClick={() => fai({ tipo: "beneficenza", accetta: true })}>
-            Dona {soldi(p.costo)}
+            {t("decisione.dona", { importo: soldi(p.costo) })}
           </Bottone>
         </div>
         {errore && <p className="f13 neg mt12" style={{ margin: "12px 0 0" }}>{errore}</p>}
@@ -323,25 +332,25 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
   if (p.tipo === "figlio") {
     return (
       <Foglio aperto>
-        <CartaGioco chiave={chiave} classe="c-figlio" etichetta="Famiglia"
-          titolo={p.nuovo ? "È nato un figlio!" : "Hai già tre figli"}>
+        <CartaGioco chiave={chiave} classe="c-figlio" etichetta={t("decisione.famiglia")}
+          titolo={t(p.nuovo ? "decisione.eNatoUnFiglio" : "decisione.giaTreFigli")}>
           {p.nuovo ? (
             <>
               <p className="f14" style={{ margin: 0, lineHeight: 1.5 }}>
-                Le spese mensili aumentano. Non è una punizione: è la vita che continua
-                mentre costruisci il tuo reddito passivo.
+                {t("decisione.figlioSpiegazione")}
               </p>
               <div className="mt12">
-                <Voce k="Spesa per figlio" v={`+${soldi(io.perFiglio)} / mese`} forte />
-                <Voce k="Figli dopo questo" v={String(io.figli + 1)} />
+                <Voce k={t("decisione.spesaPerFiglio")}
+                  v={t("decisione.perFiglioAlMese", { importo: soldi(io.perFiglio) })} forte />
+                <Voce k={t("decisione.figliDopoQuesto")} v={String(io.figli + 1)} />
               </div>
             </>
           ) : (
-            <p className="f14" style={{ margin: 0 }}>Il regolamento ferma a tre figli. Nessun cambiamento.</p>
+            <p className="f14" style={{ margin: 0 }}>{t("decisione.fermaATreFigli")}</p>
           )}
         </CartaGioco>
         <Bottone variante="btn-verde" disabled={inAzione} onClick={() => fai({ tipo: "confermaFiglio" })}>
-          Avanti
+          {t("comune.avanti")}
         </Bottone>
       </Foglio>
     );
@@ -351,24 +360,23 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
   if (p.tipo === "licenziamento") {
     return (
       <Foglio aperto>
-        <CartaGioco chiave={chiave} classe="c-licenz" etichetta="Imprevisto" titolo="Sei stato licenziato">
+        <CartaGioco chiave={chiave} classe="c-licenz" etichetta={t("decisione.imprevisto")} titolo={t("decisione.seiLicenziato")}>
           <p className="f14" style={{ margin: 0, lineHeight: 1.5 }}>
-            Hai perso temporaneamente il lavoro. Le spese però continuano: paghi
-            l'equivalente di un mese intero e salti due turni.
+            {t("decisione.licenziamentoSpiegazione")}
           </p>
           <div className="mt12">
-            <Voce k="Da pagare subito" v={soldi(p.costo)} forte />
-            <Voce k="Turni persi" v="2" />
+            <Voce k={t("decisione.daPagareSubito")} v={soldi(p.costo)} forte />
+            <Voce k={t("decisione.turniPersi")} v="2" />
           </div>
         </CartaGioco>
         {p.costo > io.contanti && (
           <Bottone variante="btn-fantasma mb8" disabled={inAzione}
             onClick={() => fai({ tipo: "prestito", importo: Math.ceil((p.costo - io.contanti) / 1000) * 1000 })}>
-            Chiedi {soldi(Math.ceil((p.costo - io.contanti) / 1000) * 1000)} alla banca
+            {t("decisione.chiediAllaBanca", { importo: soldi(Math.ceil((p.costo - io.contanti) / 1000) * 1000) })}
           </Bottone>
         )}
         <Bottone variante="btn-rosso" disabled={inAzione} onClick={() => fai({ tipo: "confermaLicenziamento" })}>
-          Paga {soldi(p.costo)}
+          {t("decisione.paga", { importo: soldi(p.costo) })}
         </Bottone>
         {errore && <p className="f13 neg mt12" style={{ margin: "12px 0 0" }}>{errore}</p>}
       </Foglio>
@@ -380,17 +388,17 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
     const r = riepilogo(io);
     return (
       <Foglio aperto>
-        <CartaGioco chiave={chiave} classe="c-banca" etichetta="Bancarotta" titolo="Il flusso è negativo">
+        <CartaGioco chiave={chiave} classe="c-banca" etichetta={t("decisione.bancarotta")} titolo={t("decisione.flussoNegativo")}>
           <p className="f14" style={{ margin: 0, lineHeight: 1.5 }}>{p.testo}</p>
           <div className="mt12">
-            <Voce k="Flusso mensile" v={soldi(r.flussoMensile)} forte />
-            <Voce k="Contanti" v={soldi(io.contanti)} />
+            <Voce k={t("scheda.flussoMensileBreve")} v={soldi(r.flussoMensile)} forte />
+            <Voce k={t("scheda.contanti")} v={soldi(io.contanti)} />
           </div>
         </CartaGioco>
 
         {io.passivita.prestitoBanca >= 1000 && io.contanti >= 1000 && (
           <div className="carta mb8" style={{ padding: 12 }}>
-            <div className="grassetto f14 mb4">Rimborsa il prestito bancario</div>
+            <div className="grassetto f14 mb4">{t("decisione.rimborsaPrestito")}</div>
             <div className="f12 tenue mb8">
               {t("decisione.rimborsoSpiegazione", {
                 debito: soldi(io.passivita.prestitoBanca),
@@ -403,7 +411,7 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
                 tipo: "vendiPerBancarotta", categoria: "prestito",
                 importo: Math.min(io.passivita.prestitoBanca, Math.floor(io.contanti / 1000) * 1000),
               })}>
-              Rimborsa {soldi(Math.min(io.passivita.prestitoBanca, Math.floor(io.contanti / 1000) * 1000))}
+              {t("decisione.rimborsa", { importo: soldi(Math.min(io.passivita.prestitoBanca, Math.floor(io.contanti / 1000) * 1000)) })}
             </Bottone>
           </div>
         )}
@@ -413,12 +421,13 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
           <div key={a.rid} className="carta mb8" style={{ padding: 12 }}>
             <div className="grassetto f14 mb4">{a.nome}</div>
             <div className="f12 tenue mb8">
-              Svendita alla banca: metà dell'acconto = <strong className="numeri">{soldi(Math.floor(a.acconto / 2))}</strong>.
-              Perdi {soldi(a.flusso)}/mese.
+              {t("decisione.svenditaAllaBanca", {
+                importo: soldi(Math.floor(a.acconto / 2)), flusso: soldi(a.flusso),
+              })}
             </div>
             <Bottone variante="btn-rosso btn-piccolo pieno" disabled={inAzione}
               onClick={() => fai({ tipo: "vendiPerBancarotta", categoria: a.cat, rid: a.rid })}>
-              Svendi · +{soldi(Math.floor(a.acconto / 2))}
+              {t("decisione.svendi", { importo: soldi(Math.floor(a.acconto / 2)) })}
             </Bottone>
           </div>
         ))}
@@ -428,27 +437,29 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
             <div className="grassetto f14 mb4">{a.quantita} × {a.simbolo}</div>
             <Bottone variante="btn-rosso btn-piccolo pieno" disabled={inAzione}
               onClick={() => fai({ tipo: "vendiPerBancarotta", categoria: "azione", simbolo: a.simbolo })}>
-              Liquida · +{soldi(Math.floor((a.quantita * a.prezzoAcquisto) / 2))}
+              {t("decisione.liquida", { importo: soldi(Math.floor((a.quantita * a.prezzoAcquisto) / 2)) })}
             </Bottone>
           </div>
         ))}
 
         {debitiEstinguibili.filter((d) => io.passivita[d.chiave] > 0 && io.contanti >= io.passivita[d.chiave]).map((d) => (
           <div key={d.chiave} className="carta mb8" style={{ padding: 12 }}>
-            <div className="grassetto f14 mb4">Estingui: {d.nome}</div>
+            <div className="grassetto f14 mb4">{t("decisione.estinguiNome", { nome: d.nome })}</div>
             <div className="f12 tenue mb8">
-              {soldi(io.passivita[d.chiave])} per togliere {soldi(io.spese[d.spesa])}/mese di spese.
+              {t("decisione.estinguiSpesa", {
+                importo: soldi(io.passivita[d.chiave]), rata: soldi(io.spese[d.spesa]),
+              })}
             </div>
             <Bottone variante="btn-verde btn-piccolo pieno" disabled={inAzione}
               onClick={() => fai({ tipo: "vendiPerBancarotta", categoria: "debito", chiave: d.chiave })}>
-              Estingui
+              {t("decisione.estingui")}
             </Bottone>
           </div>
         ))}
 
         <Bottone variante={r.flussoMensile >= 0 ? "btn-verde" : "btn-rosso"} className="mt8" disabled={inAzione}
           onClick={() => fai({ tipo: "concludiBancarotta" })}>
-          {r.flussoMensile >= 0 ? "Ho risanato: salta 3 turni" : "Non posso fare altro"}
+          {t(r.flussoMensile >= 0 ? "decisione.hoRisanato" : "decisione.nonPossoFareAltro")}
         </Bottone>
         {errore && <p className="f13 neg mt12" style={{ margin: "12px 0 0" }}>{errore}</p>}
       </Foglio>
@@ -457,35 +468,35 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
 
   /* ── Largo: affare ── */
   if (p.tipo === "affareVeloce") {
-    const a = p.affare;
+    const a = traduciCarta(p.affare);
     const nuovo = io.redditoRendita + a.flusso;
     const obiettivo = io.redditoInizialeVeloce + 50000;
     return (
       <Foglio aperto>
-        <CartaGioco chiave={chiave} classe="c-veloce" etichetta="Affare · Largo" titolo={a.nome}>
+        <CartaGioco chiave={chiave} classe="c-veloce" etichetta={t("decisione.affareLargo")} titolo={a.nome}>
           <p className="f14" style={{ margin: 0, lineHeight: 1.45 }}>{a.testo}</p>
           <div className="mt12">
-            <Voce k="Acconto" v={soldi(a.acconto)} />
-            <Voce k="Flusso mensile" v={`+${soldi(a.flusso)}`} forte />
-            <Voce k="Il tuo flusso diventerebbe" v={soldi(nuovo)} />
-            <Voce k="Obiettivo per vincere" v={soldi(obiettivo)} />
+            <Voce k={t("decisione.acconto")} v={soldi(a.acconto)} />
+            <Voce k={t("scheda.flussoMensileBreve")} v={`+${soldi(a.flusso)}`} forte />
+            <Voce k={t("decisione.flussoDiventerebbe")} v={soldi(nuovo)} />
+            <Voce k={t("scheda.obiettivoVincere")} v={soldi(obiettivo)} />
           </div>
           {nuovo >= obiettivo && (
             <p className="f13 grassetto mt12" style={{ margin: "12px 0 0", color: "var(--verde)" }}>
-              Comprando questo affare vinci la partita.
+              {t("decisione.vinciComprando")}
             </p>
           )}
         </CartaGioco>
         <div className="flex tra f13 mb12">
-          <span className="tenue">I tuoi contanti</span>
+          <span className="tenue">{t("decisione.iTuoiContanti")}</span>
           <span className="numeri grassetto">{soldi(io.contanti)}</span>
         </div>
         <div className="riga-btn">
           <Bottone variante="btn-fantasma" disabled={inAzione}
-            onClick={() => fai({ tipo: "passaAffareVeloce" })}>Lascia perdere</Bottone>
+            onClick={() => fai({ tipo: "passaAffareVeloce" })}>{t("decisione.lasciaPerdere")}</Bottone>
           <Bottone variante="btn-oro" disabled={inAzione || io.contanti < a.acconto}
             onClick={() => fai({ tipo: "compraAffareVeloce" })}>
-            {io.contanti >= a.acconto ? `Compra · ${soldi(a.acconto)}` : "Contanti insufficienti"}
+            {io.contanti >= a.acconto ? t("decisione.compra", { importo: soldi(a.acconto) }) : t("decisione.contantiInsufficienti")}
           </Bottone>
         </div>
         {errore && <p className="f13 neg mt12" style={{ margin: "12px 0 0" }}>{errore}</p>}
@@ -498,30 +509,29 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
     return (
       <Foglio aperto>
         <CartaGioco chiave={chiave} classe="c-sogno"
-          etichetta={p.mio ? "Il tuo sogno" : "Sogno di un altro giocatore"}
-          titolo={`${p.sogno.emoji || "★"} ${p.sogno.nome}`}>
+          etichetta={t(p.mio ? "decisione.ilTuoSogno" : "decisione.sognoDiUnAltro")}
+          titolo={`${p.sogno.emoji || "★"} ${(trovaSogno(p.sogno.id) || p.sogno).nome}`}>
           {p.mio ? (
             <>
               <p className="f14" style={{ margin: 0, lineHeight: 1.5 }}>
-                È il sogno che hai scelto a inizio partita. Comprarlo significa vincere.
+                {t("decisione.sognoMioSpiegazione")}
               </p>
               <div className="mt12">
-                <Voce k="Costo di listino" v={soldi(p.sogno.costo)} />
+                <Voce k={t("decisione.costoDiListino")} v={soldi(p.sogno.costo)} />
                 {io.segnaliniSogno > 0 && (
-                  <Voce k={`Rincaro (${io.segnaliniSogno} segnalin${io.segnaliniSogno === 1 ? "o" : "i"})`}
+                  <Voce k={io.segnaliniSogno === 1
+                    ? t("decisione.rincaroUno")
+                    : t("decisione.rincaroMolti", { n: io.segnaliniSogno })}
                     v={`+${soldi(p.sogno.costo * io.segnaliniSogno)}`} />
                 )}
-                <Voce k="Da pagare" v={soldi(p.costo)} forte />
+                <Voce k={t("decisione.daPagare")} v={soldi(p.costo)} forte />
               </div>
             </>
           ) : (
             <>
               <p className="f14" style={{ margin: 0, lineHeight: 1.5 }}>
-                Non è il tuo sogno, quindi non puoi comprarlo.
-                {p.vittime?.length > 0 && (
-                  <> Ma essendoci atterrato sopra, hai raddoppiato il costo
-                    a {p.vittime.join(", ")}.</>
-                )}
+                {t("decisione.sognoAltruiSpiegazione")}
+                {p.vittime?.length > 0 && t("decisione.sognoRaddoppiato", { nomi: p.vittime.join(", ") })}
               </p>
             </>
           )}
@@ -529,15 +539,17 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
         {p.mio ? (
           <div className="riga-btn">
             <Bottone variante="btn-fantasma" disabled={inAzione}
-              onClick={() => fai({ tipo: "passaSogno" })}>Non ora</Bottone>
+              onClick={() => fai({ tipo: "passaSogno" })}>{t("decisione.nonOra")}</Bottone>
             <Bottone variante="btn-oro" disabled={inAzione || io.contanti < p.costo}
               onClick={() => fai({ tipo: "compraSogno" })}>
-              {io.contanti >= p.costo ? `Realizza il sogno · ${soldi(p.costo)}` : `Ti mancano ${soldi(p.costo - io.contanti)}`}
+              {io.contanti >= p.costo
+                ? t("decisione.realizzaSogno", { importo: soldi(p.costo) })
+                : t("decisione.tiMancanoImporto", { importo: soldi(p.costo - io.contanti) })}
             </Bottone>
           </div>
         ) : (
           <Bottone variante="btn-fantasma" disabled={inAzione}
-            onClick={() => fai({ tipo: "passaSogno" })}>Avanti</Bottone>
+            onClick={() => fai({ tipo: "passaSogno" })}>{t("comune.avanti")}</Bottone>
         )}
         {errore && <p className="f13 neg mt12" style={{ margin: "12px 0 0" }}>{errore}</p>}
       </Foglio>
@@ -549,24 +561,22 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
     const costo = Math.round(io.redditoRendita * 0.1);
     return (
       <Foglio aperto>
-        <CartaGioco chiave={chiave} classe="c-benef" etichetta="Beneficenza · Largo"
-          titolo={p.gia ? "Hai già donato" : "Vuoi donare?"}>
+        <CartaGioco chiave={chiave} classe="c-benef" etichetta={t("decisione.beneficenzaLargo")}
+          titolo={t(p.gia ? "decisione.haiGiaDonato" : "decisione.vuoiDonare")}>
           <p className="f14" style={{ margin: 0, lineHeight: 1.5 }}>
-            {p.gia
-              ? "Puoi già scegliere quanti dadi tirare a ogni turno."
-              : "Donando il 10% del tuo reddito potrai scegliere se tirare 1, 2 o 3 dadi per il resto della partita: molto utile per arrivare sulla casella giusta."}
+            {t(p.gia ? "decisione.beneficenzaVeloceGia" : "decisione.beneficenzaVeloceSpiegazione")}
           </p>
-          {!p.gia && <div className="mt12"><Voce k="Costo" v={soldi(costo)} forte /></div>}
+          {!p.gia && <div className="mt12"><Voce k={t("decisione.costo")} v={soldi(costo)} forte /></div>}
         </CartaGioco>
         {p.gia ? (
           <Bottone variante="btn-fantasma" disabled={inAzione}
-            onClick={() => fai({ tipo: "beneficenzaVeloce", accetta: false })}>Avanti</Bottone>
+            onClick={() => fai({ tipo: "beneficenzaVeloce", accetta: false })}>{t("comune.avanti")}</Bottone>
         ) : (
           <div className="riga-btn">
             <Bottone variante="btn-fantasma" disabled={inAzione}
-              onClick={() => fai({ tipo: "beneficenzaVeloce", accetta: false })}>No, grazie</Bottone>
+              onClick={() => fai({ tipo: "beneficenzaVeloce", accetta: false })}>{t("decisione.noGrazie")}</Bottone>
             <Bottone variante="btn-oro" disabled={inAzione || io.contanti < costo}
-              onClick={() => fai({ tipo: "beneficenzaVeloce", accetta: true })}>Dona {soldi(costo)}</Bottone>
+              onClick={() => fai({ tipo: "beneficenzaVeloce", accetta: true })}>{t("decisione.dona", { importo: soldi(costo) })}</Bottone>
           </div>
         )}
         {errore && <p className="f13 neg mt12" style={{ margin: "12px 0 0" }}>{errore}</p>}
@@ -578,19 +588,17 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
   if (p.tipo === "penalitaVeloce") {
     return (
       <Foglio aperto>
-        <CartaGioco chiave={chiave} classe="c-extra" etichetta="Imprevisto" titolo={p.nome}>
+        <CartaGioco chiave={chiave} classe="c-extra" etichetta={t("decisione.imprevisto")} titolo={nomeCasella(p.nome)}>
           <p className="f14" style={{ margin: 0, lineHeight: 1.5 }}>
-            {p.nome === "Divorzio"
-              ? "Perdi tutti i contanti che avevi da parte. Il tuo flusso mensile resta intatto: gli affari continuano a produrre."
-              : "Perdi metà dei contanti. Il flusso mensile non cambia: è il capitale liquido a farne le spese."}
+            {t(p.nome === "Divorzio" ? "decisione.divorzioTesto" : "decisione.penalitaTesto")}
           </p>
           <div className="mt12">
-            <Voce k="Perso" v={soldi(p.perso)} forte />
-            <Voce k="Ti restano" v={soldi(io.contanti)} />
+            <Voce k={t("decisione.perso")} v={soldi(p.perso)} forte />
+            <Voce k={t("decisione.tiRestano")} v={soldi(io.contanti)} />
           </div>
         </CartaGioco>
         <Bottone variante="btn-fantasma" disabled={inAzione} onClick={() => fai({ tipo: "confermaPenalita" })}>
-          Avanti
+          {t("comune.avanti")}
         </Bottone>
       </Foglio>
     );

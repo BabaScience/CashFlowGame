@@ -91,7 +91,7 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
                   <KV k={t("vittoria.affariAcquistati")} v={String(vincitore.affariVeloci)} />
                 </>
               ) : (
-                <KV k="Reddito passivo" v={soldi(vincitore.redditoPassivo)} forte />
+                <KV k={t("vittoria.redditoPassivo")} v={soldi(vincitore.redditoPassivo)} forte />
               )}
               <KV k={t("vittoria.turniGiocati")} v={String(vincitore.turniGiocati)} />
             </div>
@@ -114,48 +114,48 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
                 <div style={{ flex: 1 }}>
                   <div className="grassetto f15">
                     {i + 1}. {riga.nome}
-                    {riga.id === mioId && <span className="tenue"> · tu</span>}
+                    {riga.id === mioId && <span className="tenue"> · {t("vittoria.tu")}</span>}
                   </div>
                   <div className="f12 tenue">
                     {trovaProfessione(riga.professioneId).nome}
                     {" · "}
-                    {riga.eliminato ? "eliminato" : riga.tracciato === "veloce" ? "Largo" : "Ruota"}
-                    {riga.usciteDallaCorsa ? ` · uscito dalla corsa al suo ${riga.usciteDallaCorsa}° turno` : ""}
+                    {t(riga.eliminato ? "vittoria.eliminato"
+                      : riga.tracciato === "veloce" ? "vittoria.largo" : "vittoria.ruota")}
+                    {riga.usciteDallaCorsa ? t("vittoria.uscitoAlTurno", { n: riga.usciteDallaCorsa }) : ""}
                   </div>
                 </div>
                 {riga.vincitore && <span className="tag tag-oro">{t("vittoria.vincitore")}</span>}
               </div>
 
-              <KV k="Contanti" v={soldi(riga.contanti)} />
+              <KV k={t("vittoria.contanti")} v={soldi(riga.contanti)} />
               {riga.tracciato === "veloce" ? (
                 <>
-                  <KV k="Flusso mensile" v={soldi(riga.redditoRendita)} />
-                  <KV k="Crescita al Largo" v={`+${soldi(riga.guadagnoVeloce)}`} />
-                  <KV k="Affari" v={String(riga.affariVeloci)} />
+                  <KV k={t("vittoria.flussoMensile")} v={soldi(riga.redditoRendita)} />
+                  <KV k={t("vittoria.crescitaAlLargo")} v={`+${soldi(riga.guadagnoVeloce)}`} />
+                  <KV k={t("vittoria.affari")} v={String(riga.affariVeloci)} />
                 </>
               ) : (
                 <>
-                  <KV k="Reddito passivo" v={soldi(riga.redditoPassivo)} />
-                  <KV k="Spese totali" v={soldi(riga.speseTotali)} />
-                  <KV k="Giorno di paga" v={soldi(riga.flussoMensile)} />
-                  <KV k="Attivi / Passività" v={`${soldi(riga.valoreAttivi)} / ${soldi(riga.passivitaTotali)}`} />
+                  <KV k={t("vittoria.redditoPassivo")} v={soldi(riga.redditoPassivo)} />
+                  <KV k={t("vittoria.speseTotali")} v={soldi(riga.speseTotali)} />
+                  <KV k={t("vittoria.giornoDiPaga")} v={soldi(riga.flussoMensile)} />
+                  <KV k={t("vittoria.attiviPassivita")} v={`${soldi(riga.valoreAttivi)} / ${soldi(riga.passivitaTotali)}`} />
                 </>
               )}
-              <KV k="Patrimonio netto" v={soldi(riga.patrimonioNetto)} forte />
-              <KV k="Figli" v={String(riga.figli)} />
+              <KV k={t("vittoria.patrimonioNetto")} v={soldi(riga.patrimonioNetto)} forte />
+              <KV k={t("vittoria.figli")} v={String(riga.figli)} />
             </motion.div>
           ))}
 
           <p className="f12 tenue mt16" style={{ margin: "16px 0 0", lineHeight: 1.55 }}>
-            I dati di questa partita restano disponibili ancora per qualche ora,
-            poi vengono cancellati automaticamente dal server.
+            {t("vittoria.datiTemporanei")}
           </p>
 
           <div className="mt16">
             <Bottone variante="btn-oro" onClick={suNuovaPartita}>{t("vittoria.nuovaPartita")}</Bottone>
             {sonoHost && (
               <Bottone variante="btn-fantasma mt8" onClick={suChiudi}>
-                Chiudi la stanza e cancella i dati
+                {t("vittoria.chiudiStanza")}
               </Bottone>
             )}
           </div>

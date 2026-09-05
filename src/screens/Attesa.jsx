@@ -58,7 +58,7 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
             {stato.codice}
           </div>
           <p className="f13 tenue" style={{ margin: "0 0 14px" }}>
-            Chi ha questo codice può entrare, fino a {MAX_GIOCATORI} giocatori.
+            {t("attesa.chiEntra", { n: MAX_GIOCATORI })}
           </p>
           <div className="riga-btn">
             <Bottone variante="btn-fantasma" onClick={copia}>{t("attesa.copia")}</Bottone>
@@ -68,7 +68,7 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
 
         <div className="carta-scura mt12">
           <div className="sezione-tit" style={{ color: "rgba(244,241,230,.5)" }}>
-            Al tavolo · {stato.giocatori.length}/{MAX_GIOCATORI}
+            {t("attesa.alTavolo")} · {stato.giocatori.length}/{MAX_GIOCATORI}
           </div>
           {stato.giocatori.map((g, i) => {
             const p = trovaProfessione(g.professioneId);
@@ -83,11 +83,14 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div className="grassetto f15">
                     {g.nome}
-                    {g.id === mioId && <span className="tenue"> · tu</span>}
+                    {g.id === mioId && <span className="tenue"> · {t("attesa.tu")}</span>}
                     {g.id === stato.hostId && <span className="tag tag-oro" style={{ marginLeft: 8 }}>host</span>}
                   </div>
                   <div className="f12 tenue">
-                    {p.emoji} {p.nome} · {soldi(p.stipendio)}/mese · sogno {s.emoji}
+                    {t("attesa.rigaGiocatore", {
+                      emoji: p.emoji, professione: p.nome,
+                      importo: soldi(p.stipendio), sogno: s.emoji,
+                    })}
                   </div>
                 </div>
               </motion.div>
@@ -95,7 +98,7 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
           })}
           {stato.giocatori.length < 2 && (
             <p className="f13 tenue mt12" style={{ margin: "12px 0 0" }}>
-              Serve almeno un altro giocatore per cominciare.
+              {t("attesa.serveUnAltro")}
             </p>
           )}
         </div>
@@ -108,8 +111,11 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
           </button>
           {!modifica && io && (
             <p className="f13 tenue" style={{ margin: "8px 0 0" }}>
-              {trovaProfessione(io.professioneId).emoji} {trovaProfessione(io.professioneId).nome}
-              {" · "}sogno: {trovaSogno(io.sognoId).nome}
+              {t("attesa.sceltaCorrente", {
+                emoji: trovaProfessione(io.professioneId).emoji,
+                professione: trovaProfessione(io.professioneId).nome,
+                sogno: trovaSogno(io.sognoId).nome,
+              })}
             </p>
           )}
           {modifica && io && (
@@ -158,7 +164,9 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
           ) : (
             <div className="carta ta-c">
               <p className="f14" style={{ margin: 0 }}>
-                In attesa che {stato.giocatori.find((g) => g.id === stato.hostId)?.nome || "l'host"} avvii la partita.
+                {t("attesa.inAttesaDiHost", {
+                  nome: stato.giocatori.find((g) => g.id === stato.hostId)?.nome || t("attesa.hostGenerico"),
+                })}
               </p>
             </div>
           )}

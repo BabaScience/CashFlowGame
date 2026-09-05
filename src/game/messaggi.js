@@ -213,11 +213,20 @@ export const MESSAGGI = {
 };
 
 /** Il testo di una riga di registro nella lingua richiesta. */
-export function testoRiga(riga, lingua = "it") {
+export function testoRiga(riga, lingua = "it", carte) {
   const modello = MESSAGGI[lingua]?.[riga?.k] ?? MESSAGGI.it?.[riga?.k];
   /* Nessuna chiave (riga vecchia, o messaggio nuovo non ancora tradotto):
      si mostra il testo che il motore ha già composto. */
   if (!modello) return riga?.testo ?? "";
   const valori = riga.v || {};
-  return modello.replace(/\{(\w+)\}/g, (_, k) => (valori[k] ?? `{${k}}`));
+  /* I nomi delle carte nel registro arrivano dal motore, che gira sul
+     server e parla italiano: "Bea compra Bilocale a Ostia" restava a metà
+     in inglese. Qui passano dalla stessa tavola dell'interfaccia — le
+     chiavi che finiscono per "Nome" sono nomi di cose, non di persone. */
+  return modello.replace(/\{(\w+)\}/g, (_, k) => {
+    const v = valori[k];
+    if (v === undefined) return `{${k}}`;
+    const diCosa = k === "nome2" || (k !== "nome" && k !== "nuovoNome" && k.endsWith("Nome"));
+    return diCosa && carte?.[v] ? carte[v] : v;
+  });
 }

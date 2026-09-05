@@ -21,6 +21,7 @@ import { traccia } from "../lib/traccia.js";
 import { useSuoni } from "../hooks/useSuoni.js";
 import Logo from "../components/Logo.jsx";
 import { copiaTesto } from "../lib/appunti.js";
+import { useLingua } from "../Lingua.jsx";
 
 /**
  * LA SFIDA DEL GIORNO.
@@ -55,6 +56,7 @@ export default function Sfida({ suEsci, mercatoId = "roma" }) {
 /* ── prima di cominciare ───────────────────────────────────── */
 
 function Presentazione({ giorno, gia, suGioca, suEsci }) {
+  const { t } = useLingua();
   const { pacchetto, soldi } = useMercato();
   const storico = storicoSfida();
   const val = storicoValutazione();
@@ -67,20 +69,18 @@ function Presentazione({ giorno, gia, suGioca, suEsci }) {
           <Logo suCasa={suEsci} />
         </div>
         <div className="carta-scura mt12 ta-c">
-          <div className="maiusc" style={{ color: "rgba(244,241,230,.45)" }}>Sfida del giorno</div>
+          <div className="maiusc" style={{ color: "rgba(244,241,230,.45)" }}>{t("sfida.titolo")}</div>
           <h1 className="titolo f28 mb8" style={{ margin: "6px 0 8px" }}>{pacchetto.nome}</h1>
           <p className="f13 tenue" style={{ margin: "0 0 16px" }}>{giorno}</p>
 
           <p className="f14" style={{ margin: "0 0 18px", lineHeight: 1.5 }}>
-            Stessa scheda, stesso mazzo, stesse carte per tutti quelli che giocano
-            oggi. {TURNI_SFIDA} turni per portare la rendita il più vicino possibile
-            alle tue spese. Un solo tentativo.
+            {t("sfida.spiegazione", { turni: TURNI_SFIDA })}
           </p>
 
           <div className="carta mt12" style={{ padding: "14px 16px" }}>
             <div className="flex tra cen">
               <div style={{ textAlign: "left" }}>
-                <div className="maiusc tenue">Valutazione</div>
+                <div className="maiusc tenue">{t("sfida.valutazione")}</div>
                 <div className="titolo f28" style={{ lineHeight: 1.1 }}>{val.valutazione}</div>
               </div>
               <div style={{ textAlign: "right" }}>
@@ -92,27 +92,27 @@ function Presentazione({ giorno, gia, suGioca, suEsci }) {
 
           {(storico.giocate > 0) && (
             <div className="flex g12" style={{ justifyContent: "center", margin: "16px 0 18px" }}>
-              <Dato k="Serie" v={`${storico.serie} 🔥`} />
-              <Dato k="Record" v={`${storico.migliore}`} />
-              <Dato k="Giocate" v={`${storico.giocate}`} />
+              <Dato k={t("sfida.serie")} v={`${storico.serie} 🔥`} />
+              <Dato k={t("sfida.record")} v={`${storico.migliore}`} />
+              <Dato k={t("sfida.giocate")} v={`${storico.giocate}`} />
             </div>
           )}
 
           {gia ? (
             <>
               <div className="carta mt12" style={{ textAlign: "center" }}>
-                <div className="maiusc tenue">Oggi hai fatto</div>
+                <div className="maiusc tenue">{t("sfida.oggiHaiFatto")}</div>
                 <div className="titolo f28" style={{ color: "var(--verde)" }}>{gia.punteggio}<span className="f16 tenue">/100</span></div>
                 <p className="f13 tenue" style={{ margin: "8px 0 0" }}>
-                  Torna domani: la sfida cambia a mezzanotte.
+                  {t("sfida.tornaDomani")}
                 </p>
               </div>
-              <Bottone variante="btn-fantasma mt12" onClick={suEsci}>Torna all'inizio</Bottone>
+              <Bottone variante="btn-fantasma mt12" onClick={suEsci}>{t("sfida.tornaInizio")}</Bottone>
             </>
           ) : (
             <>
-              <Bottone variante="btn-oro" onClick={suGioca}>Gioca la sfida di oggi</Bottone>
-              <Bottone variante="btn-fantasma mt12" onClick={suEsci}>Torna all'inizio</Bottone>
+              <Bottone variante="btn-oro" onClick={suGioca}>{t("sfida.gioca")}</Bottone>
+              <Bottone variante="btn-fantasma mt12" onClick={suEsci}>{t("sfida.tornaInizio")}</Bottone>
             </>
           )}
         </div>
@@ -131,6 +131,7 @@ const Dato = ({ k, v }) => (
 /* ── la partita ────────────────────────────────────────────── */
 
 function Tavolo({ partita, setPartita, giorno, suEsci }) {
+  const { t } = useLingua();
   const { soldi } = useMercato();
   const [errore, setErrore] = useState("");
   const [esito, setEsito] = useState(null);
@@ -171,15 +172,15 @@ function Tavolo({ partita, setPartita, giorno, suEsci }) {
         borderBottom: "1px solid rgba(255,255,255,.07)", flex: "none",
       }}>
         <button onClick={suEsci} className="f11 tenue" style={{ textAlign: "left", background: "none" }}>
-          <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>Sfida</div>
+          <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("sfida.sfida")}</div>
           <div className="numeri grassetto f16">{giorno.slice(5)}</div>
         </button>
         <div className="ta-c" style={{ flex: 1 }}>
-          <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>Turno</div>
+          <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("sfida.turno")}</div>
           <div className="numeri grassetto f16">{Math.min(stato.numeroTurno, TURNI_SFIDA)} / {TURNI_SFIDA}</div>
         </div>
         <div className="ta-r">
-          <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>Contanti</div>
+          <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("sfida.contanti")}</div>
           <div className="numeri grassetto f16">{soldi(io.contanti)}</div>
         </div>
       </div>
@@ -192,7 +193,7 @@ function Tavolo({ partita, setPartita, giorno, suEsci }) {
           </div>
           <div className="zona-progresso">
             <div className="flex tra f12 mb4">
-              <span className="tenue">Punteggio</span>
+              <span className="tenue">{t("sfida.punteggio")}</span>
               <span className="numeri grassetto">{p}/100</span>
             </div>
             <Barra scura valore={Math.min(1, p / 100)} />
@@ -226,6 +227,7 @@ function Tavolo({ partita, setPartita, giorno, suEsci }) {
 /* ── il risultato ──────────────────────────────────────────── */
 
 function Esito({ stato, esito, giorno, suEsci }) {
+  const { t } = useLingua();
   const [copiato, setCopiato] = useState(false);
   const f = fasciaPunteggio(esito.punteggio);
   const testo = useMemo(
@@ -252,7 +254,7 @@ function Esito({ stato, esito, giorno, suEsci }) {
           <div className="titolo" style={{ fontSize: 52, margin: "10px 0 0", color: "var(--oro-chiaro)" }}>
             {esito.punteggio}
           </div>
-          <div className="f14 tenue" style={{ marginBottom: 14 }}>su 100 · {f.nome}</div>
+          <div className="f14 tenue" style={{ marginBottom: 14 }}>{t("sfida.su100")} · {f.nome}</div>
 
           <div style={{ fontSize: 26, letterSpacing: 4, marginBottom: 18 }}>
             {"▰".repeat(f.blocchi)}<span style={{ opacity: 0.25 }}>{"▱".repeat(5 - f.blocchi)}</span>
@@ -262,7 +264,7 @@ function Esito({ stato, esito, giorno, suEsci }) {
             <div className="carta" style={{ padding: "14px 16px", marginBottom: 16 }}>
               <div className="flex tra cen">
                 <div style={{ textAlign: "left" }}>
-                  <div className="maiusc tenue">Valutazione</div>
+                  <div className="maiusc tenue">{t("sfida.valutazione")}</div>
                   <div className="titolo f28" style={{ lineHeight: 1.1 }}>
                     {esito.valutazione.dopo}
                     <span className="f16" style={{
@@ -279,23 +281,23 @@ function Esito({ stato, esito, giorno, suEsci }) {
                 </div>
               </div>
               <p className="f12 tenue" style={{ margin: "10px 0 0", lineHeight: 1.45 }}>
-                Il riferimento ha fatto <strong>{esito.riferimento}</strong> sulla tua stessa partita.
+                {t("sfida.riferimentoHaFatto", { n: esito.riferimento })}
               </p>
             </div>
           )}
 
           <div className="flex g12" style={{ justifyContent: "center", marginBottom: 18 }}>
-            <Dato k="Serie" v={`${esito.serie} 🔥`} />
-            <Dato k="Record" v={`${esito.migliore}`} />
+            <Dato k={t("sfida.serie")} v={`${esito.serie} 🔥`} />
+            <Dato k={t("sfida.record")} v={`${esito.migliore}`} />
           </div>
 
           <Bottone variante="btn-oro" onClick={condividi}>
-            {copiato ? "Copiato!" : "Condividi il risultato"}
+            {t(copiato ? "sfida.copiato" : "sfida.condividi")}
           </Bottone>
           <p className="f12 tenue" style={{ margin: "14px 0 0", lineHeight: 1.5 }}>
-            La sfida cambia a mezzanotte. Stessa partita per tutti, un tentativo a testa.
+            {t("sfida.cambiaAMezzanotte")}
           </p>
-          <Bottone variante="btn-fantasma mt12" onClick={suEsci}>Torna all'inizio</Bottone>
+          <Bottone variante="btn-fantasma mt12" onClick={suEsci}>{t("sfida.tornaInizio")}</Bottone>
         </motion.div>
       </div>
     </div>

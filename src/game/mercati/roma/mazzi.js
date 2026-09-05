@@ -72,7 +72,7 @@ export const PICCOLI_AFFARI = [
 
   /* ── Trilocali ── */
   immobile({ zonaId: "tuscolano", mq: 65, categoria: "trilocale", nome: "Trilocale a Tuscolano",
-    testo: "Famiglia in affitto da quattro anni, pagamenti sempre puuntuali." }),
+    testo: "Famiglia in affitto da quattro anni, pagamenti sempre puntuali." }),
   immobile({ zonaId: "montesacro", mq: 68, categoria: "trilocale", nome: "Trilocale a Montesacro",
     testo: "Zona tranquilla e ben servita. Si affitta in una settimana." }),
   immobile({ zonaId: "cinecitta", mq: 70, categoria: "trilocale", nome: "Trilocale a Cinecittà",

@@ -285,6 +285,36 @@ prova("Nessun componente scrive un simbolo di valuta a mano", () => {
   if (guai.length) throw new Error(guai.join("\n       "));
 });
 
+prova("Ogni t(\"…\") dell'interfaccia trova la sua voce", () => {
+  /* Il difetto che questo test insegue è appena successo: togliendo una
+     funzione ho cancellato `scheda.alMese` e, con lo stesso nome in un'altra
+     sezione, anche `ingresso.alMese`. Nessun test si è mosso; la schermata
+     d'ingresso mostrava la stringa "ingresso.alMese" al posto dello
+     stipendio. Una chiave che non esiste non è un errore: è testo. */
+  const RADICE = new URL("..", import.meta.url).pathname;
+  const file = (dir, out = []) => {
+    for (const n of readdirSync(dir)) {
+      const p = join(dir, n);
+      if (statSync(p).isDirectory()) file(p, out);
+      else if (/\.(jsx|js)$/.test(p)) out.push(p);
+    }
+    return out;
+  };
+  const note = new Set(foglie(dizionari.it));
+  const guai = [];
+  for (const f of file(join(RADICE, "src"))) {
+    const src = readFileSync(f, "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, " ")
+      .replace(/\/\/[^\n]*/g, " ");
+    /* Solo le chiavi scritte per intero: `t(\`scheda.cosaFa_${id}\`)` si
+       compone a runtime e questo test non può seguirlo. */
+    for (const m of src.matchAll(/\bt\(\s*"([\w.]+)"/g)) {
+      if (!note.has(m[1])) guai.push(`${relative(RADICE, f)}: t("${m[1]}") non esiste nel dizionario`);
+    }
+  }
+  if (guai.length) throw new Error(guai.join("\n       "));
+});
+
 console.log("\n── I contenuti dei mercati ──");
 
 prova("Ogni mercato dichiara le stesse lingue del gioco", () => {
@@ -327,6 +357,45 @@ prova("Le voci del conto economico sono tradotte", () => {
   }
 });
 
+prova("Ogni carta è tradotta in ogni lingua", () => {
+  /* Le carte dei mazzi non hanno una chiave: la chiave È la frase
+     italiana. Il rovescio della medaglia è che basta correggere un refuso
+     nel mazzo perché la traduzione smetta di agganciarsi, in silenzio e
+     senza rompere niente. Questo test è l'aggancio. */
+  for (const m of MERCATI) {
+    const p = getPacchetto(m.id);
+    const tutte = [...Object.values(p.mazzi).flat(), ...p.affariLargo];
+    for (const [id, tav] of Object.entries(p.lingue || {})) {
+      const mancanti = [];
+      for (const c of tutte) {
+        if (!tav.carte?.[c.nome]) mancanti.push(c.nome);
+        if (c.testo && !tav.carte?.[c.testo]) mancanti.push(c.testo);
+      }
+      vero(mancanti.length === 0,
+        `${m.id}/${id}: ${mancanti.length} stringhe non tradotte, la prima è "${mancanti[0]}"`);
+    }
+  }
+});
+
+prova("Nessuna traduzione di carta punta nel vuoto", () => {
+  /* Una chiave che non corrisponde più a nessuna carta è una traduzione
+     scritta e mai mostrata: di solito vuol dire che il mazzo è cambiato e
+     la tavola no. */
+  for (const m of MERCATI) {
+    const p = getPacchetto(m.id);
+    const vive = new Set();
+    for (const c of [...Object.values(p.mazzi).flat(), ...p.affariLargo]) {
+      vive.add(c.nome);
+      if (c.testo) vive.add(c.testo);
+    }
+    for (const [id, tav] of Object.entries(p.lingue || {})) {
+      for (const k of Object.keys(tav.carte || {})) {
+        vero(vive.has(k), `${m.id}/${id}: "${k}" non è più il testo di nessuna carta`);
+      }
+    }
+  }
+});
+
 prova("Tradurre non tocca i numeri", () => {
   /* Un mercato resta il suo mercato: Roma costa quello che costa a Roma,
      in euro, anche letta in francese. */
@@ -337,10 +406,10 @@ prova("Tradurre non tocca i numeri", () => {
         vero(voce.stipendio === undefined, "una traduzione non può cambiare uno stipendio");
         vero(voce.spese === undefined, "una traduzione non può cambiare le spese");
       }
+      /* La tavola delle carte è testo → testo, e basta: se qualcuno ci
+         infilasse un oggetto tornerebbe a poter riscrivere un prezzo. */
       for (const voce of Object.values(tav.carte || {})) {
-        for (const k of ["costo", "acconto", "flusso", "mutuo", "canone"]) {
-          vero(voce[k] === undefined, `una traduzione non può cambiare "${k}"`);
-        }
+        vero(typeof voce === "string", "una carta si traduce con una frase, non con un oggetto");
       }
     }
   }

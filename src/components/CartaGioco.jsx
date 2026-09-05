@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { soldi } from "../game/finanze.js";
 import { useMercato } from "../Mercato.jsx";
+import { useLingua } from "../Lingua.jsx";
 
 /**
  * Contenitore di una carta pescata: parte coperta e si gira.
@@ -70,6 +71,7 @@ export function roi(flusso, acconto) {
 
 /** Corpo di una carta Opportunità. */
 export function CorpoAffare({ carta }) {
+  const { t } = useLingua();
   const { categorie, flussoDi } = useMercato();
   /* Il flusso che conta è quello del livello in cui si sta giocando, non
      quello stampato sulla carta: al Livello 2 la stessa carta rendeva -20
@@ -81,10 +83,12 @@ export function CorpoAffare({ carta }) {
     return (
       <>
         <p className="f14 mb12" style={{ margin: "0 0 12px", lineHeight: 1.45 }}>{carta.testo}</p>
-        <Voce k="Simbolo" v={carta.simbolo} />
-        <Voce k="Prezzo di oggi" v={soldi(carta.prezzo)} />
-        <Voce k="Dividendo mensile" v={carta.dividendo ? `${soldi(carta.dividendo)} / azione` : "nessuno"} />
-        <Voce k="Fascia di oscillazione" v={`${soldi(carta.min)} – ${soldi(carta.max)}`} />
+        <Voce k={t("carta.simbolo")} v={carta.simbolo} />
+        <Voce k={t("carta.prezzoDiOggi")} v={soldi(carta.prezzo)} />
+        <Voce k={t("carta.dividendoMensile")} v={carta.dividendo
+          ? t("carta.perAzione", { importo: soldi(carta.dividendo) })
+          : t("carta.nessuno")} />
+        <Voce k={t("carta.fasciaOscillazione")} v={`${soldi(carta.min)} – ${soldi(carta.max)}`} />
       </>
     );
   }
@@ -92,10 +96,10 @@ export function CorpoAffare({ carta }) {
     return (
       <>
         <p className="f14" style={{ margin: "0 0 12px", lineHeight: 1.45 }}>{carta.testo}</p>
-        <Voce k="Costo" v={soldi(carta.importo)} forte />
+        <Voce k={t("carta.costo")} v={soldi(carta.importo)} forte />
         {carta.condizione === "immobile" && (
           <p className="f12 tenue mt8" style={{ margin: "8px 0 0" }}>
-            Si paga solo se possiedi almeno un immobile.
+            {t("carta.soloSeImmobile")}
           </p>
         )}
       </>
@@ -108,14 +112,15 @@ export function CorpoAffare({ carta }) {
       {carta.categoria && categorie[carta.categoria] && (
         <div className="tag tag-verde mb8">{categorie[carta.categoria]}</div>
       )}
-      <Voce k="Costo totale" v={soldi(carta.costo)} />
-      <Voce k="Acconto richiesto" v={soldi(carta.acconto)} />
-      <Voce k={carta.tipo === "immobile" ? "Mutuo" : "Debito"} v={soldi(carta.mutuo ?? carta.passivita ?? 0)} />
-      <Voce k="Flusso mensile" v={flusso ? `${flusso > 0 ? "+" : ""}${soldi(flusso)}` : "nessuno"} forte />
+      <Voce k={t("carta.costoTotale")} v={soldi(carta.costo)} />
+      <Voce k={t("carta.accontoRichiesto")} v={soldi(carta.acconto)} />
+      <Voce k={t(carta.tipo === "immobile" ? "carta.mutuo" : "carta.debito")} v={soldi(carta.mutuo ?? carta.passivita ?? 0)} />
+      <Voce k={t("carta.flussoMensile")} v={flusso ? `${flusso > 0 ? "+" : ""}${soldi(flusso)}` : t("carta.nessuno")} forte />
       {r !== null && flusso > 0 && (
         <p className="f12 tenue" style={{ margin: "10px 0 0" }}>
-          Rendimento sull'acconto: <strong>{r}%</strong> all'anno
-          ({soldi(flusso)} × 12 ÷ {soldi(carta.acconto)}).
+          {t("carta.rendimento", {
+            percentuale: r, flusso: soldi(flusso), acconto: soldi(carta.acconto),
+          })}
         </p>
       )}
     </>

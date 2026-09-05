@@ -4,18 +4,20 @@ import { GettoneGiocatore, Barra, Denaro } from "./Base.jsx";
 import { Sagoma } from "./Tabellone.jsx";
 import { soldi, riepilogo } from "../game/finanze.js";
 import { useMercato } from "../Mercato.jsx";
+import { useLingua } from "../Lingua.jsx";
 
 /**
  * Il pannello degli avversari: si vede la rendita di tutti crescere.
  * È metà del gusto del gioco — capire chi sta per prendere il largo.
  */
 export default function Giocatori({ stato, mioId, compatto }) {
+  const { t } = useLingua();
   const { trovaProfessione, trovaSogno, obiettivo } = useMercato();
   const diTurno = stato.giocatori[stato.turno]?.id;
 
   return (
     <div className={compatto ? "" : "carta-scura"}>
-      {!compatto && <div className="sezione-tit" style={{ color: "rgba(244,241,230,.5)" }}>Al tavolo</div>}
+      {!compatto && <div className="sezione-tit" style={{ color: "rgba(244,241,230,.5)" }}>{t("comune.alTavolo")}</div>}
       {stato.giocatori.map((g, i) => {
         const r = riepilogo(g);
         const prof = trovaProfessione(g.professioneId);

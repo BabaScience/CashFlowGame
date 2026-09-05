@@ -39,6 +39,31 @@ function tradotto(elenco, tavola) {
   });
 }
 
+/**
+ * Le carte si traducono per testo, non per chiave.
+ *
+ * Le carte dei mazzi non hanno un identificatore: sono generate dalle
+ * quotazioni per zona, e dargliene uno significherebbe scriverne 239 a
+ * mano e tenerli allineati per sempre. La chiave è quindi la frase
+ * italiana stessa — che è già unica, già stabile, e si legge accanto alla
+ * traduzione senza dover andare a cercare cosa fosse "p14".
+ *
+ * Vale sia per il nome sia per il testo, e quello che manca resta in
+ * italiano invece di sparire: una carta senza traduzione è brutta, una
+ * carta vuota è un difetto.
+ */
+function unaCarta(c, tavola) {
+  if (!c || !tavola) return c;
+  const nome = tavola[c.nome] || c.nome;
+  const testo = c.testo ? tavola[c.testo] || c.testo : c.testo;
+  return nome === c.nome && testo === c.testo ? c : { ...c, nome, testo };
+}
+
+function carteTradotte(elenco, tavola) {
+  if (!tavola) return elenco;
+  return elenco.map((c) => unaCarta(c, tavola));
+}
+
 export function MercatoProvider({ stato, mercatoId, children }) {
   const { lingua } = useLingua();
   const valore = useMemo(() => {
@@ -48,9 +73,9 @@ export function MercatoProvider({ stato, mercatoId, children }) {
       ...grezzo,
       professioni: tradotto(grezzo.professioni, tav.professioni),
       sogni: tradotto(grezzo.sogni, tav.sogni),
-      affariLargo: tradotto(grezzo.affariLargo, tav.carte),
+      affariLargo: carteTradotte(grezzo.affariLargo, tav.carte),
       mazzi: Object.fromEntries(
-        Object.entries(grezzo.mazzi).map(([k, m]) => [k, tradotto(m, tav.carte)])
+        Object.entries(grezzo.mazzi).map(([k, m]) => [k, carteTradotte(m, tav.carte)])
       ),
       etichetteSpese: { ...grezzo.etichetteSpese, ...(tav.etichetteSpese || {}) },
       etichettePassivita: { ...grezzo.etichettePassivita, ...(tav.etichettePassivita || {}) },
@@ -73,6 +98,12 @@ export function MercatoProvider({ stato, mercatoId, children }) {
       etichetteSpese: pacchetto.etichetteSpese,
       etichettePassivita: pacchetto.etichettePassivita,
       debitiEstinguibili: pacchetto.debitiEstinguibili,
+      /* La carta che sta sul tavolo NON viene dal pacchetto: è una copia
+         congelata dentro lo stato della partita, che il server ha scritto
+         in italiano. Va tradotta al momento di mostrarla, o resta l'unica
+         cosa italiana di una partita francese — ed è proprio la cosa che
+         si sta leggendo. */
+      traduciCarta: (c) => unaCarta(c, tav?.carte),
       obiettivo: pacchetto.obiettivoRendita,
     obiettivoLargo: pacchetto.obiettivoLargo,
       livello,
