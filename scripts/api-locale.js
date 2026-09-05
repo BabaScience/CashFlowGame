@@ -10,7 +10,7 @@ import { creaStanza, codiceStanza, applicaAzione } from "../src/game/motore.js";
 import { preparaMessaggio, accoda } from "../src/game/chat.js";
 import { incrementiPer } from "../src/game/metriche.js";
 import { pacchettoDi } from "../src/game/mercati/indice.js";
-import { statoRivincita } from "../api/_lib/rivincita.js";
+import { statoRivincita, puoChiederla } from "../api/_lib/rivincita.js";
 import { chiaveCoda, formatoValido, valutazioniDopo, partitaValida, ordineFinale, VALUTAZIONE_ARENA_INIZIALE } from "../src/game/arena.js";
 import { redditoPassivo, speseTotali } from "../src/game/finanze.js";
 
@@ -147,6 +147,8 @@ export default function apiLocale() {
               const codice = (b.codice || "").toUpperCase();
               const rec = stanze.get(codice);
               if (!rec) return invia(res, 404, { errore: "Stanza non trovata o scaduta." });
+              const permesso = puoChiederla(rec.stato, giocatoreId);
+              if (permesso.errore) return invia(res, 403, { errore: permesso.errore });
               if (rec.stato.rivincita) return invia(res, 200, { codice: rec.stato.rivincita });
               let nuovoCodice;
               do { nuovoCodice = codiceStanza(); } while (stanze.has(nuovoCodice));

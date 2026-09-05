@@ -12,7 +12,7 @@
  */
 import { stanze, giocatori, statoConfigurazione, scadenza, TTL_GIOCATORE_MS } from "./_lib/db.js";
 import { registraEsito } from "./_lib/classifica.js";
-import { statoRivincita } from "./_lib/rivincita.js";
+import { statoRivincita, puoChiederla } from "./_lib/rivincita.js";
 import { json, errore, corpo, normalizzaCodice, validoId } from "./_lib/http.js";
 import { creaStanza, codiceStanza, applicaAzione } from "../src/game/motore.js";
 
@@ -87,6 +87,10 @@ export default async function handler(req, res) {
       const codice = normalizzaCodice(body.codice);
       const vecchia = await col.findOne({ codice }, { projection: { _id: 0, scadeIl: 0 } });
       if (!vecchia) return errore(res, 404, "Stanza non trovata o scaduta.");
+      /* Il permesso si controlla PRIMA di dare qualunque codice: anche
+         quello di una rivincita già aperta è un invito a un tavolo. */
+      const permesso = puoChiederla(vecchia, giocatoreId);
+      if (permesso.errore) return errore(res, 403, permesso.errore);
       /* Se qualcun altro l'ha già chiesta si entra in quella, invece di
          aprirne una seconda e dividere il tavolo in due. */
       if (vecchia.rivincita) return json(res, 200, { codice: vecchia.rivincita });

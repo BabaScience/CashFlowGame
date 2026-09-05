@@ -14,7 +14,7 @@ import {
   VALUTAZIONE_ARENA_INIZIALE, PASSO_ARENA, PASSO_ESORDIENTE,
 } from "../src/game/arena.js";
 import { creaStanza, codiceStanza, applicaAzione, limiteTurni, TURNI_LAMPO } from "../src/game/motore.js";
-import { statoRivincita } from "../api/_lib/rivincita.js";
+import { statoRivincita, puoChiederla } from "../api/_lib/rivincita.js";
 import { mossaBot } from "../src/game/avversario.js";
 import { getPacchetto } from "../src/game/mercati/indice.js";
 
@@ -275,6 +275,20 @@ prova("Non si chiede la rivincita di una partita in corso", () => {
 prova("Non la chiede chi non ha giocato", () => {
   const finita = finoInFondo(tavolo({ formato: "lampo", quanti: 2, bot: [1] }));
   vero(statoRivincita(finita, "ZZZZ", "passante").errore, "avrebbe dovuto rifiutare uno di fuori");
+});
+
+prova("Il permesso si può chiedere senza costruire niente", () => {
+  /* Serve così: l'API deve poterlo controllare PRIMA di restituire il
+     codice di una rivincita che qualcun altro ha già aperto. Senza questo
+     chiunque conoscesse il codice di una partita finita si faceva dare il
+     codice della rivincita — e poteva sedersi a un tavolo di due persone
+     che non lo avevano invitato. Successo davvero, in produzione. */
+  const finita = finoInFondo(tavolo({ formato: "lampo", quanti: 2, bot: [1] }));
+  vero(!puoChiederla(finita, "g0").errore, "chi ha giocato deve poterla chiedere");
+  vero(puoChiederla(finita, "passante").errore, "un estraneo no");
+  vero(puoChiederla(finita, "g1").errore, "e nemmeno il computer");
+  vero(puoChiederla(tavolo({ quanti: 2 }), "g0").errore, "non a partita in corso");
+  vero(puoChiederla(null, "g0").errore, "non su una stanza che non c'è");
 });
 
 console.log(`\n${passati} test superati, ${falliti} falliti\n`);
