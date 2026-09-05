@@ -3,6 +3,7 @@ import { useStanza } from "./hooks/useStanza.js";
 import { Avviso, Bottone } from "./components/Base.jsx";
 import Ingresso from "./screens/Ingresso.jsx";
 import Sfida from "./screens/Sfida.jsx";
+import Arena from "./screens/Arena.jsx";
 import Impara from "./screens/Impara.jsx";
 import Attesa from "./screens/Attesa.jsx";
 import Partita from "./screens/Partita.jsx";
@@ -21,6 +22,23 @@ export default function App() {
   return <LinguaProvider><Applicazione /></LinguaProvider>;
 }
 
+/**
+ * L'arena ha bisogno del mercato scelto (le professioni servono a iscriversi
+ * alla coda) e di poterlo cambiare. Sta qui e non dentro Arena perché un
+ * componente non può consumare il contesto che apre lui stesso.
+ */
+function ArenaConMercato({ suEntrato, suEsci, avvisa }) {
+  const [mercatoId, setMercato] = useState(
+    () => localStorage.getItem("quotazero:mercato") || "roma"
+  );
+  return (
+    <MercatoProvider mercatoId={mercatoId}>
+      <Arena suEntrato={suEntrato} suEsci={suEsci} avvisa={avvisa}
+        mercatoId={mercatoId} setMercato={setMercato} />
+    </MercatoProvider>
+  );
+}
+
 function Applicazione() {
   const { t } = useLingua();
   const mioId = api.mioId();
@@ -32,6 +50,7 @@ function Applicazione() {
   });
   const [avviso, setAvviso] = useState("");
   const [sfida, setSfida] = useState(false);
+  const [arena, setArena] = useState(false);
   const [impara, setImpara] = useState(null); // null | "lezioni" | "quesiti"
 
   const avvisa = useCallback((t) => {
@@ -108,6 +127,15 @@ function Applicazione() {
   /* ── Nessuna stanza: schermata d'ingresso ── */
   /* Sfida e lezioni non hanno stanza: girano tutte nel browser. */
   if (sfida) return <Sfida suEsci={() => setSfida(false)} />;
+  if (arena) {
+    return (
+      <>
+        <ArenaConMercato suEntrato={(c) => { setArena(false); setCodice(c); }}
+          suEsci={() => setArena(false)} avvisa={avvisa} />
+        <Avviso testo={avviso} />
+      </>
+    );
+  }
   if (impara) return <Impara suEsci={() => setImpara(null)} modoIniziale={impara} />;
 
   if (!codice) {
@@ -115,7 +143,8 @@ function Applicazione() {
       <MercatoProvider stato={stato}>
         <div className="schermo" style={{ paddingBottom: 24 }}>
           <Ingresso suEntrato={setCodice} avvisa={avvisa}
-            suSfida={() => setSfida(true)} suImpara={(dove) => setImpara(dove || "lezioni")} />
+            suSfida={() => setSfida(true)} suArena={() => setArena(true)}
+            suImpara={(dove) => setImpara(dove || "lezioni")} />
           <Avviso testo={avviso} />
         </div>
       </MercatoProvider>
@@ -183,6 +212,13 @@ function Applicazione() {
             stato={stato} mioId={mioId}
             sonoHost={stato.hostId === mioId}
             suNuovaPartita={() => setCodice(null)}
+            suRivincita={async () => {
+              try {
+                const r = await api.rivincita(codice);
+                traccia("rivincita");
+                setCodice(r.codice);
+              } catch (e) { avvisa(e.message); }
+            }}
             suChiudi={chiudiStanza}
           />
         )}

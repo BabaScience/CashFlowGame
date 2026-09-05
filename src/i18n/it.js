@@ -74,6 +74,32 @@ export default {
     lingua: "Lingua",
   },
 
+  arena: {
+    sottotitolo: "Premi Gioca. Qualcuno arriva.",
+    giocaOra: "Gioca ora",
+    cerco: "Cerco un avversario…",
+    daSecondi: "da {n} secondi",
+    inCodaSolo: "Sei l'unico in attesa su questo formato.",
+    inCodaMolti: "{n} persone in attesa su questo formato.",
+    nessunoAncora: "Non c'è ancora nessuno. Puoi continuare ad aspettare, o cominciare subito contro il computer.",
+    giocaColComputer: "Gioca contro il computer",
+    annulla: "Annulla",
+    formato: "Quanto vuoi che duri",
+    lampo: "Lampo",
+    lunga: "Lunga",
+    lampoNota: "{n} turni a testa, una decina di minuti. Vince chi arriva più vicino a uscire dalla Ruota.",
+    lungaNota: "Si gioca finché qualcuno esce dalla Ruota e raddoppia. Mezz'ora e più.",
+    classifica: "Classifica",
+    classificaVuota: "Ancora nessuno. La prima partita fra persone apre la classifica.",
+    tu: "tu",
+    partiteVinte: "{n} partite · {v} vinte",
+    ospite: "Ospite",
+    valutazione: "Valutazione",
+    laTuaValutazione: "La tua valutazione",
+    posizioneSu: "{n}º posto",
+    maiGiocato: "Nessuna partita contro qualcuno, ancora.",
+  },
+
   attesa: {
     chiEntra: "Chi ha questo codice può entrare, fino a {n} giocatori.",
     alTavolo: "Al tavolo",
@@ -100,6 +126,8 @@ export default {
   },
 
   partita: {
+    turniRimasti: "Turni",
+    turnoSu: "{n} / {tot}",
     nonFaiParte: "Non fai parte di questa partita.",
     tornaInizio: "Torna all'inizio",
     chiudi: "Chiudi",
@@ -200,6 +228,8 @@ export default {
   },
 
   vittoria: {
+    rivincita: "Rivincita",
+    entraNellaRivincita: "Entra nella rivincita",
     tu: "tu",
     eliminato: "eliminato",
     largo: "Largo",
@@ -477,6 +507,8 @@ export default {
     haLavorato: "ha lavorato {durata}",
   },
   casa: {
+    arena: "Gioca ora",
+    arenaNota: "Ti troviamo un avversario. Anche se non conosci nessuno.",
     tavolo: "Gioca al tavolo",
     tavoloNota: "Da 2 a 6 giocatori, con un codice da mandare agli amici.",
     sfida: "Sfida del giorno",

@@ -10,7 +10,9 @@
  * La concorrenza è gestita con un controllo di versione ottimistico:
  * si riscrive il documento solo se nel frattempo nessun altro l'ha toccato.
  */
-import { stanze, statoConfigurazione, scadenza } from "./_lib/db.js";
+import { stanze, giocatori, statoConfigurazione, scadenza, TTL_GIOCATORE_MS } from "./_lib/db.js";
+import { registraEsito } from "./_lib/classifica.js";
+import { statoRivincita } from "./_lib/rivincita.js";
 import { json, errore, corpo, normalizzaCodice, validoId } from "./_lib/http.js";
 import { creaStanza, codiceStanza, applicaAzione } from "../src/game/motore.js";
 
@@ -80,6 +82,34 @@ export default async function handler(req, res) {
       return json(res, 200, { chiusa: true });
     }
 
+    /* ── Rivincita: stessa gente, stanza nuova, già avviata ── */
+    if (op === "rivincita") {
+      const codice = normalizzaCodice(body.codice);
+      const vecchia = await col.findOne({ codice }, { projection: { _id: 0, scadeIl: 0 } });
+      if (!vecchia) return errore(res, 404, "Stanza non trovata o scaduta.");
+      /* Se qualcun altro l'ha già chiesta si entra in quella, invece di
+         aprirne una seconda e dividere il tavolo in due. */
+      if (vecchia.rivincita) return json(res, 200, { codice: vecchia.rivincita });
+
+      for (let i = 0; i < 6; i++) {
+        const nuovoCodice = codiceStanza();
+        const r = statoRivincita(vecchia, nuovoCodice, giocatoreId);
+        if (r.errore) return errore(res, 400, r.errore);
+        try {
+          await col.insertOne({ ...r.stato, scadeIl: scadenza(r.stato) });
+        } catch (e) {
+          if (e.code === 11000) continue;
+          throw e;
+        }
+        /* Il collegamento sulla vecchia: gli altri lo vedono col polling
+           che stanno già facendo, senza nessun canale nuovo. */
+        await col.updateOne({ codice, rivincita: { $exists: false } }, { $set: { rivincita: nuovoCodice } });
+        const dopo = await col.findOne({ codice }, { projection: { rivincita: 1, _id: 0 } });
+        return json(res, 200, { codice: dopo?.rivincita || nuovoCodice });
+      }
+      return errore(res, 500, "Non riesco a creare la rivincita, riprova.");
+    }
+
     /* ── Applicazione di una mossa ── */
     if (op === "azione") {
       const codice = normalizzaCodice(body.codice);
@@ -111,7 +141,19 @@ export default async function handler(req, res) {
           { codice, versione: attuale.versione },
           { ...nuovo, scadeIl: scadenza(nuovo) }
         );
-        if (esito.matchedCount === 1) return json(res, 200, { stato: nuovo });
+        if (esito.matchedCount === 1) {
+          /* La partita è appena finita: la classifica si aggiorna qui, con
+             la stanza già scritta. Se qualcosa va storto la partita resta
+             valida — una valutazione mancata è un fastidio, una mossa
+             persa è un danno. */
+          if (nuovo.fase === "finita" && attuale.fase !== "finita") {
+            try {
+              const variazioni = await registraEsito(col, await giocatori(), nuovo, TTL_GIOCATORE_MS);
+              if (variazioni) return json(res, 200, { stato: nuovo, valutazioni: variazioni });
+            } catch (e) { console.error("classifica:", e); }
+          }
+          return json(res, 200, { stato: nuovo });
+        }
         // Qualcuno ha scritto nel frattempo: rileggo e riprovo.
       }
       return errore(res, 503, "Troppe mosse contemporanee, riprova.");

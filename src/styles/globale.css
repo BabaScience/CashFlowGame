@@ -647,6 +647,14 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 
 /* ══ partite lasciate a metà ══ */
 .partite-aperte { margin-bottom: 18px; }
+
+/* La striscia con la propria valutazione: la prima cosa che si guarda
+   tornando, e quindi la prima cosa della pagina. */
+.profilo-arena {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; margin-bottom: 12px;
+}
+.profilo-arena .titolo { color: var(--oro, #C9A227); }
 .partita-aperta {
   display: flex; align-items: stretch; gap: 6px; margin-top: 6px;
 }

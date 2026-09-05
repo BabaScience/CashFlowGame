@@ -152,6 +152,22 @@ export function creaGiocatore(s, id, nome, professioneId, sognoId, indice, bot =
   };
 }
 
+/**
+ * Turni a testa nel formato Lampo.
+ *
+ * Quaranta, e il numero è misurato, non scelto a naso. In due, quaranta a
+ * testa fanno circa 190 azioni in tutto: dieci minuti veri, che è la
+ * lunghezza oltre la quale nessuno dice "ancora una".
+ *
+ * Sotto i quaranta la partita finisce prima che il secondo affare renda, e
+ * lo scarto fra chi gioca bene e chi gioca male si stringe. A quaranta un
+ * giocatore che non compra mai niente perde il 98% delle volte (contro il
+ * 100% della partita lunga: praticamente lo stesso), mentre fra due
+ * giocatori di pari livello l'esito resta una moneta — che è esattamente
+ * quello che deve fare un formato competitivo.
+ */
+export const TURNI_LAMPO = 40;
+
 export function creaStanza(codice, hostId, opzioni = {}) {
   /* Il mercato si sceglie qui e non cambia più: la stanza si ancora a una
      versione precisa dei dati e rilegge sempre quella, anche se nel
@@ -173,6 +189,15 @@ export function creaStanza(codice, hostId, opzioni = {}) {
       ? (opzioni.livello || LIVELLO_PREDEFINITO)
       : LIVELLO_PREDEFINITO,
     solitaria: Boolean(opzioni.solitaria),
+    /* IL FORMATO.
+       "lampo" mette un tetto ai turni; "lunga" lascia quello del mercato,
+       che di fatto è nessuno. Non è un modo di giocare diverso: è la
+       stessa partita con un cronometro, e il motore ha già il finale a
+       tempo che ordina i giocatori per quanto si sono avvicinati al
+       proprio traguardo. Senza un formato che finisce in un quarto d'ora
+       non esiste "ancora una", e senza "ancora una" non esiste il resto. */
+    formato: opzioni.formato === "lampo" ? "lampo" : "lunga",
+    turniPerGiocatore: opzioni.formato === "lampo" ? TURNI_LAMPO : 0,
     // Il caso della partita, ricostruibile a ogni lettura dal database.
     seme: (opzioni.seme ?? semeCasuale()) >>> 0,
     passi: 0,
@@ -217,6 +242,21 @@ export function creaStanza(codice, hostId, opzioni = {}) {
  * Al limite vince chi si è avvicinato di più al proprio obiettivo. È anche
  * la regola giusta per una partita da tavolo che deve stare in una serata.
  */
+/**
+ * Quanti turni dura la partita, in tutto.
+ *
+ * Il numero è sul totale dei turni, non su quelli di ciascuno: il motore
+ * conta un turno per giocata, e a due giocatori "trenta a testa" sono
+ * sessanta. Moltiplicare qui invece che alla creazione serve perché in
+ * sala d'attesa la gente entra ed esce: il tetto deve seguire quanti sono
+ * davvero al tavolo quando si comincia.
+ */
+export function limiteTurni(s) {
+  const perGiocatore = s.turniPerGiocatore || 0;
+  if (perGiocatore > 0) return perGiocatore * Math.max(1, s.giocatori.length);
+  return pacchettoDi(s).turniMassimi;
+}
+
 function fineATempo(s) {
   const vivi = s.giocatori.filter((g) => !g.eliminato);
   if (!vivi.length) return;
@@ -246,7 +286,7 @@ function prossimoTurno(s) {
   const vivi = s.giocatori.filter((g) => !g.eliminato);
   if (vivi.length === 0) return;
 
-  const limite = pacchettoDi(s).turniMassimi;
+  const limite = limiteTurni(s);
   if (limite && s.numeroTurno >= limite) return fineATempo(s);
 
   for (let i = 0; i < s.giocatori.length * 3; i++) {

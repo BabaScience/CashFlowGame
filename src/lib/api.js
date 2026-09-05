@@ -28,14 +28,17 @@ async function invia(corpo) {
   return dati;
 }
 
-export const creaStanza = (nome, professioneId, sognoId, mercatoId, livello, avversari = 0) =>
-  invia({ op: "crea", nome, professioneId, sognoId, mercatoId, livello, avversari });
+export const creaStanza = (nome, professioneId, sognoId, mercatoId, livello, avversari = 0, formato = "lunga") =>
+  invia({ op: "crea", nome, professioneId, sognoId, mercatoId, livello, avversari, formato });
 
 export const azione = (codice, azione) =>
   invia({ op: "azione", codice, azione });
 
 export const chiudiStanza = (codice) =>
   invia({ op: "chiudi", codice });
+
+/** Rivincita: stessa gente, stanza nuova, già avviata. */
+export const rivincita = (codice) => invia({ op: "rivincita", codice });
 
 /** La chat ha un endpoint suo: non è una mossa e non passa dal motore. */
 export async function inviaMessaggio(codice, testo) {
@@ -64,4 +67,37 @@ export async function leggiStato(codice, versione = 0) {
     throw e;
   }
   return { invariato: false, stato: dati.stato };
+}
+
+
+/**
+ * LA CODA.
+ *
+ * Tre chiamate e nient'altro: entro, guardo se mi hanno preso, esco. La
+ * scelta di far chiedere al client "mi ha preso qualcuno?" invece di
+ * tenere una connessione aperta è la stessa che regge tutto il resto del
+ * gioco: una connessione aperta è un servizio da pagare, una domanda ogni
+ * due secondi per due minuti no.
+ */
+const allaCoda = async (corpo) => {
+  const r = await fetch("/api/coda", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ ...corpo, giocatoreId: identita() }),
+  });
+  const dati = await r.json().catch(() => null);
+  if (!r.ok) throw new Error(dati?.errore || `Errore ${r.status}`);
+  return dati;
+};
+
+export const entraInCoda = (opzioni) => allaCoda({ op: "entra", ...opzioni });
+export const guardaCoda = () => allaCoda({ op: "guarda" });
+export const esciDallaCoda = () => allaCoda({ op: "esci" }).catch(() => null);
+
+/** La classifica, e la propria riga dentro. */
+export async function classifica() {
+  const r = await fetch(`/api/classifica?giocatoreId=${encodeURIComponent(identita())}`);
+  const dati = await r.json().catch(() => null);
+  if (!r.ok) throw new Error(dati?.errore || `Errore ${r.status}`);
+  return dati;
 }

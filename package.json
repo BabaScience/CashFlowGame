@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "sh scripts/prova-schermate.sh && node scripts/prova-import.mjs && node scripts/prova-vercel.mjs && node scripts/prova-uri.mjs && node scripts/prova-regole.mjs && node scripts/prova-chat.mjs && node scripts/prova-suoni.mjs && node scripts/prova-metriche.mjs && node scripts/prova-mercati.mjs && node scripts/prova-livelli.mjs && node scripts/prova-appunti.mjs && node scripts/prova-marchio.mjs && node scripts/prova-tempo.mjs && node scripts/prova-lingua.mjs && node scripts/prova-sfida.mjs && node scripts/prova-agente.mjs && node scripts/prova-valutazione.mjs && node scripts/prova-partite.mjs && node scripts/prova-contenuti.mjs && node scripts/prova-accessibilita.mjs && node scripts/simula.mjs 60 && node scripts/bilancia.mjs 14",
+    "test": "sh scripts/prova-schermate.sh && node scripts/prova-import.mjs && node scripts/prova-vercel.mjs && node scripts/prova-uri.mjs && node scripts/prova-regole.mjs && node scripts/prova-chat.mjs && node scripts/prova-suoni.mjs && node scripts/prova-metriche.mjs && node scripts/prova-mercati.mjs && node scripts/prova-livelli.mjs && node scripts/prova-appunti.mjs && node scripts/prova-marchio.mjs && node scripts/prova-tempo.mjs && node scripts/prova-lingua.mjs && node scripts/prova-sfida.mjs && node scripts/prova-agente.mjs && node scripts/prova-valutazione.mjs && node scripts/prova-partite.mjs && node scripts/prova-arena.mjs && node scripts/prova-contenuti.mjs && node scripts/prova-accessibilita.mjs && node scripts/simula.mjs 60 && node scripts/bilancia.mjs 14",
     "test:regole": "node scripts/prova-regole.mjs",
     "test:simula": "node scripts/simula.mjs",
     "test:uri": "node scripts/prova-uri.mjs",
@@ -29,7 +29,8 @@
     "test:import": "node scripts/prova-import.mjs",
     "test:a11y": "node scripts/prova-accessibilita.mjs",
     "test:livelli": "node scripts/prova-livelli.mjs",
-    "test:schermate": "sh scripts/prova-schermate.sh"
+    "test:schermate": "sh scripts/prova-schermate.sh",
+    "test:arena": "node scripts/prova-arena.mjs"
   },
   "dependencies": {
     "framer-motion": "^11.15.0",

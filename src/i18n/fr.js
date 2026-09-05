@@ -80,6 +80,32 @@ export default {
     lingua: "Langue",
   },
 
+  arena: {
+    sottotitolo: "Appuyez sur Jouer. Quelqu'un arrive.",
+    giocaOra: "Jouer maintenant",
+    cerco: "Je cherche un adversaire…",
+    daSecondi: "depuis {n} secondes",
+    inCodaSolo: "Vous êtes seul à attendre sur ce format.",
+    inCodaMolti: "{n} personnes attendent sur ce format.",
+    nessunoAncora: "Personne pour l'instant. Vous pouvez continuer d'attendre, ou commencer tout de suite contre l'ordinateur.",
+    giocaColComputer: "Jouer contre l'ordinateur",
+    annulla: "Annuler",
+    formato: "Vous la voulez longue comment",
+    lampo: "Éclair",
+    lunga: "Longue",
+    lampoNota: "{n} tours chacun, une dizaine de minutes. Gagne celui qui s'approche le plus de la sortie de la Roue.",
+    lungaNota: "On joue jusqu'à ce que quelqu'un sorte de la Roue et double. Une demi-heure et plus.",
+    classifica: "Classement",
+    classificaVuota: "Personne encore. La première partie entre joueurs ouvre le classement.",
+    tu: "vous",
+    partiteVinte: "{n} parties · {v} gagnées",
+    ospite: "Invité",
+    valutazione: "Évaluation",
+    laTuaValutazione: "Votre évaluation",
+    posizioneSu: "{n}e place",
+    maiGiocato: "Aucune partie contre quelqu'un pour l'instant.",
+  },
+
   attesa: {
     chiEntra: "Toute personne ayant ce code peut entrer, jusqu'à {n} joueurs.",
     alTavolo: "À la table",
@@ -106,6 +132,8 @@ export default {
   },
 
   partita: {
+    turniRimasti: "Tours",
+    turnoSu: "{n} / {tot}",
     nonFaiParte: "Vous ne faites pas partie de cette partie.",
     tornaInizio: "Revenir au début",
     chiudi: "Fermer",
@@ -206,6 +234,8 @@ export default {
   },
 
   vittoria: {
+    rivincita: "Revanche",
+    entraNellaRivincita: "Rejoindre la revanche",
     tu: "vous",
     eliminato: "éliminé",
     largo: "le Large",
@@ -482,6 +512,8 @@ export default {
     haLavorato: "a travaillé {durata}",
   },
   casa: {
+    arena: "Jouer maintenant",
+    arenaNota: "On vous trouve un adversaire. Même si vous ne connaissez personne.",
     tavolo: "Jouer à table",
     tavoloNota: "De 2 à 6 joueurs, avec un code à envoyer à vos amis.",
     sfida: "Défi du jour",

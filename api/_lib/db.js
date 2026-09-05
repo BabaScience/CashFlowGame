@@ -38,7 +38,7 @@ export const TTL_FINITA_MS = 6 * 60 * 60 * 1000;    // 6 ore
 export const TTL_ATTESA_MS = 6 * 60 * 60 * 1000;    // 6 ore
 
 let cached = global.__quotazeroMongo;
-if (!cached) cached = global.__quotazeroMongo = { client: null, promise: null, indici: false, indiciMetriche: false };
+if (!cached) cached = global.__quotazeroMongo = { client: null, promise: null, indici: false, indiciMetriche: false, indiciCoda: false, indiciGiocatori: false };
 
 /**
  * Stato della configurazione, con un messaggio utile da mostrare
@@ -96,6 +96,57 @@ export async function metriche() {
   }
   return col;
 }
+
+/**
+ * La coda per trovare un avversario.
+ *
+ * Un documento per persona in attesa, con indice TTL a tre minuti: se
+ * nessuno arriva, la riga sparisce da sola e non resta niente da pulire.
+ * È la collezione più economica del progetto — di solito è vuota.
+ */
+export async function coda() {
+  const c = await client();
+  const col = c.db(NOME_DB).collection("coda");
+  if (!cached.indiciCoda) {
+    cached.indiciCoda = true;
+    await Promise.all([
+      col.createIndex({ giocatoreId: 1 }, { unique: true }),
+      col.createIndex({ chiave: 1, creataIl: 1 }),
+      col.createIndex({ scadeIl: 1 }, { expireAfterSeconds: 0 }),
+    ]).catch((e) => { cached.indiciCoda = false; console.error("indici coda:", e.message); });
+  }
+  return col;
+}
+
+/**
+ * Le valutazioni.
+ *
+ * Un documento per giocatore: identificativo generato dal dispositivo,
+ * nome scelto da chi gioca, e i numeri. Nient'altro — non c'è una email da
+ * conservare perché non l'abbiamo mai chiesta.
+ *
+ * Anche qui un TTL, a sei mesi dall'ultima partita: una classifica di
+ * gente che non gioca più non è una classifica, ed è comunque un dato
+ * personale che non ha motivo di restare.
+ */
+export const TTL_GIOCATORE_MS = 180 * 24 * 60 * 60 * 1000;
+
+export async function giocatori() {
+  const c = await client();
+  const col = c.db(NOME_DB).collection("giocatori");
+  if (!cached.indiciGiocatori) {
+    cached.indiciGiocatori = true;
+    await Promise.all([
+      col.createIndex({ giocatoreId: 1 }, { unique: true }),
+      col.createIndex({ valutazione: -1 }),
+      col.createIndex({ scadeIl: 1 }, { expireAfterSeconds: 0 }),
+    ]).catch((e) => { cached.indiciGiocatori = false; console.error("indici giocatori:", e.message); });
+  }
+  return col;
+}
+
+/** Quanto resta in coda chi aspetta un avversario. */
+export const TTL_CODA_MS = 3 * 60 * 1000;
 
 /** Calcola la scadenza in base alla fase della partita. */
 export function scadenza(stato) {

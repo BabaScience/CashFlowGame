@@ -10,6 +10,9 @@ import { creaStanza, codiceStanza, applicaAzione } from "../src/game/motore.js";
 import { preparaMessaggio, accoda } from "../src/game/chat.js";
 import { incrementiPer } from "../src/game/metriche.js";
 import { pacchettoDi } from "../src/game/mercati/indice.js";
+import { statoRivincita } from "../api/_lib/rivincita.js";
+import { chiaveCoda, formatoValido, valutazioniDopo, partitaValida, ordineFinale, VALUTAZIONE_ARENA_INIZIALE } from "../src/game/arena.js";
+import { redditoPassivo, speseTotali } from "../src/game/finanze.js";
 
 /** Nomi degli avversari automatici: italiani, corti, riconoscibili. */
 const NOMI_BOT = ["Bea", "Nico", "Rosa", "Furio", "Lella"];
@@ -17,6 +20,40 @@ const NOMI_BOT = ["Bea", "Nico", "Rosa", "Furio", "Lella"];
 const TTL = { attesa: 6 * 3600e3, inCorso: 48 * 3600e3, finita: 6 * 3600e3 };
 const stanze = new Map();
 const metriche = new Map();   // giorno -> contatori, come in produzione
+/* La coda e la classifica, in memoria. Stessa forma delle collezioni vere,
+   così il comportamento in sviluppo è quello che si vedrà in produzione. */
+const coda = new Map();       // giocatoreId -> riga
+const albo = new Map();       // giocatoreId -> { nome, valutazione, partite, vittorie }
+const TTL_CODA = 3 * 60e3;
+
+const progressoDi = (g) => {
+  if (g.tracciato === "veloce") {
+    return 1 + Math.max(0, (g.redditoRendita || 0) - (g.redditoInizialeVeloce || 0)) / 1000;
+  }
+  const spese = speseTotali(g);
+  return spese > 0 ? Math.min(0.999, redditoPassivo(g) / spese) : 0;
+};
+
+/** Come api/_lib/classifica.js, con Map al posto di MongoDB. */
+function registraEsito(stato) {
+  if (!partitaValida(stato) || stato.valutata) return null;
+  stato.valutata = true;
+  const ordine = ordineFinale(stato, progressoDi);
+  const esito = ordine.map((r) => {
+    const scheda = albo.get(r.id);
+    return { id: r.id, posizione: r.posizione,
+      valutazione: scheda?.valutazione ?? VALUTAZIONE_ARENA_INIZIALE, partite: scheda?.partite ?? 0 };
+  });
+  const nuove = valutazioniDopo(esito);
+  nuove.forEach((v, i) => {
+    const r = ordine[i], vecchia = albo.get(v.id) || { partite: 0, vittorie: 0 };
+    albo.set(v.id, {
+      giocatoreId: v.id, nome: r.nome, valutazione: v.dopo,
+      partite: vecchia.partite + 1, vittorie: vecchia.vittorie + (r.vincitore ? 1 : 0),
+    });
+  });
+  return nuove.map((v, i) => ({ ...v, nome: ordine[i].nome, posizione: ordine[i].posizione }));
+}
 
 const scaduta = (v) => Date.now() > v.scadeIl;
 const salva = (stato) => stanze.set(stato.codice, { stato, scadeIl: Date.now() + TTL[stato.fase] });
@@ -71,7 +108,7 @@ export default function apiLocale() {
             if (op === "crea") {
               let codice;
               do { codice = codiceStanza(); } while (stanze.has(codice));
-              const r = applicaAzione(creaStanza(codice, giocatoreId, { mercatoId: b.mercatoId, livello: Number(b.livello) || undefined }), {
+              const r = applicaAzione(creaStanza(codice, giocatoreId, { mercatoId: b.mercatoId, livello: Number(b.livello) || undefined, formato: b.formato }), {
                 tipo: "entra", giocatoreId, nome: b.nome,
                 professioneId: b.professioneId, sognoId: b.sognoId,
               });
@@ -104,6 +141,21 @@ export default function apiLocale() {
               return invia(res, 200, { chiusa: true });
             }
 
+            if (op === "rivincita") {
+              const codice = (b.codice || "").toUpperCase();
+              const rec = stanze.get(codice);
+              if (!rec) return invia(res, 404, { errore: "Stanza non trovata o scaduta." });
+              if (rec.stato.rivincita) return invia(res, 200, { codice: rec.stato.rivincita });
+              let nuovoCodice;
+              do { nuovoCodice = codiceStanza(); } while (stanze.has(nuovoCodice));
+              const r = statoRivincita(rec.stato, nuovoCodice, giocatoreId);
+              if (r.errore) return invia(res, 400, { errore: r.errore });
+              salva(r.stato);
+              rec.stato.rivincita = nuovoCodice;
+              salva(rec.stato);
+              return invia(res, 200, { codice: nuovoCodice });
+            }
+
             if (op === "azione") {
               const codice = (b.codice || "").toUpperCase();
               const rec = stanze.get(codice);
@@ -117,11 +169,81 @@ export default function apiLocale() {
                 ...b.azione, giocatoreId: eBotDiQui ? bersaglio : giocatoreId,
               });
               if (r.errore) return invia(res, 409, { errore: r.errore, stato: rec.stato });
+              const finita = r.stato.fase === "finita" && rec.stato.fase !== "finita";
+              const valutazioni = finita ? registraEsito(r.stato) : null;
               salva(r.stato);
-              return invia(res, 200, { stato: r.stato });
+              return invia(res, 200, valutazioni ? { stato: r.stato, valutazioni } : { stato: r.stato });
             }
 
             return invia(res, 400, { errore: "Operazione sconosciuta." });
+          }
+
+          /* ── coda: trovare un avversario che non conosci ── */
+          if (url.pathname === "/api/coda" && req.method === "POST") {
+            for (const [k, v] of coda) if (Date.now() > v.scadeIl) coda.delete(k);
+            const b = await leggiCorpo(req);
+            const { op, giocatoreId } = b;
+            if (!giocatoreId) return invia(res, 400, { errore: "Identificativo mancante." });
+
+            if (op === "esci") { coda.delete(giocatoreId); return invia(res, 200, { uscito: true }); }
+
+            if (op === "guarda") {
+              const riga = coda.get(giocatoreId);
+              if (!riga) return invia(res, 200, { stato: "scaduta" });
+              if (riga.codice) { coda.delete(giocatoreId); return invia(res, 200, { stato: "trovato", codice: riga.codice }); }
+              const quanti = [...coda.values()].filter((r) => r.chiave === riga.chiave && !r.codice).length;
+              return invia(res, 200, { stato: "attesa", inCoda: quanti });
+            }
+
+            if (op !== "entra") return invia(res, 400, { errore: "Operazione sconosciuta." });
+
+            const mercatoId = b.mercatoId || "roma";
+            const formato = formatoValido(b.formato);
+            const livello = Number(b.livello) || 1;
+            const chiave = chiaveCoda({ mercatoId, formato, livello });
+            const nome = String(b.nome || "").trim().slice(0, 20) || "Ospite";
+            coda.delete(giocatoreId);
+
+            const avversario = [...coda.values()]
+              .filter((r) => r.chiave === chiave && !r.codice && r.giocatoreId !== giocatoreId)
+              .sort((x, y) => x.creataIl - y.creataIl)[0];
+
+            if (!avversario) {
+              coda.set(giocatoreId, {
+                giocatoreId, chiave, nome, mercatoId, formato, livello,
+                professioneId: b.professioneId, sognoId: b.sognoId,
+                creataIl: Date.now(), scadeIl: Date.now() + TTL_CODA,
+              });
+              return invia(res, 200, { stato: "attesa", inCoda: 1 });
+            }
+            coda.delete(avversario.giocatoreId);
+
+            let codice;
+            do { codice = codiceStanza(); } while (stanze.has(codice));
+            let stato = creaStanza(codice, avversario.giocatoreId, { mercatoId, livello, formato });
+            for (const g of [avversario, { giocatoreId, nome, professioneId: b.professioneId, sognoId: b.sognoId }]) {
+              const r = applicaAzione(stato, { tipo: "entra", giocatoreId: g.giocatoreId, nome: g.nome,
+                professioneId: g.professioneId, sognoId: g.sognoId });
+              if (r.errore) return invia(res, 400, { errore: r.errore });
+              stato = r.stato;
+            }
+            const av = applicaAzione(stato, { tipo: "avvia", giocatoreId: avversario.giocatoreId });
+            if (av.errore) return invia(res, 400, { errore: av.errore });
+            salva(av.stato);
+            coda.set(avversario.giocatoreId, {
+              giocatoreId: avversario.giocatoreId, chiave, codice,
+              creataIl: Date.now(), scadeIl: Date.now() + TTL_CODA,
+            });
+            return invia(res, 200, { stato: "trovato", codice });
+          }
+
+          /* ── classifica ── */
+          if (url.pathname === "/api/classifica" && req.method === "GET") {
+            const tutti = [...albo.values()].sort((a, c) => c.valutazione - a.valutazione || c.partite - a.partite);
+            const id = url.searchParams.get("giocatoreId");
+            const mio = id ? albo.get(id) : null;
+            const io = mio ? { ...mio, posizione: tutti.findIndex((r) => r.giocatoreId === id) + 1 } : null;
+            return invia(res, 200, { primi: tutti.slice(0, 50), io });
           }
 
           /* ── chat: append, fuori dal motore come in produzione ── */

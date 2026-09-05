@@ -9,6 +9,7 @@ import { MERCATI, MERCATO_PREDEFINITO, getPacchetto } from "../game/mercati/indi
 import { LIVELLI, LIVELLO_PREDEFINITO } from "../game/regole/livelli.js";
 import { soldi } from "../game/finanze.js";
 import { MAX_GIOCATORI } from "../game/tabellone.js";
+import { TURNI_LAMPO } from "../game/motore.js";
 import * as api from "../lib/api.js";
 import { traccia } from "../lib/traccia.js";
 import { partiteAperte, dimenticaPartita, daQuanto } from "../lib/partite.js";
@@ -23,13 +24,13 @@ import { useLingua } from "../Lingua.jsx";
  * piedi a chi l'ha appena letta. Chi entra con un codice non sceglie nulla:
  * il mercato è quello della stanza, uno per tavolo.
  */
-export default function Ingresso({ suEntrato, avvisa, suSfida, suImpara, vistaIniziale, modoIniziale, stanzaIniziale }) {
+export default function Ingresso({ suEntrato, avvisa, suSfida, suArena, suImpara, vistaIniziale, modoIniziale, stanzaIniziale }) {
   const [mercatoId, setMercato] = useState(
     () => localStorage.getItem("quotazero:mercato") || MERCATO_PREDEFINITO
   );
   return (
     <MercatoProvider mercatoId={mercatoId}>
-      <Modulo suEntrato={suEntrato} avvisa={avvisa} suSfida={suSfida} suImpara={suImpara}
+      <Modulo suEntrato={suEntrato} avvisa={avvisa} suSfida={suSfida} suArena={suArena} suImpara={suImpara}
         mercatoId={mercatoId} setMercato={setMercato} vistaIniziale={vistaIniziale} modoIniziale={modoIniziale} stanzaIniziale={stanzaIniziale} />
     </MercatoProvider>
   );
@@ -114,7 +115,7 @@ function SceltaDIngresso({ stanza, professioneId, setProfessione, sognoId, setSo
   );
 }
 
-function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, vistaIniziale = "casa", modoIniziale = "crea", stanzaIniziale = null }) {
+function Modulo({ suEntrato, avvisa, suSfida, suArena, suImpara, mercatoId, setMercato, vistaIniziale = "casa", modoIniziale = "crea", stanzaIniziale = null }) {
   /* Le partite lasciate a metà. Il gioco a turni distanziati serve a poco
      se poi non si ritrova la strada per tornarci. */
   const [aperte, setAperte] = useState(() => partiteAperte());
@@ -149,12 +150,24 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
   const [vista, setVista] = useState(vistaIniziale);
   /* Quanti avversari automatici. Zero = si gioca con gli amici. */
   const [avversari, setAvversari] = useState(0);
+  /* Quanto dura. Vedi arena: senza un formato corto non esiste "ancora una". */
+  const [formato, setFormato] = useState("lunga");
   /* Entrare è in due passi. Il primo trova la stanza, il secondo fa
      scegliere professione e sogno — ma del mercato GIUSTO, che è quello
      della stanza e si conosce solo dopo averla trovata. Prima il modulo
      offriva le professioni del mercato scelto in locale e il motore le
      sostituiva in silenzio; poi non le ho più chieste affatto, e chi
      entrava si trovava assegnata una professione senza averla scelta. */
+  /* La propria riga di classifica. Una lettura sola all'apertura: è la
+     cosa che si guarda per prima ogni volta che si torna, e deve essere
+     lì prima ancora di decidere cosa fare. */
+  const [io, setIo] = useState(null);
+  useEffect(() => {
+    let vivo = true;
+    api.classifica().then((d) => { if (vivo) setIo(d.io); }).catch(() => { /* offline */ });
+    return () => { vivo = false; };
+  }, []);
+
   const [stanza, setStanza] = useState(stanzaIniziale);
   const [cercando, setCercando] = useState(false);
 
@@ -174,8 +187,8 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
     setOccupato(true);
     try {
       ricorda();
-      const r = await api.creaStanza(nome.trim(), professioneId, sognoId, mercatoId, haFisco ? livello : 1, avversari);
-      traccia("stanzaCreata", { mercato: mercatoId });
+      const r = await api.creaStanza(nome.trim(), professioneId, sognoId, mercatoId, haFisco ? livello : 1, avversari, formato);
+      traccia("stanzaCreata", { mercato: mercatoId, formato });
       suEntrato(r.stato.codice);
     } catch (e) { avvisa(e.message); }
     finally { setOccupato(false); }
@@ -252,6 +265,19 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
           <>
             {/* Chi ha una partita a metà ha una sola intenzione: tornarci.
                 Sta prima di tutto il resto. */}
+            {io && (
+              <div className="carta profilo-arena">
+                <div>
+                  <div className="etichetta" style={{ margin: 0 }}>{t("arena.laTuaValutazione")}</div>
+                  <div className="titolo numeri f28" style={{ lineHeight: 1.1 }}>{io.valutazione}</div>
+                </div>
+                <div className="ta-r f12 tenue" style={{ lineHeight: 1.5 }}>
+                  <div>{t("arena.posizioneSu", { n: io.posizione })}</div>
+                  <div>{t("arena.partiteVinte", { n: io.partite, v: io.vittorie })}</div>
+                </div>
+              </div>
+            )}
+
             {aperte.length > 0 && (
               <div className="carta partite-aperte">
                 <div className="etichetta">{t("ingresso.partiteAperte")}</div>
@@ -283,7 +309,21 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
                 quanto dura: sono le due cose che si vogliono sapere prima
                 di cliccare. */}
             <div className="destinazioni">
-              <button className="destinazione destinazione-prima"
+              {/* Prima di tutto il resto: qui non serve conoscere nessuno.
+                  È la differenza fra un gioco che si gioca fra amici e un
+                  posto dove si va. */}
+              {suArena && (
+                <button className="destinazione destinazione-prima" onClick={suArena}>
+                  <span className="dest-icona"><Icona nome="fulmine" dim={24} /></span>
+                  <span className="dest-testo">
+                    <span className="dest-titolo">{t("casa.arena")}</span>
+                    <span className="dest-nota">{t("casa.arenaNota")}</span>
+                  </span>
+                  <span className="dest-freccia"><Icona nome="frecciaDestra" dim={18} /></span>
+                </button>
+              )}
+
+              <button className={suArena ? "destinazione" : "destinazione destinazione-prima"}
                 onClick={() => setVista("modulo")}>
                 <span className="dest-icona"><Icona nome="dado" dim={24} /></span>
                 <span className="dest-testo">
@@ -422,6 +462,23 @@ function Modulo({ suEntrato, avvisa, suSfida, suImpara, mercatoId, setMercato, v
               </div>
               <p className="f12 tenue" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
                 {t(avversari === 0 ? "ingresso.conAmiciNota" : "ingresso.controIlComputerNota")}
+              </p>
+            </div>
+          )}
+
+          {modo === "crea" && (
+            <div className="gruppo-campo">
+              <label className="etichetta">{t("arena.formato")}</label>
+              <div className="scelta-avversari" role="group" aria-label={t("arena.formato")}>
+                <button data-attivo={formato === "lampo"} onClick={() => setFormato("lampo")}>
+                  {t("arena.lampo")}
+                </button>
+                <button data-attivo={formato === "lunga"} onClick={() => setFormato("lunga")}>
+                  {t("arena.lunga")}
+                </button>
+              </div>
+              <p className="f12 tenue" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
+                {t(formato === "lampo" ? "arena.lampoNota" : "arena.lungaNota", { n: TURNI_LAMPO })}
               </p>
             </div>
           )}

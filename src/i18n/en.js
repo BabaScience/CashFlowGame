@@ -80,6 +80,32 @@ export default {
     lingua: "Language",
   },
 
+  arena: {
+    sottotitolo: "Press Play. Someone shows up.",
+    giocaOra: "Play now",
+    cerco: "Looking for an opponent…",
+    daSecondi: "for {n} seconds",
+    inCodaSolo: "You are the only one waiting on this format.",
+    inCodaMolti: "{n} people waiting on this format.",
+    nessunoAncora: "Nobody yet. You can keep waiting, or start right now against the computer.",
+    giocaColComputer: "Play against the computer",
+    annulla: "Cancel",
+    formato: "How long do you want it",
+    lampo: "Blitz",
+    lunga: "Long",
+    lampoNota: "{n} turns each, about ten minutes. Whoever gets closest to leaving the Wheel wins.",
+    lungaNota: "Played until someone leaves the Wheel and doubles. Half an hour and more.",
+    classifica: "Leaderboard",
+    classificaVuota: "Nobody yet. The first game between people opens the board.",
+    tu: "you",
+    partiteVinte: "{n} games · {v} won",
+    ospite: "Guest",
+    valutazione: "Rating",
+    laTuaValutazione: "Your rating",
+    posizioneSu: "{n}th",
+    maiGiocato: "No games against anyone yet.",
+  },
+
   attesa: {
     chiEntra: "Anyone with this code can join, up to {n} players.",
     alTavolo: "At the table",
@@ -106,6 +132,8 @@ export default {
   },
 
   partita: {
+    turniRimasti: "Turns",
+    turnoSu: "{n} / {tot}",
     nonFaiParte: "You are not in this game.",
     tornaInizio: "Back to the start",
     chiudi: "Close",
@@ -206,6 +234,8 @@ export default {
   },
 
   vittoria: {
+    rivincita: "Rematch",
+    entraNellaRivincita: "Join the rematch",
     tu: "you",
     eliminato: "out",
     largo: "Open water",
@@ -483,6 +513,8 @@ export default {
     haLavorato: "worked {durata}",
   },
   casa: {
+    arena: "Play now",
+    arenaNota: "We find you an opponent. Even if you know nobody.",
     tavolo: "Play at a table",
     tavoloNota: "2 to 6 players, with a code to send your friends.",
     sfida: "Daily challenge",

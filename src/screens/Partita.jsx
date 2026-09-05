@@ -342,6 +342,11 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
   }
 
   const r = riepilogo(io);
+  /* Il tetto della partita, se ce n'è uno. `limiteTurni` conta i turni di
+     tutti; qui si mostra il numero che interessa a chi gioca, cioè i
+     propri: quanti ne restano a me, non al tavolo. */
+  const tetto = stato.turniPerGiocatore || 0;
+
   const tipoCasella = io.tracciato === "topi"
     ? PERCORSO_RUOTA[io.posizione]
     : PERCORSO_LARGO[io.posizione].tipo;
@@ -440,6 +445,18 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
               {t("tempo.annoMese", orologio(io.mesi))}
             </span>
           </div>
+
+          {/* Nel Lampo il conto alla rovescia è metà del gioco: senza
+              vederlo si gioca come in una partita lunga e ci si accorge
+              del limite quando è finita. */}
+          {tetto > 0 && (
+            <div className="zona-progresso zona-tempo">
+              <span className="maiusc tenue">{t("partita.turniRimasti")}</span>
+              <span className="numeri grassetto">
+                {t("partita.turnoSu", { n: Math.min(stato.numeroTurno + 1, tetto), tot: tetto })}
+              </span>
+            </div>
+          )}
 
           {io.tracciato === "topi" && (
             <div className="zona-progresso">

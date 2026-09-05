@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Bottone, KV } from "./Base.jsx";
 import { soldi } from "../game/finanze.js";
@@ -41,8 +41,13 @@ function Coriandoli() {
  * completa di ogni giocatore. È il momento in cui il gioco insegna
  * davvero qualcosa, quindi vale la pena mostrare tutti i numeri.
  */
-export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoHost }) {
+export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoHost, suRivincita }) {
   const { t } = useLingua();
+  const [chiedendo, setChiedendo] = useState(false);
+  /* La rivincita è il pulsante più importante di questa schermata: se
+     qualcuno rigioca, lo decide adesso. Se un altro l'ha già chiesta, la
+     stanza c'è già e il testo cambia — non se ne aprono due. */
+  const pronta = Boolean(stato.rivincita);
   const { trovaProfessione, trovaSogno, obiettivo } = useMercato();
   const tabella = useMemo(() => classifica(stato), [stato]);
   const vincitore = tabella.find((riga) => riga.vincitore);
@@ -152,7 +157,15 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
           </p>
 
           <div className="mt16">
-            <Bottone variante="btn-oro" onClick={suNuovaPartita}>{t("vittoria.nuovaPartita")}</Bottone>
+            {suRivincita && (
+              <Bottone variante="btn-oro" disabled={chiedendo}
+                onClick={async () => { setChiedendo(true); await suRivincita(); setChiedendo(false); }}>
+                {t(pronta ? "vittoria.entraNellaRivincita" : "vittoria.rivincita")}
+              </Bottone>
+            )}
+            <Bottone variante={suRivincita ? "btn-fantasma mt8" : "btn-oro"} onClick={suNuovaPartita}>
+              {t("vittoria.nuovaPartita")}
+            </Bottone>
             {sonoHost && (
               <Bottone variante="btn-fantasma mt8" onClick={suChiudi}>
                 {t("vittoria.chiudiStanza")}
