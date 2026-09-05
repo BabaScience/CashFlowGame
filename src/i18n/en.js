@@ -137,6 +137,9 @@ export default {
   },
 
   partita: {
+    seiLiberoSpiegazione: "Your passive income ({rendita}) is above your expenses ({spese}). Leaving pays you {liquidazione} as a settlement.",
+    nonGiocaDa: "{nome} has not played for a few minutes.",
+    mettiFuori: "Carry on without them",
     turniRimasti: "Turns",
     turnoSu: "{n} / {tot}",
     nonFaiParte: "You are not in this game.",

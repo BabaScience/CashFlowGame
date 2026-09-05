@@ -131,6 +131,9 @@ export default {
   },
 
   partita: {
+    seiLiberoSpiegazione: "Il tuo reddito passivo ({rendita}) supera le spese ({spese}). Uscendo ricevi {liquidazione} di liquidazione.",
+    nonGiocaDa: "{nome} non gioca da qualche minuto.",
+    mettiFuori: "Vai avanti senza di lui",
     turniRimasti: "Turni",
     turnoSu: "{n} / {tot}",
     nonFaiParte: "Non fai parte di questa partita.",

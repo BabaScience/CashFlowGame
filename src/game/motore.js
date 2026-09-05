@@ -280,6 +280,39 @@ function fineATempo(s) {
   nota(s, `⏳ Tempo scaduto dopo ${s.numeroTurno} turni. Vince ${capofila.nome}, il più vicino al proprio obiettivo.`, "r00", { numeroTurno: s.numeroTurno, capofilaNome: capofila.nome }, "sistema", capofila.id);
 }
 
+/**
+ * Se è rimasto uno solo, la partita è finita.
+ *
+ * Stava dentro il ramo della bancarotta e basta: chi premeva "esci" a
+ * metà partita lasciava l'avversario da solo in una partita che non
+ * finiva più. Con gli sconosciuti succede spesso — si perde il primo
+ * tiro e si chiude la scheda — quindi il controllo va fatto ogni volta
+ * che qualcuno esce di scena, non solo quando fallisce.
+ */
+function ultimoRimasto(s) {
+  const restanti = s.giocatori.filter((p) => !p.eliminato);
+  if (restanti.length !== 1 || s.fase !== "inCorso") return false;
+  s.fase = "finita";
+  s.vincitore = restanti[0].id;
+  s.motivoVittoria = "ultimo";
+  nota(s, `🏆 ${restanti[0].nome} è l'ultimo giocatore rimasto e vince.`, "r44",
+    { v: restanti[0].nome }, "vittoria", restanti[0].id);
+  return true;
+}
+
+/**
+ * Quanto si aspetta chi non gioca prima di poterlo mettere fuori.
+ *
+ * Tre minuti: abbastanza perché nessuno venga buttato fuori mentre
+ * pensa o mentre risponde al telefono, abbastanza poco perché una
+ * partita con uno sconosciuto che ha chiuso la scheda non resti appesa
+ * per due giorni.
+ */
+export const ATTESA_MASSIMA_MS = 3 * 60 * 1000;
+
+/** Da quanto non succede niente in questa partita. */
+export const fermoDa = (s, ora = Date.now()) => ora - (s.registro?.[0]?.t ?? ora);
+
 function prossimoTurno(s) {
   s.dado = null;
   s.pending = null;
@@ -731,8 +764,31 @@ export function applicaAzione(stato, azione) {
     } else {
       g.eliminato = true;
       nota(s, `${g.nome} abbandona la partita.`, "r21", { nome: g.nome }, "lobby", g.id);
+      if (ultimoRimasto(s)) return ok();
       if (attuale(s)?.id === giocatoreId) prossimoTurno(s);
     }
+    return ok();
+  }
+
+  /* ── Chi non gioca più ──
+     Con gli sconosciuti capita: si perde il primo tiro e si chiude la
+     scheda. Senza questa azione la partita resta appesa fino alla
+     scadenza della stanza, e la valutazione non si muove mai.
+     Non è un modo per liberarsi di chi ci sta pensando su: il tempo lo
+     misura il server sull'ultima riga del registro, e chiunque al tavolo
+     può chiederlo — anche chi sta perdendo. */
+  if (tipo === "fuoriTempo") {
+    if (s.fase !== "inCorso") return err("La partita non è in corso.");
+    if (!g || g.eliminato) return err("Non sei al tavolo.");
+    const fermo = attuale(s);
+    if (!fermo) return err("Non tocca a nessuno.");
+    if (fermo.id === giocatoreId) return err("Non puoi mettere fuori te stesso.");
+    if (fermoDa(s) < ATTESA_MASSIMA_MS) return err("Non è passato abbastanza tempo.");
+    fermo.eliminato = true;
+    nota(s, `${fermo.nome} non gioca da troppo tempo ed esce dalla partita.`, "r63",
+      { nome: fermo.nome }, "lobby", fermo.id);
+    if (ultimoRimasto(s)) return ok();
+    prossimoTurno(s);
     return ok();
   }
 
@@ -1091,14 +1147,7 @@ export function applicaAzione(stato, azione) {
       if (g.contanti < 0) g.contanti = 0;
       nota(s, `${g.nome} esce dalla bancarotta e salta 3 turni.`, "r43", { nome: g.nome }, "bancarotta", g.id);
     }
-    const restanti = s.giocatori.filter((p) => !p.eliminato);
-    if (restanti.length === 1) {
-      s.fase = "finita";
-      s.vincitore = restanti[0].id;
-      s.motivoVittoria = "ultimo";
-      nota(s, `🏆 ${restanti[0].nome} è l'ultimo giocatore rimasto e vince.`, "r44", { v: restanti[0].nome }, "vittoria", restanti[0].id);
-      return ok();
-    }
+    if (ultimoRimasto(s)) return ok();
     prossimoTurno(s);
     return ok();
   }

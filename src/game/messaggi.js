@@ -77,6 +77,7 @@ export const MESSAGGI = {
     r57: "{nome} svende \"{aNome}\" alla banca per {importo}.",
     r58: "{nome} liquida {simbolo} per {importo}.",
     r59: "{nome} estingue \"{dNome}\" durante la bancarotta.",
+    r63: "⏳ {nome} non gioca da troppo tempo ed esce dalla partita.",
     r60: "{nome} rimborsa {importo} di prestito.",
   },
 
@@ -143,6 +144,7 @@ export const MESSAGGI = {
     r57: "{nome} dumps \"{aNome}\" to the bank for {importo}.",
     r58: "{nome} liquidates {simbolo} for {importo}.",
     r59: "{nome} pays off \"{dNome}\" during bankruptcy.",
+    r63: "⏳ {nome} has not played for too long and leaves the game.",
     r60: "{nome} repays {importo} of the loan.",
   },
   fr: {
@@ -208,6 +210,7 @@ export const MESSAGGI = {
     r57: "{nome} brade \"{aNome}\" à la banque pour {importo}.",
     r58: "{nome} liquide {simbolo} pour {importo}.",
     r59: "{nome} solde \"{dNome}\" pendant la faillite.",
+    r63: "⏳ {nome} ne joue plus depuis trop longtemps et quitte la partie.",
     r60: "{nome} rembourse {importo} de prêt.",
   },
 };

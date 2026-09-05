@@ -18,6 +18,7 @@ import { copiaTesto } from "../lib/appunti.js";
 import { useSuoni } from "../hooks/useSuoni.js";
 import { avvisaTurno, chiediAvvisi, ricordaPartita, statoAvvisi } from "../lib/partite.js";
 import { audioAcceso, impostaAudio, sbloccaAudio } from "../lib/suoni.js";
+import { fermoDa, ATTESA_MASSIMA_MS } from "../game/motore.js";
 import { useLingua } from "../Lingua.jsx";
 import { useMercato } from "../Mercato.jsx";
 
@@ -118,6 +119,17 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa, tiroAltrove = false }) 
   const diTurno = stato.giocatori[stato.turno];
   const mioTurno = diTurno?.id === mioId;
   const [nDadi, setNDadi] = useState(2);
+  /* Un battito al minuto, solo per far comparire il pulsante quando il
+     tempo è passato: senza, chi guarda uno schermo fermo non lo vedrebbe
+     mai apparire. */
+  const [adesso, setAdesso] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setAdesso(Date.now()), 20000);
+    return () => clearInterval(t);
+  }, []);
+  const aspettaTroppo = stato.fase === "inCorso"
+    && fermoDa(stato, adesso) >= ATTESA_MASSIMA_MS
+    && stato.giocatori.filter((g) => !g.eliminato).length > 1;
 
   if (!io) return null;
   if (io.eliminato) {
@@ -156,6 +168,23 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa, tiroAltrove = false }) 
         </div>
       );
     }
+    /* L'avversario ha chiuso la scheda. Succede, soprattutto con gli
+       sconosciuti, e senza questo la partita resta appesa fino alla
+       scadenza della stanza. Il permesso lo dà il server guardando
+       l'ultima riga del registro: qui si mostra solo il pulsante. */
+    if (aspettaTroppo) {
+      return (
+        <div className="carta-scura ta-c">
+          <p className="f13" style={{ margin: "0 0 10px", lineHeight: 1.45 }}>
+            {t("partita.nonGiocaDa", { nome: diTurno?.nome || "" })}
+          </p>
+          <Bottone variante="btn-fantasma" disabled={inAzione}
+            onClick={() => fai({ tipo: "fuoriTempo" })}>
+            {t("partita.mettiFuori")}
+          </Bottone>
+        </div>
+      );
+    }
     return null;
   }
 
@@ -171,9 +200,11 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa, tiroAltrove = false }) 
           }}>
           <div className="titolo f16 mb4">{t("partita.seiLibero")}</div>
           <p className="f13" style={{ margin: "0 0 12px", lineHeight: 1.45 }}>
-            Il tuo reddito passivo ({soldi(riepilogo(io).redditoPassivo)}) supera
-            le spese ({soldi(riepilogo(io).speseTotali)}).
-            Uscendo ricevi <strong>{soldi(riepilogo(io).redditoPassivo * 100)}</strong> di liquidazione.
+            {t("partita.seiLiberoSpiegazione", {
+              rendita: soldi(riepilogo(io).redditoPassivo),
+              spese: soldi(riepilogo(io).speseTotali),
+              liquidazione: soldi(riepilogo(io).redditoPassivo * 100),
+            })}
           </p>
           <Bottone variante="btn-verde" disabled={inAzione}
             onClick={() => fai({ tipo: "esciDallaCorsa" })}>
@@ -186,7 +217,7 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa, tiroAltrove = false }) 
         <>
           {io.tracciato === "topi" && io.turniBeneficenza > 0 && (
             <p className="f13 ta-c mb8" style={{ margin: "12px 0 8px", color: "var(--oro-chiaro)" }}>
-              Beneficenza attiva: tiri 2 dadi ({io.turniBeneficenza} turni rimasti).
+              {t("partita.beneficenzaAttiva", { n: io.turniBeneficenza })}
             </p>
           )}
           {io.tracciato === "veloce" && io.beneficenzaVeloce && (

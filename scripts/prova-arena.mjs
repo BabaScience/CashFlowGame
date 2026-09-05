@@ -13,7 +13,7 @@ import {
   chiaveCoda, formatoValido, inClassifica, PARTITE_PER_CLASSIFICA,
   VALUTAZIONE_ARENA_INIZIALE, PASSO_ARENA, PASSO_ESORDIENTE,
 } from "../src/game/arena.js";
-import { creaStanza, codiceStanza, applicaAzione, limiteTurni, TURNI_LAMPO } from "../src/game/motore.js";
+import { creaStanza, codiceStanza, applicaAzione, limiteTurni, fermoDa, TURNI_LAMPO, ATTESA_MASSIMA_MS } from "../src/game/motore.js";
 import { statoRivincita, puoChiederla } from "../api/_lib/rivincita.js";
 import { mossaBot } from "../src/game/avversario.js";
 import { getPacchetto } from "../src/game/mercati/indice.js";
@@ -248,6 +248,67 @@ prova("Si entra in classifica solo dopo qualche partita", () => {
   eq(inClassifica(2), false);
   eq(inClassifica(3), true);
   eq(inClassifica(undefined), false, "chi non ha mai giocato:");
+});
+
+console.log("\n── Chi chiude la scheda e non torna ──");
+
+/** Sposta indietro l'ultima riga del registro, per simulare l'attesa. */
+const invecchia = (s, ms) => ({ ...s, registro: s.registro.map((r, i) => (i === 0 ? { ...r, t: r.t - ms } : r)) });
+
+prova("Non si mette fuori nessuno prima del tempo", () => {
+  const s = tavolo({ quanti: 2 });
+  const chi = s.giocatori[s.turno].id;
+  const altro = s.giocatori.find((g) => g.id !== chi).id;
+  const r = applicaAzione(s, { tipo: "fuoriTempo", giocatoreId: altro });
+  vero(r.errore, "avrebbe dovuto rifiutare: non è passato tempo");
+});
+
+prova("Passato il tempo, chi resta può andare avanti", () => {
+  const s = invecchia(tavolo({ quanti: 3 }), ATTESA_MASSIMA_MS + 1000);
+  vero(fermoDa(s) >= ATTESA_MASSIMA_MS, "l'invecchiamento non ha funzionato");
+  const fermo = s.giocatori[s.turno].id;
+  const altro = s.giocatori.find((g) => g.id !== fermo).id;
+  const r = applicaAzione(s, { tipo: "fuoriTempo", giocatoreId: altro });
+  vero(!r.errore, r.errore);
+  eq(r.stato.giocatori.find((g) => g.id === fermo).eliminato, true, "il fermo non è uscito:");
+  eq(r.stato.fase, "inCorso", "in tre la partita continua:");
+  vero(r.stato.giocatori[r.stato.turno].id !== fermo, "il turno è rimasto sul giocatore uscito");
+});
+
+prova("In due, chi resta vince", () => {
+  const s = invecchia(tavolo({ quanti: 2 }), ATTESA_MASSIMA_MS + 1000);
+  const fermo = s.giocatori[s.turno].id;
+  const altro = s.giocatori.find((g) => g.id !== fermo).id;
+  const r = applicaAzione(s, { tipo: "fuoriTempo", giocatoreId: altro });
+  vero(!r.errore, r.errore);
+  eq(r.stato.fase, "finita", "la partita doveva finire:");
+  eq(r.stato.vincitore, altro, "vince chi è rimasto:");
+  eq(r.stato.motivoVittoria, "ultimo");
+});
+
+prova("Non ci si mette fuori da soli", () => {
+  const s = invecchia(tavolo({ quanti: 2 }), ATTESA_MASSIMA_MS + 1000);
+  const fermo = s.giocatori[s.turno].id;
+  vero(applicaAzione(s, { tipo: "fuoriTempo", giocatoreId: fermo }).errore,
+    "avrebbe dovuto rifiutare");
+});
+
+prova("Chi non è al tavolo non mette fuori nessuno", () => {
+  const s = invecchia(tavolo({ quanti: 2 }), ATTESA_MASSIMA_MS + 1000);
+  vero(applicaAzione(s, { tipo: "fuoriTempo", giocatoreId: "passante" }).errore,
+    "avrebbe dovuto rifiutare");
+});
+
+prova("Abbandonare in due chiude la partita invece di lasciarla appesa", () => {
+  /* C'era da prima: il controllo \"è rimasto uno solo\" stava dentro il ramo
+     della bancarotta, quindi chi premeva esci lasciava l'avversario in una
+     partita che non finiva più. */
+  const s = tavolo({ quanti: 2 });
+  const chi = s.giocatori[0].id, altro = s.giocatori[1].id;
+  const r = applicaAzione(s, { tipo: "esci", giocatoreId: chi });
+  vero(!r.errore, r.errore);
+  eq(r.stato.fase, "finita", "la partita doveva finire:");
+  eq(r.stato.vincitore, altro, "vince chi è rimasto:");
 });
 
 console.log("\n── La rivincita ──");

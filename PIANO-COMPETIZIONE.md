@@ -84,6 +84,17 @@ esserci qualcuno dall'altra parte anche quando non hai invitato nessuno.
 - [x] **C.4** PRIVACY.md aggiornato: dalla classifica in poi conserviamo un
       identificativo, e va detto prima, non dopo.
 
+### C-bis — Le partite devono finire
+- [x] **C.5** Dopo tre minuti senza mosse, chi resta può andare avanti
+      senza chi è sparito. Senza questo il matchmaking produce stanze
+      morte: si perde il primo tiro, si chiude la scheda, e la partita
+      resta appesa fino alla scadenza — con la valutazione che non si
+      muove mai.
+- [x] **C.6** Chi abbandona in due fa vincere l'altro. Il controllo
+      "è rimasto uno solo" stava dentro il ramo della bancarotta: chi
+      premeva *esci* lasciava l'avversario in una partita senza fine.
+      C'era da prima; con gli sconosciuti sarebbe diventato la norma.
+
 ### D — Rigiocare, e sapere com'è andata
 - [x] **D.1** **Rivincita** a fine partita: una stanza nuova con gli stessi
       giocatori, un clic per chi accetta.

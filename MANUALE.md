@@ -492,6 +492,17 @@ Attenzione a non confonderla con la **valutazione della sfida del giorno**,
 che è un'altra cosa: quella misura te contro un riferimento che gioca la tua
 identica partita, vive sul tuo dispositivo e non riguarda nessun altro.
 
+### Se l'avversario sparisce
+
+Capita, e con gli sconosciuti capita spesso: si perde il primo tiro e si
+chiude la scheda. Dopo tre minuti senza mosse, chi è rimasto al tavolo vede
+un pulsante per andare avanti senza di lui. Chi sparisce esce dalla partita;
+se resta una persona sola, vince.
+
+Il tempo lo misura il server sull'ultima riga del registro, quindi non è un
+modo per liberarsi di chi ci sta pensando su — e può chiederlo chiunque,
+anche chi sta perdendo.
+
 ### La rivincita
 
 A fine partita, **Rivincita** apre una stanza nuova con gli stessi giocatori

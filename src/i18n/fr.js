@@ -137,6 +137,9 @@ export default {
   },
 
   partita: {
+    seiLiberoSpiegazione: "Votre revenu passif ({rendita}) dépasse vos dépenses ({spese}). En sortant, vous recevez {liquidazione} de solde.",
+    nonGiocaDa: "{nome} ne joue plus depuis quelques minutes.",
+    mettiFuori: "Continuer sans lui",
     turniRimasti: "Tours",
     turnoSu: "{n} / {tot}",
     nonFaiParte: "Vous ne faites pas partie de cette partie.",
