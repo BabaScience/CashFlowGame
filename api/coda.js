@@ -133,13 +133,19 @@ export default async function handler(req, res) {
 
       /* L'altro sta chiedendo "qualcuno mi ha preso?": glielo diciamo
          rimettendo la sua riga con dentro il codice. Vive tre minuti come
-         tutte le altre, e sparisce appena la legge. */
-      await col.insertOne({
-        giocatoreId: avversario.giocatoreId,
-        chiave, codice,
-        creataIl: new Date(),
-        scadeIl: new Date(Date.now() + TTL_CODA_MS),
-      }).catch(() => { /* se è tornato in coda nel frattempo, pazienza */ });
+         tutte le altre, e sparisce appena la legge.
+         `upsert` e non `insertOne`: se nel frattempo è rientrato in coda
+         da un'altra scheda, la sua riga esiste già e un inserimento
+         fallirebbe per chiave duplicata — lasciandolo ad aspettare una
+         partita che è già cominciata senza di lui. */
+      await col.updateOne(
+        { giocatoreId: avversario.giocatoreId },
+        {
+          $set: { chiave, codice, scadeIl: new Date(Date.now() + TTL_CODA_MS) },
+          $setOnInsert: { giocatoreId: avversario.giocatoreId, creataIl: new Date() },
+        },
+        { upsert: true }
+      ).catch((e) => console.error("coda/avviso:", e.message));
 
       return json(res, 200, { stato: "trovato", codice });
     }
