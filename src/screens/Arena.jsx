@@ -127,6 +127,10 @@ export default function Arena({ suEntrato, suEsci, avvisa, mercatoId, setMercato
     try {
       const d = dati();
       const r = await api.creaStanza(d.nome, d.professioneId, d.sognoId, mercatoId, 1, 1, formato);
+      /* Si comincia subito, come nella coda. Chi ha appena aspettato venti
+         secondi non deve trovare una sala d'attesa e un altro pulsante:
+         l'avversario è già lì, sono io. */
+      await api.azione(r.stato.codice, { tipo: "avvia" }).catch(() => { /* l'host la avvierà a mano */ });
       traccia("arenaComputer", { formato });
       suEntrato(r.stato.codice);
     } catch (e) { avvisa(e.message); }
