@@ -52,7 +52,9 @@ function registraEsito(stato) {
       partite: vecchia.partite + 1, vittorie: vecchia.vittorie + (r.vincitore ? 1 : 0),
     });
   });
-  return nuove.map((v, i) => ({ ...v, nome: ordine[i].nome, posizione: ordine[i].posizione }));
+  const righe = nuove.map((v, i) => ({ ...v, nome: ordine[i].nome, posizione: ordine[i].posizione }));
+  stato.valutazioni = righe;   // come in produzione: la vedono tutti col polling
+  return righe;
 }
 
 const scaduta = (v) => Date.now() > v.scadeIl;

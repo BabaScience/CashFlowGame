@@ -24,7 +24,8 @@ Da 2 a 6 giocatori. Una partita dura in media 60–120 minuti.
 11. [Le caselle del Largo](#11-le-caselle-della-corsia-veloce)
 12. [Fine partita](#12-fine-partita)
 13. [Strategia: cosa insegna davvero](#13-strategia-cosa-insegna-davvero)
-14. [Note sulla versione online](#14-note-sulla-versione-online)
+14. [Giocare contro sconosciuti](#14-giocare-contro-sconosciuti)
+15. [Note sulla versione online](#15-note-sulla-versione-online)
 
 ---
 
@@ -432,7 +433,69 @@ rende $270 al mese — ma senza rischio e senza acconto.
 
 ---
 
-## 14. Note sulla versione online
+## 14. Giocare contro sconosciuti
+
+Fino a poco fa per giocare con qualcuno bisognava conoscerlo: si apriva una
+stanza e gli si mandava un codice di quattro lettere. Va benissimo fra amici,
+e non basta perché il gioco diventi un posto dove si torna.
+
+### Gioca ora
+
+Dalla prima pagina, **Gioca ora** ti mette in coda. Il primo che arriva con
+la stessa scelta — stesso mercato, stesso formato — viene appaiato con te e
+la partita comincia da sola, senza sala d'attesa: siete già tutti e due lì.
+
+Se dopo tre quarti di minuto non è arrivato nessuno, il gioco propone una
+partita contro il computer. Non è un ripiego travestito: con pochi giocatori
+la coda è quasi sempre vuota, e una partita subito vale più di un'attesa.
+
+### I due formati
+
+| | Durata | Come finisce |
+|---|---|---|
+| **Lampo** | 40 turni a testa, una decina di minuti | Vince chi è arrivato più vicino a uscire dalla Ruota |
+| **Lunga** | mezz'ora e oltre | Vince chi esce dalla Ruota e raddoppia, come sempre |
+
+Il Lampo non è un gioco diverso: è la stessa partita con un cronometro. Il
+contatore dei turni si vede accanto al tempo lavorato, perché sapere quanti
+ne restano cambia le scelte — negli ultimi cinque turni un affare che si
+ripaga in un anno non si ripaga più.
+
+Il numero quaranta è misurato, non scelto a naso: sotto, la partita la vince
+chi ha pescato meglio nei primi turni; a quaranta un giocatore che non compra
+mai niente perde il 98% delle volte, e fra due giocatori di pari livello
+l'esito resta una moneta.
+
+### La valutazione
+
+Chiunque finisca una partita **contro almeno un'altra persona** entra in
+classifica. Si parte da 1000. Chi vince sale, chi perde scende, e battere
+qualcuno più forte vale più che battere qualcuno più debole — è l'Elo, lo
+stesso sistema degli scacchi, esteso alle partite a più giocatori
+confrontando ogni coppia di giocatori.
+
+Nelle prime dieci partite il punteggio si muove al doppio della velocità: chi
+comincia arriva in fretta al proprio livello invece di passare due settimane
+a scalare da 1000.
+
+**Le partite contro il computer non contano.** Se contassero, la classifica
+la vincerebbe chi ha più pazienza di battere un bot, e smetterebbe di dire
+qualcosa su come si gioca.
+
+Attenzione a non confonderla con la **valutazione della sfida del giorno**,
+che è un'altra cosa: quella misura te contro un riferimento che gioca la tua
+identica partita, vive sul tuo dispositivo e non riguarda nessun altro.
+
+### La rivincita
+
+A fine partita, **Rivincita** apre una stanza nuova con gli stessi giocatori
+già seduti e la partita già avviata. Se la chiede anche l'avversario, entrate
+nella stessa: non se ne aprono due. Chi tira per primo lo decidono i dadi,
+come in qualunque altra partita.
+
+---
+
+## 15. Note sulla versione online
 
 **I numeri.** Ogni scheda professione è verificata aritmeticamente: la somma
 delle voci di spesa deve dare le spese totali, e stipendio meno spese deve dare

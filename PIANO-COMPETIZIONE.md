@@ -90,6 +90,26 @@ esserci qualcuno dall'altra parte anche quando non hai invitato nessuno.
 
 ---
 
+## Trovato costruendo
+
+**Due partite di fila rompevano il polling.** Passando da una stanza a
+un'altra — che è esattamente quello che fa la rivincita — la richiesta della
+stanza vecchia restava in volo e, tornando, scriveva la sua versione nel
+riferimento condiviso. Da lì in poi giravano due cicli intrecciati: uno
+chiedeva la stanza nuova con la versione della vecchia, l'altro il contrario,
+e la schermata restava su quella sbagliata. C'era già prima — bastava
+riprendere una partita dall'elenco — e nessuno l'aveva mai visto perché
+nessuno cambiava stanza senza passare dalla prima pagina. Risolto numerando
+i giri e buttando le risposte del giro precedente.
+
+**Due schede dello stesso browser sono la stessa persona.** Lo spazio di
+memoria del sito è per origine, non per scheda: l'identificativo è lo stesso,
+e la coda giustamente si rifiuta di appaiarti con te stesso. Per provare in
+due servono due origini diverse (`localhost` e `127.0.0.1`). Non è un
+difetto, ma è la prima cosa che confonde chi prova.
+
+---
+
 ## Decisioni prese strada facendo
 
 **Il Lampo finisce a punti, non per abbandono.** Un limite di turni che

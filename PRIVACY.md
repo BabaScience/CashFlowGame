@@ -30,6 +30,28 @@ Il nome è **libero**: non serve che sia il tuo. Non chiediamo cognome, età,
 indirizzo, telefono, e **non chiediamo la posta elettronica** — non esiste
 registrazione, non esiste account, non esiste password.
 
+**Per la classifica fra giocatori**
+
+Questa è la sola cosa che conserviamo oltre la durata di una partita, e la
+diciamo prima perché è giusto saperlo prima di giocare.
+
+| Dato | Perché serve | Quanto resta |
+|---|---|---|
+| L'identificativo casuale del dispositivo | Riconoscere la tua riga di classifica | 6 mesi dall'ultima partita |
+| Il nome che hai scelto | Comparire in classifica con un nome invece che con un codice | 6 mesi dall'ultima partita |
+| Valutazione, partite giocate, partite vinte | È la classifica | 6 mesi dall'ultima partita |
+
+La riga nasce **solo quando finisci una partita contro almeno un'altra
+persona**: le partite contro il computer e la sfida in solitaria non
+lasciano niente sul server. Se non giochi mai contro qualcuno, di te sul
+nostro database non resta nulla dopo la scadenza della stanza.
+
+L'identificativo è un numero casuale generato dal tuo browser la prima volta
+che apri il gioco. Non è legato al tuo nome, alla tua email o al tuo
+dispositivo in alcun modo che ci permetta di risalire a te: è un'etichetta e
+basta. Cancellando i dati del sito dal browser la perdi — e con essa la
+valutazione, che a quel punto ricomincia da capo.
+
 **Per capire se il gioco funziona**
 
 Contiamo eventi anonimi: quante partite iniziano, quante finiscono, quanto
@@ -59,6 +81,10 @@ Le stanze si cancellano da sole, senza che nessuno debba intervenire:
 Alla scadenza sparisce tutto il documento della stanza: nomi, mosse, chat.
 La chat vive dentro la stanza proprio per questo — non c'è un archivio
 separato da cancellare, perché non esiste.
+
+La riga di classifica si cancella da sola **6 mesi** dopo l'ultima partita
+giocata contro qualcuno. Non c'è niente da fare per farla sparire: se smetti
+di giocare, sparisce.
 
 I contatori d'uso, che non contengono dati personali, si conservano **400
 giorni** e poi si cancellano da soli.

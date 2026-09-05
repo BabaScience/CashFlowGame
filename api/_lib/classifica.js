@@ -76,5 +76,13 @@ export async function registraEsito(stanzeCol, giocatoriCol, stato, ttlMs) {
     );
   }));
 
-  return nuove.map((v, i) => ({ ...v, nome: ordine[i].nome, posizione: ordine[i].posizione }));
+  const righe = nuove.map((v, i) => ({ ...v, nome: ordine[i].nome, posizione: ordine[i].posizione }));
+
+  /* Le variazioni si scrivono sulla stanza, non solo nella risposta.
+     Chi ha fatto l'ultima mossa le riceve subito; tutti gli altri stanno
+     leggendo lo stato col polling che già fanno, e senza questa riga
+     vedrebbero la schermata finale senza sapere quanto hanno perso o
+     guadagnato — che è la sola cosa che si guarda. */
+  await stanzeCol.updateOne({ codice: stato.codice }, { $set: { valutazioni: righe } });
+  return righe;
 }

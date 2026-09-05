@@ -453,7 +453,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
             <div className="zona-progresso zona-tempo">
               <span className="maiusc tenue">{t("partita.turniRimasti")}</span>
               <span className="numeri grassetto">
-                {t("partita.turnoSu", { n: Math.min(stato.numeroTurno + 1, tetto), tot: tetto })}
+                {t("partita.turnoSu", { n: Math.min(Math.max(1, stato.numeroTurno), tetto), tot: tetto })}
               </span>
             </div>
           )}

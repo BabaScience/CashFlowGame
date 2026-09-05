@@ -22,7 +22,9 @@ export function useStanza(codice, mioId) {
 
   const versione = useRef(0);
   const statoRef = useRef(null);
-  const vivo = useRef(true);
+  /* Il numero di giro: cambia a ogni cambio di stanza, e le risposte in
+     ritardo del giro precedente si riconoscono e si buttano. */
+  const giro = useRef(0);
   const timer = useRef(null);
 
   const applica = useCallback((s) => {
@@ -32,15 +34,27 @@ export function useStanza(codice, mioId) {
     setStato(s);
   }, []);
 
-  const aggiorna = useCallback(async () => {
+  /**
+   * Una lettura.
+   *
+   * `miaVolta` è il numero di giro del ciclo che l'ha chiesta. Passare da
+   * una stanza a un'altra — la rivincita, o una partita ripresa
+   * dall'elenco — lascia in volo la richiesta della stanza vecchia: quando
+   * torna, senza questo controllo scrive la sua versione nel riferimento
+   * condiviso e da lì in poi i due cicli si pestano i piedi a vicenda.
+   * Succedeva davvero: due catene di polling, una che chiedeva la stanza
+   * nuova con la versione della vecchia e una il contrario, e la
+   * schermata che restava su quella sbagliata.
+   */
+  const aggiorna = useCallback(async (miaVolta) => {
     if (!codice) return;
     try {
       const r = await api.leggiStato(codice, versione.current);
-      if (!vivo.current) return;
+      if (giro.current !== miaVolta) return;
       if (!r.invariato) applica(r.stato);
       setErrore(null);
     } catch (e) {
-      if (!vivo.current) return;
+      if (giro.current !== miaVolta) return;
       setErrore(e.codiceHttp === 404 ? "Stanza non trovata o scaduta." : "Connessione persa, riprovo…");
     }
   }, [codice, applica]);
@@ -61,21 +75,24 @@ export function useStanza(codice, mioId) {
   }, [mioId]);
 
   useEffect(() => {
-    vivo.current = true;
+    const miaVolta = ++giro.current;
     clearTimeout(timer.current);
+    /* Stanza nuova, conti da zero: tenere la versione della precedente
+       farebbe rispondere 204 ("non è cambiato niente") su una stanza che
+       non abbiamo mai letto, e resteremmo a guardare quella di prima. */
+    versione.current = 0;
+    statoRef.current = null;
 
     if (!codice) {
-      versione.current = 0;
-      statoRef.current = null;
       setStato(null);
       setCaricamento(false);
-      return () => { vivo.current = false; };
+      return () => { giro.current++; };
     }
 
     setCaricamento(true);
     const ciclo = async () => {
-      await aggiorna();
-      if (!vivo.current) return;
+      await aggiorna(miaVolta);
+      if (giro.current !== miaVolta) return;
       setCaricamento(false);
       timer.current = setTimeout(ciclo, ritmo());
     };
@@ -83,14 +100,14 @@ export function useStanza(codice, mioId) {
 
     // Tornando sull'app si ricarica subito, senza aspettare il turno di polling.
     const suVisibilita = () => {
-      if (document.hidden || !vivo.current) return;
+      if (document.hidden || giro.current !== miaVolta) return;
       clearTimeout(timer.current);
       ciclo();
     };
     document.addEventListener("visibilitychange", suVisibilita);
 
     return () => {
-      vivo.current = false;
+      giro.current++;
       clearTimeout(timer.current);
       document.removeEventListener("visibilitychange", suVisibilita);
     };
@@ -112,5 +129,5 @@ export function useStanza(codice, mioId) {
     }
   }, [codice, applica]);
 
-  return { stato, errore, caricamento, inAzione, invia, aggiorna, applica };
+  return { stato, errore, caricamento, inAzione, invia, aggiorna: () => aggiorna(giro.current), applica };
 }

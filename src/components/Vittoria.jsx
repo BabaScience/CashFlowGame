@@ -48,6 +48,9 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
      qualcuno rigioca, lo decide adesso. Se un altro l'ha già chiesta, la
      stanza c'è già e il testo cambia — non se ne aprono due. */
   const pronta = Boolean(stato.rivincita);
+  /* La variazione di valutazione la scrive il server sulla stanza, quindi
+     la vedono tutti e non solo chi ha fatto l'ultima mossa. */
+  const mia = (stato.valutazioni || []).find((v) => v.id === mioId);
   const { trovaProfessione, trovaSogno, obiettivo } = useMercato();
   const tabella = useMemo(() => classifica(stato), [stato]);
   const vincitore = tabella.find((riga) => riga.vincitore);
@@ -99,6 +102,18 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
                 <KV k={t("vittoria.redditoPassivo")} v={soldi(vincitore.redditoPassivo)} forte />
               )}
               <KV k={t("vittoria.turniGiocati")} v={String(vincitore.turniGiocati)} />
+            </div>
+          )}
+
+          {mia && (
+            <div className="carta ta-c" style={{ marginBottom: 14 }}>
+              <div className="etichetta" style={{ margin: 0 }}>{t("arena.laTuaValutazione")}</div>
+              <div className="flex cen" style={{ justifyContent: "center", gap: 10, marginTop: 4 }}>
+                <span className="titolo numeri f28" style={{ lineHeight: 1.1 }}>{mia.dopo}</span>
+                <span className={`numeri grassetto f16 ${mia.variazione >= 0 ? "pos" : "neg"}`}>
+                  {mia.variazione >= 0 ? "+" : ""}{mia.variazione}
+                </span>
+              </div>
             </div>
           )}
 
