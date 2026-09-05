@@ -97,6 +97,92 @@ for (const h of config.headers || []) {
 }
 ok("le intestazioni puntano a file esistenti");
 
+/* Ripulire il codice prima di guardarlo, in due gradi.
+ *
+ * `senzaTesti` toglie commenti ed espressioni regolari: basta per
+ * riconoscere una chiamata di funzione, e non può cancellare niente per
+ * sbaglio. `senzaCommenti` toglie anche le stringhe, che serve per non
+ * scambiare una parola dentro un messaggio per una chiamata.
+ *
+ * L'ordine conta. Le espressioni regolari prima dei commenti di riga,
+ * perché `/^mongodb:\\/\\//i` finisce con due sbarre di fila e verrebbe
+ * scambiato per l'inizio di un commento. Le stringhe per ultime perché in
+ * questo progetto i commenti sono in italiano e pieni di apostrofi, che
+ * aprirebbero stringhe fantasma.
+ *
+ * E una rete: se togliere le stringhe si porta via più della metà del
+ * file, una virgoletta spaiata ha fatto danni e ci si ferma al grado
+ * prima. Un controllo che non vede niente passa sempre, ed è il tipo di
+ * test peggiore che ci sia — questo è successo davvero qui sotto.
+ */
+const senzaTesti = (t) => t
+  /* I commenti diventano righe vuote, non spazio: se le righe si
+     accorciano, il numero indicato dagli errori manda a cercare altrove. */
+  .replace(/\/\*[\s\S]*?\*\//g, (c) => "\n".repeat((c.match(/\n/g) || []).length))
+  .replace(/([(=,:!&|]\s*)\/(?:[^/\\\n]|\\.)+\/[gimsuy]*/g, "$1RE")
+  .replace(/\/\/[^\n]*/g, " ");
+
+const senzaCommenti = (t) => {
+  const base = senzaTesti(t);
+  const nudo = base
+    .replace(/`(?:[^`\\]|\\.)*`/g, '""')
+    .replace(/"(?:[^"\\]|\\.)*"/g, '""')
+    .replace(/'(?:[^'\\]|\\.)*'/g, '""');
+  return nudo.length < base.length * 0.5 ? base : nudo;
+};
+
+/* ═══ Le due API restano d'accordo su cosa accettano ═══
+ *
+ * Le API esistono in due copie: le funzioni serverless in `api/`, e la
+ * copia in memoria che gira con `npm run dev`. Sono due file, e per due
+ * volte hanno preso strade diverse in silenzio.
+ *
+ * L'ultima: il formato della partita (Lampo o Lunga) arrivava al motore
+ * in sviluppo e non in produzione, perché `api/room.js` non lo passava a
+ * `creaStanza`. Il selettore c'era, funzionava sul computer di casa, e
+ * online non faceva niente.
+ *
+ * Qui si confrontano le chiavi passate a `creaStanza` nei due file: se
+ * una manca da una parte, quella cosa funziona solo in sviluppo.
+ */
+const chiamateCreaStanza = (file) => {
+  const src = senzaTesti(readFileSync(file, "utf8"));
+  const punti = [];
+  for (const m of src.matchAll(/creaStanza\([^,]+,[^,]+,\s*\{([^}]*)\}/g)) {
+    const chiavi = new Set();
+    for (const pezzo of m[1].split(",")) {
+      const nome = pezzo.trim().match(/^(\w+)/);
+      if (nome) chiavi.add(nome[1]);
+    }
+    punti.push({ file, riga: src.slice(0, m.index).split("\n").length, chiavi });
+  }
+  return punti;
+};
+
+{
+  /* Chiavi che una sola chiamata ha buon motivo di passare: la rivincita
+     si ancora alla versione dei dati della partita di prima. */
+  const SOLO_SUE = new Set(["versioneDati", "seme", "solitaria"]);
+  const punti = [
+    ...chiamateCreaStanza("api/room.js"),
+    ...chiamateCreaStanza("api/coda.js"),
+    ...chiamateCreaStanza("api/_lib/rivincita.js"),
+    ...chiamateCreaStanza("scripts/api-locale.js"),
+  ];
+  const attese = new Set();
+  for (const p of punti) for (const k of p.chiavi) if (!SOLO_SUE.has(k)) attese.add(k);
+
+  let buchi = 0;
+  for (const p of punti) {
+    const mancanti = [...attese].filter((k) => !p.chiavi.has(k));
+    if (mancanti.length) {
+      errore(`${p.file}:${p.riga} apre una stanza senza ${mancanti.join(", ")} — quell'impostazione non arriva al motore`);
+      buchi++;
+    }
+  }
+  if (!buchi) ok(`le ${punti.length} chiamate a creaStanza passano tutte ${[...attese].join(", ")}`);
+}
+
 /* ═══ Le funzioni chiamano solo cose che hanno importato ═══
  *
  * Questo controllo nasce da un difetto vero, arrivato in produzione e
@@ -122,20 +208,6 @@ const GLOBALI = new Set([
   "setTimeout", "clearTimeout", "setInterval", "clearInterval", "structuredClone",
   "if", "for", "while", "switch", "catch", "return", "typeof", "function", "await",
 ]);
-
-/* L'ordine conta: prima i commenti a blocco, poi le espressioni regolari,
-   poi i commenti di riga, e per ultime le stringhe.
-   Le regolari prima dei commenti di riga perché `/^mongodb:\\/\\//i` finisce
-   con due sbarre di fila e verrebbe scambiato per l'inizio di un commento.
-   Le stringhe per ultime perché in questo progetto i commenti sono in
-   italiano e pieni di apostrofi, che aprirebbero stringhe fantasma. */
-const senzaCommenti = (t) => t
-  .replace(/\/\*[\s\S]*?\*\//g, " ")
-  .replace(/([(=,:!&|]\s*)\/(?:[^/\\\n]|\\.)+\/[gimsuy]*/g, "$1RE")
-  .replace(/\/\/[^\n]*/g, " ")
-  .replace(/`(?:[^`\\]|\\.)*`/g, '""')
-  .replace(/"(?:[^"\\]|\\.)*"/g, '""')
-  .replace(/'(?:[^'\\]|\\.)*'/g, '""');
 
 const fileApi = [];
 const raccogli = (dir) => {

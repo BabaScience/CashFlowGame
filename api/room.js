@@ -44,7 +44,11 @@ export default async function handler(req, res) {
     if (op === "crea") {
       for (let i = 0; i < 6; i++) {
         const codice = codiceStanza();
-        let stato = creaStanza(codice, giocatoreId, { mercatoId: body.mercatoId, livello: Number(body.livello) || undefined });
+        let stato = creaStanza(codice, giocatoreId, {
+          mercatoId: body.mercatoId,
+          livello: Number(body.livello) || undefined,
+          formato: body.formato,
+        });
         const r = applicaAzione(stato, {
           tipo: "entra", giocatoreId,
           nome: body.nome, professioneId: body.professioneId, sognoId: body.sognoId,
