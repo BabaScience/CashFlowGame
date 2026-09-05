@@ -60,10 +60,6 @@ export default {
     prestitoBanca: "Bank overdraft",
   },
 
-  professionisti: {
-    commercialista: { nome: "Accountant" },
-    avvocato: { nome: "Lawyer" },
-  },
 
   /* Le carte si aggiungono qui, chiave per chiave. */
   carte: {},

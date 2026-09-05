@@ -12,7 +12,7 @@ import { useLingua } from "../Lingua.jsx";
 export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
   const { t } = useLingua();
   const { etichetteSpese, etichettePassivita, debitiEstinguibili, trovaProfessione,
-    trovaSogno, trovaAffare, obiettivo, obiettivoLargo, professionisti } = useMercato();
+    trovaSogno, trovaAffare, obiettivo, obiettivoLargo } = useMercato();
   const alLargo = g.tracciato === "veloce";
   const [apri, setApri] = useState("conto");
   const [prestito, setPrestito] = useState(5000);
@@ -263,52 +263,6 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
           </div>
         </>
       )}
-
-      {mio && professionisti.length > 0 && sezione("professionisti", t("scheda.professionisti"), (
-        <>
-          <p className="f12 tenue" style={{ margin: "0 0 12px", lineHeight: 1.5 }}>
-            {t("scheda.professionistiSpiegazione")}
-          </p>
-          {professionisti.map((p) => {
-            const assunto = (g.professionisti || []).some((x) => x.id === p.id);
-            return (
-              <div key={p.id} style={{ padding: "10px 0", borderTop: "1px dashed var(--linea)" }}>
-                <div className="flex tra cen">
-                  <div>
-                    <div className="f14 grassetto">{p.nome}</div>
-                    <div className="f12 tenue numeri">{soldi(p.costoMensile)}/{t("scheda.alMese")}</div>
-                  </div>
-                  <Bottone variante={assunto ? "btn-fantasma btn-piccolo" : "btn-blu btn-piccolo"}
-                    style={{ width: "auto" }} disabled={inAzione}
-                    onClick={() => fai({ tipo: "professionista", id: p.id })}>
-                    {t(assunto ? "scheda.congeda" : "scheda.assumi")}
-                  </Bottone>
-                </div>
-                <p className="f12 tenue" style={{ margin: "6px 0 0", lineHeight: 1.45 }}>
-                  {t(`scheda.cosaFa_${p.id}`)}
-                </p>
-              </div>
-            );
-          })}
-          {r.professionisti.costo > 0 && (
-            <div className="carta mt12" style={{ background: "#F2F0E6", padding: 12 }}>
-              <KV k={t("scheda.professionistiCosto")} v={soldi(r.professionisti.costo)} />
-              <KV k={t("scheda.professionistiRisparmio")} v={soldi(r.professionisti.risparmio)} />
-              <div className="flex tra f13 grassetto" style={{ borderTop: "1px dashed var(--linea)", paddingTop: 6, marginTop: 6 }}>
-                <span>{t("scheda.professionistiNetto")}</span>
-                {/* Il segno è quello del tuo flusso: meno se ti costano,
-                    più se ti fanno guadagnare. */}
-                <span className={`numeri ${r.professionisti.netto <= 0 ? "pos" : "neg"}`}>
-                  {r.professionisti.netto <= 0 ? "+" : "−"}{soldi(Math.abs(r.professionisti.netto))}
-                </span>
-              </div>
-              <p className="f12 tenue" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
-                {t(r.professionisti.netto <= 0 ? "scheda.siRipagano" : "scheda.nonSiRipagano")}
-              </p>
-            </div>
-          )}
-        </>
-      ))}
 
       {mio && sezione("banca", t("scheda.banca"), (
         <>

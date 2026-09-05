@@ -59,38 +59,13 @@ export function ratePrestito(g) {
   return arrotonda((g.passivita.prestitoBanca || 0) * tasso);
 }
 
-/**
- * Quanto costano al mese i professionisti assunti, al netto di quello che
- * fanno risparmiare.
- *
- * Il compenso è una spesa vera; il risparmio non è un reddito, è un costo
- * evitato — imposte che non paghi, canoni che non perdi — e quindi si
- * sottrae dalle spese invece di sommarsi alle entrate. Il netto può essere
- * negativo: significa che quel professionista si sta ripagando, ed è
- * esattamente la cosa che il giocatore deve poter vedere.
- */
-export function contoProfessionisti(g) {
-  const assunti = g.professionisti || [];
-  if (!assunti.length) return { costo: 0, risparmio: 0, netto: 0 };
-  const canoni = (g.immobili || []).reduce((somma, i) => somma + (i.canone || 0), 0);
-  let costo = 0, risparmio = 0;
-  for (const p of assunti) {
-    costo += p.costoMensile || 0;
-    if (p.scontoImposte) risparmio += canoni * (g.cedolare ?? 0) * p.scontoImposte;
-    if (p.scontoSfitto) risparmio += canoni * (g.quotaSfitto ?? 0) * p.scontoSfitto;
-  }
-  costo = arrotonda(costo);
-  risparmio = arrotonda(risparmio);
-  return { costo, risparmio, netto: costo - risparmio };
-}
-
 export function speseFigli(g) {
   return g.figli * g.perFiglio;
 }
 
 export function speseTotali(g) {
   const base = Object.values(g.spese).reduce((s, v) => s + v, 0);
-  return arrotonda(base + speseFigli(g) + ratePrestito(g) + contoProfessionisti(g).netto);
+  return arrotonda(base + speseFigli(g) + ratePrestito(g));
 }
 
 /** Flusso di cassa mensile = il tuo Giorno di Paga. */
@@ -156,10 +131,9 @@ export function riepilogo(g) {
   const figli = speseFigli(g);
   /* Deve dare lo stesso numero di speseTotali(): sono due strade allo
      stesso totale, e quando divergono l'interfaccia mostra un conto e il
-     motore ne usa un altro. È già successo aggiungendo i professionisti. */
-  const prof = contoProfessionisti(g);
+     motore ne usa un altro. È già successo una volta. */
   const totUscite = arrotonda(
-    Object.values(g.spese).reduce((s, v) => s + v, 0) + figli + rataPrestito + prof.netto
+    Object.values(g.spese).reduce((s, v) => s + v, 0) + figli + rataPrestito
   );
   return {
     dividendi: div,
@@ -168,7 +142,6 @@ export function riepilogo(g) {
     redditoPassivo: passivo,
     redditoTotale: totEntrate,
     ratePrestito: rataPrestito,
-    professionisti: prof,
     speseFigli: figli,
     speseTotali: totUscite,
     flussoMensile: totEntrate - totUscite,

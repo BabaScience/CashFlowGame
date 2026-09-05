@@ -61,10 +61,6 @@ export default {
     prestitoBanca: "Découvert bancaire",
   },
 
-  professionisti: {
-    commercialista: { nome: "Expert-comptable" },
-    avvocato: { nome: "Avocat" },
-  },
 
   /* Les cartes s'ajoutent ici, clé par clé. */
   carte: {},

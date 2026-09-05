@@ -339,39 +339,33 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       passando agli eventi dal server. Da riprendere prima di spingere sul
       traffico, non adesso.
 
-- [ ] **Gli altri professionisti che servirebbero** — commercialista e avvocato
-      sono fatti. Restano fuori, in ordine di quanto contano:
-      **assicurazione** sul fabbricato e responsabilità civile (150–400 € l'anno
-      per immobile: la cosa che evita di perdere tutto una volta sola);
-      **tecnico/geometra** per APE e conformità catastale (300–800 € per
-      immobile, obbligatorio in compravendita); **consulente del lavoro**, se
-      un'attività assume qualcuno. Notaio, agenzia e amministratore di
-      condominio sono già dentro i costi d'acquisto e le quote sul canone.
+- [ ] **Chi lavora per te: costruito, misurato, tolto** — commercialista e
+      avvocato erano assumibili a 120 e 90 € al mese, con uno sconto sulle
+      imposte e sulle perdite da sfitto. Misurati dopo averli costruiti
+      (Roma L2, quadro, 60 partite per scenario) peggioravano la partita e
+      basta: si usciva dalla Ruota nell'83% delle partite senza nessuno, nel
+      65% col commercialista, nel 60% con l'avvocato, nel 47% con entrambi;
+      le vittorie dal 68% al 38%.
 
-- [ ] **Commercialista e avvocato oggi non convengono mai** — misurato dopo
-      averli costruiti, ed è una risposta che non mi aspettavo.
-      Assumendoli dal primo turno (Roma L2, quadro, 60 partite per scenario)
-      si peggiora e basta: si esce dalla Ruota nell'83% delle partite senza
-      nessuno, nel 65% col commercialista, nel 60% con l'avvocato, nel 47%
-      con entrambi. Le vittorie scendono dal 68% al 38%.
+      La causa vera non è il compenso: è che **il risparmio era agganciato ai
+      canoni d'affitto, mentre la partita si vince con le attività.** A Roma
+      L2 gli immobili rendono fra il −1% e il −3% e le attività il 32%,
+      quindi chi gioca bene compra attività — che non hanno canone e non sono
+      tassate. Un giocatore che assumeva "solo quando si ripaga" non assumeva
+      mai: in 60 partite, zero volte. Una decisione con una sola risposta
+      giusta non è una decisione, e in più era una schermata in più da capire.
 
-      Due cause, e la seconda è quella vera.
+      Rimossi. Tornano quando ci sarà qualcosa da ottimizzare, cioè dopo aver
+      **tassato le attività** — il buco già annotato del Livello 3. Il codice
+      sta nella storia di git: `fonti.js` (PROFESSIONISTI), `finanze.js`
+      (contoProfessionisti), l'azione `professionista` del motore e la
+      sezione della scheda.
 
-      La prima: il compenso entra nelle spese, e con la soglia d'uscita a
-      1,5× ogni euro di parcella allontana il traguardo di un euro e mezzo.
-      È la stessa aritmetica del prestito.
-
-      La seconda: **il risparmio è agganciato ai canoni d'affitto, ma la
-      partita si vince con le attività.** A Roma L2 gli immobili rendono
-      fra il −1% e il −3% e le attività il 32%, quindi chi gioca bene compra
-      attività — che non hanno canone e non sono tassate. Un giocatore che
-      assume "solo quando si ripaga" non assume mai: in 60 partite, zero
-      volte.
-
-      Non si aggiusta spostando una costante. Il commercialista fa risparmiare
-      imposte, e nel gioco l'unica cosa tassata sono gli affitti: farlo
-      risparmiare anche sulle attività significherebbe premiare il giocatore
-      per una tassa che non paga. La strada giusta è **tassare le attività**
-      — il buco già annotato del Livello 3 — e allora il commercialista avrà
-      qualcosa da ottimizzare. Prima di allora restano una decisione che ha
-      una sola risposta giusta, cioè non una decisione.
+- [ ] **Gli altri professionisti che servirebbero** — restano fuori, in ordine
+      di quanto contano: **assicurazione** sul fabbricato e responsabilità
+      civile (150–400 € l'anno per immobile: la cosa che evita di perdere
+      tutto una volta sola); **tecnico/geometra** per APE e conformità
+      catastale (300–800 € per immobile, obbligatorio in compravendita);
+      **consulente del lavoro**, se un'attività assume qualcuno. Notaio,
+      agenzia e amministratore di condominio sono già dentro i costi
+      d'acquisto e le quote sul canone.

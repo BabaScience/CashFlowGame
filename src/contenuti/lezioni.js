@@ -389,37 +389,6 @@ export const LEZIONI = [
     ],
   },
 
-  {
-    id: "professionisti",
-    titolo: "Quando conviene pagare qualcuno",
-    minuti: 3,
-    sommario: "Commercialista e avvocato: quanto costano davvero e da che punto si ripagano.",
-    corpo: () => [
-      "Chi mette insieme qualche affitto e un'attività, in Italia, non lo fa da solo. " +
-      "Il commercialista sceglie il regime fiscale, tiene i conti e presenta le " +
-      "dichiarazioni; l'avvocato scrive i contratti e, quando serve, recupera i canoni " +
-      "che non arrivano.",
-      "I costi veri, oggi: la gestione completa di una posizione fiscale sta fra 500 e " +
-      "1.500 euro l'anno — la sola dichiarazione fra 300 e 800. Un incarico legale a " +
-      "Roma va dai 400 ai 2.000 euro, e uno sfratto per morosità dai 600 ai 1.400. A " +
-      "ore, un avvocato va da 100 a oltre 500 euro.",
-      "Sono cifre che spaventano finché non le si mette accanto a quello che evitano. " +
-      "Un commercialista che ti fa scegliere il canone concordato invece del libero ti " +
-      "fa risparmiare undici punti di aliquota su ogni euro di affitto. Un contratto " +
-      "scritto male e uno sfratto avviato con sei mesi di ritardo costano molto più di " +
-      "mille euro l'anno.",
-      "La regola è la stessa di qualunque altra spesa in questo gioco: **produce più di " +
-      "quanto costa?** Con un bilocale la risposta è no, e pagarne uno è una spesa di " +
-      "vanità. Con cinque appartamenti la risposta è sì, e non pagarlo è il modo più " +
-      "caro di risparmiare.",
-      "C'è una seconda cosa che si compra, e non si vede nei conti finché non serve: " +
-      "chi ha i libri in ordine affronta una verifica fiscale a metà prezzo, e chi ha " +
-      "un avvocato che già conosce la pratica affronta una causa a metà prezzo. Si " +
-      "paga tutti i mesi per qualcosa che si userà due volte in dieci anni — che è la " +
-      "definizione di un'assicurazione, ed è il motivo per cui le assicurazioni " +
-      "esistono.",
-    ],
-  },
 
 ];
 
