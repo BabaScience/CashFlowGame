@@ -10,7 +10,7 @@
  */
 import {
   valutazioniDopo, partitaValida, ordineFinale, attesa, passoDi,
-  chiaveCoda, formatoValido,
+  chiaveCoda, formatoValido, inClassifica, PARTITE_PER_CLASSIFICA,
   VALUTAZIONE_ARENA_INIZIALE, PASSO_ARENA, PASSO_ESORDIENTE,
 } from "../src/game/arena.js";
 import { creaStanza, codiceStanza, applicaAzione, limiteTurni, TURNI_LAMPO } from "../src/game/motore.js";
@@ -237,6 +237,17 @@ prova("Chi ha lo stesso progresso arriva pari merito", () => {
 
 prova("Chi non ha mai giocato parte dal valore dichiarato", () => {
   eq(VALUTAZIONE_ARENA_INIZIALE, 1000);
+});
+
+prova("Si entra in classifica solo dopo qualche partita", () => {
+  /* Con una partita sola chi vince per fortuna si ritrova primo, e una
+     classifica in cui il primo posto si prende col caso non la guarda
+     nessuno una seconda volta. */
+  eq(PARTITE_PER_CLASSIFICA, 3);
+  eq(inClassifica(0), false);
+  eq(inClassifica(2), false);
+  eq(inClassifica(3), true);
+  eq(inClassifica(undefined), false, "chi non ha mai giocato:");
 });
 
 console.log("\n── La rivincita ──");

@@ -241,11 +241,20 @@ function Classifica({ albo }) {
       <div className="sezione-tit" style={{ color: "rgba(244,241,230,.5)" }}>{t("arena.classifica")}</div>
 
       {io && (
-        <div className="riga-log" style={{ borderBottom: "1px solid rgba(255,255,255,.12)", paddingBottom: 8, marginBottom: 8 }}>
-          <span className="numeri grassetto" style={{ minWidth: 34 }}>{io.posizione}</span>
-          <span style={{ flex: 1 }}>{io.nome} · <span className="tenue">{t("arena.tu")}</span></span>
-          <span className="numeri grassetto">{io.valutazione}</span>
-        </div>
+        <>
+          <div className="riga-log" style={{ borderBottom: "1px solid rgba(255,255,255,.12)", paddingBottom: 8 }}>
+            <span className="numeri grassetto" style={{ minWidth: 34 }}>
+              {io.posizione ?? t("arena.nonInClassifica")}
+            </span>
+            <span style={{ flex: 1 }}>{io.nome} · <span className="tenue">{t("arena.tu")}</span></span>
+            <span className="numeri grassetto">{io.valutazione}</span>
+          </div>
+          {io.mancano > 0 && (
+            <p className="f11 tenue" style={{ margin: "6px 0 10px" }}>
+              {t(io.mancano === 1 ? "arena.mancanoUna" : "arena.mancanoMolte", { n: io.mancano })}
+            </p>
+          )}
+        </>
       )}
 
       {primi.map((r, i) => (
@@ -253,7 +262,7 @@ function Classifica({ albo }) {
           <span className="numeri tenue" style={{ minWidth: 34 }}>{i + 1}</span>
           <span style={{ flex: 1, minWidth: 0, overflow: "hidden", textOverflow: "ellipsis" }}>{r.nome}</span>
           <span className="f11 tenue" style={{ marginRight: 8 }}>
-            {t("arena.partiteVinte", { n: r.partite, v: r.vittorie || 0 })}
+            {t(r.partite === 1 ? "arena.unaPartita" : "arena.partiteVinte", { n: r.partite, v: r.vittorie || 0 })}
           </span>
           <span className="numeri grassetto">{r.valutazione}</span>
         </div>

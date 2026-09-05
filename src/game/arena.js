@@ -78,6 +78,21 @@ export function valutazioniDopo(esito) {
 }
 
 /**
+ * Quante partite servono per comparire in classifica.
+ *
+ * Tre, e la ragione non è la statistica: è che con una sola partita chi
+ * vince per fortuna si ritrova primo, e una classifica in cui il primo
+ * posto si prende col caso non la guarda nessuno una seconda volta.
+ *
+ * La propria riga si vede sempre, anche a zero partite, con scritto
+ * quante ne mancano: nascondere a qualcuno il suo stesso punteggio
+ * sarebbe il modo peggiore di dargli il benvenuto.
+ */
+export const PARTITE_PER_CLASSIFICA = 3;
+
+export const inClassifica = (partite) => (partite || 0) >= PARTITE_PER_CLASSIFICA;
+
+/**
  * Una partita conta per la classifica?
  *
  * Due condizioni, e vengono dal buon senso più che dalla teoria.

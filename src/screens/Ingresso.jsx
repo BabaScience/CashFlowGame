@@ -272,8 +272,11 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suImpara, mercatoId, setM
                   <div className="titolo numeri f28" style={{ lineHeight: 1.1 }}>{io.valutazione}</div>
                 </div>
                 <div className="ta-r f12 tenue" style={{ lineHeight: 1.5 }}>
-                  <div>{t("arena.posizioneSu", { n: io.posizione })}</div>
-                  <div>{t("arena.partiteVinte", { n: io.partite, v: io.vittorie })}</div>
+                  <div>{io.posizione
+                    ? t("arena.posizioneSu", { n: io.posizione })
+                    : t("arena.provvisoria")}</div>
+                  <div>{t(io.partite === 1 ? "arena.unaPartita" : "arena.partiteVinte",
+                    { n: io.partite, v: io.vittorie })}</div>
                 </div>
               </div>
             )}

@@ -78,7 +78,9 @@ esserci qualcuno dall'altra parte anche quando non hai invitato nessuno.
       password, nessun dato che non sia stato scritto apposta.
 - [x] **C.2** Valutazione Elo aggiornata a fine partita, sul server, una
       volta sola (guardia sul documento della stanza).
-- [x] **C.3** `/api/classifica`: i primi cinquanta, più la tua posizione.
+- [x] **C.3** `/api/classifica`: i primi cinquanta, più la tua posizione. In
+      classifica si entra dalla terza partita; la propria riga si vede
+      sempre, con scritto quante ne mancano.
 - [x] **C.4** PRIVACY.md aggiornato: dalla classifica in poi conserviamo un
       identificativo, e va detto prima, non dopo.
 
@@ -104,6 +106,14 @@ e la schermata restava su quella sbagliata. C'era già prima — bastava
 riprendere una partita dall'elenco — e nessuno l'aveva mai visto perché
 nessuno cambiava stanza senza passare dalla prima pagina. Risolto numerando
 i giri e buttando le risposte del giro precedente.
+
+**In classifica si entra dalla terza partita.** Ci sono arrivato da un
+inciampo: le due partite di prova che ho giocato in produzione per verificare
+il deploy si sono piazzate prime e seconde in una classifica vuota, e non
+avevo modo di cancellarle. La soluzione giusta non era cancellarle: era la
+regola che serviva comunque. Con una partita sola chi vince per fortuna è
+primo, e nessuno guarda due volte una classifica così. Le righe di prova sono
+sparite da sole, e il difetto vero era coperto.
 
 **Due schede dello stesso browser sono la stessa persona.** Lo spazio di
 memoria del sito è per origine, non per scheda: l'identificativo è lo stesso,

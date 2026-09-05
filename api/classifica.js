@@ -14,6 +14,7 @@
  */
 import { giocatori, statoConfigurazione } from "./_lib/db.js";
 import { json, errore, validoId } from "./_lib/http.js";
+import { PARTITE_PER_CLASSIFICA } from "../src/game/arena.js";
 
 const QUANTI = 50;
 
@@ -25,7 +26,7 @@ export default async function handler(req, res) {
   try {
     const col = await giocatori();
     const primi = await col
-      .find({ partite: { $gte: 1 } }, { projection: { _id: 0, giocatoreId: 1, nome: 1, valutazione: 1, partite: 1, vittorie: 1 } })
+      .find({ partite: { $gte: PARTITE_PER_CLASSIFICA } }, { projection: { _id: 0, giocatoreId: 1, nome: 1, valutazione: 1, partite: 1, vittorie: 1 } })
       .sort({ valutazione: -1, partite: -1 })
       .limit(QUANTI)
       .toArray();
@@ -39,7 +40,7 @@ export default async function handler(req, res) {
            sopra di me. Su una collezione con l'indice giusto è una lettura
            sola, e resta una lettura sola anche con centomila iscritti. */
         const sopra = await col.countDocuments({
-          partite: { $gte: 1 },
+          partite: { $gte: PARTITE_PER_CLASSIFICA },
           $or: [
             { valutazione: { $gt: mio.valutazione } },
             { valutazione: mio.valutazione, partite: { $gt: mio.partite } },
@@ -47,7 +48,11 @@ export default async function handler(req, res) {
         });
         io = {
           giocatoreId: mio.giocatoreId, nome: mio.nome, valutazione: mio.valutazione,
-          partite: mio.partite, vittorie: mio.vittorie || 0, posizione: sopra + 1,
+          partite: mio.partite, vittorie: mio.vittorie || 0,
+          /* La posizione ha senso solo per chi è in classifica: a due
+             partite dire "sei primo" sarebbe una bugia gentile. */
+          posizione: (mio.partite || 0) >= PARTITE_PER_CLASSIFICA ? sopra + 1 : null,
+          mancano: Math.max(0, PARTITE_PER_CLASSIFICA - (mio.partite || 0)),
         };
       }
     }

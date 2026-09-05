@@ -478,6 +478,12 @@ Nelle prime dieci partite il punteggio si muove al doppio della velocità: chi
 comincia arriva in fretta al proprio livello invece di passare due settimane
 a scalare da 1000.
 
+**In classifica si compare dalla terza partita.** Prima il punteggio c'è ed è
+tuo — lo vedi in prima pagina e a fine partita — ma non finisce nell'elenco
+pubblico: con una partita sola chi vince per fortuna si ritroverebbe primo, e
+una classifica dove il primo posto si prende col caso non la guarda nessuno
+una seconda volta.
+
 **Le partite contro il computer non contano.** Se contassero, la classifica
 la vincerebbe chi ha più pazienza di battere un bot, e smetterebbe di dire
 qualcosa su come si gioca.

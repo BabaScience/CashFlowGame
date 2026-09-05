@@ -11,7 +11,7 @@ import { preparaMessaggio, accoda } from "../src/game/chat.js";
 import { incrementiPer } from "../src/game/metriche.js";
 import { pacchettoDi } from "../src/game/mercati/indice.js";
 import { statoRivincita, puoChiederla } from "../api/_lib/rivincita.js";
-import { chiaveCoda, formatoValido, valutazioniDopo, partitaValida, ordineFinale, VALUTAZIONE_ARENA_INIZIALE } from "../src/game/arena.js";
+import { PARTITE_PER_CLASSIFICA, chiaveCoda, formatoValido, valutazioniDopo, partitaValida, ordineFinale, VALUTAZIONE_ARENA_INIZIALE } from "../src/game/arena.js";
 import { redditoPassivo, speseTotali } from "../src/game/finanze.js";
 
 /** Nomi degli avversari automatici: italiani, corti, riconoscibili. */
@@ -243,10 +243,17 @@ export default function apiLocale() {
 
           /* ── classifica ── */
           if (url.pathname === "/api/classifica" && req.method === "GET") {
-            const tutti = [...albo.values()].sort((a, c) => c.valutazione - a.valutazione || c.partite - a.partite);
+            const tutti = [...albo.values()]
+              .filter((r) => (r.partite || 0) >= PARTITE_PER_CLASSIFICA)
+              .sort((a, c) => c.valutazione - a.valutazione || c.partite - a.partite);
             const id = url.searchParams.get("giocatoreId");
             const mio = id ? albo.get(id) : null;
-            const io = mio ? { ...mio, posizione: tutti.findIndex((r) => r.giocatoreId === id) + 1 } : null;
+            const posto = mio ? tutti.findIndex((r) => r.giocatoreId === id) + 1 : 0;
+            const io = mio ? {
+              ...mio,
+              posizione: posto > 0 ? posto : null,
+              mancano: Math.max(0, PARTITE_PER_CLASSIFICA - (mio.partite || 0)),
+            } : null;
             return invia(res, 200, { primi: tutti.slice(0, 50), io });
           }
 
