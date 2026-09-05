@@ -445,9 +445,12 @@ Dalla prima pagina, **Gioca ora** ti mette in coda. Il primo che arriva con
 la stessa scelta — stesso mercato, stesso formato — viene appaiato con te e
 la partita comincia da sola, senza sala d'attesa: siete già tutti e due lì.
 
-Se dopo tre quarti di minuto non è arrivato nessuno, il gioco propone una
-partita contro il computer. Non è un ripiego travestito: con pochi giocatori
-la coda è quasi sempre vuota, e una partita subito vale più di un'attesa.
+Se dopo venti secondi non è arrivato nessuno, il gioco propone una partita
+contro il computer. Non è un ripiego travestito: con una coda piena si viene
+appaiati in meno di cinque secondi, quindi chi arriva a venti è quasi
+certamente solo — e una partita subito vale più di un'attesa. Chi preferisce
+aspettare aspetta: la ricerca continua, e se arriva qualcuno la partita parte
+comunque.
 
 ### I due formati
 

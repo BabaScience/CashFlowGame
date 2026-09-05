@@ -69,7 +69,7 @@ esserci qualcuno dall'altra parte anche quando non hai invitato nessuno.
 - [x] **B.2** Appaiamento atomico con `findOneAndDelete`: due persone che
       premono nello stesso istante non possono prendersi lo stesso avversario.
 - [x] **B.3** Il bottone in prima pagina: **Gioca ora**. Attesa con un
-      contatore, e dopo 45 secondi si propone il computer — meglio una
+      contatore, e dopo 20 secondi si propone il computer — meglio una
       partita subito che una sala d'attesa vuota.
 
 ### C — Un numero che significa qualcosa, anche contro le persone

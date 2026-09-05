@@ -112,12 +112,21 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
 
 ## 4 · Perché tornarci ogni giorno
 
+> **Da qui in poi il filo si è spostato in [PIANO-COMPETIZIONE.md](PIANO-COMPETIZIONE.md).**
+> Quel file risponde a una domanda diversa e più grande: cosa manca perché
+> uno ci giochi novemila volte, come si fa con gli scacchi. Ne sono uscite
+> quattro cose che ora sono in produzione — il formato Lampo, la coda per
+> trovare un avversario che non conosci, la valutazione Elo con la
+> classifica, e la rivincita — più tre difetti che erano già lì e che
+> nessuno vedeva perché nessuno giocava con sconosciuti.
+
 - [x] **4.1 Sfida del giorno** — stesso seme, stessa professione, stesso
       mazzo per tutti quelli che giocano oggi; un tentativo; punteggio,
-      serie e risultato condivisibile in stile Wordle. Manca la
-      **classifica**: richiede di conservare un identificativo, e sarebbe la
-      prima cosa che ci fa raccogliere dati su qualcuno. Da progettare con
-      cura, non da aggiungere di corsa.
+      serie e risultato condivisibile in stile Wordle.
+      La **classifica** è arrivata dopo, e non per la sfida: per le partite
+      fra persone, dove un identificativo serve comunque per sapere chi ha
+      giocato con chi. La sfida in solitaria resta com'era — tutta sul
+      dispositivo, niente sul server. Vedi PIANO-COMPETIZIONE.md.
 - [x] **4.2 Modalità in solitaria** — la sfida gira **tutta nel browser**:
       nessuna stanza, nessuna scrittura sul database, nessun costo. La
       modalità che dovrebbe essere giocata più spesso è quella che non

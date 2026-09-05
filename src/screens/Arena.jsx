@@ -25,12 +25,18 @@ import { TURNI_LAMPO } from "../game/motore.js";
  * ne va. Nome, mercato e professione sono già decisi altrove o hanno un
  * valore ragionevole.
  *
- * **Dopo tre quarti di minuto si propone il computer.** Con pochi
+ * **Dopo venti secondi si propone il computer.** Con pochi
  * giocatori la coda è quasi sempre vuota, e una sala d'attesa vuota è il
  * modo più veloce per non tornare mai più. Meglio una partita subito.
  */
 
-const SECONDI_PRIMA_DEL_COMPUTER = 45;
+/* Dopo quanto si propone il computer.
+   Venti secondi, non quarantacinque: con una coda piena si viene appaiati
+   in meno di cinque, quindi chi arriva a venti è quasi certamente solo, e
+   fargliene aspettare altri venticinque davanti a una rotella è il modo
+   più veloce per non farlo tornare. Chi vuole aspettare aspetta: la
+   ricerca continua sotto, e se arriva qualcuno la partita parte comunque. */
+const SECONDI_PRIMA_DEL_COMPUTER = 20;
 const OGNI = 2000;
 
 export default function Arena({ suEntrato, suEsci, avvisa, mercatoId, setMercato }) {
