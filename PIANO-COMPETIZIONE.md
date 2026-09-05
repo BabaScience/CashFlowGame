@@ -52,13 +52,14 @@ esserci qualcuno dall'altra parte anche quando non hai invitato nessuno.
 
 ### A — Formato Lampo *(sblocca tutto il resto)*
 - [x] **A.1** Un limite di turni per stanza, scelto alla creazione:
-      **Lampo** (30 turni a testa) e **Lunga** (come adesso). Il motore ha
+      **Lampo** (40 turni a testa) e **Lunga** (come adesso). Il motore ha
       già il finale a tempo con la classifica per progresso: si riusa quello,
       che è provato e testato, invece di inventare un finale nuovo.
-- [x] **A.2** Il limite si vede mentre si gioca: *turno 12 / 30*, non solo
+- [x] **A.2** Il limite si vede mentre si gioca: *turni 12 / 40*, non solo
       alla fine.
-- [x] **A.3** `bilancia.mjs` verifica anche il formato Lampo: deve restare
-      vinto da chi gioca meglio, non da chi ha pescato meglio.
+- [x] **A.3** `bilancia.mjs` verifica anche il formato Lampo: ogni partita
+      deve finire entro il tetto, e chi compra deve battere chi non compra
+      almeno nell'85% dei casi. Misurato: 100%.
 
 ### B — Trovare un avversario senza conoscerlo
 - [x] **B.1** `/api/coda`: entri in coda, il primo che arriva con lo stesso
@@ -68,8 +69,8 @@ esserci qualcuno dall'altra parte anche quando non hai invitato nessuno.
 - [x] **B.2** Appaiamento atomico con `findOneAndDelete`: due persone che
       premono nello stesso istante non possono prendersi lo stesso avversario.
 - [x] **B.3** Il bottone in prima pagina: **Gioca ora**. Attesa con un
-      contatore, e se dopo un minuto non c'è nessuno si propone il computer —
-      meglio una partita subito che una sala d'attesa vuota.
+      contatore, e dopo 45 secondi si propone il computer — meglio una
+      partita subito che una sala d'attesa vuota.
 
 ### C — Un numero che significa qualcosa, anche contro le persone
 - [x] **C.1** Identità leggera: l'identificativo casuale che il dispositivo
@@ -84,7 +85,9 @@ esserci qualcuno dall'altra parte anche quando non hai invitato nessuno.
 ### D — Rigiocare, e sapere com'è andata
 - [x] **D.1** **Rivincita** a fine partita: una stanza nuova con gli stessi
       giocatori, un clic per chi accetta.
-- [x] **D.2** Profilo in prima pagina: valutazione, partite, vittorie, serie.
+- [x] **D.2** Profilo in prima pagina: valutazione, posizione, partite e
+      vittorie. E la variazione a fine partita, scritta dal server sulla
+      stanza così la vedono tutti e non solo chi ha fatto l'ultima mossa.
 - [ ] **D.3** Storico delle ultime partite. *(rimandato: serve una
       collezione in più, e con pochi utenti non dice ancora niente)*
 
@@ -117,9 +120,12 @@ dichiara pareggio sarebbe stato più semplice, ma toglie il motivo di giocare
 gli ultimi cinque turni. Con la classifica per progresso — la stessa che usa
 la sfida del giorno — ogni turno fino all'ultimo sposta qualcosa.
 
-**Trenta turni a testa, non venti.** Sotto i trenta non si arriva a comprare
-il secondo affare, e la partita la vince chi ha pescato meglio nei primi
-cinque turni. Misurato con `bilancia.mjs` prima di fissare il numero.
+**Quaranta turni a testa, non trenta.** Il primo numero provato era trenta;
+misurando, a trenta il vincitore arrivava al 22% del proprio traguardo contro
+il 12% del perdente — uno scarto di dieci punti su numeri piccoli, cioè
+rumore. A quaranta lo scarto raddoppia in proporzione (30% contro 15%), i
+pareggi scendono a uno su venti, e la partita resta sotto i duecento
+turni in tutto: una decina di minuti veri.
 
 **La valutazione la calcola il server, non il browser.** Quella della sfida
 in solitaria vive sul dispositivo perché non c'è niente da difendere: sei tu

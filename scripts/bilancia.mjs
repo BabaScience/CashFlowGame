@@ -20,7 +20,7 @@
  *
  * Uscita 0 = i dati reggono. Uscita 1 = i dati hanno rotto il gioco.
  */
-import { creaStanza, applicaAzione, codiceStanza } from "../src/game/motore.js";
+import { creaStanza, applicaAzione, codiceStanza, TURNI_LAMPO } from "../src/game/motore.js";
 import { getPacchetto, MERCATI, esiste, versioneCorrente } from "../src/game/mercati/indice.js";
 
 /* Quale mercato si sta verificando: `node scripts/bilancia.mjs 12 roma`.
@@ -29,7 +29,7 @@ import { getPacchetto, MERCATI, esiste, versioneCorrente } from "../src/game/mer
    perché nessuno si è ricordato di controllarlo. */
 const MERCATO = process.argv.find((a) => /^[a-z]+$/.test(a) && a !== "--verboso" && esiste(a, versioneCorrente(a)));
 const DA_VERIFICARE = MERCATO ? [MERCATO] : MERCATI.map((m) => m.id);
-import { flussoMensile, fuoriDallaCorsa, riepilogo, soldi } from "../src/game/finanze.js";
+import { flussoMensile, fuoriDallaCorsa, riepilogo, soldi, redditoPassivo, speseTotali } from "../src/game/finanze.js";
 
 /* ═══════════════ soglie di accettazione ═══════════════ */
 /* Alzarle rende il gioco più severo con sé stesso. Vanno tarate una volta
@@ -403,6 +403,86 @@ for (const { mercatoId, livello } of COMBINAZIONI) {
   } else {
     console.log(`\n  ✅ "${pacchetto.nome}" livello ${livello} regge: vincibile da tutte e ${professioni.length} le professioni.`);
   }
+}
+
+/* ═══════════════ il formato Lampo ═══════════════
+ *
+ * Il Lampo non ha bisogno che si esca dalla Ruota — finisce a punti — ma
+ * ha bisogno di due cose, e sono quelle che un cambio di dati può rompere
+ * in silenzio.
+ *
+ * Che **finisca sempre**, e nel numero di turni dichiarato: se un mercato
+ * nuovo allungasse le decisioni, dieci minuti diventerebbero venti e il
+ * formato non servirebbe più a niente.
+ *
+ * E che **lo vinca chi gioca meglio**. Il modo più diretto di verificarlo
+ * è metterci contro un giocatore che non compra mai niente: se in una
+ * partita corta il caso conta più delle scelte, quello comincia a vincere,
+ * e la classifica smette di misurare qualcosa.
+ */
+console.log("\n══════════════════════════════════════════════════════════════════");
+console.log("FORMATO LAMPO · finisce in tempo, e lo vince chi gioca");
+console.log("══════════════════════════════════════════════════════════════════");
+
+function lampoContro(mercatoId, seme, scarsoPrimo) {
+  let s = creaStanza(codiceStanza(), "p0", { seme, mercatoId, formato: "lampo" });
+  const pac = getPacchetto(mercatoId);
+  for (let i = 0; i < 2; i++) {
+    const r = applicaAzione(s, {
+      tipo: "entra", giocatoreId: "p" + i, nome: "Bot" + i,
+      professioneId: pac.professioni[3 % pac.professioni.length].id,
+      sognoId: pac.sogni[i].id,
+    });
+    if (r.errore) throw new Error(r.errore);
+    s = r.stato;
+  }
+  s = applicaAzione(s, { tipo: "avvia", giocatoreId: "p0" }).stato;
+
+  const scarso = scarsoPrimo ? "p0" : "p1";
+  let n = 0;
+  while (s.fase === "inCorso" && n < 20000) {
+    const az = mossa(s);
+    if (!az) break;
+    /* Il giocatore scarso tiene i soldi sotto il materasso. */
+    const suo = (s.pending?.giocatoreId || s.giocatori[s.turno].id) === scarso;
+    const mossaSua = (suo && az.tipo === "compraCarta" && s.pending?.tipo === "carta"
+      && s.pending.carta?.tipo !== "spesa")
+      ? { tipo: "passaCarta", giocatoreId: scarso }
+      : az;
+    const r = applicaAzione(s, mossaSua);
+    if (r.errore) break;
+    s = r.stato; n++;
+  }
+  const q = (id) => {
+    const g = s.giocatori.find((x) => x.id === id);
+    return redditoPassivo(g) / Math.max(1, speseTotali(g));
+  };
+  const bravo = scarso === "p0" ? "p1" : "p0";
+  return { finita: s.fase === "finita", turni: s.numeroTurno, azioni: n, vintaDalBravo: q(bravo) > q(scarso) };
+}
+
+let lampoRotto = 0;
+for (const mercatoId of DA_VERIFICARE) {
+  const pac = getPacchetto(mercatoId);
+  const out = [];
+  for (let i = 0; i < 24; i++) out.push(lampoContro(mercatoId, 40000 + i, i % 2 === 0));
+  const tetto = TURNI_LAMPO * 2;
+  const tutteFinite = out.every((o) => o.finita && o.turni <= tetto);
+  const quota = out.filter((o) => o.vintaDalBravo).length / out.length;
+  const azioni = mediana(out.map((o) => o.azioni));
+
+  const ok1 = tutteFinite;
+  const ok2 = quota >= 0.85;
+  console.log(`\n  ${ok1 ? "✅" : "❌"} "${pac.nome}": ogni partita Lampo finisce entro ${tetto} turni`);
+  console.log(`       ${out.filter((o) => o.finita).length}/${out.length} concluse · mediana ${azioni} azioni in tutto`);
+  console.log(`  ${ok2 ? "✅" : "❌"} "${pac.nome}": il Lampo lo vince chi gioca, non chi pesca`);
+  console.log(`       chi compra batte chi non compra nel ${(quota * 100).toFixed(0)}% dei casi (minimo 85%)`);
+  if (!ok1 || !ok2) lampoRotto++;
+}
+
+if (lampoRotto) {
+  console.error(`\n❌ FORMATO LAMPO ROTTO in ${lampoRotto} mercato/i. Non pubblicare.\n`);
+  process.exit(1);
 }
 
 if (mercatiRotti) {
