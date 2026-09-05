@@ -15,6 +15,12 @@ import { registraEsito } from "./_lib/classifica.js";
 import { statoRivincita, puoChiederla } from "./_lib/rivincita.js";
 import { json, errore, corpo, normalizzaCodice, validoId } from "./_lib/http.js";
 import { creaStanza, codiceStanza, applicaAzione } from "../src/game/motore.js";
+/* Serve per dare una professione agli avversari automatici. Mancava, e
+   siccome l'eccezione finiva nel `catch` generale, creare una stanza
+   contro il computer rispondeva "errore di scrittura sul database" — che
+   è esattamente il messaggio che manda a cercare nel posto sbagliato.
+   In sviluppo non si vedeva: la copia in memoria lo importava. */
+import { pacchettoDi } from "../src/game/mercati/indice.js";
 
 /** Nomi degli avversari automatici: italiani, corti, riconoscibili. */
 const NOMI_BOT = ["Bea", "Nico", "Rosa", "Furio", "Lella"];

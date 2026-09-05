@@ -97,5 +97,93 @@ for (const h of config.headers || []) {
 }
 ok("le intestazioni puntano a file esistenti");
 
+/* ═══ Le funzioni chiamano solo cose che hanno importato ═══
+ *
+ * Questo controllo nasce da un difetto vero, arrivato in produzione e
+ * rimasto lì: `api/room.js` chiamava `pacchettoDi()` senza importarla.
+ * Creare una stanza contro il computer sollevava un ReferenceError che
+ * finiva nel `catch` generale e usciva come "Errore di scrittura sul
+ * database" — il messaggio che manda a cercare nel posto sbagliato.
+ *
+ * In sviluppo non si vedeva: la copia in memoria delle API (che è un
+ * altro file) quella funzione la importava. E nessun test la coglieva,
+ * perché i test non eseguono mai le funzioni serverless.
+ *
+ * L'euristica è semplice: ogni nome chiamato come funzione senza un punto
+ * davanti deve essere importato, dichiarato nel file, o un nome del
+ * linguaggio. Non è un analizzatore sintattico, ma prende esattamente
+ * questa famiglia di sbagli, che è quella che fa male.
+ */
+const GLOBALI = new Set([
+  "require", "fetch", "console", "process", "Buffer", "URL", "URLSearchParams",
+  "Number", "String", "Boolean", "Array", "Object", "JSON", "Math", "Date",
+  "Promise", "Error", "Set", "Map", "RegExp", "Symbol", "BigInt", "parseInt",
+  "parseFloat", "isNaN", "isFinite", "encodeURIComponent", "decodeURIComponent",
+  "setTimeout", "clearTimeout", "setInterval", "clearInterval", "structuredClone",
+  "if", "for", "while", "switch", "catch", "return", "typeof", "function", "await",
+]);
+
+/* L'ordine conta: prima i commenti a blocco, poi le espressioni regolari,
+   poi i commenti di riga, e per ultime le stringhe.
+   Le regolari prima dei commenti di riga perché `/^mongodb:\\/\\//i` finisce
+   con due sbarre di fila e verrebbe scambiato per l'inizio di un commento.
+   Le stringhe per ultime perché in questo progetto i commenti sono in
+   italiano e pieni di apostrofi, che aprirebbero stringhe fantasma. */
+const senzaCommenti = (t) => t
+  .replace(/\/\*[\s\S]*?\*\//g, " ")
+  .replace(/([(=,:!&|]\s*)\/(?:[^/\\\n]|\\.)+\/[gimsuy]*/g, "$1RE")
+  .replace(/\/\/[^\n]*/g, " ")
+  .replace(/`(?:[^`\\]|\\.)*`/g, '""')
+  .replace(/"(?:[^"\\]|\\.)*"/g, '""')
+  .replace(/'(?:[^'\\]|\\.)*'/g, '""');
+
+const fileApi = [];
+const raccogli = (dir) => {
+  for (const n of readdirSync(dir, { withFileTypes: true })) {
+    if (n.isDirectory()) raccogli(`${dir}/${n.name}`);
+    else if (n.name.endsWith(".js")) fileApi.push(`${dir}/${n.name}`);
+  }
+};
+raccogli("api");
+
+let nomiKo = 0;
+for (const f of fileApi) {
+  const src = senzaCommenti(readFileSync(f, "utf8"));
+
+  const noti = new Set(GLOBALI);
+  /* Quello che il file importa. */
+  for (const m of src.matchAll(/import\s+(?:\{([^}]*)\}|(\w+))[^;]*from/g)) {
+    if (m[2]) noti.add(m[2]);
+    for (const pezzo of (m[1] || "").split(",")) {
+      const nome = pezzo.trim().split(/\s+as\s+/).pop().trim();
+      if (nome) noti.add(nome);
+    }
+  }
+  /* Quello che dichiara, incluse le funzioni ricevute come parametro. */
+  for (const m of src.matchAll(/\b(?:function|const|let|var|class)\s+(\w+)/g)) noti.add(m[1]);
+  for (const m of src.matchAll(/\(([^)]*)\)\s*=>/g)) {
+    for (const pezzo of m[1].split(",")) {
+      const nome = pezzo.trim().replace(/[=:].*$/, "").trim();
+      if (/^\w+$/.test(nome)) noti.add(nome);
+    }
+  }
+  for (const m of src.matchAll(/function\s*\w*\s*\(([^)]*)\)/g)) {
+    for (const pezzo of m[1].split(",")) {
+      const nome = pezzo.trim().replace(/[=:].*$/, "").trim();
+      if (/^\w+$/.test(nome)) noti.add(nome);
+    }
+  }
+
+  const ignoti = new Set();
+  for (const m of src.matchAll(/(^|[^\w.$])([a-zA-Z_$][\w$]*)\s*\(/g)) {
+    if (!noti.has(m[2])) ignoti.add(m[2]);
+  }
+  if (ignoti.size) {
+    errore(`${f}: chiama senza importare → ${[...ignoti].join(", ")}`);
+    nomiKo++;
+  }
+}
+if (!nomiKo) ok(`le ${fileApi.length} funzioni chiamano solo cose che hanno importato`);
+
 console.log(ko ? `\n${ko} problemi: il deploy fallirebbe.\n` : "\nvercel.json è a posto.\n");
 process.exit(ko ? 1 : 0);
