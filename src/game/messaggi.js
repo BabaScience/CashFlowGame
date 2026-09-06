@@ -78,6 +78,8 @@ export const MESSAGGI = {
     r58: "{nome} liquida {simbolo} per {importo}.",
     r59: "{nome} estingue \"{dNome}\" durante la bancarotta.",
     r63: "⏳ {nome} non gioca da troppo tempo ed esce dalla partita.",
+    r64: "🏆 {nome} lascia il lavoro dopo {n} mesi e vive di {importo} al mese. Ha vinto.",
+    r65: "{nome} incassa {n} Giorni di Rendita: {importo}.",
     r60: "{nome} rimborsa {importo} di prestito.",
   },
 
@@ -145,6 +147,8 @@ export const MESSAGGI = {
     r58: "{nome} liquidates {simbolo} for {importo}.",
     r59: "{nome} pays off \"{dNome}\" during bankruptcy.",
     r63: "⏳ {nome} has not played for too long and leaves the game.",
+    r64: "🏆 {nome} leaves work after {n} months and lives on {importo} a month. They win.",
+    r65: "{nome} collects {n} Income Days: {importo}.",
     r60: "{nome} repays {importo} of the loan.",
   },
   fr: {
@@ -211,6 +215,8 @@ export const MESSAGGI = {
     r58: "{nome} liquide {simbolo} pour {importo}.",
     r59: "{nome} solde \"{dNome}\" pendant la faillite.",
     r63: "⏳ {nome} ne joue plus depuis trop longtemps et quitte la partie.",
+    r64: "🏆 {nome} quitte son travail après {n} mois et vit avec {importo} par mois. La partie est gagnée.",
+    r65: "{nome} encaisse {n} Jours de rente : {importo}.",
     r60: "{nome} rembourse {importo} de prêt.",
   },
 };

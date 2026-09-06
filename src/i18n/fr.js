@@ -64,7 +64,7 @@ export default {
     giornoDiPaga: "Jour de paie",
     perUscire: "Pour sortir de la Roue, il vous faut un revenu passif supérieur à {importo} par mois.",
     sogno: "Votre rêve",
-    sognoNota: "L'acheter au Large fait gagner sur-le-champ. Attention : chaque adversaire qui tombe dessus en double le prix pour vous.",
+    sognoNota: "Il ne s'achète pas : c'est ce pour quoi vous jouez. À la fin, le jeu vous dit à combien de mois de rente vous êtes arrivé.",
     creaStanza: "Créer un salon",
     entraConCodice: "Entrer avec un code",
     creaEInvita: "Créer et inviter des amis",
@@ -137,7 +137,7 @@ export default {
   },
 
   partita: {
-    seiLiberoSpiegazione: "Votre revenu passif ({rendita}) dépasse vos dépenses ({spese}). En sortant, vous recevez {liquidazione} de solde.",
+    seiLiberoSpiegazione: "Votre revenu passif ({rendita}) dépasse vos dépenses ({spese}). Vous pouvez arrêter de travailler : la partie est à vous.",
     nonGiocaDa: "{nome} ne joue plus depuis quelques minutes.",
     mettiFuori: "Continuer sans lui",
     turniRimasti: "Tours",
@@ -173,6 +173,7 @@ export default {
     renditaVersoSpese: "Rentes face aux dépenses",
     seiLibero: "Vous êtes libre !",
     prendiIlLargo: "Gagner le large",
+    lasciaIlLavoro: "Quitter le travail et gagner",
     fuoriDallaPartita: "Vous êtes hors jeu, mais vous pouvez continuer à suivre la partie.",
     quantiDadi: "Combien de dés ?",
     casellaRisolta: "Case résolue. Le tour passe…",
@@ -242,6 +243,8 @@ export default {
   },
 
   vittoria: {
+    sognoADistanza: "à {durata} de rente",
+    sognoIrraggiungibile: "encore hors de portée : la rente ne couvre pas les dépenses",
     rivincita: "Revanche",
     entraNellaRivincita: "Rejoindre la revanche",
     tu: "vous",
@@ -272,6 +275,7 @@ export default {
     redditoPassivo: "Revenu passif",
     turniGiocati: "Tours joués",
     motivo: {
+      liberta: "a quitté son travail après {durata} et vit de ses rentes",
       sogno: "a réalisé son rêve",
       rendita: "a atteint +{importo} de rente au Large",
       ultimo: "est le dernier joueur encore en lice",
@@ -416,11 +420,11 @@ export default {
     flussoMensileBreve: "Flux mensuel",
     nessunAffare: "Aucune pour l'instant. Chaque affaire verte augmente votre revenu mensuel.",
     largoSpiegazione: "Vous avez quitté votre emploi : le salaire n'est plus là, tout le reste si. Vous retrouvez ci-dessous les mêmes dépenses, les mêmes dettes et la même banque qu'avant.",
-    tiManca: "Il vous manque encore {importo} par mois de revenu passif. Sur ce marché il en faut le double de vos dépenses : sortir à l'équilibre, c'est revenir au premier imprévu.",
+    tiManca: "Il vous manque encore {importo} par mois de revenu passif. Il faut une marge au-dessus des dépenses : sortir à l'équilibre, c'est rentrer au premier imprévu.",
     prestitoSpiegazione: "Vous pouvez emprunter par tranches de {taglio}. Chaque {taglio} coûte {rata} par mois.",
     contanti: "Liquide",
     redditoVersoSpese: "Revenu passif face aux dépenses",
-    puoiUscire: "Votre revenu passif dépasse vos dépenses : vous pouvez sortir de la Roue !",
+    puoiUscire: "Votre revenu passif dépasse vos dépenses : vous pouvez arrêter de travailler et gagner !",
     giornoDiPaga: "Jour de paie",
     passivo: "Passif",
     sogno: "Rêve",

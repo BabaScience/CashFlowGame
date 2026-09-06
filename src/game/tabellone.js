@@ -60,69 +60,80 @@ export const CASELLE_RUOTA = {
  * `rif` collega la casella all'affare o al sogno corrispondente.
  */
 export const PERCORSO_LARGO = [
-  /* ═══ RIDISEGNATO PER UN'ECONOMIA CONTINUA ═══
+  /* ═══ IL SECONDO TEMPO, PER QUANDO TORNERÀ ═══
    *
-   * Prima: 4 caselle di incasso e 7 di penalità grave su 48. Aveva senso
-   * finché uscire dalla Ruota moltiplicava tutto per cento e un solo Giorno
-   * di Rendita pagava centosettantamila euro: le penalità erano graffi.
+   * Questo tabellone oggi non si gioca: i mercati pubblicati hanno
+   * `secondoTempo: false` e uscire dalla Ruota è la vittoria. Resta qui,
+   * sistemato, perché il difetto che aveva era visibile a occhio nudo e
+   * riaccenderlo com'era sarebbe stato riaccendere anche quello.
    *
-   * Ora che sul Largo si vive del flusso vero, con quei rapporti si atterra
-   * su una catastrofe ogni sette turni e si incassa mezza volta a turno: il
-   * capitale non arriva mai al primo affare. Misurato: un affare comprato in
-   * 359 turni, e contanti azzerati tre volte.
+   * ═══ COS'ERA STORTO ═══
    *
-   * Adesso: 8 caselle di incasso e 4 di penalità. Gli affari e i sogni non
-   * si toccano — sono il gioco — e le caselle liberate diventano Giorni di
-   * Rendita.
+   * I Giorni di Rendita stavano a 0, 12, 24, 36, 40, 42, 44, 46: distanze
+   * di 2, 12, 12, 12, 4, 2, 2, 2. E le ultime otto caselle erano un blocco
+   * di rendite e sogni senza un solo affare.
+   *
+   * Si vedeva nel registro, ed è così che l'ho trovato: il 28% dei turni
+   * produceva soltanto il tiro dei dadi, e il 36% di quelli che pagavano
+   * scriveva da due a cinque righe identiche di fila. Carestia, poi
+   * abbuffata. In mezzo, otto caselle in cui non si poteva comprare niente.
+   *
+   * ═══ COM'È ADESSO ═══
+   *
+   * Un Giorno di Rendita ogni sei caselle, otto in tutto: distanze tutte
+   * uguali. Con due dadi (media 7) si incassa poco più di una volta a
+   * turno, sempre. Le quantità non cambiano — 20 affari, 14 sogni, 4
+   * penalità, 2 beneficenze — cambia solo dove stanno, e adesso non c'è
+   * nessun tratto senza affari.
    */
-  { tipo: "rendita" },                        // 0
-  { tipo: "affare", rif: "av01" },            // 1
-  { tipo: "sogno", rif: "sg01" },             // 2
-  { tipo: "affare", rif: "av02" },            // 3
-  { tipo: "verificaFiscale" },                // 4
-  { tipo: "affare", rif: "av03" },            // 5
-  { tipo: "sogno", rif: "sg02" },             // 6
-  { tipo: "affare", rif: "av04" },            // 7
-  { tipo: "beneficenza" },                    // 8
-  { tipo: "affare", rif: "av05" },            // 9
-  { tipo: "sogno", rif: "sg03" },             // 10
-  { tipo: "affare", rif: "av06" },            // 11
-  { tipo: "rendita" },                        // 12
-  { tipo: "affare", rif: "av07" },            // 13
-  { tipo: "sogno", rif: "sg04" },             // 14
-  { tipo: "affare", rif: "av08" },            // 15
-  { tipo: "causa" },                          // 16
-  { tipo: "affare", rif: "av09" },            // 17
-  { tipo: "sogno", rif: "sg05" },             // 18
-  { tipo: "affare", rif: "av10" },            // 19
-  { tipo: "divorzio" },                       // 20
-  { tipo: "affare", rif: "av11" },            // 21
-  { tipo: "sogno", rif: "sg06" },             // 22
-  { tipo: "affare", rif: "av12" },            // 23
-  { tipo: "rendita" },                        // 24
-  { tipo: "affare", rif: "av13" },            // 25
-  { tipo: "sogno", rif: "sg07" },             // 26
-  { tipo: "affare", rif: "av14" },            // 27
-  { tipo: "verificaFiscale" },                // 28
-  { tipo: "affare", rif: "av15" },            // 29
-  { tipo: "sogno", rif: "sg08" },             // 30
-  { tipo: "affare", rif: "av16" },            // 31
-  { tipo: "beneficenza" },                    // 32
-  { tipo: "affare", rif: "av17" },            // 33
-  { tipo: "sogno", rif: "sg09" },             // 34
-  { tipo: "affare", rif: "av18" },            // 35
-  { tipo: "rendita" },                        // 36
-  { tipo: "affare", rif: "av19" },            // 37
-  { tipo: "sogno", rif: "sg10" },             // 38
-  { tipo: "affare", rif: "av20" },            // 39
-  { tipo: "rendita" },                        // 40
-  { tipo: "sogno", rif: "sg11" },             // 41
-  { tipo: "rendita" },                        // 42
-  { tipo: "sogno", rif: "sg12" },             // 43
-  { tipo: "rendita" },                        // 44
-  { tipo: "sogno", rif: "sg01" },             // 45
-  { tipo: "rendita" },                        // 46
-  { tipo: "sogno", rif: "sg03" },             // 47
+  { tipo: "rendita" },                         // 0
+  { tipo: "affare", rif: "av01" },             // 1
+  { tipo: "sogno", rif: "sg01" },              // 2
+  { tipo: "affare", rif: "av02" },             // 3
+  { tipo: "verificaFiscale" },                 // 4
+  { tipo: "affare", rif: "av03" },             // 5
+  { tipo: "rendita" },                         // 6
+  { tipo: "affare", rif: "av04" },             // 7
+  { tipo: "sogno", rif: "sg02" },              // 8
+  { tipo: "affare", rif: "av05" },             // 9
+  { tipo: "beneficenza" },                     // 10
+  { tipo: "sogno", rif: "sg03" },              // 11
+  { tipo: "rendita" },                         // 12
+  { tipo: "affare", rif: "av06" },             // 13
+  { tipo: "sogno", rif: "sg04" },              // 14
+  { tipo: "affare", rif: "av07" },             // 15
+  { tipo: "causa" },                           // 16
+  { tipo: "affare", rif: "av08" },             // 17
+  { tipo: "rendita" },                         // 18
+  { tipo: "affare", rif: "av09" },             // 19
+  { tipo: "sogno", rif: "sg05" },              // 20
+  { tipo: "affare", rif: "av10" },             // 21
+  { tipo: "sogno", rif: "sg06" },              // 22
+  { tipo: "sogno", rif: "sg07" },              // 23
+  { tipo: "rendita" },                         // 24
+  { tipo: "affare", rif: "av11" },             // 25
+  { tipo: "sogno", rif: "sg08" },              // 26
+  { tipo: "affare", rif: "av12" },             // 27
+  { tipo: "verificaFiscale" },                 // 28
+  { tipo: "affare", rif: "av13" },             // 29
+  { tipo: "rendita" },                         // 30
+  { tipo: "affare", rif: "av14" },             // 31
+  { tipo: "sogno", rif: "sg09" },              // 32
+  { tipo: "affare", rif: "av15" },             // 33
+  { tipo: "beneficenza" },                     // 34
+  { tipo: "sogno", rif: "sg10" },              // 35
+  { tipo: "rendita" },                         // 36
+  { tipo: "affare", rif: "av16" },             // 37
+  { tipo: "sogno", rif: "sg11" },              // 38
+  { tipo: "affare", rif: "av17" },             // 39
+  { tipo: "divorzio" },                        // 40
+  { tipo: "affare", rif: "av18" },             // 41
+  { tipo: "rendita" },                         // 42
+  { tipo: "affare", rif: "av19" },             // 43
+  { tipo: "sogno", rif: "sg12" },              // 44
+  { tipo: "affare", rif: "av20" },             // 45
+  { tipo: "sogno", rif: "sg01" },              // 46
+  { tipo: "sogno", rif: "sg02" },              // 47
 ];
 
 export const CASELLE_LARGO = {

@@ -11,6 +11,11 @@ import { MARCHIO } from "../marchio.js";
 const L = 400, CX = L / 2, CY = L / 2;
 const R_EST = 170, SP_EST = 24;   // Largo
 const R_INT = 116, SP_INT = 28;   // Ruota
+/* Col secondo tempo spento la Ruota si prende tutto il tabellone.
+   Disegnare un anello esterno dove non si può andare toglie metà della
+   superficie alla pista su cui si gioca davvero, e promette un posto che
+   non esiste. */
+const R_SOLA = 158, SP_SOLA = 34;
 
 const ang = (i, n, frazione = 0.5) => ((i + frazione) / n) * Math.PI * 2 - Math.PI / 2;
 const punto = (a, r) => [CX + Math.cos(a) * r, CY + Math.sin(a) * r];
@@ -148,6 +153,11 @@ function Gettone({ giocatore, n, raggio, ordine, totale, èTurno, mio, indice })
 /* ── tabellone ─────────────────────────────────────────────── */
 export default function Tabellone({ stato, mioId, nota, centroLibero }) {
   const { t: tr } = useLingua();
+  /* Dalla stanza, non dal pacchetto: una partita cominciata col Largo
+     acceso lo tiene fino alla fine. */
+  const conLargo = Boolean(stato.secondoTempo);
+  const rRuota = conLargo ? R_INT : R_SOLA;
+  const spRuota = conLargo ? SP_INT : SP_SOLA;
   const giocatori = stato.giocatori || [];
   const inTopi = giocatori.filter((g) => g.tracciato === "topi");
   const inVeloce = giocatori.filter((g) => g.tracciato === "veloce");
@@ -181,10 +191,10 @@ export default function Tabellone({ stato, mioId, nota, centroLibero }) {
       </defs>
 
       <circle cx={CX} cy={CY} r={196} fill="url(#feltro)" stroke="rgba(201,162,39,.34)" strokeWidth="1.5" />
-      <circle cx={CX} cy={CY} r={R_EST + SP_EST / 2 + 5} fill="none" stroke="rgba(201,162,39,.2)" strokeWidth="1" />
+      <circle cx={CX} cy={CY} r={(conLargo ? R_EST + SP_EST / 2 : rRuota + spRuota / 2) + 5} fill="none" stroke="rgba(201,162,39,.2)" strokeWidth="1" />
 
       {/* ── Largo (anello esterno) ── */}
-      <g filter="url(#morbida)">
+      {conLargo && <g filter="url(#morbida)">
         {PERCORSO_LARGO.map((c, i) => {
           const def = CASELLE_LARGO[c.tipo];
           const preso = c.tipo === "affare" && stato.affariVenduti?.[c.rif];
@@ -199,14 +209,14 @@ export default function Tabellone({ stato, mioId, nota, centroLibero }) {
             />
           );
         })}
-      </g>
+      </g>}
 
       {/* ── Ruota (anello interno) ── */}
       <g filter="url(#morbida)">
         {PERCORSO_RUOTA.map((t, i) => (
           <path
             key={"t" + i}
-            d={settore(i, N_RUOTA, R_INT, SP_INT)}
+            d={settore(i, N_RUOTA, rRuota, spRuota)}
             fill={CASELLE_RUOTA[t].colore}
             opacity={0.95}
             stroke="rgba(0,0,0,.22)"
@@ -218,7 +228,7 @@ export default function Tabellone({ stato, mioId, nota, centroLibero }) {
       {/* Etichette brevi sulla Ruota */}
       {PERCORSO_RUOTA.map((t, i) => {
         const a = ang(i, N_RUOTA);
-        const [tx, ty] = punto(a, R_INT);
+        const [tx, ty] = punto(a, rRuota);
         const gradi = (a * 180) / Math.PI + 90;
         const capovolto = gradi > 90 && gradi < 270;
         return (
@@ -235,7 +245,7 @@ export default function Tabellone({ stato, mioId, nota, centroLibero }) {
       })}
 
       {/* Simboli sulla Largo */}
-      {PERCORSO_LARGO.map((c, i) => {
+      {conLargo && PERCORSO_LARGO.map((c, i) => {
         const a = ang(i, N_LARGO);
         const [tx, ty] = punto(a, R_EST);
         const simbolo = { rendita: "€", affare: "◆", sogno: "★", beneficenza: "♥",
@@ -249,7 +259,7 @@ export default function Tabellone({ stato, mioId, nota, centroLibero }) {
       })}
 
       {/* ── Centro ── */}
-      <circle cx={CX} cy={CY} r={R_INT - SP_INT / 2 - 6} fill="#132a22" stroke="rgba(201,162,39,.3)" strokeWidth="1.2" />
+      <circle cx={CX} cy={CY} r={rRuota - spRuota / 2 - 6} fill="#132a22" stroke="rgba(201,162,39,.3)" strokeWidth="1.2" />
       {/* Quando il centro ospita il pulsante del tiro, il marchio si toglie
           di mezzo: due cose nello stesso punto sono una sola cosa
           illeggibile. */}
@@ -300,7 +310,7 @@ export default function Tabellone({ stato, mioId, nota, centroLibero }) {
       {inTopi.map((g) => {
         const gruppo = affTopi.get(g.posizione) || [g.id];
         return (
-          <Gettone key={g.id} giocatore={g} n={N_RUOTA} raggio={R_INT}
+          <Gettone key={g.id} giocatore={g} n={N_RUOTA} raggio={rRuota}
             ordine={gruppo.indexOf(g.id)} totale={gruppo.length} èTurno={g.id === diTurno}
             mio={g.id === mioId} indice={giocatori.indexOf(g)} />
         );

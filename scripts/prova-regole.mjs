@@ -38,8 +38,8 @@ const app = (s, az) => {
 };
 const appErr = (s, az) => applicaAzione(s, az).errore;
 
-function tavolo(prof = ["medico", "custode"]) {
-  let s = creaStanza(codiceStanza(), "p0");
+function tavolo(prof = ["medico", "custode"], opzioni = {}) {
+  let s = creaStanza(codiceStanza(), "p0", opzioni);
   prof.forEach((pid, i) => {
     s = app(s, { tipo: "entra", giocatoreId: "p" + i, nome: "G" + i, professioneId: pid, sognoId: "sg0" + (i + 1) });
   });
@@ -193,7 +193,9 @@ test("Uscire dalla Ruota significa smettere di lavorare, non cambiare gioco", ()
      portafoglio costruito in tutta la prima metà smetteva di contare, le
      spese sparivano, e la seconda metà era un altro gioco attaccato al
      primo. Ora l'unica cosa che cambia è che lo stipendio finisce. */
-  let s = tavolo();
+  /* Il secondo tempo è spento sui mercati pubblicati, ma il codice resta
+     e va sorvegliato: qui lo si accende apposta. */
+  let s = tavolo(["medico", "custode"], { secondoTempo: true });
   s = turnoDi(s, "p0");
   const g = G(s, 0);
   g.attivita.push({ rid: "x1", nome: "Test", costo: 1, acconto: 1, passivita: 0, flusso: 10000 });
@@ -228,6 +230,53 @@ test("Sul Largo il Giorno di Rendita paga il flusso vero", () => {
   eq(flussoMensile(dopo), redditoPassivo(dopo) - speseTotali(dopo));
   vero(flussoMensile(dopo) > 0, "chi è uscito deve stare in piedi");
 });
+
+prova_uscita_vittoria();
+function prova_uscita_vittoria() {
+  test("Lasciare il lavoro è la vittoria", () => {
+    /* Col secondo tempo spento — che è come sono pubblicati tutti i
+       mercati — uscire dalla Ruota chiude la partita. È la cosa che dà il
+       nome al gioco, ed è l'unico finale che si raggiunga davvero: col
+       Largo acceso, due partite su trenta si vincevano e ventotto
+       scadevano. */
+    let s = tavolo();
+    eq(s.secondoTempo, false, "i mercati pubblicati non hanno un secondo tempo:");
+    s = turnoDi(s, "p0");
+    const g = G(s, 0);
+    g.attivita.push({ rid: "y1", nome: "Test", costo: 1, acconto: 1, passivita: 0, flusso: 10000 });
+    const passivo = redditoPassivo(g);
+    const spese = speseTotali(g);
+    const quantiAttivi = g.attivita.length + g.immobili.length;
+
+    s = app(s, { tipo: "esciDallaCorsa", giocatoreId: "p0" });
+    const dopo = G(s, 0);
+    eq(s.fase, "finita", "la partita doveva chiudersi:");
+    eq(s.vincitore, "p0", "vince chi ha lasciato il lavoro:");
+    eq(s.motivoVittoria, "liberta");
+    eq(dopo.tracciato, "topi", "non si passa a un secondo tabellone");
+    eq(dopo.stipendio, 0, "lo stipendio deve finire: hai lasciato il lavoro");
+    /* La schermata finale mostra quello che hai costruito, non un numero
+       di comodo: il portafoglio e le spese restano quelli veri. */
+    eq(dopo.attivita.length + dopo.immobili.length, quantiAttivi, "il portafoglio resta");
+    eq(speseTotali(dopo), spese, "le spese non spariscono");
+    eq(redditoPassivo(dopo), passivo, "la rendita è la stessa di un minuto prima");
+    vero(dopo.mesiAllUscita >= 1, "il mese dell'uscita non è stato registrato");
+  });
+
+  test("Il secondo tempo si può riaccendere per stanza", () => {
+    /* Il Largo non è stato cancellato: è spento nei dati. Una stanza che
+       lo accende continua a giocarlo, e una partita in corso tiene la
+       regola che valeva quando è nata. */
+    let s = tavolo(["medico", "custode"], { secondoTempo: true });
+    eq(s.secondoTempo, true);
+    s = turnoDi(s, "p0");
+    const g = G(s, 0);
+    g.attivita.push({ rid: "y2", nome: "Test", costo: 1, acconto: 1, passivita: 0, flusso: 10000 });
+    s = app(s, { tipo: "esciDallaCorsa", giocatoreId: "p0" });
+    eq(s.fase, "inCorso", "col secondo tempo acceso la partita continua:");
+    eq(G(s, 0).tracciato, "veloce");
+  });
+}
 
 console.log("\n── Largo e vittoria ──");
 
@@ -423,8 +472,8 @@ test("Ogni azione incrementa la versione (per la sincronizzazione)", () => {
 console.log("\n── La banca guarda il reddito ──");
 
 
-function tavoloRoma(professioneId = "insegnante") {
-  let s = creaStanza("REAL", "a", { seme: 21, mercatoId: "roma", livello: 2 });
+function tavoloRoma(professioneId = "insegnante", opzioni = {}) {
+  let s = creaStanza("REAL", "a", { seme: 21, mercatoId: "roma", livello: 2, ...opzioni });
   s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "A", professioneId, sognoId: "sg01" }).stato;
   s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "B", professioneId: "meccanico", sognoId: "sg02" }).stato;
   s = applicaAzione(s, { tipo: "avvia", giocatoreId: "a" }).stato;
@@ -694,7 +743,7 @@ test("Anche dopo aver lasciato il lavoro la banca presta", () => {
   /* È la conseguenza della continuità, e nella realtà è così: un
      proprietario con affitti documentati viene valutato su quelli. Prima
      il manuale diceva che sul Largo non si poteva più chiedere credito. */
-  let s = tavoloRoma("quadro");
+  let s = tavoloRoma("quadro", { secondoTempo: true });
   const g = s.giocatori.find((x) => x.id === "a");
   g.attivita.push({ rid: "k", nome: "K", costo: 1, acconto: 1, passivita: 0, flusso: 5000 });
   s = applicaAzione(s, { tipo: "esciDallaCorsa", giocatoreId: "a" }).stato;

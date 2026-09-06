@@ -189,6 +189,12 @@ export function creaStanza(codice, hostId, opzioni = {}) {
       ? (opzioni.livello || LIVELLO_PREDEFINITO)
       : LIVELLO_PREDEFINITO,
     solitaria: Boolean(opzioni.solitaria),
+    /* IL SECONDO TEMPO, DECISO ALLA CREAZIONE E POI FERMO.
+       Come `versioneDati`: la stanza si ancora alla regola che valeva il
+       giorno in cui è nata, e cambiare il pacchetto non riscrive le
+       partite in corso. Serve anche ai test, che devono poter accendere
+       il Largo per continuare a sorvegliarlo mentre è spento. */
+    secondoTempo: opzioni.secondoTempo ?? Boolean(getPacchetto(mercatoId, versioneDati).secondoTempo),
     /* IL FORMATO.
        "lampo" mette un tetto ai turni; "lunga" lascia quello del mercato,
        che di fatto è nessuno. Non è un modo di giocare diverso: è la
@@ -942,14 +948,37 @@ export function applicaAzione(stato, azione) {
      * incassa quello che il tuo portafoglio produce davvero, meno quello che
      * ti costa vivere. La seconda metà non è un altro gioco: è la stessa
      * economia senza più la busta paga. */
-    g.tracciato = "veloce";
-    g.posizione = 0;
     g.stipendioPrimaDiUscire = g.stipendio;
     g.stipendio = 0;
     g.redditoInizialeVeloce = passivo;
     g.turniBeneficenza = 0;
     g.usciteDallaCorsa = g.turniGiocati;
     g.mesiAllUscita = g.mesi;
+
+    /* ═══ USCIRE DALLA RUOTA È LA VITTORIA ═══
+     *
+     * Dove il mercato non dichiara un secondo tempo, qui la partita
+     * finisce. È la cosa che dà il nome al gioco, ed è l'unico finale che
+     * si raggiunga davvero: col Largo acceso, due partite su trenta si
+     * vincevano e ventotto scadevano.
+     *
+     * Il conto economico resta quello vero — lo stipendio è a zero, le
+     * spese ci sono tutte — perché la schermata finale deve mostrare
+     * quello che hai costruito, non un numero di comodo. */
+    if (!s.secondoTempo) {
+      s.fase = "finita";
+      s.vincitore = g.id;
+      s.motivoVittoria = "liberta";
+      nota(
+        s,
+        `🏆 ${g.nome} lascia il lavoro dopo ${g.mesi} mesi e vive di ${den(s, passivo)} al mese. Ha vinto.`,
+        "r64", { nome: g.nome, n: g.mesi, importo: den(s, passivo) }, "vittoria", g.id
+      );
+      return ok();
+    }
+
+    g.tracciato = "veloce";
+    g.posizione = 0;
     nota(
       s,
       `🎉 ${g.nome} lascia il lavoro! Vive di ${den(s, passivo)} al mese di rendita. Obiettivo: ${den(s, traguardoLargo(s, g))}.`, "r28", { nome: g.nome, importo: den(s, passivo), importo2: den(s, passivo), v: den(s, passivo + obiettivoDi(s)) },
@@ -1002,13 +1031,26 @@ export function applicaAzione(stato, azione) {
       const giorni = giorniRenditaPassati(da, passi);
       g.posizione = (da + passi) % N_LARGO;
       nota(s, `${g.nome} tira ${valori.join(" + ")} = ${passi}.`, "r30", { nome: g.nome, v: valori.join(" + "), passi: passi }, "dado", g.id);
+      /* Un tiro può attraversare più Giorni di Rendita. Gli incassi si
+         fanno uno per uno — il flusso può cambiare in mezzo, e il mese
+         scorre — ma nel registro finiscono in una riga sola.
+         Prima ne scriveva una per giorno: il 36% dei turni che pagavano
+         produceva da due a cinque righe identiche di fila, e il registro
+         alternava silenzio e muro. Chi legge vuole sapere quanto ha preso,
+         non quante volte. */
+      let incassato = 0;
       for (let i = 0; i < giorni; i++) {
         g.mesi = (g.mesi || 0) + 1; // fuori dalla Ruota il tempo passa uguale
         /* Lo stesso conto del Giorno di Paga, senza lo stipendio: quello
            che rendono le tue cose, meno quello che ti costa vivere. */
         const flusso = flussoMensile(g);
         g.contanti += flusso;
-        nota(s, `${g.nome} incassa il Giorno di Rendita: ${flusso >= 0 ? "+" : ""}${den(s, flusso)}.`, "r31", { nome: g.nome, importo: den(s, flusso) }, "paga", g.id);
+        incassato += flusso;
+      }
+      if (giorni === 1) {
+        nota(s, `${g.nome} incassa il Giorno di Rendita: ${incassato >= 0 ? "+" : ""}${den(s, incassato)}.`, "r31", { nome: g.nome, importo: den(s, incassato) }, "paga", g.id);
+      } else if (giorni > 1) {
+        nota(s, `${g.nome} incassa ${giorni} Giorni di Rendita: ${incassato >= 0 ? "+" : ""}${den(s, incassato)}.`, "r65", { nome: g.nome, n: giorni, importo: den(s, incassato) }, "paga", g.id);
       }
       risolviVeloce(s, g);
     }
@@ -1431,6 +1473,9 @@ export function classifica(s) {
         affariVeloci: g.affariVeloci.length,
         sognoComprato: g.sognoComprato,
         figli: g.figli,
+        /* I mesi lavorati sono la tesi del gioco: la schermata finale li
+           deve avere sottomano come ha i soldi. */
+        mesi: g.mesi || 0,
         turniGiocati: g.turniGiocati,
         usciteDallaCorsa: g.usciteDallaCorsa,
         vincitore: s.vincitore === g.id,

@@ -17,6 +17,8 @@ import { creaStanza, codiceStanza, applicaAzione, limiteTurni, fermoDa, TURNI_LA
 import { statoRivincita, puoChiederla } from "../api/_lib/rivincita.js";
 import { mossaBot } from "../src/game/avversario.js";
 import { getPacchetto } from "../src/game/mercati/indice.js";
+import { PERCORSO_LARGO, N_LARGO } from "../src/game/tabellone.js";
+import { mesiAlSogno } from "../src/game/tempo.js";
 
 let passati = 0, falliti = 0;
 const prova = (nome, fn) => {
@@ -248,6 +250,58 @@ prova("Si entra in classifica solo dopo qualche partita", () => {
   eq(inClassifica(2), false);
   eq(inClassifica(3), true);
   eq(inClassifica(undefined), false, "chi non ha mai giocato:");
+});
+
+console.log("\n── Il secondo tempo, spento ma in ordine ──");
+
+prova("I mercati pubblicati non hanno un secondo tempo", () => {
+  /* Misurato: col Largo acceso due partite su trenta si vincevano e
+     ventotto scadevano, e chi usciva dalla Ruota ci arrivava con meno
+     soldi al mese di prima. Resta nel codice, spento. */
+  for (const id of ["roma", "classico"]) {
+    eq(getPacchetto(id).secondoTempo, false, id + ":");
+  }
+});
+
+prova("I Giorni di Rendita del Largo sono distribuiti uniformemente", () => {
+  /* Stavano a 0, 12, 24, 36, 40, 42, 44, 46: carestia per tre quarti del
+     giro, poi quattro incassi in otto caselle. Si vedeva nel registro,
+     ed è così che l'ho trovato. */
+  const r = PERCORSO_LARGO.map((c, i) => (c.tipo === "rendita" ? i : null)).filter((x) => x !== null);
+  eq(r.length, 8, "quanti Giorni di Rendita:");
+  const distanze = r.map((x, i) => (i ? x - r[i - 1] : x + N_LARGO - r[r.length - 1]));
+  const min = Math.min(...distanze), max = Math.max(...distanze);
+  vero(max - min <= 1, `distanze da ${min} a ${max}: non sono uniformi`);
+});
+
+prova("Nel Largo non c'è un tratto lungo senza affari", () => {
+  /* Le ultime otto caselle erano un blocco di rendite e sogni: chi ci
+     capitava non poteva comprare niente per un giro intero. */
+  let peggio = 0, corrente = 0;
+  for (let i = 0; i < N_LARGO * 2; i++) {
+    if (PERCORSO_LARGO[i % N_LARGO].tipo === "affare") corrente = 0;
+    else { corrente++; peggio = Math.max(peggio, corrente); }
+  }
+  vero(peggio <= 4, `si sta fino a ${peggio} caselle senza poter comprare niente`);
+});
+
+prova("Ogni affare del Largo compare una volta sola", () => {
+  const rif = PERCORSO_LARGO.filter((c) => c.tipo === "affare").map((c) => c.rif);
+  eq(new Set(rif).size, rif.length, "ci sono affari ripetuti sul tabellone:");
+  eq(rif.length, getPacchetto("roma").affariLargo.length, "affari sul tabellone contro affari nel mazzo:");
+});
+
+console.log("\n── Il sogno, che si misura invece di comprarsi ──");
+
+prova("Il sogno si misura in mesi di rendita", () => {
+  /* Non si compra quasi mai: costa da 70.000 a mezzo milione e il picco di
+     contanti nella Ruota sta sui 46.000. Dirlo in mesi è l'unica cosa
+     onesta, ed è l'unità che il gioco usa per tutto il resto. */
+  eq(mesiAlSogno(90000, 3000), 30);
+  eq(mesiAlSogno(90000, 4000), 23, "si arrotonda per eccesso:");
+  eq(mesiAlSogno(90000, 0), null, "senza rendita la distanza non è un numero:");
+  eq(mesiAlSogno(90000, -500), null, "con la rendita sotto le spese nemmeno:");
+  eq(mesiAlSogno(0, 3000), null, "un sogno che non costa niente non ha distanza:");
 });
 
 console.log("\n── Chi chiude la scheda e non torna ──");

@@ -19,13 +19,12 @@ Da 2 a 6 giocatori. Una partita dura in media 60–120 minuti.
 6. [Le caselle della Ruota](#6-le-caselle-della-corsa-dei-topi)
 7. [La banca: prestiti e debiti](#7-la-banca-prestiti-e-debiti)
 8. [La bancarotta](#8-la-bancarotta)
-9. [Uscire dalla Ruota](#9-uscire-dalla-corsa-dei-topi)
-10. [Parte II — La Largo](#10-parte-ii--la-corsia-veloce)
-11. [Le caselle del Largo](#11-le-caselle-della-corsia-veloce)
-12. [Fine partita](#12-fine-partita)
-13. [Strategia: cosa insegna davvero](#13-strategia-cosa-insegna-davvero)
-14. [Giocare contro sconosciuti](#14-giocare-contro-sconosciuti)
-15. [Note sulla versione online](#15-note-sulla-versione-online)
+9. [Uscire dalla Ruota — e vincere](#9-uscire-dalla-ruota--e-vincere)
+10. [Il Largo — il secondo tempo, spento](#10-il-largo--il-secondo-tempo-spento)
+11. [Fine partita](#11-fine-partita)
+12. [Strategia: cosa insegna davvero](#12-strategia-cosa-insegna-davvero)
+13. [Giocare contro sconosciuti](#13-giocare-contro-sconosciuti)
+14. [Note sulla versione online](#14-note-sulla-versione-online)
 
 ---
 
@@ -40,8 +39,8 @@ ogni mese senza che tu debba lavorarci. Immobili affittati, attività avviate,
 titoli che pagano dividendi. Quel denaro si chiama **reddito passivo**.
 
 Quando il tuo reddito passivo supera le tue spese totali, non hai più bisogno
-dello stipendio: sei libero. In quel momento esci dalla Ruota ed entri
-nella **Largo**, dove si gioca per i sogni.
+dello stipendio: sei libero. In quel momento lasci il lavoro, esci dalla
+Ruota, e la partita è tua.
 
 > **Attivo**: qualcosa che ti mette soldi in tasca.
 > **Passività**: qualcosa che ti toglie soldi di tasca.
@@ -51,18 +50,36 @@ nella **Largo**, dove si gioca per i sogni.
 
 ## 2. Come si vince
 
-Ci sono **due modi**, entrambi validi solo dopo essere arrivati al Largo:
+**Smetti di lavorare.**
 
-**1. Compra il tuo sogno.**
-A inizio partita scegli un sogno fra i dodici del Largo. Quando ci
-atterri sopra e hai i contanti per pagarlo, lo compri e vinci all'istante.
+Quando il tuo reddito passivo supera stabilmente le tue spese, lasci il
+lavoro e la partita è tua. È l'unica condizione di vittoria, ed è la cosa
+che dà il nome al gioco.
 
-**2. Aumenta di $50.000 il tuo flusso mensile.**
-Entrando al Largo ricevi un Reddito del Giorno di Rendita iniziale.
-Comprando gli affari verdi lo fai crescere. Quando supera il valore iniziale
-di **$50.000**, vinci.
+| Mercato | Quanto reddito passivo serve |
+|---|---|
+| Classico | più delle spese totali (1×) |
+| Roma | **1,5 volte** le spese totali |
 
-La partita finisce nel momento in cui qualcuno raggiunge uno dei due obiettivi.
+Se il tempo scade prima che ci arrivi qualcuno, vince chi ci è arrivato più
+vicino. Nel formato **Lampo** — quaranta turni a testa — è così che finisce
+quasi sempre, e va benissimo: la domanda è la stessa, cambia solo che si
+risponde in dieci minuti.
+
+**E il sogno?** Lo scegli prima del primo tiro e non si compra: è quello per
+cui giochi. Alla fine il gioco ti dice a quanti mesi di rendita sei
+arrivato — *«il giro del mondo: a cinque anni e otto mesi»*. È una misura
+onesta, ed è confrontabile con quella degli altri al tavolo.
+
+> **C'era una seconda metà, e non c'è più.** Fino a poco fa uscire dalla
+> Ruota portava a un secondo tabellone, il Largo, dove si giocava a
+> raddoppiare la rendita. Misurandolo si è visto che non funzionava: su
+> trenta partite due si vincevano davvero e ventotto finivano perché
+> scadevano i turni. Chi ci arrivava aveva **meno soldi al mese di prima**
+> (mediana 4.049 € → 1.449 €: si lascia lo stipendio e non arriva niente al
+> suo posto), 6.904 € in mano e l'affare più economico che ne chiedeva
+> 25.000. Il codice del Largo è ancora tutto qui, spento: tornerà quando
+> varrà la pena giocarlo. Vedi il capitolo 10.
 
 ---
 
@@ -72,8 +89,9 @@ La partita finisce nel momento in cui qualcuno raggiunge uno dei due obiettivi.
 2. Gli altri **entrano col codice**. Massimo 6 giocatori.
 3. Ognuno sceglie:
    - una **professione** fra le dodici disponibili (dal Custode al Medico);
-   - un **sogno** fra i dodici del Largo (due giocatori possono
-     scegliere lo stesso sogno — pensaci bene, è un rischio).
+   - un **sogno** fra i dodici disponibili: non si compra, è quello per
+     cui giochi, e alla fine il gioco ti dice a quanti mesi di rendita sei
+     arrivato.
 4. Chi ha creato la stanza avvia la partita quando sono tutti pronti.
 5. All'avvio ogni giocatore riceve in contanti:
    **il proprio Giorno di Paga + i propri Risparmi iniziali**.
@@ -293,7 +311,7 @@ Se anche così il flusso resta negativo, **sei fuori dalla partita**.
 
 ---
 
-## 9. Uscire dalla Ruota
+## 9. Uscire dalla Ruota — e vincere
 
 Puoi uscire **all'inizio di un tuo turno**, non appena il tuo reddito passivo
 supera la soglia del mercato in cui giochi:
@@ -309,105 +327,82 @@ lascia il lavoro nel mese esatto in cui i conti si toccano è un imprevisto
 lontano dal doverlo cercare di nuovo. Quel margine non è prudenza esagerata: è
 il costo di poter dire di no.
 
-Uscire vuol dire **una cosa sola: smetti di lavorare.**
+Uscire vuol dire **una cosa sola: smetti di lavorare.** Lo stipendio va a
+zero; le case, le attività, i debiti, l'affitto e la spesa restano tutti
+dove sono. Non c'è nessuna liquidazione e nessun premio: la schermata finale
+mostra quello che hai costruito davvero, non un numero di comodo.
 
-1. Lo **stipendio va a zero**. Hai lasciato il lavoro.
-2. **Tutto il resto resta com'è**: le case, le attività, i debiti, l'affitto,
-   la spesa. Non c'è nessuna liquidazione e nessun premio.
-3. Il **Giorno di Rendita** incassa quello che il tuo portafoglio produce
-   davvero, meno quello che ti costa vivere — lo stesso conto del Giorno di
-   Paga, senza la busta paga.
-4. Il tuo obiettivo diventa **raddoppiare la rendita** con cui sei uscito.
-5. **La banca continua a prestarti**, con le stesse regole di prima: la rata
-   non può superare un terzo di quello che entra. Solo che adesso quello che
-   entra è la rendita, non lo stipendio — ed è esattamente come funziona
-   nella realtà, dove un proprietario con affitti documentati viene valutato
-   su quelli. La sezione **Banca** della scheda resta dov'era.
+E la partita finisce lì. Hai vinto.
 
-La scheda non cambia forma: conto economico, stato patrimoniale, mutui,
-debiti e banca sono tutti ancora lì. Cambia solo che la riga *Stipendio* è a
-zero. In cima si aggiunge il quadro del Largo, con il traguardo e quanta
-strada hai fatto.
+La schermata finale dice, per ognuno:
 
-> **Perché non c'è un premio.** Nelle prime versioni uscire moltiplicava tutto
-> per cento: chi lasciava il lavoro con 1.739 € di rendita riceveva 173.900 €
-> in contanti e incassava la stessa cifra a ogni Giorno di Rendita. È la regola
-> del gioco da tavolo originale, ma spezzava la partita in due: il portafoglio
-> costruito in tutta la prima metà smetteva di contare, le spese sparivano, e
-> la seconda metà era un altro gioco. Qui la seconda metà è la stessa
-> economia, senza più la busta paga.
+- quanti **mesi hai lavorato** per arrivarci — *«otto anni e otto mesi»*;
+- il conto economico completo: rendita, spese, Giorno di Paga, patrimonio;
+- **a quanti mesi di rendita sta il tuo sogno.**
 
-Chi esce prima ha un vantaggio. Chi esce con una rendita più alta ha un
-traguardo più alto: la domanda è la stessa per tutti — sai raddoppiare quello
-che ti sei costruito?
+Quell'ultima riga è la più interessante da confrontare, perché due persone
+possono uscire lo stesso mese con sogni a distanze molto diverse.
 
----
+> **Perché non c'è un premio d'uscita.** Nelle prime versioni uscire
+> moltiplicava tutto per cento: chi lasciava il lavoro con 1.739 € di rendita
+> riceveva 173.900 € in contanti e incassava la stessa cifra a ogni Giorno di
+> Rendita. È la regola del gioco da tavolo originale, ma spezzava la partita
+> in due: il portafoglio costruito in tutta la prima metà smetteva di
+> contare, e le spese sparivano. Qui il traguardo è la stessa economia con
+> cui hai giocato, letta senza la busta paga.
 
-## 10. Parte II — La Largo
+## 10. Il Largo — il secondo tempo, spento
 
-L'anello esterno, 48 caselle. Si tirano **2 dadi**.
+C'è un secondo tabellone nel codice: 48 caselle, venti grandi affari, i
+sogni, quattro penalità. Oggi non si gioca. Ogni mercato pubblicato dichiara
+`secondoTempo: false`, e uscire dalla Ruota chiude la partita.
 
-Le carte Opportunità, Mercato e Spese Extra non ti riguardano più.
-Qui si gioca solo per due cose: il tuo sogno e il tuo flusso mensile.
+**Perché.** Misurato su trenta partite a tre giocatori:
 
----
+| | col Largo acceso |
+|---|---|
+| partite vinte davvero | 2 su 30 |
+| partite finite perché scadeva il tempo | 28 su 30 |
+| giocatori che uscendo si ritrovavano con meno soldi al mese | 52 su 52 |
+| flusso mensile mediano, prima → dopo l'uscita | 4.049 € → 1.449 € |
+| contanti in mano all'uscita, contro l'affare più economico | 6.904 € contro 25.000 € |
+| affari del Largo comprati, a testa | 0,85 |
+| turni fra l'uscita e il primo affare | 40 |
 
-## 11. Le caselle del Largo
+Non era un finale: era una pista di rullaggio che finiva prima del decollo.
+Il premio per aver vinto il primo tempo era una riduzione di stipendio, e
+poi quaranta turni di attesa prima di poter fare qualcosa.
 
-### 💰 Giorno di Rendita (8 caselle)
-Atterrando o passando incassi il tuo flusso mensile: quello che rendono le tue
-cose, meno quello che ti costa vivere.
+**Cosa è stato sistemato comunque.** Il tabellone aveva i Giorni di Rendita a
+0, 12, 24, 36, 40, 42, 44, 46 — distanze di 2, 12, 12, 12, 4, 2, 2, 2 — e le
+ultime otto caselle erano un blocco senza un solo affare. Si vedeva nel
+registro: il 28% dei turni produceva soltanto il tiro dei dadi, e il 36% di
+quelli che pagavano scriveva da due a cinque righe identiche di fila.
+Adesso i Giorni di Rendita stanno **ogni sei caselle**, non c'è nessun tratto
+di più di tre caselle senza affari, e più incassi nello stesso tiro
+diventano **una riga sola**.
 
-### ◆ Affare (20 caselle)
-Ogni casella verde è un investimento unico: una piantagione di caffè, un parco
-eolico, una squadra sportiva. Paghi l'**acconto** indicato ed
-entra nel tuo portafoglio come qualunque altra attività, aumentando il tuo
-reddito passivo.
+**Per riaccenderlo** basta mettere `secondoTempo: true` nel pacchetto del
+mercato. I test lo accendono già, così il codice resta sorvegliato mentre
+dorme.
 
-**Una volta comprato, quell'affare non è più disponibile per gli altri.**
-Sul tabellone appare sbiadito.
+## 11. Fine partita
 
-### ★ Sogno (14 caselle)
-- Se è **il sogno che hai scelto tu** e hai i contanti: compralo e **vinci**.
-- Se è il sogno **di un altro giocatore**: non puoi comprarlo, ma atterrandoci
-  sopra ne **aumenti il costo del 100%** per lui. Un sogno da $200.000 gliene
-  costerà $400.000; se ci atterra un secondo giocatore, $600.000.
+La partita finisce quando qualcuno lascia il lavoro, o quando scadono i
+turni. In tutti e due i casi appare il riepilogo finale con, per ogni
+giocatore:
 
-È l'unico modo che hai per rallentare chi sta per vincere col sogno.
-
-### ❤️ Beneficenza (2 caselle)
-Facoltativa. Donando il **10% del tuo reddito** puoi scegliere se tirare
-**1, 2 o 3 dadi** per il resto della partita, cambiando idea a ogni turno.
-Serve a fermarti esattamente sulla casella che ti interessa.
-
-### 🧾 Verifica fiscale (2 caselle) · ⚖️ Causa legale (1 casella)
-Costano **due o tre mesi di rendita**. Sono cifre, non quote del patrimonio:
-prima costavano metà dei contanti, e punivano esattamente chi stava
-risparmiando per il primo affare.
-
-### 💔 Divorzio (1 casella)
-La casella peggiore del tabellone: **sei mesi di rendita**. Nella realtà un
-divorzio divide un patrimonio, non lo brucia.
-
-
----
-
-## 12. Fine partita
-
-Appena un giocatore compra il proprio sogno o raggiunge +$50.000 di flusso,
-la partita si chiude e appare il riepilogo finale con, per ogni giocatore:
-
+- **quanti mesi ha lavorato** per arrivare fin lì;
 - contanti finali e patrimonio netto;
-- reddito passivo e spese totali (o flusso del Largo);
+- reddito passivo, spese totali e Giorno di Paga;
 - valore degli attivi e totale delle passività;
-- turno in cui è uscito dalla Ruota;
-- numero di figli e di affari acquistati.
+- numero di figli;
+- **a quanti mesi di rendita sta il suo sogno.**
 
-Serve a capire *perché* qualcuno ha vinto — che è la parte più utile.
+Serve a capire *perché* qualcuno ha vinto — che è la parte più utile — e
+l'ultima riga serve a ricordare per cosa si giocava.
 
----
-
-## 13. Strategia: cosa insegna davvero
+## 12. Strategia: cosa insegna davvero
 
 **Lo stipendio alto non è un vantaggio.**
 Il Medico ha $3.550 di flusso mensile ma $9.650 di spese: gli servono $9.650 al
@@ -433,7 +428,7 @@ rende $270 al mese — ma senza rischio e senza acconto.
 
 ---
 
-## 14. Giocare contro sconosciuti
+## 13. Giocare contro sconosciuti
 
 Fino a poco fa per giocare con qualcuno bisognava conoscerlo: si apriva una
 stanza e gli si mandava un codice di quattro lettere. Va benissimo fra amici,
@@ -515,7 +510,7 @@ come in qualunque altra partita.
 
 ---
 
-## 15. Note sulla versione online
+## 14. Note sulla versione online
 
 **I numeri.** Ogni scheda professione è verificata aritmeticamente: la somma
 delle voci di spesa deve dare le spese totali, e stipendio meno spese deve dare
@@ -525,11 +520,12 @@ verifica che da ognuna delle dodici professioni si possa davvero prendere il
 largo: se un cambio di dati rendesse una professione senza via d'uscita, la
 pubblicazione si ferma.
 
-**Il tabellone.** 24 caselle sulla Ruota e 48 al Largo.
+**Il tabellone.** 24 caselle sulla Ruota. Il secondo anello da 48 caselle
+esiste nel codice ma è spento: vedi il capitolo 10.
 
 **Il dado.** Un generatore casuale uniforme, tirato sul server: nessun
-giocatore può influenzarlo. Sulil Largo si tirano due dadi separati,
-quindi il 7 esce sei volte più spesso del 2, come coi dadi veri.
+giocatore può influenzarlo. Dove si tirano due dadi si tirano davvero
+separati, quindi il 7 esce sei volte più spesso del 2, come coi dadi veri.
 
 **Cosa è stato semplificato.** Tre regole del gioco da tavolo non sono state
 riportate, ed è giusto saperlo:

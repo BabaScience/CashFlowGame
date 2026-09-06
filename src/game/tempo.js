@@ -54,3 +54,26 @@ export function durata(mesi, t) {
      un trattino lascerebbe credere a un dato mancante. */
   return pAnni || pMesi || t("tempo.mesi", { n: 0 });
 }
+
+/**
+ * A quanti mesi di rendita sta il tuo sogno.
+ *
+ * Il sogno lo si sceglie prima del primo tiro e finora non si comprava
+ * quasi mai: costa fra i 70.000 e i mezzo milione, e nella Ruota il picco
+ * di contanti sta sui 46.000 — solo il 13% dei giocatori arrivava anche
+ * solo a permettersi il più economico. Prometterlo come acquisto era una
+ * promessa che il gioco non manteneva.
+ *
+ * Misurarlo invece si può, e nell'unità che questo gioco usa per tutto:
+ * i mesi. "Il giro del mondo è a quattordici mesi di rendita" dice quanto
+ * sei vicino senza inventare niente — ed è vero anche quando la risposta
+ * è "a trent'anni".
+ *
+ * Restituisce `null` quando la rendita non basta nemmeno a coprire le
+ * spese: in quel caso la distanza non è lunga, è infinita, e scriverlo
+ * come un numero grande sarebbe peggio che non scriverlo.
+ */
+export function mesiAlSogno(costo, renditaMensileNetta) {
+  if (!costo || !(renditaMensileNetta > 0)) return null;
+  return Math.ceil(costo / renditaMensileNetta);
+}

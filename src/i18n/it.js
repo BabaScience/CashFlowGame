@@ -58,7 +58,7 @@ export default {
     giornoDiPaga: "Giorno di paga",
     perUscire: "Per uscire dalla Ruota ti serve un reddito passivo superiore a {importo} al mese.",
     sogno: "Il tuo sogno",
-    sognoNota: "Comprarlo al Largo fa vincere all'istante. Attenzione: ogni avversario che ci atterra sopra ne raddoppia il prezzo per te.",
+    sognoNota: "Non si compra: è quello per cui giochi. Alla fine il gioco ti dice a quanti mesi di rendita sei arrivato.",
     creaStanza: "Crea una stanza",
     entraConCodice: "Entra con codice",
     creaEInvita: "Crea e invita gli amici",
@@ -131,7 +131,7 @@ export default {
   },
 
   partita: {
-    seiLiberoSpiegazione: "Il tuo reddito passivo ({rendita}) supera le spese ({spese}). Uscendo ricevi {liquidazione} di liquidazione.",
+    seiLiberoSpiegazione: "Il tuo reddito passivo ({rendita}) supera le spese ({spese}). Puoi smettere di lavorare: la partita è tua.",
     nonGiocaDa: "{nome} non gioca da qualche minuto.",
     mettiFuori: "Vai avanti senza di lui",
     turniRimasti: "Turni",
@@ -167,6 +167,7 @@ export default {
     renditaVersoSpese: "Rendita verso le spese",
     seiLibero: "Sei libero!",
     prendiIlLargo: "Prendi il largo",
+    lasciaIlLavoro: "Lascia il lavoro e vinci",
     fuoriDallaPartita: "Sei fuori dalla partita, ma puoi continuare a seguirla.",
     quantiDadi: "Quanti dadi?",
     casellaRisolta: "Casella risolta. Il turno sta passando…",
@@ -236,6 +237,8 @@ export default {
   },
 
   vittoria: {
+    sognoADistanza: "a {durata} di rendita",
+    sognoIrraggiungibile: "ancora fuori portata: la rendita non copre le spese",
     rivincita: "Rivincita",
     entraNellaRivincita: "Entra nella rivincita",
     tu: "tu",
@@ -266,6 +269,7 @@ export default {
     redditoPassivo: "Reddito passivo",
     turniGiocati: "Turni giocati",
     motivo: {
+      liberta: "ha lasciato il lavoro dopo {durata} e vive di rendita",
       sogno: "ha realizzato il proprio sogno",
       rendita: "ha raggiunto +{importo} di rendita al Largo",
       ultimo: "è l'ultimo giocatore rimasto in partita",
@@ -410,11 +414,11 @@ export default {
     flussoMensileBreve: "Flusso mensile",
     nessunAffare: "Nessuno ancora. Ogni affare verde aumenta il tuo reddito mensile.",
     largoSpiegazione: "Hai lasciato il lavoro: lo stipendio non c'è più, tutto il resto sì. Sotto trovi le stesse uscite, gli stessi debiti e la stessa banca di prima.",
-    tiManca: "Ti manca ancora {importo} al mese di reddito passivo. Su questo mercato serve il doppio delle spese: uscire al pareggio significa rientrare al primo imprevisto.",
+    tiManca: "Ti manca ancora {importo} al mese di reddito passivo. Serve un margine sopra le spese: uscire al pareggio significa rientrare al primo imprevisto.",
     prestitoSpiegazione: "Puoi chiedere prestiti a multipli di {taglio}. Ogni {taglio} costa {rata} al mese.",
     contanti: "Contanti",
     redditoVersoSpese: "Reddito passivo verso le spese",
-    puoiUscire: "Il tuo reddito passivo supera le spese: puoi uscire dalla Ruota!",
+    puoiUscire: "Il tuo reddito passivo supera le spese: puoi lasciare il lavoro e vincere!",
     giornoDiPaga: "Giorno di paga",
     passivo: "Passivo",
     sogno: "Sogno",

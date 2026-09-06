@@ -203,12 +203,11 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa, tiroAltrove = false }) 
             {t("partita.seiLiberoSpiegazione", {
               rendita: soldi(riepilogo(io).redditoPassivo),
               spese: soldi(riepilogo(io).speseTotali),
-              liquidazione: soldi(riepilogo(io).redditoPassivo * 100),
             })}
           </p>
           <Bottone variante="btn-verde" disabled={inAzione}
             onClick={() => fai({ tipo: "esciDallaCorsa" })}>
-            {t("partita.prendiIlLargo")}
+            {t("partita.lasciaIlLavoro")}
           </Bottone>
         </motion.div>
       )}

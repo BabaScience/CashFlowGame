@@ -4,6 +4,7 @@ import { Bottone, KV } from "./Base.jsx";
 import { soldi } from "../game/finanze.js";
 
 import { classifica } from "../game/motore.js";
+import { durata, mesiAlSogno } from "../game/tempo.js";
 import { useMercato } from "../Mercato.jsx";
 import { useLingua } from "../Lingua.jsx";
 
@@ -57,9 +58,25 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
   const motivo = {
     sogno: t("vittoria.motivo.sogno"),
     rendita: t("vittoria.motivo.rendita", { importo: soldi(obiettivo) }),
+    liberta: vincitore
+      ? t("vittoria.motivo.liberta", { durata: durata(vincitore.mesi, t) })
+      : t("vittoria.motivo.generico"),
     ultimo: t("vittoria.motivo.ultimo"),
     tempo: t("vittoria.motivo.tempo"),
   }[stato.motivoVittoria] || t("vittoria.motivo.generico");
+
+  /* Il sogno non si compra più: si misura. È l'ultima riga che si legge,
+     ed è quella che dice a cosa servivano tutti quei conti. */
+  const distanzaSogno = (riga) => {
+    const s = trovaSogno(riga.sognoId);
+    /* Sempre la rendita meno le spese, per tutti: mai lo stipendio.
+       Per chi ha vinto è la stessa cosa (lo stipendio è a zero); per gli
+       altri dice la cosa vera e scomoda, cioè che dal solo stipendio quel
+       sogno non si raggiunge. È il punto del gioco. */
+    const netto = riga.redditoPassivo - riga.speseTotali;
+    const mesi = mesiAlSogno(s?.costo, netto);
+    return { sogno: s, mesi };
+  };
 
   return (
     <>
@@ -164,6 +181,17 @@ export default function Vittoria({ stato, mioId, suNuovaPartita, suChiudi, sonoH
               )}
               <KV k={t("vittoria.patrimonioNetto")} v={soldi(riga.patrimonioNetto)} forte />
               <KV k={t("vittoria.figli")} v={String(riga.figli)} />
+              {(() => {
+                const { sogno, mesi } = distanzaSogno(riga);
+                if (!sogno) return null;
+                return (
+                  <p className="f12 tenue" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
+                    {sogno.emoji} {sogno.nome} — {mesi === null
+                      ? t("vittoria.sognoIrraggiungibile")
+                      : t("vittoria.sognoADistanza", { durata: durata(mesi, t) })}
+                  </p>
+                );
+              })()}
             </motion.div>
           ))}
 

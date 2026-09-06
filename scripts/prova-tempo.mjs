@@ -112,18 +112,25 @@ prova("Ogni Giorno di Paga vale un mese", () => {
   }
 });
 
-prova("Chi esce dalla Ruota si porta dietro la data", () => {
+prova("Chi lascia il lavoro si porta dietro la data", () => {
+  /* Da quando uscire dalla Ruota è la vittoria, chi esce non prosegue in
+     un secondo tempo: la partita finisce lì. Il mese in cui è successo
+     resta comunque scritto, perché è la frase che il giocatore si porta a
+     casa — "ci ho messo quattro anni e due mesi". */
   for (let tentativo = 0; tentativo < 8; tentativo++) {
     const { stato } = gioca(tavolo(), 4000);
-    const usciti = stato.giocatori.filter((g) => g.tracciato === "veloce");
+    const usciti = stato.giocatori.filter((g) => g.mesiAllUscita != null);
     if (!usciti.length) continue;
     for (const g of usciti) {
       vero(g.mesiAllUscita >= 1, `${g.nome} è uscito senza registrare i mesi`);
       vero(g.mesiAllUscita <= g.mesi, `${g.nome}: uscita a ${g.mesiAllUscita}, ora ${g.mesi}`);
+      eq(g.stipendio, 0, `${g.nome} ha lasciato il lavoro ma ha ancora lo stipendio`);
     }
+    vero(stato.fase === "finita", "chi lascia il lavoro deve chiudere la partita");
+    eq(stato.motivoVittoria, "liberta", "il motivo della vittoria:");
     return;
   }
-  throw new Error("in otto partite nessuno è uscito dalla Ruota");
+  throw new Error("in otto partite nessuno ha lasciato il lavoro");
 });
 
 prova("Una stanza vecchia senza il campo non fa esplodere niente", () => {

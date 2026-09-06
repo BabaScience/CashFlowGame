@@ -110,6 +110,22 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       delle case in Italia sono a +4,0% annuo, sopra la soglia del 3%:
       quando si vuole aggiornare Roma, si riparte da lì.
 
+## 3bis · Il secondo tempo, spento
+
+- [x] **Uscire dalla Ruota è la vittoria.** Misurato: col Largo acceso due
+      partite su trenta si vincevano e ventotto scadevano, e tutti e 52 i
+      giocatori che uscivano si ritrovavano con meno soldi al mese di prima
+      (4.049 € → 1.449 €). Ora le partite finite con una vittoria vera sono
+      il 100%, e la mediana sta a 108 turni. Il Largo resta nel codice
+      dietro `secondoTempo: false`, sistemato e sorvegliato dai test.
+      Dettagli e numeri in [PIANO-COMPETIZIONE.md](PIANO-COMPETIZIONE.md).
+
+- [ ] **Riaccendere il Largo, quando avrà senso.** Serve che chi esce non
+      peggiori: o si arriva al secondo tempo con il capitale per comprare
+      qualcosa, o gli affari del Largo devono costare quanto ci si può
+      permettere. Finché uscire vuol dire perdere lo stipendio e aspettare
+      quaranta turni, non è un finale.
+
 ## 4 · Perché tornarci ogni giorno
 
 > **Da qui in poi il filo si è spostato in [PIANO-COMPETIZIONE.md](PIANO-COMPETIZIONE.md).**

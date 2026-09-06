@@ -446,7 +446,7 @@ prova("La scheda del Largo mostra la rendita vera", () => {
   vero(!html.includes("120.000"), "mostra ancora il contatore moltiplicato per cento");
 });
 
-prova("Partita quando puoi prendere il largo", () => {
+prova("Partita quando puoi lasciare il lavoro", () => {
   const s = tavolo();
   /* Rendita che supera le spese: compare il riquadro "Sei libero". Il
      riquadro appare solo nel PROPRIO turno, e l'ordine di gioco lo decide
@@ -458,8 +458,12 @@ prova("Partita quando puoi prendere il largo", () => {
   const html = conMercato(s, React.createElement(Partita, {
     stato: s, mioId: "a", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
   }));
-  vero(html.includes("largo") || html.includes("open water") || html.includes("Open Water"),
-    "manca l'invito a prendere il largo");
+  /* Il riquadro non invita più a un secondo tabellone: invita a smettere
+     di lavorare, che adesso è la vittoria. */
+  vero(html.includes("Lascia il lavoro") || html.includes("Leave work") || html.includes("Quitter le travail"),
+    "manca l'invito a lasciare il lavoro");
+  vero(!html.includes("liquidazione") && !html.includes("settlement"),
+    "promette ancora una liquidazione che il motore non paga");
 });
 
 prova("Schermata finale", () => {

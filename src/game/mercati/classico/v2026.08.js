@@ -63,6 +63,33 @@ export default Object.freeze({
      cento. */
   obiettivoLargo: 1.5,
 
+  /**
+   * IL SECONDO TEMPO È SPENTO.
+   *
+   * Il Largo esiste ancora — tabellone, venti affari, sogni, penalità — ma
+   * non ci si arriva più. La misura, su trenta partite a tre giocatori:
+   *
+   *   · due partite su trenta si vincevano davvero al Largo; le altre
+   *     ventotto finivano perché scadevano i turni;
+   *   · tutti e cinquantadue i giocatori che uscivano dalla Ruota ci
+   *     arrivavano con MENO soldi al mese di prima (4.049 € → 1.449 €):
+   *     il premio per aver vinto il primo tempo era una riduzione di
+   *     stipendio;
+   *   · ci si arrivava con 6.904 € in mano e l'affare più economico ne
+   *     chiedeva 25.000 di acconto, per una mediana di quaranta turni
+   *     prima di poterne comprare uno;
+   *   · in tutto, 0,85 affari a testa. La maggior parte non ne comprava
+   *     nessuno.
+   *
+   * Non era un finale: era una pista di rullaggio che finiva prima del
+   * decollo. Uscire dalla Ruota diventa la vittoria — che è poi la cosa
+   * che dà il nome al gioco — e il Largo resta qui, spento, per quando
+   * varrà la pena giocarlo.
+   *
+   * Per riaccenderlo basta questa riga.
+   */
+  secondoTempo: false,
+
   fisco: null,
 
   professioni: PROFESSIONI,

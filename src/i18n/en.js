@@ -64,7 +64,7 @@ export default {
     giornoDiPaga: "Payday",
     perUscire: "To get off the Wheel you need passive income above {importo} a month.",
     sogno: "Your dream",
-    sognoNota: "Buying it in Open Water wins instantly. Careful: every opponent who lands on it doubles its price for you.",
+    sognoNota: "You do not buy it: it is what you are playing for. At the end the game tells you how many months of income away you got.",
     creaStanza: "Create a room",
     entraConCodice: "Join with a code",
     creaEInvita: "Create and invite friends",
@@ -137,7 +137,7 @@ export default {
   },
 
   partita: {
-    seiLiberoSpiegazione: "Your passive income ({rendita}) is above your expenses ({spese}). Leaving pays you {liquidazione} as a settlement.",
+    seiLiberoSpiegazione: "Your passive income ({rendita}) is above your expenses ({spese}). You can stop working: the game is yours.",
     nonGiocaDa: "{nome} has not played for a few minutes.",
     mettiFuori: "Carry on without them",
     turniRimasti: "Turns",
@@ -173,6 +173,7 @@ export default {
     renditaVersoSpese: "Passive income vs expenses",
     seiLibero: "You're free!",
     prendiIlLargo: "Make for open water",
+    lasciaIlLavoro: "Leave work and win",
     fuoriDallaPartita: "You're out of the game, but you can keep watching.",
     quantiDadi: "How many dice?",
     casellaRisolta: "Square resolved. The turn is passing…",
@@ -242,6 +243,8 @@ export default {
   },
 
   vittoria: {
+    sognoADistanza: "{durata} of income away",
+    sognoIrraggiungibile: "still out of reach: the income does not cover the expenses",
     rivincita: "Rematch",
     entraNellaRivincita: "Join the rematch",
     tu: "you",
@@ -272,6 +275,7 @@ export default {
     redditoPassivo: "Passive income",
     turniGiocati: "Turns played",
     motivo: {
+      liberta: "left work after {durata} and lives on their income",
       sogno: "achieved their dream",
       rendita: "reached +{importo} of income in Open Water",
       ultimo: "is the last player standing",
@@ -416,11 +420,11 @@ export default {
     flussoMensileBreve: "Monthly cash flow",
     nessunAffare: "None yet. Every green deal raises your monthly income.",
     largoSpiegazione: "You have left your job: the salary is gone, everything else is not. Below are the same expenses, the same debts and the same bank as before.",
-    tiManca: "You still need {importo} a month of passive income. This market asks for twice your expenses: leaving at break-even means coming back at the first surprise.",
+    tiManca: "You are still {importo} a month of passive income short. You need a margin above your expenses: leaving at break-even means coming straight back at the first setback.",
     prestitoSpiegazione: "You can borrow in multiples of {taglio}. Every {taglio} costs {rata} a month.",
     contanti: "Cash",
     redditoVersoSpese: "Passive income against expenses",
-    puoiUscire: "Your passive income beats your expenses: you can leave the Wheel!",
+    puoiUscire: "Your passive income is above your expenses: you can stop working and win!",
     giornoDiPaga: "Payday",
     passivo: "Passive",
     sogno: "Dream",

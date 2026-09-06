@@ -255,12 +255,15 @@ function partita({ mercatoId, livello, professioneId, giocatori = 3, seme, maxAz
         throw new Error(`i mesi di ${g.nome} sono tornati indietro: ${prima} → ${g.mesi}`);
       }
       mesiVisti.set(g.id, g.mesi);
-      if (g.tracciato === "veloce" && g.mesiAllUscita == null) {
+      /* Uscire non vuol più dire "stare sul Largo": il secondo tempo è
+         spento e chi lascia il lavoro vince lì. Il segno dell'uscita è
+         quello che resta scritto sul giocatore. */
+      if (g.usciteDallaCorsa != null && g.mesiAllUscita == null) {
         throw new Error(`${g.nome} è uscito dalla Ruota senza registrare i mesi`);
       }
     }
     for (const g of s.giocatori) {
-      if (g.tracciato === "veloce" && !uscita.has(g.id)) uscita.set(g.id, g.turniGiocati);
+      if (g.usciteDallaCorsa != null && !uscita.has(g.id)) uscita.set(g.id, g.usciteDallaCorsa);
     }
   }
 
@@ -334,7 +337,9 @@ for (const { mercatoId, livello } of COMBINAZIONI) {
         }
       }
       azioniViste.push(azioni);
-      if (s.motivoVittoria === "sogno" || s.motivoVittoria === "rendita") { vinte++; vittorieVere++; }
+      /* `liberta` è la vittoria normale da quando il secondo tempo è
+         spento; `sogno` e `rendita` restano per i mercati che lo accendono. */
+      if (["liberta", "sogno", "rendita"].includes(s.motivoVittoria)) { vinte++; vittorieVere++; }
       else if (s.motivoVittoria === "tempo") aTempo++;
     }
 

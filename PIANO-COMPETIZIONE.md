@@ -134,6 +134,75 @@ difetto, ma è la prima cosa che confonde chi prova.
 
 ---
 
+## Il secondo tempo è spento
+
+Domanda di partenza: *le righe del registro al Largo non sono ben
+distribuite, e chi esce dalla Ruota — gli conviene davvero?*
+
+Misurato, su trenta partite a tre giocatori, la risposta alla seconda è no,
+e non di poco.
+
+| | |
+|---|---|
+| partite vinte davvero al Largo | **2 su 30** |
+| partite finite perché scadeva il tempo | **28 su 30** |
+| giocatori che uscendo peggioravano il proprio flusso | **52 su 52** |
+| flusso mensile mediano, prima → dopo | 4.049 € → 1.449 € |
+| contanti all'uscita, contro l'affare più economico | 6.904 € contro 25.000 € |
+| affari del Largo comprati, a testa | 0,85 |
+| turni fra l'uscita e il primo affare | 40 |
+
+Il premio per aver vinto il primo tempo era una riduzione di stipendio,
+seguita da quaranta turni in cui non si poteva comprare niente. Non era un
+finale: era una pista di rullaggio che finiva prima del decollo.
+
+**La distribuzione del registro era il sintomo, non la malattia.** I Giorni
+di Rendita stavano a 0, 12, 24, 36, 40, 42, 44, 46 — distanze di 2, 12, 12,
+12, 4, 2, 2, 2 — e le ultime otto caselle erano un blocco senza un solo
+affare. Il 28% dei turni produceva soltanto il tiro dei dadi; il 36% di
+quelli che pagavano scriveva da due a cinque righe identiche di fila.
+Carestia, poi abbuffata.
+
+### Cosa si è deciso
+
+**Uscire dalla Ruota è la vittoria.** Ogni mercato pubblicato dichiara
+`secondoTempo: false`. Risultato misurato: le partite finite con una
+vittoria vera passano dal 7% al **100%**, e la mediana scende a 108 turni.
+
+**Il Largo non è stato cancellato, è stato spento** — e sistemato prima di
+spegnerlo, perché riaccenderlo com'era avrebbe riacceso anche il difetto.
+Giorni di Rendita ogni sei caselle, nessun tratto di più di tre caselle
+senza affari, e più incassi nello stesso tiro diventano una riga sola. Due
+test lo tengono acceso apposta, così il codice resta sorvegliato mentre
+dorme.
+
+**Il sogno non si compra più: si misura.** Era l'unica altra vittoria, e
+viveva solo al Largo. Prima di spostarlo nella Ruota l'ho misurato: costa da
+70.000 a mezzo milione, e il picco di contanti dentro la Ruota sta sui
+46.000 — solo il 13% dei giocatori arriva a permettersi anche solo il più
+economico. Un pulsante che non si accende quasi mai è peggio di nessun
+pulsante. Adesso la schermata finale dice a **quanti mesi di rendita** sta
+il tuo sogno: *«il giro del mondo: a cinque anni e otto mesi»*. È l'unità
+che il gioco usa per tutto il resto, è vera, e si confronta con quella
+degli altri al tavolo.
+
+**Il tabellone è un anello solo.** Disegnare l'anello esterno di un posto
+dove non si può andare toglieva metà della superficie alla pista su cui si
+gioca davvero.
+
+### Trovato mentre lo facevo
+
+**L'interfaccia prometteva una liquidazione che il motore non paga.** Il
+riquadro «Sei libero» diceva *«uscendo ricevi 383.200 € di liquidazione»*:
+era la vecchia regola del ×100, tolta dal motore mesi fa e rimasta scritta
+nella schermata. Chi usciva riceveva zero. Ora un test vieta la parola.
+
+**La soglia dichiarata era sbagliata.** La scheda diceva *«serve il doppio
+delle spese»*; il margine è 1,5× da quando il 2× si è rivelato ingiocabile
+con un reddito solo.
+
+---
+
 ## Decisioni prese strada facendo
 
 **Il Lampo finisce a punti, non per abbandono.** Un limite di turni che
