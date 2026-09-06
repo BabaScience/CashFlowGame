@@ -63,6 +63,8 @@ const { LinguaProvider } = await import("../src/Lingua.jsx");
 const { MercatoProvider } = await import("../src/Mercato.jsx");
 const Ingresso = (await import("../src/screens/Ingresso.jsx")).default;
 const require_partite = await import("../src/lib/partite.js");
+const { MERCATO_PREDEFINITO } = await import("../src/game/mercati/indice.js");
+const { soldi: require_soldi } = await import("../src/game/finanze.js");
 const Attesa = (await import("../src/screens/Attesa.jsx")).default;
 const Partita = (await import("../src/screens/Partita.jsx")).default;
 const Impara = (await import("../src/screens/Impara.jsx")).default;
@@ -444,6 +446,34 @@ prova("La scheda del Largo mostra la rendita vera", () => {
   /* 1.200 € formattati dal mercato romano. */
   vero(html.includes("1.200"), "non mostra la rendita vera del portafoglio");
   vero(!html.includes("120.000"), "mostra ancora il contatore moltiplicato per cento");
+});
+
+prova("L'ingresso annuncia la soglia vera, non le spese nude", () => {
+  /* Su Roma il margine d'uscita è 1,5×: la schermata mostrava le spese
+     (2.820 €) e chiamava quello il traguardo, che è un terzo sotto quello
+     vero (4.230 €). Da quando uscire è la vittoria, quel numero è la
+     condizione per vincere e sbagliarlo è peggio che mai. */
+  const html = disegna(React.createElement(Ingresso, {
+    suEntrato: nulla, avvisa: nulla, suSfida: nulla, suImpara: nulla,
+    vistaIniziale: "modulo", modoIniziale: "crea",
+  }));
+  /* Il mercato è quello che sceglie l'Ingresso da solo, non uno a scelta
+     nostra: il test deve guardare la schermata che vede chi arriva. */
+  const p = require_pacchetto(MERCATO_PREDEFINITO);
+  const prof = p.professioni[0];
+  const spese = Object.values(prof.spese).reduce((a, b) => a + b, 0);
+  const soglia = Math.round(spese * (p.margineUscita ?? 1));
+  const atteso = require_soldi(soglia, p.valuta);
+  vero(html.includes(atteso), `manca la soglia vera (${atteso}) nella schermata d'ingresso`);
+  if (soglia !== spese) {
+    vero(!html.includes(require_soldi(spese, p.valuta) + " al mese"),
+      "annuncia ancora le spese nude al posto della soglia");
+  }
+  /* E su un mercato col margine, il conto deve cambiare davvero. */
+  const roma = require_pacchetto("roma");
+  const speseRoma = Object.values(roma.professioni[0].spese).reduce((a, b) => a + b, 0);
+  vero(Math.round(speseRoma * roma.margineUscita) > speseRoma,
+    "su Roma la soglia dovrebbe stare sopra le spese");
 });
 
 prova("Partita quando puoi lasciare il lavoro", () => {

@@ -178,6 +178,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suImpara, mercatoId, setM
      perché nessuno cambiava mercato. */
   const prof = professioni.find((p) => p.id === professioneId) || professioni[0];
   const speseProf = Object.values(prof.spese).reduce((a, b) => a + b, 0);
+  const margine = getPacchetto(mercatoId).margineUscita ?? 1;
   const flussoProf = prof.stipendio - speseProf;
 
   const ricorda = () => localStorage.setItem("quotazero:nome", nome.trim());
@@ -545,7 +546,11 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suImpara, mercatoId, setM
                 <span>{t("ingresso.giornoDiPaga")}</span><span className="numeri pos">{soldi(flussoProf)}</span>
               </div>
               <p className="f12 tenue" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
-                {t("ingresso.perUscire", { importo: soldi(speseProf) })}
+                {/* La soglia, non le spese. Su Roma il margine è 1,5×:
+                    mostrare le spese nude annunciava un traguardo di un
+                    terzo più basso di quello vero — e da oggi quel numero
+                    è la condizione di vittoria. */}
+                {t("ingresso.perUscire", { importo: soldi(Math.round(speseProf * margine)) })}
               </p>
             </div>
           </div>
