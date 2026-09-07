@@ -29,14 +29,14 @@ const NOMI_BOT = ["Bea", "Nico", "Rosa", "Furio", "Lella"];
 const MAX_TENTATIVI = 5;
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return errore(res, 405, "Metodo non consentito.");
+  if (req.method !== "POST") return errore(res, 405, "Metodo non consentito.", "errori.metodoNonConsentito");
   const config = statoConfigurazione();
   if (!config.ok) return errore(res, 503, config.errore);
 
   const body = await corpo(req);
   const { op } = body;
   const giocatoreId = body.giocatoreId;
-  if (!validoId(giocatoreId)) return errore(res, 400, "Identificativo giocatore non valido.");
+  if (!validoId(giocatoreId)) return errore(res, 400, "Identificativo giocatore non valido.", "errori.identificativoNonValido");
 
   try {
     const col = await stanze();
@@ -60,7 +60,7 @@ export default async function handler(req, res) {
           tipo: "entra", giocatoreId,
           nome: body.nome, professioneId, sognoId: body.sognoId,
         });
-        if (r.errore) return errore(res, 400, r.errore);
+        if (r.errore) return errore(res, 400, r.errore, r.chiaveErrore, r.valoriErrore);
         stato = r.stato;
 
         /* Avversari automatici: si aggiungono qui, come giocatori normali.
@@ -75,7 +75,7 @@ export default async function handler(req, res) {
             professioneId,
             sognoId: pac.sogni[(n + 1) % pac.sogni.length].id,
           });
-          if (b.errore) return errore(res, 400, b.errore);
+          if (b.errore) return errore(res, 400, b.errore, b.chiaveErrore, b.valoriErrore);
           stato = b.stato;
         }
         try {
@@ -86,15 +86,15 @@ export default async function handler(req, res) {
           throw e;
         }
       }
-      return errore(res, 500, "Non riesco a generare un codice libero, riprova.");
+      return errore(res, 500, "Non riesco a generare un codice libero, riprova.", "errori.codiceLiberoFallito");
     }
 
     /* ── Chiusura esplicita: libera subito lo spazio ── */
     if (op === "chiudi") {
       const codice = normalizzaCodice(body.codice);
       const doc = await col.findOne({ codice }, { projection: { hostId: 1, _id: 0 } });
-      if (!doc) return errore(res, 404, "Stanza non trovata.");
-      if (doc.hostId !== giocatoreId) return errore(res, 403, "Solo chi ha creato la stanza può chiuderla.");
+      if (!doc) return errore(res, 404, "Stanza non trovata.", "errori.stanzaNonTrovata");
+      if (doc.hostId !== giocatoreId) return errore(res, 403, "Solo chi ha creato la stanza può chiuderla.", "errori.soloIlCreatoreChiude");
       await col.deleteOne({ codice });
       return json(res, 200, { chiusa: true });
     }
@@ -103,11 +103,11 @@ export default async function handler(req, res) {
     if (op === "rivincita") {
       const codice = normalizzaCodice(body.codice);
       const vecchia = await col.findOne({ codice }, { projection: { _id: 0, scadeIl: 0 } });
-      if (!vecchia) return errore(res, 404, "Stanza non trovata o scaduta.");
+      if (!vecchia) return errore(res, 404, "Stanza non trovata o scaduta.", "errori.stanzaNonTrovata");
       /* Il permesso si controlla PRIMA di dare qualunque codice: anche
          quello di una rivincita già aperta è un invito a un tavolo. */
       const permesso = puoChiederla(vecchia, giocatoreId);
-      if (permesso.errore) return errore(res, 403, permesso.errore);
+      if (permesso.errore) return errore(res, 403, permesso.errore, permesso.chiaveErrore, permesso.valoriErrore);
       /* Se qualcun altro l'ha già chiesta si entra in quella, invece di
          aprirne una seconda e dividere il tavolo in due. */
       if (vecchia.rivincita) return json(res, 200, { codice: vecchia.rivincita });
@@ -115,7 +115,7 @@ export default async function handler(req, res) {
       for (let i = 0; i < 6; i++) {
         const nuovoCodice = codiceStanza();
         const r = statoRivincita(vecchia, nuovoCodice, giocatoreId);
-        if (r.errore) return errore(res, 400, r.errore);
+        if (r.errore) return errore(res, 400, r.errore, r.chiaveErrore, r.valoriErrore);
         try {
           await col.insertOne({ ...r.stato, scadeIl: scadenza(r.stato) });
         } catch (e) {
@@ -128,19 +128,19 @@ export default async function handler(req, res) {
         const dopo = await col.findOne({ codice }, { projection: { rivincita: 1, _id: 0 } });
         return json(res, 200, { codice: dopo?.rivincita || nuovoCodice });
       }
-      return errore(res, 500, "Non riesco a creare la rivincita, riprova.");
+      return errore(res, 500, "Non riesco a creare la rivincita, riprova.", "errori.rivincitaFallita");
     }
 
     /* ── Applicazione di una mossa ── */
     if (op === "azione") {
       const codice = normalizzaCodice(body.codice);
-      if (!codice) return errore(res, 400, "Codice stanza mancante.");
+      if (!codice) return errore(res, 400, "Codice stanza mancante.", "errori.codiceStanzaMancante");
       const azione = body.azione;
-      if (!azione || typeof azione.tipo !== "string") return errore(res, 400, "Azione non valida.");
+      if (!azione || typeof azione.tipo !== "string") return errore(res, 400, "Azione non valida.", "errori.azioneNonValida");
 
       for (let tentativo = 0; tentativo < MAX_TENTATIVI; tentativo++) {
         const attuale = await col.findOne({ codice }, { projection: { _id: 0, scadeIl: 0 } });
-        if (!attuale) return errore(res, 404, "Stanza non trovata o scaduta.");
+        if (!attuale) return errore(res, 404, "Stanza non trovata o scaduta.", "errori.stanzaNonTrovata");
 
         /* Chi agisce.
            Di norma vale solo la propria identità: `giocatoreId` arriva dal
@@ -155,7 +155,7 @@ export default async function handler(req, res) {
           && attuale.giocatori.some((g) => g.id === bersaglio && g.bot);
         const attore = eBotDiQui ? bersaglio : giocatoreId;
         const r = applicaAzione(attuale, { ...azione, giocatoreId: attore });
-        if (r.errore) return json(res, 409, { errore: r.errore, stato: attuale });
+        if (r.errore) return json(res, 409, { errore: r.errore, chiaveErrore: r.chiaveErrore, valoriErrore: r.valoriErrore, stato: attuale });
 
         const nuovo = r.stato;
         const esito = await col.replaceOne(
@@ -177,12 +177,12 @@ export default async function handler(req, res) {
         }
         // Qualcuno ha scritto nel frattempo: rileggo e riprovo.
       }
-      return errore(res, 503, "Troppe mosse contemporanee, riprova.");
+      return errore(res, 503, "Troppe mosse contemporanee, riprova.", "errori.troppeMosse");
     }
 
-    return errore(res, 400, "Operazione sconosciuta.");
+    return errore(res, 400, "Operazione sconosciuta.", "errori.operazioneSconosciuta");
   } catch (e) {
     console.error("room:", e);
-    return errore(res, 500, "Errore di scrittura sul database.");
+    return errore(res, 500, "Errore di scrittura sul database.", "errori.scritturaFallita");
   }
 }

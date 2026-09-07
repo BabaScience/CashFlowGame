@@ -3,6 +3,7 @@ import { Bottone } from "./Base.jsx";
 import { LUNGHEZZA_MAX } from "../game/chat.js";
 import * as api from "../lib/api.js";
 import { useLingua } from "../Lingua.jsx";
+import { testoErrore } from "../lib/errori.js";
 
 const ora = (t, lingua) =>
   new Date(t).toLocaleTimeString(lingua === "en" ? "en-GB" : "it-IT", { hour: "2-digit", minute: "2-digit" });
@@ -40,7 +41,7 @@ export default function Chat({ stato, mioId, suLetto }) {
       await api.inviaMessaggio(stato.codice, pulito);
       setTesto("");
     } catch (err) {
-      setErrore(err.message);
+      setErrore(testoErrore(lingua, err));
     } finally {
       setInvio(false);
     }
@@ -49,7 +50,7 @@ export default function Chat({ stato, mioId, suLetto }) {
   const cambiaInterruttore = async () => {
     setErrore("");
     const r = await api.azione(stato.codice, { tipo: "impostaChat", aperta: spenta })
-      .catch((e) => ({ errore: e.message }));
+      .catch((e) => ({ errore: testoErrore(lingua, e) }));
     if (r?.errore) setErrore(r.errore);
   };
 

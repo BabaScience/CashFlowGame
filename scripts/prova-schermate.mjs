@@ -73,6 +73,8 @@ const Vittoria = (await import("../src/components/Vittoria.jsx")).default;
 const Decisione = (await import("../src/components/Decisione.jsx")).default;
 const PrimaPartita = (await import("../src/screens/PrimaPartita.jsx")).default;
 const Roulette = (await import("../src/components/Roulette.jsx")).default;
+const { lezioniIn, avvertenzaIn } = await import("../src/contenuti/lezioni.js");
+const { quesitiIn, testoDi } = await import("../src/contenuti/quesiti.js");
 const { LINGUE, dizionari } = await import("../src/i18n/index.js");
 const Chat = (await import("../src/components/Chat.jsx")).default;
 const Scheda = (await import("../src/components/Scheda.jsx")).default;
@@ -571,18 +573,27 @@ console.log("\n── In nessun'altra lingua resta italiano ──");
 const SPIE = [
   "della", "delle", "degli", "dello", "nella", "nelle", "sulla", "dalla",
   "quello", "quella", "questo", "questa", "perché", "anche se", "quando",
-  "invece", "oppure", "soltanto", "adesso", "senza", "ogni ", "sono ",
-  "hai ", "puoi ", "tuo ", "tua ", "tuoi ", "è ",
+  "invece", "oppure", "soltanto", "adesso", "senza", "ogni", "sono",
+  "hai", "puoi", "tuo", "tua", "tuoi", "è",
 ];
 
-/** Le parole italiane rimaste dentro un markup disegnato in un'altra lingua. */
+/** Le parole italiane rimaste dentro un markup disegnato in un'altra lingua.
+ *
+ * Si confrontano PAROLE INTERE, non pezzi di parola. Cercare "nelle" dentro
+ * il testo francese trovava "proportionnelle" e dava l'allarme su una frase
+ * tradotta benissimo: un controllo che grida al lupo viene spento, e allora
+ * tanto vale non averlo. Il testo si spezza in parole su tutto ciò che non
+ * è una lettera — l'apostrofo compreso — e le spie si cercano fra quelle. */
 function spieIn(html) {
   const nudo = html
     .replace(/<[^>]+>/g, " ")
     .replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&")
     .replace(/&#xE8;/gi, "è").replace(/&#xE9;/gi, "é")
     .toLowerCase();
-  return SPIE.filter((w) => nudo.includes(w.toLowerCase()));
+  /* Uno spazio in testa e in coda, così anche la prima e l'ultima parola
+     hanno un confine da entrambi i lati. */
+  const parole = " " + (nudo.match(/\p{L}+/gu) || []).join(" ") + " ";
+  return SPIE.filter((w) => parole.includes(` ${w} `));
 }
 
 function inLingua(lingua, fn) {
@@ -649,6 +660,13 @@ function schermate() {
     ["rullo del mestiere", () => conMercato(s, React.createElement(Roulette, {
       professioneId: require_pacchetto(s.mercatoId).professioni[2].id, suContinua: nulla,
     }))],
+    /* Impara è entrata qui solo adesso, quando le lezioni e i quesiti sono
+       stati tradotti: metterci prima un controllo impossibile da passare
+       avrebbe voluto dire spegnerlo, ed è così che i controlli muoiono. */
+    ["impara · lezioni", () => disegna(React.createElement(Impara, { suEsci: nulla }))],
+    ["impara · quesiti", () => disegna(React.createElement(Impara, {
+      suEsci: nulla, modoIniziale: "quesiti",
+    }))],
   ];
 }
 
@@ -659,6 +677,40 @@ for (const lingua of LINGUE.map((l) => l.id).filter((id) => id !== "it")) {
       vero(trovate.length === 0, "parole italiane rimaste: " + trovate.join(", "));
     });
   }
+}
+
+/* Le schermate disegnano solo quello che è aperto: la lezione chiusa non
+   mostra i suoi paragrafi, il quesito senza risposta non mostra la sua
+   spiegazione. Sono le parti più lunghe del materiale, e passerebbero di
+   qui senza essere lette. Quindi il testo si controlla anche alla fonte,
+   riga per riga, invece che solo dove il markup lo fa vedere. */
+for (const lingua of LINGUE.map((l) => l.id).filter((id) => id !== "it")) {
+  prova(`In "${lingua}" le lezioni sono tradotte fino in fondo`, () => {
+    for (const l of lezioniIn(lingua)) {
+      for (const [dove, testo] of [["titolo", l.titolo], ["sommario", l.sommario],
+                                   ...l.corpo().map((p, i) => [`p${i + 1}`, p])]) {
+        const trovate = spieIn(testo);
+        vero(trovate.length === 0, `${l.id}/${dove}: ${trovate.join(", ")}`);
+      }
+    }
+    const trovate = spieIn(avvertenzaIn(lingua));
+    vero(trovate.length === 0, "avvertenza: " + trovate.join(", "));
+  });
+
+  prova(`In "${lingua}" i quesiti sono tradotti fino in fondo`, () => {
+    for (const q of quesitiIn(lingua)) {
+      const pezzi = [["titolo", q.titolo], ["domanda", testoDi(q.domanda)],
+                     ["spiegazione", testoDi(q.spiegazione)],
+                     ...q.opzioni.map((o) => [`opzione ${o.id}`, o.testo])];
+      for (const [dove, testo] of pezzi) {
+        const trovate = spieIn(testo);
+        vero(trovate.length === 0, `${q.id}/${dove}: ${trovate.join(", ")}`);
+      }
+      /* La risposta giusta punta a un'opzione per id: una traduzione che
+         rinominasse gli id cambierebbe quale risposta è quella buona. */
+      vero(q.opzioni.some((o) => o.id === q.giusta), `${q.id}: la risposta giusta non esiste più`);
+    }
+  });
 }
 
 console.log("\n── Le parole che si possono chiedere ──");

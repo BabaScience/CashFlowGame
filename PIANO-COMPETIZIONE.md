@@ -225,3 +225,28 @@ classifica che si scrive da sola.
 **Nessuna variabile d'ambiente nuova.** Le collezioni nuove stanno nello
 stesso database, con lo stesso indice TTL. Così `main` si può pubblicare
 senza toccare la configurazione di Vercel.
+
+**L'introduzione è una partita, non un giro di finestrelle.** Un carosello si
+salta e si dimentica; e comunque non può rispondere alla domanda che blocca
+davvero — *tocca a me, adesso che faccio* — perché quella si risponde solo
+mentre uno sta decidendo. La prima partita ha seme fisso: la stessa a tutti,
+quindi descrivibile e correggibile. Otto frasi, una alla volta, ognuna una
+volta sola: meglio tacere che ripetersi.
+
+**Il mestiere è lo stesso per tutti al tavolo.** Sorteggiarne uno per
+giocatore avrebbe dato più varietà, ma avrebbe reso ogni partita un confronto
+fra professioni invece che fra giocatori — e la classifica non avrebbe
+significato niente. Il sorteggio è del tavolo, non della persona.
+
+**Il rullo gira su un esito già scritto.** La professione la sceglie il
+server prima che il rullo parta. Non è un imbroglio finché il risultato non
+dipende dal rullo, e qui non dipende: serve solo a far *vedere* un'estrazione,
+perché una scheda che compare già compilata si legge come un dato di fatto.
+Chi giocava tre partite di fila si convinceva che nel gioco ci fosse un
+mestiere solo.
+
+**Un solo modulo per il tempo della pedina e della carta.** Il ritardo del
+foglio di decisione poteva essere una costante scelta a occhio. In questo
+progetto due copie della stessa cosa hanno già preso strade diverse tre volte
+(le due API, i due tempi della pedina, i due conti delle spese), quindi il
+tempo del cammino si calcola in un posto solo e lo leggono entrambi.

@@ -14,6 +14,7 @@ import { useAvversari } from "./hooks/useAvversari.js";
 import { traccia, tracciaSessione } from "./lib/traccia.js";
 import { MercatoProvider } from "./Mercato.jsx";
 import { LinguaProvider, useLingua } from "./Lingua.jsx";
+import { testoErrore } from "./lib/errori.js";
 
 const CHIAVE_STANZA = "quotazero:stanza";
 
@@ -41,7 +42,7 @@ function ArenaConMercato({ suEntrato, suEsci, avvisa }) {
 }
 
 function Applicazione() {
-  const { t } = useLingua();
+  const { t, lingua } = useLingua();
   const mioId = api.mioId();
   const [codice, setCodice] = useState(() => {
     // Un link con ?c=ABCD porta dritto nella stanza.
@@ -122,7 +123,7 @@ function Applicazione() {
     try {
       await api.chiudiStanza(codice);
       avvisa(t("app.stanzaChiusa"));
-    } catch (e) { avvisa(e.message); }
+    } catch (e) { avvisa(testoErrore(lingua, e)); }
     setCodice(null);
   }, [codice, avvisa]);
 
@@ -228,7 +229,7 @@ function Applicazione() {
                 const r = await api.rivincita(codice);
                 traccia("rivincita");
                 setCodice(r.codice);
-              } catch (e) { avvisa(e.message); }
+              } catch (e) { avvisa(testoErrore(lingua, e)); }
             }}
             suChiudi={chiudiStanza}
           />

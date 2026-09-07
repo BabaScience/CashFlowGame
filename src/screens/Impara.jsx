@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Bottone } from "../components/Base.jsx";
-import { LEZIONI, AVVERTENZA } from "../contenuti/lezioni.js";
-import { QUESITI, testoDi, quesitoDelGiorno } from "../contenuti/quesiti.js";
+import { lezioniIn, avvertenzaIn } from "../contenuti/lezioni.js";
+import { quesitiIn, testoDi, quesitoDelGiorno } from "../contenuti/quesiti.js";
 import { useLingua } from "../Lingua.jsx";
 import Logo from "../components/Logo.jsx";
 
@@ -19,7 +19,7 @@ import Logo from "../components/Logo.jsx";
  * le cose e non dice a nessuno che cosa comprare.
  */
 export default function Impara({ suEsci, modoIniziale }) {
-  const { t } = useLingua();
+  const { t, lingua } = useLingua();
   const [modo, setModo] = useState(modoIniziale || "lezioni");
   const [aperta, setAperta] = useState(null);
 
@@ -37,7 +37,7 @@ export default function Impara({ suEsci, modoIniziale }) {
           </button>
         </div>
 
-        <p className="avvertenza">{AVVERTENZA}</p>
+        <p className="avvertenza">{avvertenzaIn(lingua)}</p>
 
         <div className="flex g8 mb12">
           <button className={`btn ${modo === "lezioni" ? "btn-oro" : "btn-chiaro"}`}
@@ -60,7 +60,8 @@ export default function Impara({ suEsci, modoIniziale }) {
 /* ── lezioni ───────────────────────────────────────────────── */
 
 function Lezioni({ aperta, setAperta }) {
-  const { t } = useLingua();
+  const { t, lingua } = useLingua();
+  const LEZIONI = lezioniIn(lingua);
   return (
     <div>
       {LEZIONI.map((l) => {
@@ -102,8 +103,14 @@ function Lezioni({ aperta, setAperta }) {
 /* ── quesiti ───────────────────────────────────────────────── */
 
 function Quesiti() {
-  const { t } = useLingua();
-  const [indice, setIndice] = useState(() => QUESITI.indexOf(quesitoDelGiorno()));
+  const { t, lingua } = useLingua();
+  const QUESITI = quesitiIn(lingua);
+  /* Il quesito del giorno si sceglie sull'elenco italiano — gli id sono
+     gli stessi — e poi si prende quello tradotto con lo stesso id. */
+  const [indice, setIndice] = useState(() => {
+    const oggi = quesitoDelGiorno();
+    return Math.max(0, QUESITI.findIndex((q) => q.id === oggi.id));
+  });
   const [scelta, setScelta] = useState(null);
   const q = QUESITI[Math.max(0, indice) % QUESITI.length];
   const risposto = scelta !== null;

@@ -23,6 +23,9 @@ async function invia(corpo) {
     const e = new Error(dati?.errore || `Errore ${r.status}`);
     e.stato = dati?.stato || null;
     e.codiceHttp = r.status;
+    /* La chiave con cui tradurre il messaggio: vedi `lib/errori.js`. */
+    e.chiaveErrore = dati?.chiaveErrore || null;
+    e.valoriErrore = dati?.valoriErrore || null;
     throw e;
   }
   return dati;
@@ -49,7 +52,12 @@ export async function inviaMessaggio(codice, testo) {
   });
   let dati = null;
   try { dati = await r.json(); } catch { /* corpo vuoto */ }
-  if (!r.ok) throw new Error(dati?.errore || `Errore ${r.status}`);
+  if (!r.ok) {
+    const e = new Error(dati?.errore || `Errore ${r.status}`);
+    e.chiaveErrore = dati?.chiaveErrore || null;
+    e.valoriErrore = dati?.valoriErrore || null;
+    throw e;
+  }
   return dati;
 }
 
@@ -86,7 +94,12 @@ const allaCoda = async (corpo) => {
     body: JSON.stringify({ ...corpo, giocatoreId: identita() }),
   });
   const dati = await r.json().catch(() => null);
-  if (!r.ok) throw new Error(dati?.errore || `Errore ${r.status}`);
+  if (!r.ok) {
+    const e = new Error(dati?.errore || `Errore ${r.status}`);
+    e.chiaveErrore = dati?.chiaveErrore || null;
+    e.valoriErrore = dati?.valoriErrore || null;
+    throw e;
+  }
   return dati;
 };
 
@@ -98,6 +111,11 @@ export const esciDallaCoda = () => allaCoda({ op: "esci" }).catch(() => null);
 export async function classifica() {
   const r = await fetch(`/api/classifica?giocatoreId=${encodeURIComponent(identita())}`);
   const dati = await r.json().catch(() => null);
-  if (!r.ok) throw new Error(dati?.errore || `Errore ${r.status}`);
+  if (!r.ok) {
+    const e = new Error(dati?.errore || `Errore ${r.status}`);
+    e.chiaveErrore = dati?.chiaveErrore || null;
+    e.valoriErrore = dati?.valoriErrore || null;
+    throw e;
+  }
   return dati;
 }

@@ -14,6 +14,7 @@ import {
 import { traccia } from "../lib/traccia.js";
 import { useSuoni } from "../hooks/useSuoni.js";
 import { useLingua } from "../Lingua.jsx";
+import { testoErrore } from "../lib/errori.js";
 
 /**
  * LA PRIMA PARTITA.
@@ -44,7 +45,7 @@ export default function PrimaPartita({ suEsci, suGiocaDavvero }) {
 }
 
 function Dentro({ partita, setPartita, suEsci, suGiocaDavvero }) {
-  const { t } = useLingua();
+  const { t, lingua } = useLingua();
   const { soldi } = useMercato();
   const [errore, setErrore] = useState("");
   const [finita, setFinita] = useState(false);
@@ -79,7 +80,11 @@ function Dentro({ partita, setPartita, suEsci, suGiocaDavvero }) {
 
   const invia = useCallback(async (az) => {
     const r = applicaAzione(stato, { ...az, giocatoreId: "io" });
-    if (r.errore) { setErrore(r.errore); return { errore: r.errore }; }
+    if (r.errore) {
+      const msg = testoErrore(lingua, r);
+      setErrore(msg);
+      return { errore: msg };
+    }
     setErrore("");
     const nuovo = r.stato;
     setPartita({ ...partita, stato: nuovo });

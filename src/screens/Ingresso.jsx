@@ -16,6 +16,7 @@ import * as api from "../lib/api.js";
 import { traccia } from "../lib/traccia.js";
 import { partiteAperte, dimenticaPartita, daQuanto } from "../lib/partite.js";
 import { useLingua } from "../Lingua.jsx";
+import { testoErrore } from "../lib/errori.js";
 
 /**
  * Schermata iniziale.
@@ -194,7 +195,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, mercat
       const r = await api.creaStanza(nome.trim(), professioneId, sognoId, mercatoId, haFisco ? livello : 1, avversari, formato);
       traccia("stanzaCreata", { mercato: mercatoId, formato });
       suEntrato(r.stato.codice);
-    } catch (e) { avvisa(e.message); }
+    } catch (e) { avvisa(testoErrore(lingua, e)); }
     finally { setOccupato(false); }
   };
 
@@ -218,7 +219,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, mercat
         livello: stato.livello,
         giocatori: stato.giocatori.map((g) => g.nome),
       });
-    } catch (e) { avvisa(e.message); }
+    } catch (e) { avvisa(testoErrore(lingua, e)); }
     finally { setCercando(false); }
   };
 
@@ -235,7 +236,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, mercat
       await api.azione(c, { tipo: "entra", nome: nome.trim(), professioneId, sognoId });
       traccia("stanzaRaggiunta");
       suEntrato(c);
-    } catch (e) { avvisa(e.message); }
+    } catch (e) { avvisa(testoErrore(lingua, e)); }
     finally { setOccupato(false); }
   };
 

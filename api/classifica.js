@@ -19,7 +19,7 @@ import { PARTITE_PER_CLASSIFICA } from "../src/game/arena.js";
 const QUANTI = 50;
 
 export default async function handler(req, res) {
-  if (req.method !== "GET") return errore(res, 405, "Metodo non consentito.");
+  if (req.method !== "GET") return errore(res, 405, "Metodo non consentito.", "errori.metodoNonConsentito");
   const config = statoConfigurazione();
   if (!config.ok) return errore(res, 503, config.errore);
 
@@ -60,6 +60,6 @@ export default async function handler(req, res) {
     return json(res, 200, { primi, io });
   } catch (e) {
     console.error("classifica:", e);
-    return errore(res, 500, "Errore di lettura della classifica.");
+    return errore(res, 500, "Errore di lettura della classifica.", "errori.letturaClassificaFallita");
   }
 }

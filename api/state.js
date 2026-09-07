@@ -10,12 +10,12 @@ import { stanze, statoConfigurazione } from "./_lib/db.js";
 import { json, errore, normalizzaCodice } from "./_lib/http.js";
 
 export default async function handler(req, res) {
-  if (req.method !== "GET") return errore(res, 405, "Metodo non consentito.");
+  if (req.method !== "GET") return errore(res, 405, "Metodo non consentito.", "errori.metodoNonConsentito");
   const config = statoConfigurazione();
   if (!config.ok) return errore(res, 503, config.errore);
 
   const codice = normalizzaCodice(req.query.codice);
-  if (!codice) return errore(res, 400, "Codice stanza mancante.");
+  if (!codice) return errore(res, 400, "Codice stanza mancante.", "errori.codiceStanzaMancante");
   const vClient = Number(req.query.v || 0);
 
   try {
@@ -23,7 +23,7 @@ export default async function handler(req, res) {
 
     // Lettura minima: solo il numero di versione.
     const leggera = await col.findOne({ codice }, { projection: { versione: 1, _id: 0 } });
-    if (!leggera) return errore(res, 404, "Stanza non trovata o scaduta.");
+    if (!leggera) return errore(res, 404, "Stanza non trovata o scaduta.", "errori.stanzaNonTrovata");
 
     if (Number.isFinite(vClient) && vClient > 0 && leggera.versione === vClient) {
       res.setHeader("Cache-Control", "no-store");
@@ -31,10 +31,10 @@ export default async function handler(req, res) {
     }
 
     const doc = await col.findOne({ codice }, { projection: { _id: 0, scadeIl: 0 } });
-    if (!doc) return errore(res, 404, "Stanza non trovata o scaduta.");
+    if (!doc) return errore(res, 404, "Stanza non trovata o scaduta.", "errori.stanzaNonTrovata");
     return json(res, 200, { stato: doc });
   } catch (e) {
     console.error("state:", e);
-    return errore(res, 500, "Errore di lettura dal database.");
+    return errore(res, 500, "Errore di lettura dal database.", "errori.letturaFallita");
   }
 }

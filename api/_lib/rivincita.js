@@ -27,17 +27,17 @@ import { creaStanza, applicaAzione } from "../../src/game/motore.js";
  * persone che non lo avevano invitato.
  */
 export function puoChiederla(vecchia, chi) {
-  if (!vecchia) return { errore: "Stanza non trovata." };
-  if (vecchia.fase !== "finita") return { errore: "La partita non è finita." };
+  if (!vecchia) return { errore: "Stanza non trovata.", chiaveErrore: "errori.stanzaNonTrovata" };
+  if (vecchia.fase !== "finita") return { errore: "La partita non è finita.", chiaveErrore: "errori.partitaNonFinita" };
   if (!vecchia.giocatori.some((g) => g.id === chi && !g.bot)) {
-    return { errore: "Solo chi ha giocato può chiedere la rivincita." };
+    return { errore: "Solo chi ha giocato può chiedere la rivincita.", chiaveErrore: "errori.soloChiHaGiocatoRivincita" };
   }
   return {};
 }
 
 /**
  * Costruisce lo stato della rivincita a partire da una partita finita.
- * Restituisce `{ stato }` oppure `{ errore }`.
+ * Restituisce `{ stato }` oppure `{ errore, chiaveErrore }`.
  *
  * Non tocca nessun database: chi chiama ci pensa a scriverlo.
  */
@@ -64,11 +64,11 @@ export function statoRivincita(vecchia, codiceNuovo, chiediChi) {
       tipo: "entra", giocatoreId: g.id, bot: Boolean(g.bot), nome: g.nome,
       professioneId: g.professioneId, sognoId: g.sognoId,
     });
-    if (r.errore) return { errore: r.errore };
+    if (r.errore) return { errore: r.errore, chiaveErrore: r.chiaveErrore, valoriErrore: r.valoriErrore };
     stato = r.stato;
   }
 
   const avvio = applicaAzione(stato, { tipo: "avvia", giocatoreId: chiediChi });
-  if (avvio.errore) return { errore: avvio.errore };
+  if (avvio.errore) return { errore: avvio.errore, chiaveErrore: avvio.chiaveErrore, valoriErrore: avvio.valoriErrore };
   return { stato: avvio.stato };
 }

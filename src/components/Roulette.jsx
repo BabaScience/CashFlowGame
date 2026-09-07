@@ -11,7 +11,7 @@ import { useMercato } from "../Mercato.jsx";
  * Chi entra dalla coda o gioca contro il computer non sceglie il mestiere:
  * glielo pesca il server. Prima gliene toccava sempre lo stesso — il primo
  * dell'elenco — e chi ha giocato tre partite di fila si è convinto che nel
- * gioco esista un mestiere solo, il pilota. Ce ne sono tredici.
+ * gioco esista un mestiere solo, il pilota. Ce ne sono dodici.
  *
  * Ma non basta che sia diverso: bisogna **vederlo cambiare**. Una scheda
  * che compare già compilata si legge come un dato di fatto; un rullo che

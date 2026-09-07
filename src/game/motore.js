@@ -71,6 +71,12 @@ export const codiceStanza = () =>
  * continuare a leggersi. Il testo è anche la rete di sicurezza se un giorno
  * una chiave sparisse da un dizionario.
  */
+/**
+ * Un rifiuto che esce da una funzione d'appoggio: la frase italiana di
+ * ripiego e la chiave con cui tradurla. Chi lo riceve lo gira a `err()`.
+ */
+const no = (testo, chiave) => ({ testo, chiave });
+
 function nota(s, testo, chiave = null, valori = null, tipo = "info", giocatoreId = null) {
   s.registro.unshift({
     id: idBreve(s), testo, k: chiave, v: valori, tipo, giocatoreId, t: Date.now(),
@@ -722,11 +728,17 @@ function controllaVittoria(s, g) {
 
 export function applicaAzione(stato, azione) {
   const s = structuredClone(stato);
-  const err = (m) => ({ stato: null, errore: m });
+  /* L'errore viaggia in due copie: la frase italiana e la chiave con cui
+     tradurla. La frase resta perché è il ripiego quando la chiave manca —
+     un messaggio in italiano è meglio di una schermata vuota — ma quello
+     che il giocatore legge viene dalla chiave. Il motore non conosce la
+     lingua di chi gioca, e non deve: la stessa partita la guardano in tre
+     lingue diverse. */
+  const err = (m, chiave = null, valori = null) => ({ stato: null, errore: m, chiaveErrore: chiave, valoriErrore: valori });
   const ok = () => {
     s.versione += 1;
     s.aggiornataIl = Date.now();
-    return { stato: s, errore: null };
+    return { stato: s, errore: null, chiaveErrore: null, valoriErrore: null };
   };
 
   const { tipo, giocatoreId } = azione;
@@ -735,7 +747,7 @@ export function applicaAzione(stato, azione) {
   /* ─── Sala d'attesa ─── */
 
   if (tipo === "entra") {
-    if (s.fase !== "attesa") return err("La partita è già iniziata.");
+    if (s.fase !== "attesa") return err("La partita è già iniziata.", "errori.partitaGiaIniziata");
     if (g) {
       g.nome = (azione.nome || g.nome).slice(0, 18);
       g.professioneId = azione.professioneId || g.professioneId;
@@ -747,7 +759,7 @@ export function applicaAzione(stato, azione) {
       g.passivita = { ...p.passivita, prestitoBanca: 0 };
       return ok();
     }
-    if (s.giocatori.length >= MAX_GIOCATORI) return err(`Massimo ${MAX_GIOCATORI} giocatori.`);
+    if (s.giocatori.length >= MAX_GIOCATORI) return err(`Massimo ${MAX_GIOCATORI} giocatori.`, "errori.tavoloPieno", { n: MAX_GIOCATORI });
     const nuovo = creaGiocatore(s, giocatoreId, azione.nome, azione.professioneId, azione.sognoId, s.giocatori.length, azione.bot);
     s.giocatori.push(nuovo);
     nota(s, `${nuovo.nome} entra nella stanza.`, "r19", { nuovoNome: nuovo.nome }, "lobby", nuovo.id);
@@ -755,13 +767,13 @@ export function applicaAzione(stato, azione) {
   }
 
   if (tipo === "pronto") {
-    if (!g) return err("Giocatore non trovato.");
+    if (!g) return err("Giocatore non trovato.", "errori.giocatoreNonTrovato");
     g.pronto = !!azione.valore;
     return ok();
   }
 
   if (tipo === "esci") {
-    if (!g) return err("Giocatore non trovato.");
+    if (!g) return err("Giocatore non trovato.", "errori.giocatoreNonTrovato");
     if (s.fase === "attesa") {
       s.giocatori = s.giocatori.filter((x) => x.id !== giocatoreId);
       s.giocatori.forEach((x, i) => { x.colore = COLORI[i % COLORI.length]; });
@@ -784,12 +796,12 @@ export function applicaAzione(stato, azione) {
      misura il server sull'ultima riga del registro, e chiunque al tavolo
      può chiederlo — anche chi sta perdendo. */
   if (tipo === "fuoriTempo") {
-    if (s.fase !== "inCorso") return err("La partita non è in corso.");
-    if (!g || g.eliminato) return err("Non sei al tavolo.");
+    if (s.fase !== "inCorso") return err("La partita non è in corso.", "errori.partitaNonInCorso");
+    if (!g || g.eliminato) return err("Non sei al tavolo.", "errori.nonSeiAlTavolo");
     const fermo = attuale(s);
-    if (!fermo) return err("Non tocca a nessuno.");
-    if (fermo.id === giocatoreId) return err("Non puoi mettere fuori te stesso.");
-    if (fermoDa(s) < ATTESA_MASSIMA_MS) return err("Non è passato abbastanza tempo.");
+    if (!fermo) return err("Non tocca a nessuno.", "errori.nonToccaANessuno");
+    if (fermo.id === giocatoreId) return err("Non puoi mettere fuori te stesso.", "errori.nonPuoiEspellerti");
+    if (fermoDa(s) < ATTESA_MASSIMA_MS) return err("Non è passato abbastanza tempo.", "errori.tempoNonScaduto");
     fermo.eliminato = true;
     nota(s, `${fermo.nome} non gioca da troppo tempo ed esce dalla partita.`, "r63",
       { nome: fermo.nome }, "lobby", fermo.id);
@@ -799,13 +811,13 @@ export function applicaAzione(stato, azione) {
   }
 
   if (tipo === "avvia") {
-    if (s.fase !== "attesa") return err("La partita è già iniziata.");
-    if (s.hostId !== giocatoreId) return err("Solo chi ha creato la stanza può avviare.");
+    if (s.fase !== "attesa") return err("La partita è già iniziata.", "errori.partitaGiaIniziata");
+    if (s.hostId !== giocatoreId) return err("Solo chi ha creato la stanza può avviare.", "errori.soloIlCreatoreAvvia");
     /* Al tavolo servono almeno due persone. In solitaria no: la sfida del
        giorno è una persona sola contro il proprio conto economico, e il
        motore è lo stesso — cambia solo chi si ha di fronte. */
-    if (!s.solitaria && s.giocatori.length < 2) return err("Servono almeno 2 giocatori.");
-    if (s.solitaria && s.giocatori.length !== 1) return err("La sfida si gioca da soli.");
+    if (!s.solitaria && s.giocatori.length < 2) return err("Servono almeno 2 giocatori.", "errori.servonoDueGiocatori");
+    if (s.solitaria && s.giocatori.length !== 1) return err("La sfida si gioca da soli.", "errori.sfidaInSolitaria");
 
     // Ognuno riceve il primo Giorno di Paga più i risparmi (regolamento pag. 2).
     for (const p of s.giocatori) {
@@ -834,30 +846,30 @@ export function applicaAzione(stato, azione) {
   /* La chat non passa di qui (vedi chat.js), ma il suo interruttore sì:
      è una decisione della stanza, e va registrata come le altre. */
   if (tipo === "impostaChat") {
-    if (s.hostId !== giocatoreId) return err("Solo chi ha creato la stanza può spegnere la chat.");
+    if (s.hostId !== giocatoreId) return err("Solo chi ha creato la stanza può spegnere la chat.", "errori.soloIlCreatoreSpegneChat");
     s.chatAperta = azione.aperta !== false;
     if (!s.chatAperta) s.chat = [];
     nota(s, s.chatAperta ? "La chat è stata riaperta." : "La chat è stata spenta.", "sistema");
     return ok();
   }
 
-  if (s.fase !== "inCorso") return err("La partita non è in corso.");
-  if (!g) return err("Giocatore non trovato.");
-  if (g.eliminato) return err("Non sei più in partita.");
+  if (s.fase !== "inCorso") return err("La partita non è in corso.", "errori.partitaNonInCorso");
+  if (!g) return err("Giocatore non trovato.", "errori.giocatoreNonTrovato");
+  if (g.eliminato) return err("Non sei più in partita.", "errori.nonSeiPiuInPartita");
 
   const suoTurno = attuale(s)?.id === giocatoreId;
 
   /* ─── Il Mercato: possono rispondere anche gli altri ─── */
 
   if (tipo === "vendiAlMercato" || tipo === "passaMercato") {
-    if (s.pending?.tipo !== "mercato") return err("Nessuna carta Mercato attiva.");
-    if (!s.pending.idonei.includes(giocatoreId)) return err("Questa carta non ti riguarda.");
-    if (s.pending.risposto.includes(giocatoreId)) return err("Hai già risposto.");
+    if (s.pending?.tipo !== "mercato") return err("Nessuna carta Mercato attiva.", "errori.nessunaCartaMercato");
+    if (!s.pending.idonei.includes(giocatoreId)) return err("Questa carta non ti riguarda.", "errori.cartaDiUnAltro");
+    if (s.pending.risposto.includes(giocatoreId)) return err("Hai già risposto.", "errori.giaRisposto");
     const carta = s.pending.carta;
 
     if (tipo === "vendiAlMercato") {
       const r = vendiAlMercato(s, g, carta, azione);
-      if (r) return err(r);
+      if (r) return err(r.testo, r.chiave);
       // Chi vende può vendere ancora (più immobili della stessa categoria).
       if (!azione.ultima) return ok();
     }
@@ -870,21 +882,21 @@ export function applicaAzione(stato, azione) {
   }
 
   if (tipo === "chiudiMercato") {
-    if (s.pending?.tipo !== "mercato") return err("Nessuna carta Mercato attiva.");
-    if (!suoTurno) return err("Solo chi ha pescato la carta può chiudere il Mercato.");
+    if (s.pending?.tipo !== "mercato") return err("Nessuna carta Mercato attiva.", "errori.nessunaCartaMercato");
+    if (!suoTurno) return err("Solo chi ha pescato la carta può chiudere il Mercato.", "errori.soloChiHaPescatoChiude");
     nota(s, "Fase di Mercato chiusa.", "r24", null, "mercato");
     prossimoTurno(s);
     return ok();
   }
 
   /* ─── Tutto il resto richiede che sia il tuo turno ─── */
-  if (!suoTurno) return err("Non è il tuo turno.");
+  if (!suoTurno) return err("Non è il tuo turno.", "errori.nonEIlTuoTurno");
 
   /* ─── Azioni libere ─── */
 
   if (tipo === "prestito") {
     const imp = Math.floor(azione.importo || 0);
-    if (imp < 1000 || imp % 1000 !== 0) return err("Il prestito è a multipli di $1.000.");
+    if (imp < 1000 || imp % 1000 !== 0) return err("Il prestito è a multipli di $1.000.", "errori.prestitoAMultipli");
     /* Quanto la banca è disposta a prestare.
        Prima: mezzo milione a chiunque, senza guardare niente. Nella realtà
        il credito al consumo si concede se la rata — sommata a quelle già in
@@ -893,9 +905,11 @@ export function applicaAzione(stato, azione) {
        mercati/roma/fonti.js. */
     const tetto = massimoPrestabile(s, g);
     if (imp > tetto) {
-      return err(tetto <= 0
-        ? `La banca non concede altro credito: le rate che hai già assorbono un terzo del tuo reddito.`
-        : `La banca arriva a ${den(s, tetto)}: la rata non può superare un terzo del reddito netto.`);
+      return tetto <= 0
+        ? err("La banca non concede altro credito: le rate che hai già assorbono un terzo del tuo reddito.",
+              "errori.creditoEsaurito")
+        : err(`La banca arriva a ${den(s, tetto)}: la rata non può superare un terzo del reddito netto.`,
+              "errori.tettoDelCredito", { tetto: den(s, tetto) });
     }
     g.passivita.prestitoBanca += imp;
     g.contanti += imp;
@@ -907,19 +921,19 @@ export function applicaAzione(stato, azione) {
     const chiave = azione.chiave;
     if (chiave === "prestitoBanca") {
       const imp = Math.floor(azione.importo || 0);
-      if (imp < 1000 || imp % 1000 !== 0) return err("Rimborso a multipli di $1.000.");
-      if (imp > g.passivita.prestitoBanca) return err("Importo superiore al debito.");
-      if (imp > g.contanti) return err("Contanti insufficienti.");
+      if (imp < 1000 || imp % 1000 !== 0) return err("Rimborso a multipli di $1.000.", "errori.rimborsoAMultipli");
+      if (imp > g.passivita.prestitoBanca) return err("Importo superiore al debito.", "errori.importoOltreIlDebito");
+      if (imp > g.contanti) return err("Contanti insufficienti.", "errori.contantiInsufficienti");
       g.passivita.prestitoBanca -= imp;
       g.contanti -= imp;
       nota(s, `${g.nome} rimborsa ${den(s, imp)} di prestito bancario.`, "r26", { nome: g.nome, importo: den(s, imp) }, "prestito", g.id);
       return ok();
     }
     const debito = debitiEstinguibiliDi(s).find((d) => d.chiave === chiave);
-    if (!debito) return err("Questo debito non è estinguibile.");
+    if (!debito) return err("Questo debito non è estinguibile.", "errori.debitoNonEstinguibile");
     const dovuto = g.passivita[chiave];
-    if (!dovuto) return err("Non hai questo debito.");
-    if (g.contanti < dovuto) return err("Contanti insufficienti: va estinto per intero.");
+    if (!dovuto) return err("Non hai questo debito.", "errori.debitoInesistente");
+    if (g.contanti < dovuto) return err("Contanti insufficienti: va estinto per intero.", "errori.estinzioneInteraRichiesta");
     g.contanti -= dovuto;
     g.passivita[chiave] = 0;
     g.spese[debito.spesa] = 0;
@@ -928,9 +942,9 @@ export function applicaAzione(stato, azione) {
   }
 
   if (tipo === "esciDallaCorsa") {
-    if (g.tracciato !== "topi") return err("Sei già al Largo.");
-    if (s.pending) return err("Concludi prima l'azione in corso.");
-    if (!fuoriDallaCorsa(g)) return err("Il tuo reddito passivo non supera ancora le spese totali.");
+    if (g.tracciato !== "topi") return err("Sei già al Largo.", "errori.giaAlLargo");
+    if (s.pending) return err("Concludi prima l'azione in corso.", "errori.concludiAzioneInCorso");
+    if (!fuoriDallaCorsa(g)) return err("Il tuo reddito passivo non supera ancora le spese totali.", "errori.renditaNonBasta");
     const passivo = redditoPassivo(g);
     /* ═══ NIENTE LIQUIDAZIONE, NIENTE SALTO DI SCALA ═══
      *
@@ -990,8 +1004,8 @@ export function applicaAzione(stato, azione) {
   /* ─── Tiro dei dadi ─── */
 
   if (tipo === "tira") {
-    if (s.pending) return err("Concludi prima l'azione in corso.");
-    if (s.dado) return err("Hai già tirato in questo turno.");
+    if (s.pending) return err("Concludi prima l'azione in corso.", "errori.concludiAzioneInCorso");
+    if (s.dado) return err("Hai già tirato in questo turno.", "errori.giaTirato");
 
     let n = 1;
     if (g.tracciato === "topi") {
@@ -1059,11 +1073,11 @@ export function applicaAzione(stato, azione) {
 
   /* ─── Risoluzione delle carte ─── */
 
-  if (!s.pending) return err("Nessuna azione in sospeso.");
-  if (s.pending.giocatoreId !== giocatoreId) return err("Non è una tua decisione.");
+  if (!s.pending) return err("Nessuna azione in sospeso.", "errori.nessunaAzioneInSospeso");
+  if (s.pending.giocatoreId !== giocatoreId) return err("Non è una tua decisione.", "errori.nonEUnaTuaDecisione");
 
   if (tipo === "scegliTaglia") {
-    if (s.pending.tipo !== "sceltaTaglia") return err("Azione non valida ora.");
+    if (s.pending.tipo !== "sceltaTaglia") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
     const taglia = azione.taglia === "grandi" ? "grandi" : "piccoli";
     const carta = pesca(s, taglia);
     nota(s, `${g.nome} pesca un ${taglia === "grandi" ? "Grande" : "Piccolo"} Affare: "${carta.nome}".`,
@@ -1073,15 +1087,15 @@ export function applicaAzione(stato, azione) {
   }
 
   if (tipo === "compraCarta") {
-    if (s.pending.tipo !== "carta") return err("Azione non valida ora.");
+    if (s.pending.tipo !== "carta") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
     const errore = compraCarta(s, g, s.pending.carta, azione);
-    if (errore) return err(errore);
+    if (errore) return err(errore.testo, errore.chiave);
     prossimoTurno(s);
     return ok();
   }
 
   if (tipo === "passaCarta") {
-    if (s.pending.tipo !== "carta") return err("Azione non valida ora.");
+    if (s.pending.tipo !== "carta") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
     const c = s.pending.carta;
     if (c.tipo === "spesa" && !c.opzionale) {
       const dovuto = c.condizione === "immobile" && g.immobili.length === 0 ? 0 : c.importo;
@@ -1099,7 +1113,7 @@ export function applicaAzione(stato, azione) {
   }
 
   if (tipo === "confermaExtra") {
-    if (s.pending.tipo !== "extra") return err("Azione non valida ora.");
+    if (s.pending.tipo !== "extra") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
     const imp = s.pending.importo;
     if (imp > 0) {
       pagaObbligatorio(s, g, imp, `"${s.pending.carta.nome}"`);
@@ -1110,10 +1124,10 @@ export function applicaAzione(stato, azione) {
   }
 
   if (tipo === "beneficenza") {
-    if (s.pending.tipo !== "beneficenza") return err("Azione non valida ora.");
+    if (s.pending.tipo !== "beneficenza") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
     if (azione.accetta) {
       const costo = s.pending.costo;
-      if (g.contanti < costo) return err("Contanti insufficienti per la donazione.");
+      if (g.contanti < costo) return err("Contanti insufficienti per la donazione.", "errori.contantiPerLaDonazione");
       g.contanti -= costo;
       g.turniBeneficenza = 3;
       nota(s, `${g.nome} dona ${den(s, costo)}: 2 dadi per i prossimi 3 turni.`, "r37", { nome: g.nome, importo: den(s, costo) }, "beneficenza", g.id);
@@ -1125,7 +1139,7 @@ export function applicaAzione(stato, azione) {
   }
 
   if (tipo === "confermaFiglio") {
-    if (s.pending.tipo !== "figlio") return err("Azione non valida ora.");
+    if (s.pending.tipo !== "figlio") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
     if (s.pending.nuovo) {
       g.figli += 1;
       nota(s, `👶 ${g.nome} ha un figlio! Spese +${den(s, g.perFiglio)}/mese (figli: ${g.figli}).`, "r39", { nome: g.nome, importo: den(s, g.perFiglio), figli: g.figli }, "figlio", g.id);
@@ -1135,7 +1149,7 @@ export function applicaAzione(stato, azione) {
   }
 
   if (tipo === "confermaLicenziamento") {
-    if (s.pending.tipo !== "licenziamento") return err("Azione non valida ora.");
+    if (s.pending.tipo !== "licenziamento") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
     const costo = s.pending.costo;
     pagaObbligatorio(s, g, costo, "il licenziamento");
     g.turniDaSaltare = 2;
@@ -1153,14 +1167,14 @@ export function applicaAzione(stato, azione) {
   /* ─── Bancarotta ─── */
 
   if (tipo === "vendiPerBancarotta") {
-    if (s.pending.tipo !== "bancarotta") return err("Azione non valida ora.");
+    if (s.pending.tipo !== "bancarotta") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
     const errore = vendiPerBancarotta(s, g, azione);
-    if (errore) return err(errore);
+    if (errore) return err(errore.testo, errore.chiave);
     return ok();
   }
 
   if (tipo === "concludiBancarotta") {
-    if (s.pending.tipo !== "bancarotta") return err("Azione non valida ora.");
+    if (s.pending.tipo !== "bancarotta") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
     if (flussoMensile(g) < 0) {
       /* Quali debiti si dimezzano lo dice il pacchetto, non il motore.
          Prima l'elenco era scritto a mano con le chiavi del mercato
@@ -1197,10 +1211,10 @@ export function applicaAzione(stato, azione) {
   /* ─── Largo ─── */
 
   if (tipo === "compraAffareVeloce" || tipo === "passaAffareVeloce") {
-    if (s.pending.tipo !== "affareVeloce") return err("Azione non valida ora.");
+    if (s.pending.tipo !== "affareVeloce") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
     const affare = s.pending.affare;
     if (tipo === "compraAffareVeloce") {
-      if (g.contanti < affare.acconto) return err("Contanti insufficienti.");
+      if (g.contanti < affare.acconto) return err("Contanti insufficienti.", "errori.contantiInsufficienti");
       g.contanti -= affare.acconto;
       g.affariVeloci.push(affare.id);
       /* Un affare del Largo è un attivo come gli altri: entra nel
@@ -1227,11 +1241,11 @@ export function applicaAzione(stato, azione) {
   }
 
   if (tipo === "compraSogno" || tipo === "passaSogno") {
-    if (s.pending.tipo !== "sogno") return err("Azione non valida ora.");
+    if (s.pending.tipo !== "sogno") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
     if (tipo === "compraSogno") {
-      if (!s.pending.mio) return err("Puoi comprare solo il sogno che hai scelto.");
+      if (!s.pending.mio) return err("Puoi comprare solo il sogno che hai scelto.", "errori.soloIlSognoScelto");
       const costo = s.pending.costo;
-      if (g.contanti < costo) return err("Contanti insufficienti per il tuo sogno.");
+      if (g.contanti < costo) return err("Contanti insufficienti per il tuo sogno.", "errori.contantiPerIlSogno");
       g.contanti -= costo;
       g.sognoComprato = true;
       nota(s, `⭐ ${g.nome} compra il proprio sogno "${s.pending.sogno.nome}" per ${den(s, costo)}!`, "r47", { nome: g.nome, nome2: s.pending.sogno.nome, importo: den(s, costo) }, "sogno", g.id);
@@ -1242,10 +1256,10 @@ export function applicaAzione(stato, azione) {
   }
 
   if (tipo === "beneficenzaVeloce") {
-    if (s.pending.tipo !== "beneficenzaVeloce") return err("Azione non valida ora.");
+    if (s.pending.tipo !== "beneficenzaVeloce") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
     if (azione.accetta) {
       const costo = arrotonda(redditoPassivo(g) * 0.1);
-      if (g.contanti < costo) return err("Contanti insufficienti.");
+      if (g.contanti < costo) return err("Contanti insufficienti.", "errori.contantiInsufficienti");
       g.contanti -= costo;
       g.beneficenzaVeloce = true;
       nota(s, `${g.nome} dona ${den(s, costo)}: da ora può scegliere quanti dadi tirare (1, 2 o 3).`, "r48", { nome: g.nome, importo: den(s, costo) }, "beneficenza", g.id);
@@ -1255,12 +1269,12 @@ export function applicaAzione(stato, azione) {
   }
 
   if (tipo === "confermaPenalita") {
-    if (s.pending.tipo !== "penalitaVeloce") return err("Azione non valida ora.");
+    if (s.pending.tipo !== "penalitaVeloce") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
     prossimoTurno(s);
     return ok();
   }
 
-  return err("Azione sconosciuta: " + tipo);
+  return err("Azione sconosciuta: " + tipo, "errori.azioneSconosciuta");
 }
 
 /* ═══════════════ compravendita ═══════════════ */
@@ -1268,9 +1282,9 @@ export function applicaAzione(stato, azione) {
 function compraCarta(s, g, c, azione) {
   if (c.tipo === "azione") {
     const q = Math.max(1, Math.floor(azione.quantita || 0));
-    if (!q) return "Indica quante azioni comprare.";
+    if (!q) return no("Indica quante azioni comprare.", "errori.indicaQuanteAzioni");
     const costo = q * c.prezzo;
-    if (g.contanti < costo) return "Contanti insufficienti.";
+    if (g.contanti < costo) return no("Contanti insufficienti.", "errori.contantiInsufficienti");
     g.contanti -= costo;
     const esistente = g.azioni.find((a) => a.simbolo === c.simbolo);
     if (esistente) {
@@ -1288,7 +1302,7 @@ function compraCarta(s, g, c, azione) {
   }
 
   if (c.tipo === "immobile") {
-    if (g.contanti < c.acconto) return "Contanti insufficienti per l'acconto.";
+    if (g.contanti < c.acconto) return no("Contanti insufficienti per l'acconto.", "errori.contantiPerAcconto");
     g.contanti -= c.acconto;
     /* Il flusso non è quello stampato sulla carta: è quello che risulta al
        livello di realismo della stanza. Al Livello 2 lo stesso bilocale può
@@ -1308,7 +1322,7 @@ function compraCarta(s, g, c, azione) {
   }
 
   if (c.tipo === "attivita") {
-    if (g.contanti < c.acconto) return "Contanti insufficienti per l'acconto.";
+    if (g.contanti < c.acconto) return no("Contanti insufficienti per l'acconto.", "errori.contantiPerAcconto");
     g.contanti -= c.acconto;
     g.attivita.push({
       rid: idBreve(s), nome: c.nome, costo: c.costo,
@@ -1325,7 +1339,7 @@ function compraCarta(s, g, c, azione) {
     return null;
   }
 
-  return "Tipo di carta sconosciuto.";
+  return no("Tipo di carta sconosciuto.", "errori.tipoCartaSconosciuto");
 }
 
 /**
@@ -1359,7 +1373,7 @@ function vendiAlMercato(s, g, c, azione) {
   if (c.tipo === "offerta") {
     if (c.categoria === "attivita") {
       const a = g.attivita.find((x) => x.rid === azione.rid);
-      if (!a) return "Attività non trovata.";
+      if (!a) return no("Attività non trovata.", "errori.attivitaNonTrovata");
       const prezzo = c.moltiplicatore ? arrotonda(a.costo * c.moltiplicatore) : c.prezzo;
       const netto = prezzo - (a.passivita || 0);
       g.contanti += netto;
@@ -1368,8 +1382,8 @@ function vendiAlMercato(s, g, c, azione) {
       return null;
     }
     const i = g.immobili.find((x) => x.rid === azione.rid);
-    if (!i) return "Immobile non trovato.";
-    if (i.categoria !== c.categoria) return "Questa offerta non riguarda quell'immobile.";
+    if (!i) return no("Immobile non trovato.", "errori.immobileNonTrovato");
+    if (i.categoria !== c.categoria) return no("Questa offerta non riguarda quell'immobile.", "errori.offertaAltroImmobile");
     const prezzo = c.moltiplicatore ? arrotonda(i.costo * c.moltiplicatore) : c.prezzo;
     const { agenzia, imposta, netto } = contiDellaVendita(s, g, i, prezzo);
     g.contanti += netto;
@@ -1384,7 +1398,7 @@ function vendiAlMercato(s, g, c, azione) {
 
   if (c.tipo === "prezzo") {
     const a = g.azioni.find((x) => x.simbolo === c.simbolo);
-    if (!a) return "Non possiedi questo titolo.";
+    if (!a) return no("Non possiedi questo titolo.", "errori.titoloNonPosseduto");
     const q = Math.min(a.quantita, Math.max(1, Math.floor(azione.quantita || a.quantita)));
     const incasso = q * c.prezzo;
     g.contanti += incasso;
@@ -1394,14 +1408,14 @@ function vendiAlMercato(s, g, c, azione) {
     return null;
   }
 
-  return "Questa carta non permette vendite.";
+  return no("Questa carta non permette vendite.", "errori.cartaSenzaVendite");
 }
 
 function vendiPerBancarotta(s, g, azione) {
   const meta = (n) => Math.floor(n / 2);
   if (azione.categoria === "immobile") {
     const i = g.immobili.find((x) => x.rid === azione.rid);
-    if (!i) return "Immobile non trovato.";
+    if (!i) return no("Immobile non trovato.", "errori.immobileNonTrovato");
     const incasso = meta(i.acconto);
     g.contanti += incasso;
     g.immobili = g.immobili.filter((x) => x.rid !== i.rid);
@@ -1410,7 +1424,7 @@ function vendiPerBancarotta(s, g, azione) {
   }
   if (azione.categoria === "attivita") {
     const a = g.attivita.find((x) => x.rid === azione.rid);
-    if (!a) return "Attività non trovata.";
+    if (!a) return no("Attività non trovata.", "errori.attivitaNonTrovata");
     const incasso = meta(a.acconto);
     g.contanti += incasso;
     g.attivita = g.attivita.filter((x) => x.rid !== a.rid);
@@ -1419,7 +1433,7 @@ function vendiPerBancarotta(s, g, azione) {
   }
   if (azione.categoria === "azione") {
     const a = g.azioni.find((x) => x.simbolo === azione.simbolo);
-    if (!a) return "Titolo non trovato.";
+    if (!a) return no("Titolo non trovato.", "errori.titoloNonTrovato");
     const incasso = meta(a.quantita * a.prezzoAcquisto);
     g.contanti += incasso;
     g.azioni = g.azioni.filter((x) => x.simbolo !== a.simbolo);
@@ -1428,10 +1442,10 @@ function vendiPerBancarotta(s, g, azione) {
   }
   if (azione.categoria === "debito") {
     const d = debitiEstinguibiliDi(s).find((x) => x.chiave === azione.chiave);
-    if (!d) return "Debito non estinguibile.";
+    if (!d) return no("Debito non estinguibile.", "errori.debitoNonEstinguibile");
     const dovuto = g.passivita[d.chiave];
-    if (!dovuto) return "Non hai questo debito.";
-    if (g.contanti < dovuto) return "Contanti insufficienti.";
+    if (!dovuto) return no("Non hai questo debito.", "errori.debitoInesistente");
+    if (g.contanti < dovuto) return no("Contanti insufficienti.", "errori.contantiInsufficienti");
     g.contanti -= dovuto;
     g.passivita[d.chiave] = 0;
     g.spese[d.spesa] = 0;
@@ -1440,15 +1454,15 @@ function vendiPerBancarotta(s, g, azione) {
   }
   if (azione.categoria === "prestito") {
     const richiesto = Math.floor(azione.importo || 0);
-    if (richiesto < 1000 || richiesto % 1000 !== 0) return "Rimborso a multipli di $1.000.";
+    if (richiesto < 1000 || richiesto % 1000 !== 0) return no("Rimborso a multipli di $1.000.", "errori.rimborsoAMultipli");
     const imp = Math.min(g.passivita.prestitoBanca, richiesto);
-    if (g.contanti < imp) return "Contanti insufficienti.";
+    if (g.contanti < imp) return no("Contanti insufficienti.", "errori.contantiInsufficienti");
     g.contanti -= imp;
     g.passivita.prestitoBanca -= imp;
     nota(s, `${g.nome} rimborsa ${den(s, imp)} di prestito.`, "r60", { nome: g.nome, importo: den(s, imp) }, "bancarotta", g.id);
     return null;
   }
-  return "Categoria sconosciuta.";
+  return no("Categoria sconosciuta.", "errori.categoriaSconosciuta");
 }
 
 /* ═══════════════ classifica finale ═══════════════ */

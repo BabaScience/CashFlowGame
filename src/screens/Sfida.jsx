@@ -18,6 +18,7 @@ import { useSuoni } from "../hooks/useSuoni.js";
 import Logo from "../components/Logo.jsx";
 import { copiaTesto } from "../lib/appunti.js";
 import { useLingua } from "../Lingua.jsx";
+import { testoErrore } from "../lib/errori.js";
 
 /**
  * LA SFIDA DEL GIORNO.
@@ -127,7 +128,7 @@ const Dato = ({ k, v }) => (
 /* ── la partita ────────────────────────────────────────────── */
 
 function Tavolo({ partita, setPartita, giorno, suEsci }) {
-  const { t } = useLingua();
+  const { t, lingua } = useLingua();
   const { soldi } = useMercato();
   const [errore, setErrore] = useState("");
   const [esito, setEsito] = useState(null);
@@ -139,7 +140,11 @@ function Tavolo({ partita, setPartita, giorno, suEsci }) {
 
   const invia = useCallback(async (az) => {
     const r = applicaAzione(stato, { ...az, giocatoreId: "io" });
-    if (r.errore) { setErrore(r.errore); return { errore: r.errore }; }
+    if (r.errore) {
+      const msg = testoErrore(lingua, r);
+      setErrore(msg);
+      return { errore: msg };
+    }
     setErrore("");
     const nuovo = r.stato;
     setPartita({ ...partita, stato: nuovo });

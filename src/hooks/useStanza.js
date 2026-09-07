@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import * as api from "../lib/api.js";
+import { useLingua } from "../Lingua.jsx";
+import { testoErrore } from "../lib/errori.js";
 
 /** Ogni quanto interrogare il server, a seconda di cosa sta succedendo. */
 const RITMO = {
@@ -15,6 +17,7 @@ const RITMO = {
  * Il ritmo si adatta da solo per non sprecare né batteria né letture.
  */
 export function useStanza(codice, mioId) {
+  const { t, lingua } = useLingua();
   const [stato, setStato] = useState(null);
   const [errore, setErrore] = useState(null);
   const [caricamento, setCaricamento] = useState(true);
@@ -55,9 +58,9 @@ export function useStanza(codice, mioId) {
       setErrore(null);
     } catch (e) {
       if (giro.current !== miaVolta) return;
-      setErrore(e.codiceHttp === 404 ? "Stanza non trovata o scaduta." : "Connessione persa, riprovo…");
+      setErrore(e.codiceHttp === 404 ? t("errori.stanzaNonTrovata") : t("errori.connessionePersa"));
     }
-  }, [codice, applica]);
+  }, [codice, applica, t, lingua]);
 
   /** Quanto aspettare prima della prossima lettura. */
   const ritmo = useCallback(() => {
@@ -115,7 +118,7 @@ export function useStanza(codice, mioId) {
 
   /** Invia una mossa e adotta subito lo stato restituito dal server. */
   const invia = useCallback(async (az) => {
-    if (!codice) return { errore: "Nessuna stanza." };
+    if (!codice) return { errore: t("errori.nessunaStanza") };
     setInAzione(true);
     try {
       const r = await api.azione(codice, az);
@@ -123,7 +126,9 @@ export function useStanza(codice, mioId) {
       return { errore: null };
     } catch (e) {
       if (e.stato) applica(e.stato);   // il server rimanda comunque lo stato valido
-      return { errore: e.message };
+      /* Tradotto qui, una volta sola: chi mostra l'errore riceve una frase
+         già nella lingua giusta e non deve saperne niente. */
+      return { errore: testoErrore(lingua, e) };
     } finally {
       setInAzione(false);
     }

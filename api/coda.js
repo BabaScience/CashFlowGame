@@ -36,14 +36,14 @@ const MAX_TENTATIVI = 6;
 const nomePulito = (n) => String(n || "").trim().slice(0, 20) || "Ospite";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return errore(res, 405, "Metodo non consentito.");
+  if (req.method !== "POST") return errore(res, 405, "Metodo non consentito.", "errori.metodoNonConsentito");
   const config = statoConfigurazione();
   if (!config.ok) return errore(res, 503, config.errore);
 
   const body = await corpo(req);
   const { op } = body;
   const giocatoreId = body.giocatoreId;
-  if (!validoId(giocatoreId)) return errore(res, 400, "Identificativo giocatore non valido.");
+  if (!validoId(giocatoreId)) return errore(res, 400, "Identificativo giocatore non valido.", "errori.identificativoNonValido");
 
   try {
     const col = await coda();
@@ -69,7 +69,7 @@ export default async function handler(req, res) {
       return json(res, 200, { stato: "attesa", inCoda: quanti });
     }
 
-    if (op !== "entra") return errore(res, 400, "Operazione sconosciuta.");
+    if (op !== "entra") return errore(res, 400, "Operazione sconosciuta.", "errori.operazioneSconosciuta");
 
     const mercatoId = body.mercatoId || "roma";
     const formato = formatoValido(body.formato);
@@ -120,14 +120,14 @@ export default async function handler(req, res) {
         professioneId, sognoId: g.sognoId,
       });
       let r = entra(avversario);
-      if (r.errore) return errore(res, 400, r.errore);
+      if (r.errore) return errore(res, 400, r.errore, r.chiaveErrore, r.valoriErrore);
       stato = r.stato;
       r = entra({ giocatoreId, nome, professioneId: body.professioneId, sognoId: body.sognoId });
-      if (r.errore) return errore(res, 400, r.errore);
+      if (r.errore) return errore(res, 400, r.errore, r.chiaveErrore, r.valoriErrore);
       stato = r.stato;
 
       r = applicaAzione(stato, { tipo: "avvia", giocatoreId: avversario.giocatoreId });
-      if (r.errore) return errore(res, 400, r.errore);
+      if (r.errore) return errore(res, 400, r.errore, r.chiaveErrore, r.valoriErrore);
       stato = r.stato;
 
       try {
@@ -155,9 +155,9 @@ export default async function handler(req, res) {
 
       return json(res, 200, { stato: "trovato", codice, professioneId });
     }
-    return errore(res, 500, "Non riesco a creare la stanza, riprova.");
+    return errore(res, 500, "Non riesco a creare la stanza, riprova.", "errori.creazioneStanzaFallita");
   } catch (e) {
     console.error("coda:", e);
-    return errore(res, 500, "Errore della coda.");
+    return errore(res, 500, "Errore della coda.", "errori.codaFallita");
   }
 }

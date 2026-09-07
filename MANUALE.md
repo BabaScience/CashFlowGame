@@ -13,6 +13,7 @@ Da 2 a 6 giocatori. Una partita dura in media 60–120 minuti.
 
 1. [L'idea del gioco](#1-lidea-del-gioco)
 2. [Come si vince](#2-come-si-vince)
+2bis. [La prima partita](#2bis-la-prima-partita)
 3. [Preparazione](#3-preparazione)
 4. [La tua scheda finanziaria](#4-la-tua-scheda-finanziaria)
 5. [Parte I — La Ruota](#5-parte-i--la-corsa-dei-topi)
@@ -83,6 +84,48 @@ onesta, ed è confrontabile con quella degli altri al tavolo.
 
 ---
 
+## 2bis. La prima partita
+
+Il gioco è stato dato da provare ad amici senza spiegazioni, e la domanda è
+tornata sempre uguale: «cos'è questo? non capisco niente». Sono tre domande
+diverse messe insieme — *a che serve*, *cosa vogliono dire queste parole*,
+*tocca a me e adesso che faccio* — e l'ultima non si può rispondere prima di
+cominciare: si risponde mentre uno sta decidendo.
+
+Per questo l'introduzione non è un giro di finestrelle. È **una partita vera,
+in solitaria**, con un seme fisso: la stessa a tutti, così si può descrivere
+e correggere. Dura venticinque turni e una voce in alto dice una cosa sola,
+nel momento in cui quella cosa succede davvero:
+
+| Quando | Cosa dice |
+|---|---|
+| All'apertura | chi sei, quanto ti resta ogni mese, e che si tira il dado |
+| Alla prima paga | che quello è il carburante di tutto |
+| Alla prima scelta di taglia | che decidi tu quanto grande guardare |
+| Su una carta che ti puoi permettere | *cosa* guardare in un affare — acconto e flusso, non se comprarlo |
+| Alla prima rendita incassata | quanto manca al traguardo |
+| Alla prima Spesa Extra | che non si rifiuta, ed è quello che rallenta |
+| A metà strada | che cosa misura la barra in alto |
+| Su una carta fuori portata | che la banca esiste, e quanto costa |
+
+Ogni frase si dice **una volta sola** e poi tace per sempre, anche se la sua
+occasione ritorna. Meglio restare zitti che ripetersi.
+
+I passi sono funzioni pure (`src/game/guida.js`): guardano lo stato prima e
+dopo una mossa e rispondono sì o no. Si possono provare senza disegnare
+niente, ed è l'unico modo di sapere che la guida parla quando serve invece di
+scoprirlo giocando.
+
+**Le parole del gioco si possono chiedere.** Rendita, Giorno di Paga,
+acconto, flusso, conto economico, Ruota: dove compaiono la prima volta sono
+toccabili e si aprono su una definizione di tre righe. Il glossario spiega
+*meccanismi*, mai cosa comprare — la stessa linea che vale per le lezioni.
+
+**Chi ha già giocato non la rivede.** La prima partita si segna come fatta sul
+dispositivo, e l'ingresso smette di proporla.
+
+---
+
 ## 3. Preparazione
 
 1. Uno dei giocatori **crea la stanza** e riceve un codice di 4 lettere.
@@ -92,6 +135,19 @@ onesta, ed è confrontabile con quella degli altri al tavolo.
    - un **sogno** fra i dodici disponibili: non si compra, è quello per
      cui giochi, e alla fine il gioco ti dice a quanti mesi di rendita sei
      arrivato.
+
+   **Chi non crea la stanza non sceglie il mestiere: glielo pesca il
+   server.** Vale per chi entra dalla coda e per chi gioca contro il
+   computer. Il sorteggio è uno solo per tutto il tavolo — gli avversari
+   hanno la stessa scheda — perché due schede diverse renderebbero il
+   confronto un confronto fra professioni invece che fra giocatori.
+
+   Il mestiere estratto si **vede estrarre**: un rullo gira per un secondo e
+   mezzo, rallenta e si ferma sul nome, poi compaiono stipendio, spese e
+   Giorno di Paga. Il rullo non decide niente — l'esito arriva già scritto
+   dal server — ma una scheda che compare già compilata si legge come un
+   dato di fatto, e chi giocava tre partite di fila si convinceva che nel
+   gioco esistesse un mestiere solo.
 4. Chi ha creato la stanza avvia la partita quando sono tutti pronti.
 5. All'avvio ogni giocatore riceve in contanti:
    **il proprio Giorno di Paga + i propri Risparmi iniziali**.
@@ -554,6 +610,32 @@ Qui i conti li fa il server: nessuno può sbagliare una somma o barare.
 
 **Sincronizzazione.** Tutti vedono lo stesso tavolo. Le carte pescate compaiono
 a schermo per tutti, e il registro tiene traccia di ogni mossa.
+
+**Il tempo della carta.** Il foglio di decisione non compare insieme al tiro:
+aspetta che la pedina abbia finito di camminare. Il ritardo non è una pausa
+scelta a occhio, è il tempo vero del cammino — un tempo per casella più un
+respiro — e lo calcola un modulo solo (`src/lib/ritmo.js`) che serve sia alla
+pedina sia alla carta, così i due non possono scollarsi. Chi arriva a scheda
+nascosta (linguetta cambiata, telefono in tasca) non aspetta: la carta è già
+lì quando torna.
+
+**Le lingue.** Italiano, inglese e francese, e non solo le etichette:
+professioni, sogni, carte, categorie, quindici lezioni e dieci quesiti. Gli
+importi restano in euro col formato romano, perché un mercato è il suo
+mercato in qualunque lingua lo si legga, e le regole fiscali descritte sono
+italiane — il gioco si svolge a Roma, e tradurle in equivalenti stranieri
+vorrebbe dire inventare un paese che non è quello del tabellone.
+
+Le traduzioni sono presidiate da un controllo che disegna **ogni schermata in
+ogni lingua** e ci cerca dentro parole funzione italiane, e da un secondo
+controllo che legge il testo di lezioni e quesiti alla fonte — perché una
+lezione chiusa non mostra i suoi paragrafi, e sono la parte più lunga del
+materiale.
+
+Anche i rifiuti sono tradotti: quando il gioco dice che non è il tuo turno o
+che la banca non arriva a quella cifra, lo dice nella tua lingua. Il server
+non sa in che lingua stai giocando, quindi manda la frase e la chiave con cui
+tradurla, e sceglie il browser.
 
 **Durata dei dati.** Una stanza inattiva viene cancellata dopo 48 ore; una
 partita conclusa dopo 6 ore; una stanza mai avviata dopo 6 ore. Chi ha creato

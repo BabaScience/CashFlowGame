@@ -28,32 +28,18 @@
  * bilocale a Ostia" e lo dimostra con i prezzi veri delle due zone insegna
  * qualcosa che nessun manuale generico può insegnare.
  */
-import { rataMutuo, zona, QUOTA_COSTI_L1 } from "../game/mercati/roma/derivazione.js";
-import { numero } from "../game/finanze.js";
-import { CREDITO, ZONE } from "../game/mercati/roma/fonti.js";
+import { QUOTA_COSTI_L1 } from "../game/mercati/roma/derivazione.js";
+import { CREDITO } from "../game/mercati/roma/fonti.js";
+/* Gli esempi stanno in un file loro per rompere l'anello con le
+   traduzioni: vedi esempi.js. */
+import { eur, pct, esempioRata, esempioZone } from "./esempi.js";
 
 /** L'avvertenza che accompagna ogni lezione, sempre visibile. */
 export const AVVERTENZA =
   "Questo è materiale didattico: spiega come funzionano le cose. Non è " +
   "consulenza finanziaria e non suggerisce che cosa comprare o vendere.";
 
-const eur = (n) => `${numero(n)} €`;
-const pct = (n) => `${(n * 100).toFixed(1)}%`;
 
-/* Esempi calcolati sui dati veri, non scritti a mano. */
-function esempioRata() {
-  const capitale = 160000;
-  const rata = rataMutuo(capitale, CREDITO.taeg, CREDITO.anni);
-  const totale = rata * CREDITO.anni * 12;
-  return { capitale, rata, totale, interessi: totale - capitale };
-}
-
-function esempioZone() {
-  const centro = zona("centro");
-  const periferia = zona("torbella");
-  const resa = (z) => (z.canoneMq * 12) / z.euroMq;
-  return { centro, periferia, resaCentro: resa(centro), resaPeriferia: resa(periferia) };
-}
 
 export const LEZIONI = [
   {
@@ -383,9 +369,8 @@ export const LEZIONI = [
       "superare un terzo di quello che entra. Chi ha smesso di lavorare non ha smesso " +
       "di essere valutato.",
       "Nel gioco è la stessa cosa: uscire dalla Ruota non regala niente e non azzera " +
-      "niente. Il Giorno di Rendita incassa quello che le tue cose producono davvero, " +
-      "meno quello che ti costa vivere, e da lì si riparte — con l'obiettivo di " +
-      "raddoppiare quello che ti sei costruito.",
+      "niente. La schermata finale mostra quello che le tue cose producono davvero, " +
+      "meno quello che ti costa vivere — e quanti mesi ci hai messo ad arrivarci.",
     ],
   },
 
@@ -393,3 +378,32 @@ export const LEZIONI = [
 ];
 
 export const perId = (id) => LEZIONI.find((l) => l.id === id);
+
+/* ── Le lezioni nella lingua scelta ──────────────────────────
+ *
+ * Le lezioni erano l'unica parte del gioco senza nessuna via per essere
+ * tradotta: quindicimila parole di italiano dentro una sezione che, in
+ * francese, si presenta come «ce que veulent dire les mots que le jeu
+ * emploie». Nessun test la guardava, perché la sezione non era nell'elenco
+ * delle schermate controllate.
+ *
+ * La forma della traduzione è la stessa dell'originale — titolo, sommario,
+ * e un `corpo()` che è una funzione — perché gli esempi si calcolano dai
+ * dati del mercato e devono continuare a calcolarsi anche tradotti. Una
+ * lezione che dicesse «1.000 €» scritti a mano mentirebbe al primo
+ * aggiornamento dei prezzi.
+ */
+import lezioniEn from "./lingue/en.js";
+import lezioniFr from "./lingue/fr.js";
+
+const TRADUZIONI = { en: lezioniEn, fr: lezioniFr };
+
+export function lezioniIn(lingua) {
+  const tav = TRADUZIONI[lingua]?.lezioni;
+  if (!tav) return LEZIONI;
+  return LEZIONI.map((l) => (tav[l.id] ? { ...l, ...tav[l.id] } : l));
+}
+
+export function avvertenzaIn(lingua) {
+  return TRADUZIONI[lingua]?.avvertenza || AVVERTENZA;
+}

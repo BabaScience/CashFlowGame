@@ -19,16 +19,16 @@ import { json, errore, corpo, normalizzaCodice, validoId } from "./_lib/http.js"
 import { preparaMessaggio, MAX_MESSAGGI } from "../src/game/chat.js";
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return errore(res, 405, "Metodo non consentito.");
+  if (req.method !== "POST") return errore(res, 405, "Metodo non consentito.", "errori.metodoNonConsentito");
   const config = statoConfigurazione();
   if (!config.ok) return errore(res, 503, config.errore);
 
   const body = await corpo(req);
   const giocatoreId = body.giocatoreId;
-  if (!validoId(giocatoreId)) return errore(res, 400, "Identificativo giocatore non valido.");
+  if (!validoId(giocatoreId)) return errore(res, 400, "Identificativo giocatore non valido.", "errori.identificativoNonValido");
 
   const codice = normalizzaCodice(body.codice);
-  if (!codice) return errore(res, 400, "Codice stanza mancante.");
+  if (!codice) return errore(res, 400, "Codice stanza mancante.", "errori.codiceStanzaMancante");
 
   try {
     const col = await stanze();
@@ -38,10 +38,10 @@ export default async function handler(req, res) {
       { codice },
       { projection: { _id: 0, giocatori: 1, chat: 1, chatAperta: 1, fase: 1 } }
     );
-    if (!stanza) return errore(res, 404, "Stanza non trovata o scaduta.");
+    if (!stanza) return errore(res, 404, "Stanza non trovata o scaduta.", "errori.stanzaNonTrovata");
 
     const esito = preparaMessaggio(stanza, giocatoreId, body.testo);
-    if (esito.errore) return errore(res, 400, esito.errore);
+    if (esito.errore) return errore(res, 400, esito.errore, esito.chiaveErrore, esito.valoriErrore);
 
     await col.updateOne(
       { codice },
@@ -55,6 +55,6 @@ export default async function handler(req, res) {
     return json(res, 200, { messaggio: esito.messaggio });
   } catch (e) {
     console.error("chat:", e);
-    return errore(res, 500, "Errore di scrittura sul database.");
+    return errore(res, 500, "Errore di scrittura sul database.", "errori.scritturaFallita");
   }
 }

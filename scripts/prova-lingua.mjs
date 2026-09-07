@@ -315,6 +315,99 @@ prova("Ogni t(\"…\") dell'interfaccia trova la sua voce", () => {
   if (guai.length) throw new Error(guai.join("\n       "));
 });
 
+console.log("\n── Gli errori parlano la lingua di chi gioca ──");
+
+/* ═══ IL DIFETTO CHE QUESTA SEZIONE PRESIDIA ═══
+ *
+ * Il motore e il server rifiutano una mossa con una frase italiana, e
+ * quella frase finiva a schermo così com'era: interfaccia in francese,
+ * errore in italiano. Non erano due stringhe dimenticate — erano
+ * cinquantacinque rifiuti del motore e una ventina del server, cioè tutta
+ * la parte del gioco che spiega perché non puoi fare una cosa.
+ *
+ * È rimasto in piedi a lungo perché il controllo sulle lingue disegna le
+ * schermate con dati finti e stato sano, e in uno stato sano non ci sono
+ * errori: la strada che porta un errore a schermo non passava di lì.
+ * Adesso non si guarda quello che appare, si guarda il codice sorgente. */
+
+prova("Ogni rifiuto del motore porta la sua chiave", () => {
+  const p = new URL("../src/game/motore.js", import.meta.url).pathname;
+  const src = readFileSync(p, "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/\/\/[^\n]*/g, " ");
+  /* Le parentesi vanno contate, non cercate: dentro un `err()` ci stanno
+     `den(s, tetto)` e i template, e una ricerca fino alla prima parentesi
+     chiusa taglia l'argomento a metà e poi si lamenta di non trovarci la
+     chiave. Un controllo che accusa il codice sano viene spento. */
+  const senza = [];
+  for (let i = src.indexOf("err("); i !== -1; i = src.indexOf("err(", i + 1)) {
+    /* `err(` dentro un nome più lungo (`nonErr(`) non è una chiamata. */
+    if (i > 0 && /[\w$.]/.test(src[i - 1])) continue;
+    let liv = 0, fine = i + 3;
+    for (; fine < src.length; fine++) {
+      if (src[fine] === "(") liv++;
+      else if (src[fine] === ")" && --liv === 0) break;
+    }
+    const arg = src.slice(i + 4, fine);
+    /* La definizione stessa di `err` non è una chiamata. */
+    if (/^\s*m,\s*chiave/.test(arg)) continue;
+    if (!arg.includes('"errori.') && !/\.chiave\b/.test(arg)) senza.push(arg.replace(/\s+/g, " "));
+  }
+  vero(senza.length === 0,
+    "err() senza chiave: " + senza.map((a) => a.slice(0, 60)).join(" · "));
+});
+
+prova("Ogni chiave d'errore usata esiste in tutte le lingue", () => {
+  const RADICE = new URL("..", import.meta.url).pathname;
+  const file = (dir, out = []) => {
+    for (const n of readdirSync(dir)) {
+      const q = join(dir, n);
+      if (statSync(q).isDirectory()) file(q, out);
+      else if (/\.(jsx|js|mjs)$/.test(q)) out.push(q);
+    }
+    return out;
+  };
+  const usate = new Set();
+  for (const d of ["src", "api"]) {
+    for (const f of file(join(RADICE, d))) {
+      for (const m of readFileSync(f, "utf8").matchAll(/"(errori\.[\w]+)"/g)) usate.add(m[1]);
+    }
+  }
+  vero(usate.size > 40, `trovate solo ${usate.size} chiavi d'errore: lo scanner non sta leggendo niente`);
+  const guai = [];
+  for (const l of LINGUE.map((x) => x.id)) {
+    const note = new Set(foglie(dizionari[l]));
+    for (const k of usate) if (!note.has(k)) guai.push(`${l}: manca ${k}`);
+  }
+  if (guai.length) throw new Error(guai.join("\n       "));
+});
+
+prova("Nessun errore italiano scritto a mano arriva a schermo", () => {
+  /* `setErrore("…")` e `avvisa("…")` con una frase dentro sono la porta da
+     cui l'italiano rientra: passano la compilazione, passano i test delle
+     schermate, e si vedono solo cambiando lingua e sbagliando una mossa. */
+  const RADICE = new URL("..", import.meta.url).pathname;
+  const file = (dir, out = []) => {
+    for (const n of readdirSync(dir)) {
+      const q = join(dir, n);
+      if (statSync(q).isDirectory()) file(q, out);
+      else if (/\.(jsx|js)$/.test(q)) out.push(q);
+    }
+    return out;
+  };
+  const guai = [];
+  for (const f of file(join(RADICE, "src"))) {
+    const src = readFileSync(f, "utf8")
+      .replace(/\/\*[\s\S]*?\*\//g, " ")
+      .replace(/\/\/[^\n]*/g, " ");
+    for (const m of src.matchAll(/\b(setErrore|avvisa)\(\s*"([^"]+)"/g)) {
+      /* Una stringa vuota azzera l'errore: quella va bene. */
+      if (m[2].trim()) guai.push(`${relative(RADICE, f)}: ${m[1]}("${m[2].slice(0, 40)}")`);
+    }
+  }
+  if (guai.length) throw new Error(guai.join("\n       "));
+});
+
 console.log("\n── I contenuti dei mercati ──");
 
 prova("Ogni mercato dichiara le stesse lingue del gioco", () => {

@@ -238,3 +238,25 @@ export function quesitoDelGiorno(giorno = new Date().toISOString().slice(0, 10))
   for (let i = 0; i < giorno.length; i++) h = (h * 31 + giorno.charCodeAt(i)) >>> 0;
   return QUESITI[h % QUESITI.length];
 }
+
+
+/* ── I quesiti nella lingua scelta ───────────────────────────
+   Stessa forma dell'originale: le opzioni si traducono una per una,
+   tenendo gli stessi id, perché la risposta giusta è un id. */
+import quesitiEn from "./lingue/en.js";
+import quesitiFr from "./lingue/fr.js";
+
+const TRADUZIONI_Q = { en: quesitiEn, fr: quesitiFr };
+
+export function quesitiIn(lingua) {
+  const tav = TRADUZIONI_Q[lingua]?.quesiti;
+  if (!tav) return QUESITI;
+  return QUESITI.map((q) => {
+    const t = tav[q.id];
+    if (!t) return q;
+    return {
+      ...q, ...t,
+      opzioni: q.opzioni.map((o) => (t.opzioni?.[o.id] ? { ...o, testo: t.opzioni[o.id] } : o)),
+    };
+  });
+}

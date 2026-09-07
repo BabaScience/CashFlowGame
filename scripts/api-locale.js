@@ -97,7 +97,7 @@ export default function apiLocale() {
             const codice = (url.searchParams.get("codice") || "").toUpperCase();
             const v = Number(url.searchParams.get("v") || 0);
             const rec = stanze.get(codice);
-            if (!rec || scaduta(rec)) return invia(res, 404, { errore: "Stanza non trovata o scaduta." });
+            if (!rec || scaduta(rec)) return invia(res, 404, { errore: "Stanza non trovata o scaduta.", chiaveErrore: "errori.stanzaNonTrovata" });
             if (v > 0 && rec.stato.versione === v) return invia(res, 204);
             return invia(res, 200, { stato: rec.stato });
           }
@@ -106,7 +106,7 @@ export default function apiLocale() {
           if (url.pathname === "/api/room" && req.method === "POST") {
             const b = await leggiCorpo(req);
             const { op, giocatoreId } = b;
-            if (!giocatoreId) return invia(res, 400, { errore: "Identificativo mancante." });
+            if (!giocatoreId) return invia(res, 400, { errore: "Identificativo mancante.", chiaveErrore: "errori.identificativoNonValido" });
 
             if (op === "crea") {
               let codice;
@@ -120,7 +120,7 @@ export default function apiLocale() {
                 tipo: "entra", giocatoreId, nome: b.nome,
                 professioneId, sognoId: b.sognoId,
               });
-              if (r.errore) return invia(res, 400, { errore: r.errore });
+              if (r.errore) return invia(res, 400, { errore: r.errore, chiaveErrore: r.chiaveErrore, valoriErrore: r.valoriErrore });
               /* Avversari automatici, come nell'API vera: giocatori normali
                  con un flag. Le mosse gliele manda il client. */
               let stato = r.stato;
@@ -133,7 +133,7 @@ export default function apiLocale() {
                   professioneId,
                   sognoId: pac.sogni[(n + 1) % pac.sogni.length].id,
                 });
-                if (bb.errore) return invia(res, 400, { errore: bb.errore });
+                if (bb.errore) return invia(res, 400, { errore: bb.errore, chiaveErrore: bb.chiaveErrore, valoriErrore: bb.valoriErrore });
                 stato = bb.stato;
               }
               salva(stato);
@@ -143,8 +143,8 @@ export default function apiLocale() {
             if (op === "chiudi") {
               const codice = (b.codice || "").toUpperCase();
               const rec = stanze.get(codice);
-              if (!rec) return invia(res, 404, { errore: "Stanza non trovata." });
-              if (rec.stato.hostId !== giocatoreId) return invia(res, 403, { errore: "Non sei l'host." });
+              if (!rec) return invia(res, 404, { errore: "Stanza non trovata.", chiaveErrore: "errori.stanzaNonTrovata" });
+              if (rec.stato.hostId !== giocatoreId) return invia(res, 403, { errore: "Non sei l'host.", chiaveErrore: "errori.soloIlCreatoreChiude" });
               stanze.delete(codice);
               return invia(res, 200, { chiusa: true });
             }
@@ -152,14 +152,14 @@ export default function apiLocale() {
             if (op === "rivincita") {
               const codice = (b.codice || "").toUpperCase();
               const rec = stanze.get(codice);
-              if (!rec) return invia(res, 404, { errore: "Stanza non trovata o scaduta." });
+              if (!rec) return invia(res, 404, { errore: "Stanza non trovata o scaduta.", chiaveErrore: "errori.stanzaNonTrovata" });
               const permesso = puoChiederla(rec.stato, giocatoreId);
-              if (permesso.errore) return invia(res, 403, { errore: permesso.errore });
+              if (permesso.errore) return invia(res, 403, { errore: permesso.errore, chiaveErrore: permesso.chiaveErrore, valoriErrore: permesso.valoriErrore });
               if (rec.stato.rivincita) return invia(res, 200, { codice: rec.stato.rivincita });
               let nuovoCodice;
               do { nuovoCodice = codiceStanza(); } while (stanze.has(nuovoCodice));
               const r = statoRivincita(rec.stato, nuovoCodice, giocatoreId);
-              if (r.errore) return invia(res, 400, { errore: r.errore });
+              if (r.errore) return invia(res, 400, { errore: r.errore, chiaveErrore: r.chiaveErrore, valoriErrore: r.valoriErrore });
               salva(r.stato);
               rec.stato.rivincita = nuovoCodice;
               salva(rec.stato);
@@ -169,7 +169,7 @@ export default function apiLocale() {
             if (op === "azione") {
               const codice = (b.codice || "").toUpperCase();
               const rec = stanze.get(codice);
-              if (!rec || scaduta(rec)) return invia(res, 404, { errore: "Stanza non trovata o scaduta." });
+              if (!rec || scaduta(rec)) return invia(res, 404, { errore: "Stanza non trovata o scaduta.", chiaveErrore: "errori.stanzaNonTrovata" });
               /* Come nell'API vera: vale solo la propria identità, tranne
                  per gli avversari automatici, che non hanno un client. */
               const bersaglio = b.azione?.giocatoreId;
@@ -178,14 +178,14 @@ export default function apiLocale() {
               const r = applicaAzione(rec.stato, {
                 ...b.azione, giocatoreId: eBotDiQui ? bersaglio : giocatoreId,
               });
-              if (r.errore) return invia(res, 409, { errore: r.errore, stato: rec.stato });
+              if (r.errore) return invia(res, 409, { errore: r.errore, chiaveErrore: r.chiaveErrore, valoriErrore: r.valoriErrore, stato: rec.stato });
               const finita = r.stato.fase === "finita" && rec.stato.fase !== "finita";
               const valutazioni = finita ? registraEsito(r.stato) : null;
               salva(r.stato);
               return invia(res, 200, valutazioni ? { stato: r.stato, valutazioni } : { stato: r.stato });
             }
 
-            return invia(res, 400, { errore: "Operazione sconosciuta." });
+            return invia(res, 400, { errore: "Operazione sconosciuta.", chiaveErrore: "errori.operazioneSconosciuta" });
           }
 
           /* ── coda: trovare un avversario che non conosci ── */
@@ -193,7 +193,7 @@ export default function apiLocale() {
             for (const [k, v] of coda) if (Date.now() > v.scadeIl) coda.delete(k);
             const b = await leggiCorpo(req);
             const { op, giocatoreId } = b;
-            if (!giocatoreId) return invia(res, 400, { errore: "Identificativo mancante." });
+            if (!giocatoreId) return invia(res, 400, { errore: "Identificativo mancante.", chiaveErrore: "errori.identificativoNonValido" });
 
             if (op === "esci") { coda.delete(giocatoreId); return invia(res, 200, { uscito: true }); }
 
@@ -205,7 +205,7 @@ export default function apiLocale() {
               return invia(res, 200, { stato: "attesa", inCoda: quanti });
             }
 
-            if (op !== "entra") return invia(res, 400, { errore: "Operazione sconosciuta." });
+            if (op !== "entra") return invia(res, 400, { errore: "Operazione sconosciuta.", chiaveErrore: "errori.operazioneSconosciuta" });
 
             const mercatoId = b.mercatoId || "roma";
             const formato = formatoValido(b.formato);
@@ -236,11 +236,11 @@ export default function apiLocale() {
             for (const g of [avversario, { giocatoreId, nome, sognoId: b.sognoId }]) {
               const r = applicaAzione(stato, { tipo: "entra", giocatoreId: g.giocatoreId, nome: g.nome,
                 professioneId, sognoId: g.sognoId });
-              if (r.errore) return invia(res, 400, { errore: r.errore });
+              if (r.errore) return invia(res, 400, { errore: r.errore, chiaveErrore: r.chiaveErrore, valoriErrore: r.valoriErrore });
               stato = r.stato;
             }
             const av = applicaAzione(stato, { tipo: "avvia", giocatoreId: avversario.giocatoreId });
-            if (av.errore) return invia(res, 400, { errore: av.errore });
+            if (av.errore) return invia(res, 400, { errore: av.errore, chiaveErrore: av.chiaveErrore, valoriErrore: av.valoriErrore });
             salva(av.stato);
             coda.set(avversario.giocatoreId, {
               giocatoreId: avversario.giocatoreId, chiave, codice, professioneId,
@@ -268,12 +268,12 @@ export default function apiLocale() {
           /* ── chat: append, fuori dal motore come in produzione ── */
           if (url.pathname === "/api/chat" && req.method === "POST") {
             const b = await leggiCorpo(req);
-            if (!b.giocatoreId) return invia(res, 400, { errore: "Identificativo mancante." });
+            if (!b.giocatoreId) return invia(res, 400, { errore: "Identificativo mancante.", chiaveErrore: "errori.identificativoNonValido" });
             const codice = (b.codice || "").toUpperCase();
             const rec = stanze.get(codice);
-            if (!rec || scaduta(rec)) return invia(res, 404, { errore: "Stanza non trovata o scaduta." });
+            if (!rec || scaduta(rec)) return invia(res, 404, { errore: "Stanza non trovata o scaduta.", chiaveErrore: "errori.stanzaNonTrovata" });
             const esito = preparaMessaggio(rec.stato, b.giocatoreId, b.testo);
-            if (esito.errore) return invia(res, 400, { errore: esito.errore });
+            if (esito.errore) return invia(res, 400, { errore: esito.errore, chiaveErrore: esito.chiaveErrore, valoriErrore: esito.valoriErrore });
             salva(accoda(rec.stato, esito.messaggio));
             return invia(res, 200, { messaggio: esito.messaggio });
           }

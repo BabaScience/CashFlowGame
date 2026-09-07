@@ -6,8 +6,15 @@ export function json(res, codice, corpo) {
   res.status(codice).send(JSON.stringify(corpo));
 }
 
-export function errore(res, codice, messaggio) {
-  return json(res, codice, { errore: messaggio });
+/**
+ * Un errore viaggia in due copie: la frase italiana e la chiave con cui
+ * tradurla. Il server non conosce la lingua di chi gioca — la stessa
+ * stanza la guardano in tre lingue diverse — quindi manda tutte e due e
+ * lascia scegliere al browser. La frase resta come ripiego: quando una
+ * chiave manca, un messaggio in italiano è meglio di niente.
+ */
+export function errore(res, codice, messaggio, chiave = null, valori = null) {
+  return json(res, codice, { errore: messaggio, chiaveErrore: chiave, valoriErrore: valori });
 }
 
 /** Legge il corpo della richiesta, sia già decodificato sia grezzo. */

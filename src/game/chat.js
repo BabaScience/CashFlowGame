@@ -40,18 +40,18 @@ export function ripulisci(testo) {
  * entrambi i server possono limitarsi a inoltrare l'esito.
  */
 export function preparaMessaggio(stato, giocatoreId, testoGrezzo, ora = Date.now()) {
-  if (!stato) return { errore: "Stanza non trovata o scaduta." };
-  if (stato.chatAperta === false) return { errore: "La chat è spenta in questa stanza." };
+  if (!stato) return { errore: "Stanza non trovata o scaduta.", chiaveErrore: "errori.stanzaNonTrovata" };
+  if (stato.chatAperta === false) return { errore: "La chat è spenta in questa stanza.", chiaveErrore: "errori.chatSpenta" };
 
   const chi = (stato.giocatori || []).find((g) => g.id === giocatoreId);
-  if (!chi) return { errore: "Non fai parte di questa partita." };
+  if (!chi) return { errore: "Non fai parte di questa partita.", chiaveErrore: "errori.nonSeiInPartita" };
 
   const testo = ripulisci(testoGrezzo);
-  if (!testo) return { errore: "Il messaggio è vuoto." };
+  if (!testo) return { errore: "Il messaggio è vuoto.", chiaveErrore: "errori.messaggioVuoto" };
 
   const suoUltimo = [...(stato.chat || [])].reverse().find((m) => m.di === giocatoreId);
   if (suoUltimo && ora - suoUltimo.t < PAUSA_MS) {
-    return { errore: "Vai un po' più piano." };
+    return { errore: "Vai un po' più piano.", chiaveErrore: "errori.vaiPiuPiano" };
   }
 
   return {

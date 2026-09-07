@@ -170,7 +170,104 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
 
 ## 5 · Imparare
 
-- [x] **5.1 Lezioni e quesiti** — dieci lezioni e dieci quesiti, con gli
+- [x] **5.0 Capire il gioco senza che nessuno lo spieghi** — il difetto più
+      caro che avesse: amici messi davanti al gioco senza spiegazioni
+      chiedevano «cos'è questo? non capisco niente». Il materiale per
+      rispondere c'era già tutto — quindici lezioni, dieci quesiti — dietro
+      un menù che nessuno apre *prima* di giocare.
+
+      Risolto con tre cose, non con un giro di finestrelle:
+
+      **Una prima partita vera** (`src/screens/PrimaPartita.jsx`), in
+      solitaria, con seme fisso e venticinque turni, e una voce che dice una
+      cosa sola nel momento in cui quella cosa succede. Gli otto passi sono
+      funzioni pure (`src/game/guida.js`) con una condizione su `(prima,
+      dopo)`: si provano senza disegnare niente, ed è l'unico modo di sapere
+      che la guida parla quando serve. Tredici verifiche in
+      `scripts/prova-guida.mjs`.
+
+      **Le parole del gioco si possono chiedere** (`src/components/Glossa.jsx`):
+      rendita, Giorno di Paga, acconto, flusso, conto economico, Ruota. Dove
+      compaiono la prima volta si toccano e si aprono su una definizione.
+      Meccanismi, mai consigli — la stessa linea delle lezioni.
+
+      **Il mestiere si vede pescare** (`src/components/Roulette.jsx`): chi
+      entra dalla coda o gioca contro il computer non sceglieva niente e si
+      trovava sempre il pilota, cioè il primo dell'elenco. Adesso il server
+      ne pesca uno **solo, per tutto il tavolo** (`professioneACaso` in
+      `arena.js`) e il rullo lo mostra fermarsi. Stessa scheda per tutti:
+      due schede diverse renderebbero il confronto un confronto fra
+      professioni.
+
+      Rimandato di proposito: le presentazioni una-tantum sulle linguette
+      dei pannelli. La prima partita copre già la scheda, e una finestrella
+      in più su una schermata che si è appena imparata a usare è rumore.
+
+- [x] **5.2 Il tempo della carta** — il foglio di decisione compariva insieme
+      al tiro, mentre la pedina stava ancora camminando: si leggeva l'affare
+      prima di sapere dove si era finiti. Adesso aspetta l'arrivo. Il ritardo
+      non è una pausa a occhio ma il tempo vero del cammino, e lo calcola un
+      modulo solo (`src/lib/ritmo.js`) usato **sia dalla pedina sia dalla
+      carta** — due copie dello stesso tempo in questo progetto avrebbero
+      preso strade diverse, come è già successo tre volte. A scheda nascosta
+      il ritardo salta.
+
+- [x] **5.3 Lezioni e quesiti tradotti** — quindici lezioni e dieci quesiti
+      in inglese e francese (`src/contenuti/lingue/`). I corpi restano
+      **funzioni**, non stringhe: gli esempi si calcolano dai dati del
+      mercato, e una lezione tradotta che citasse «1.000 €» scritti a mano
+      comincerebbe a mentire al primo aggiornamento dei prezzi. Gli
+      identificatori delle opzioni non si toccano — `giusta` ne indica uno.
+      Rotto l'anello `lezioni.js` ↔ `lingue/*.js` estraendo gli aiuti in
+      `src/contenuti/esempi.js`.
+
+- [x] **5.4 Perché le traduzioni mancanti reggevano** — non perché nessuno
+      traducesse: perché il controllo guardava **tre schermate su dieci, e
+      solo in inglese**, e portava un ritaglio che si escludeva da solo i
+      contenuti del mercato. Il ritaglio era giusto quando è stato scritto e
+      poi è rimasto lì: le categorie («Bilocale», «Trilocale» — l'etichetta
+      verde su ogni carta immobiliare, la stringa più vista del gioco) sono
+      passate inosservate per questo.
+
+      Adesso il controllo disegna **quindici schermate in ogni lingua** e
+      cerca parole funzione italiane invece di una lista scelta a mano; e un
+      secondo controllo legge lezioni e quesiti **alla fonte**, perché una
+      lezione chiusa non mostra i suoi paragrafi e un quesito senza risposta
+      non mostra la sua spiegazione — cioè la parte più lunga del materiale.
+      Corretto anche il confronto, che cercava sottostringhe e trovava
+      «nelle» dentro «proportionnelle»: un controllo che grida al lupo viene
+      spento, e allora tanto vale non averlo.
+
+      Non riprodotto: la segnalazione di «achetez» che appariva tagliato in
+      «chetez». Cercato con una scansione del DOM a larghezza telefono su
+      ingresso, modulo, foglio di decisione aperto e schermata Impara: non
+      si è ripresentato. Resta annotato qui, non chiuso.
+
+- [x] **5.5 Gli errori parlano la lingua di chi gioca** — trovato provando
+      il gioco in francese: «Stanza non trovata o scaduta.» in mezzo a una
+      schermata francese. Non era una stringa dimenticata, era **una classe
+      intera**: cinquantacinque rifiuti del motore e una ventina del
+      server, cioè tutta la parte che spiega perché non puoi fare una cosa.
+
+      Reggeva perché il controllo sulle lingue disegna le schermate con
+      dati finti e stato sano, e **in uno stato sano non ci sono errori**:
+      la strada che porta un errore a schermo non passava di lì.
+
+      Il server non conosce la lingua di chi gioca — la stessa stanza la
+      guardano in tre lingue diverse — quindi manda due cose: la frase
+      italiana e la chiave con cui tradurla (`errori.*`). Traduce il
+      browser, in un punto solo (`src/lib/errori.js`); la frase italiana
+      resta come ripiego, perché una chiave mancante deve dare un
+      messaggio brutto ma leggibile, non il nome della chiave.
+
+      Tre controlli nuovi, che guardano il **sorgente** invece di quello
+      che appare: ogni `err()` del motore porta una chiave; ogni chiave
+      usata esiste in tutte e tre le lingue; nessun `setErrore("…")` o
+      `avvisa("…")` con una frase scritta a mano. Restano in italiano di
+      proposito i messaggi che legge solo chi gestisce il servizio
+      (`cleanup`, `eventi`, la variabile d'ambiente mancante).
+
+- [x] **5.1 Lezioni e quesiti** — quindici lezioni e dieci quesiti, con gli
       esempi calcolati sui dati veri del mercato (la lezione sul centro
       contro la periferia dimostra il 3,4% del Centro Storico contro l'8,1%
       di Tor Bella Monaca usando le quotazioni vere). Avvertenza fissa e non

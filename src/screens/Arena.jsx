@@ -7,6 +7,7 @@ import Roulette from "../components/Roulette.jsx";
 import * as api from "../lib/api.js";
 import { traccia } from "../lib/traccia.js";
 import { useLingua } from "../Lingua.jsx";
+import { testoErrore } from "../lib/errori.js";
 import { useMercato } from "../Mercato.jsx";
 import { MERCATI } from "../game/mercati/indice.js";
 import { TURNI_LAMPO } from "../game/motore.js";
@@ -41,7 +42,7 @@ const SECONDI_PRIMA_DEL_COMPUTER = 20;
 const OGNI = 2000;
 
 export default function Arena({ suEntrato, suEsci, avvisa, mercatoId, setMercato }) {
-  const { t } = useLingua();
+  const { t, lingua } = useLingua();
   const { sogni } = useMercato();
   const [nome, setNome] = useState(localStorage.getItem("quotazero:nome") || "");
   const [formato, setFormato] = useState("lampo");
@@ -98,7 +99,7 @@ export default function Arena({ suEntrato, suEsci, avvisa, mercatoId, setMercato
       setAttesa({ secondi: 0, inCoda: r.inCoda || 1 });
     } catch (e) {
       setAttesa(null);
-      avvisa(e.message);
+      avvisa(testoErrore(lingua, e));
     }
   };
 
@@ -142,7 +143,7 @@ export default function Arena({ suEntrato, suEsci, avvisa, mercatoId, setMercato
       traccia("arenaComputer", { formato });
       const mio = r.stato.giocatori.find((g) => !g.bot);
       setEstratto({ codice: r.stato.codice, professioneId: mio?.professioneId });
-    } catch (e) { avvisa(e.message); }
+    } catch (e) { avvisa(testoErrore(lingua, e)); }
   };
 
   return (
