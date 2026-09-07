@@ -20,7 +20,8 @@ import { creaStanza, codiceStanza, applicaAzione } from "../src/game/motore.js";
    contro il computer rispondeva "errore di scrittura sul database" — che
    è esattamente il messaggio che manda a cercare nel posto sbagliato.
    In sviluppo non si vedeva: la copia in memoria lo importava. */
-import { pacchettoDi } from "../src/game/mercati/indice.js";
+import { pacchettoDi, getPacchetto } from "../src/game/mercati/indice.js";
+import { professioneACaso } from "../src/game/arena.js";
 
 /** Nomi degli avversari automatici: italiani, corti, riconoscibili. */
 const NOMI_BOT = ["Bea", "Nico", "Rosa", "Furio", "Lella"];
@@ -49,9 +50,15 @@ export default async function handler(req, res) {
           livello: Number(body.livello) || undefined,
           formato: body.formato,
         });
+        /* Senza una scelta esplicita il mestiere lo pesca il server, e i
+           computer al tavolo prendono lo stesso: si gioca la stessa
+           scheda, e l'unica differenza resta come si gioca. Chi apre una
+           stanza dal modulo continua a sceglierselo. */
+        const professioneId = body.professioneId
+          || professioneACaso(getPacchetto(body.mercatoId, stato.versioneDati));
         const r = applicaAzione(stato, {
           tipo: "entra", giocatoreId,
-          nome: body.nome, professioneId: body.professioneId, sognoId: body.sognoId,
+          nome: body.nome, professioneId, sognoId: body.sognoId,
         });
         if (r.errore) return errore(res, 400, r.errore);
         stato = r.stato;
@@ -65,7 +72,7 @@ export default async function handler(req, res) {
           const b = applicaAzione(stato, {
             tipo: "entra", giocatoreId: `bot${n + 1}`, bot: true,
             nome: NOMI_BOT[n],
-            professioneId: pac.professioni[(n + 1) % pac.professioni.length].id,
+            professioneId,
             sognoId: pac.sogni[(n + 1) % pac.sogni.length].id,
           });
           if (b.errore) return errore(res, 400, b.errore);

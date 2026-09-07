@@ -3,6 +3,7 @@ import { motion } from "framer-motion";
 import { Bottone } from "../components/Base.jsx";
 import Logo from "../components/Logo.jsx";
 import Scelta from "../components/Scelta.jsx";
+import Roulette from "../components/Roulette.jsx";
 import * as api from "../lib/api.js";
 import { traccia } from "../lib/traccia.js";
 import { useLingua } from "../Lingua.jsx";
@@ -41,11 +42,14 @@ const OGNI = 2000;
 
 export default function Arena({ suEntrato, suEsci, avvisa, mercatoId, setMercato }) {
   const { t } = useLingua();
-  const { professioni, sogni } = useMercato();
+  const { sogni } = useMercato();
   const [nome, setNome] = useState(localStorage.getItem("quotazero:nome") || "");
   const [formato, setFormato] = useState("lampo");
   const [attesa, setAttesa] = useState(null);   // { secondi, inCoda }
   const [albo, setAlbo] = useState(null);
+  /* La stanza è pronta ma non ci si entra subito: prima si vede che
+     mestiere è uscito. Vedi Roulette.jsx. */
+  const [estratto, setEstratto] = useState(null);   // { codice, professioneId }
   const fermato = useRef(false);
 
   /* La classifica si legge una volta sola all'apertura: è una lettura
@@ -65,12 +69,14 @@ export default function Arena({ suEntrato, suEsci, avvisa, mercatoId, setMercato
     return () => window.removeEventListener("pagehide", esci);
   }, []);
 
+  /* Nessuna professione: la pesca il server, ed è la stessa per tutti e
+     due gli appaiati. Con due schede diverse la partita sarebbe decisa
+     prima di tirare. */
   const dati = useCallback(() => ({
     nome: nome.trim() || t("arena.ospite"),
-    professioneId: professioni[0].id,
     sognoId: sogni[0].id,
     mercatoId, livello: 1, formato,
-  }), [nome, professioni, sogni, mercatoId, formato, t]);
+  }), [nome, sogni, mercatoId, formato, t]);
 
   const annulla = useCallback(async () => {
     fermato.current = true;
@@ -86,7 +92,8 @@ export default function Arena({ suEntrato, suEsci, avvisa, mercatoId, setMercato
       const r = await api.entraInCoda(dati());
       if (r.stato === "trovato") {
         traccia("arenaAppaiato", { formato });
-        return suEntrato(r.codice);
+        setAttesa(null);
+        return setEstratto({ codice: r.codice, professioneId: r.professioneId });
       }
       setAttesa({ secondi: 0, inCoda: r.inCoda || 1 });
     } catch (e) {
@@ -109,7 +116,8 @@ export default function Arena({ suEntrato, suEsci, avvisa, mercatoId, setMercato
         if (r.stato === "trovato") {
           fermato.current = true;
           traccia("arenaAppaiato", { formato });
-          suEntrato(r.codice);
+          setAttesa(null);
+          setEstratto({ codice: r.codice, professioneId: r.professioneId });
         } else if (r.stato === "scaduta") {
           /* La riga è morta di TTL mentre aspettavamo: ci si rimette,
              invece di restare a guardare una rotella che non gira più. */
@@ -126,13 +134,14 @@ export default function Arena({ suEntrato, suEsci, avvisa, mercatoId, setMercato
     await annulla();
     try {
       const d = dati();
-      const r = await api.creaStanza(d.nome, d.professioneId, d.sognoId, mercatoId, 1, 1, formato);
+      const r = await api.creaStanza(d.nome, undefined, d.sognoId, mercatoId, 1, 1, formato);
       /* Si comincia subito, come nella coda. Chi ha appena aspettato venti
          secondi non deve trovare una sala d'attesa e un altro pulsante:
          l'avversario è già lì, sono io. */
       await api.azione(r.stato.codice, { tipo: "avvia" }).catch(() => { /* l'host la avvierà a mano */ });
       traccia("arenaComputer", { formato });
-      suEntrato(r.stato.codice);
+      const mio = r.stato.giocatori.find((g) => !g.bot);
+      setEstratto({ codice: r.stato.codice, professioneId: mio?.professioneId });
     } catch (e) { avvisa(e.message); }
   };
 
@@ -146,7 +155,10 @@ export default function Arena({ suEntrato, suEsci, avvisa, mercatoId, setMercato
           </p>
         </div>
 
-        {attesa ? (
+        {estratto ? (
+          <Roulette professioneId={estratto.professioneId}
+            suContinua={() => suEntrato(estratto.codice)} />
+        ) : attesa ? (
           <div className="carta ta-c mt12">
             <motion.div
               animate={{ rotate: 360 }}

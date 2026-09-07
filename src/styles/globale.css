@@ -1296,3 +1296,15 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
   border-color: var(--oro); border-width: 2px; padding: 10px 7px;
   background: rgba(201,162,39,.12);
 }
+
+/* ══ il rullo del mestiere ══
+   Chi entra dalla coda non sceglie il lavoro: glielo pesca il server. Che
+   sia diverso ogni volta non basta — bisogna vederlo cambiare, o si legge
+   come un dato di fatto invece che come un'estrazione. ══ */
+.rullo {
+  display: flex; align-items: center; justify-content: center;
+  min-height: 104px; margin-top: 6px;
+  overflow: hidden;
+}
+.rullo-emoji { font-size: 40px; line-height: 1.1; }
+.rullo-nome { font-size: 21px; margin-top: 4px; }

@@ -27,7 +27,8 @@
 import { stanze, coda, scadenza, TTL_CODA_MS, statoConfigurazione } from "./_lib/db.js";
 import { json, errore, corpo, validoId } from "./_lib/http.js";
 import { creaStanza, codiceStanza, applicaAzione } from "../src/game/motore.js";
-import { chiaveCoda, formatoValido } from "../src/game/arena.js";
+import { chiaveCoda, formatoValido, professioneACaso } from "../src/game/arena.js";
+import { getPacchetto } from "../src/game/mercati/indice.js";
 
 const MAX_TENTATIVI = 6;
 
@@ -62,7 +63,7 @@ export default async function handler(req, res) {
       if (!riga) return json(res, 200, { stato: "scaduta" });
       if (riga.codice) {
         await col.deleteOne({ giocatoreId });
-        return json(res, 200, { stato: "trovato", codice: riga.codice });
+        return json(res, 200, { stato: "trovato", codice: riga.codice, professioneId: riga.professioneId });
       }
       const quanti = await col.countDocuments({ chiave: riga.chiave, codice: { $exists: false } });
       return json(res, 200, { stato: "attesa", inCoda: quanti });
@@ -109,9 +110,14 @@ export default async function handler(req, res) {
       const codice = codiceStanza();
       let stato = creaStanza(codice, avversario.giocatoreId, { mercatoId, livello, formato });
 
+      /* Il mestiere lo pesca il server, uno solo per tutti e due: con due
+         schede diverse la partita è decisa prima di tirare, e la
+         classifica misurerebbe chi ha avuto la scheda migliore invece di
+         chi ha giocato meglio. */
+      const professioneId = professioneACaso(getPacchetto(mercatoId));
       const entra = (g) => applicaAzione(stato, {
         tipo: "entra", giocatoreId: g.giocatoreId, nome: g.nome,
-        professioneId: g.professioneId, sognoId: g.sognoId,
+        professioneId, sognoId: g.sognoId,
       });
       let r = entra(avversario);
       if (r.errore) return errore(res, 400, r.errore);
@@ -141,13 +147,13 @@ export default async function handler(req, res) {
       await col.updateOne(
         { giocatoreId: avversario.giocatoreId },
         {
-          $set: { chiave, codice, scadeIl: new Date(Date.now() + TTL_CODA_MS) },
+          $set: { chiave, codice, professioneId, scadeIl: new Date(Date.now() + TTL_CODA_MS) },
           $setOnInsert: { giocatoreId: avversario.giocatoreId, creataIl: new Date() },
         },
         { upsert: true }
       ).catch((e) => console.error("coda/avviso:", e.message));
 
-      return json(res, 200, { stato: "trovato", codice });
+      return json(res, 200, { stato: "trovato", codice, professioneId });
     }
     return errore(res, 500, "Non riesco a creare la stanza, riprova.");
   } catch (e) {

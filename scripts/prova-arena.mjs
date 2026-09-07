@@ -10,7 +10,7 @@
  */
 import {
   valutazioniDopo, partitaValida, ordineFinale, attesa, passoDi,
-  chiaveCoda, formatoValido, inClassifica, PARTITE_PER_CLASSIFICA,
+  chiaveCoda, formatoValido, inClassifica, PARTITE_PER_CLASSIFICA, professioneACaso,
   VALUTAZIONE_ARENA_INIZIALE, PASSO_ARENA, PASSO_ESORDIENTE,
 } from "../src/game/arena.js";
 import { creaStanza, codiceStanza, applicaAzione, limiteTurni, fermoDa, TURNI_LAMPO, ATTESA_MASSIMA_MS } from "../src/game/motore.js";
@@ -122,6 +122,53 @@ prova("Si appaia solo chi gioca allo stesso gioco", () => {
   vero(chiaveCoda(a) !== chiaveCoda({ ...a, mercatoId: "classico" }), "mercati diversi, stessa chiave");
   vero(chiaveCoda(a) !== chiaveCoda({ ...a, formato: "lunga" }), "formati diversi, stessa chiave");
   vero(chiaveCoda(a) !== chiaveCoda({ ...a, livello: 2 }), "livelli diversi, stessa chiave");
+});
+
+console.log("\n── Il mestiere che ti tocca ──");
+
+prova("Prima o poi escono tutti i mestieri", () => {
+  /* Chi entra dalla coda non sceglie: gliene toccava sempre uno solo — il
+     primo dell'elenco — e chi ha giocato tre partite di fila si è
+     convinto che nel gioco esista solo il pilota. */
+  const p = getPacchetto("roma");
+  const usciti = new Set();
+  for (let i = 0; i < 3000; i++) usciti.add(professioneACaso(p));
+  eq(usciti.size, p.professioni.length, "mestieri diversi estratti:");
+});
+
+prova("L'estrazione sta dentro l'elenco, anche agli estremi", () => {
+  const p = getPacchetto("roma");
+  const ids = p.professioni.map((x) => x.id);
+  eq(professioneACaso(p, () => 0), ids[0], "col minimo:");
+  eq(professioneACaso(p, () => 0.9999999), ids[ids.length - 1], "col massimo:");
+  /* Un generatore che restituisse 1 (non dovrebbe, ma) non deve uscire
+     dall'elenco e dare undefined. */
+  eq(professioneACaso(p, () => 1), ids[ids.length - 1], "con un 1 di troppo:");
+});
+
+prova("Un pacchetto senza professioni non fa esplodere niente", () => {
+  eq(professioneACaso({ professioni: [] }), undefined);
+  eq(professioneACaso(null), undefined);
+});
+
+prova("Al tavolo la scheda è la stessa per tutti", () => {
+  /* Se a me tocca l'operatore ecologico e a te il pilota, la partita
+     l'abbiamo già giocata prima di tirare: le due schede non hanno la
+     stessa strada da fare, e la classifica misurerebbe la scheda invece
+     del giocatore. */
+  const p = getPacchetto("roma");
+  const professioneId = professioneACaso(p);
+  let s = creaStanza(codiceStanza(), "g0", { mercatoId: "roma", seme: 3 });
+  for (let i = 0; i < 3; i++) {
+    s = applicaAzione(s, { tipo: "entra", giocatoreId: "g" + i, nome: "G" + i,
+      professioneId, sognoId: p.sogni[i].id }).stato;
+  }
+  const schede = new Set(s.giocatori.map((g) => g.professioneId));
+  eq(schede.size, 1, "professioni diverse al tavolo:");
+  const stipendi = new Set(s.giocatori.map((g) => g.stipendio));
+  eq(stipendi.size, 1, "stipendi diversi al tavolo:");
+  const spese = new Set(s.giocatori.map((g) => Object.values(g.spese).reduce((a, b) => a + b, 0)));
+  eq(spese.size, 1, "spese diverse al tavolo:");
 });
 
 console.log("\n── La valutazione fra persone ──");

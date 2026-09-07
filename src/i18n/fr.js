@@ -80,6 +80,13 @@ export default {
     lingua: "Langue",
   },
 
+  roulette: {
+    estrazione: "Le métier qui vous tombe dessus",
+    seiTu: "Cette fois, vous êtes",
+    stessaPerTutti: "La même fiche pour tout le monde à la table : la seule différence sera votre façon de jouer.",
+    comincia: "Commencer",
+  },
+
   arena: {
     sottotitolo: "Appuyez sur Jouer. Quelqu'un arrive.",
     giocaOra: "Jouer maintenant",

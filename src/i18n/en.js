@@ -80,6 +80,13 @@ export default {
     lingua: "Language",
   },
 
+  roulette: {
+    estrazione: "What job you get",
+    seiTu: "This time you are",
+    stessaPerTutti: "The same sheet for everyone at the table: the only difference will be how you play.",
+    comincia: "Start",
+  },
+
   arena: {
     sottotitolo: "Press Play. Someone shows up.",
     giocaOra: "Play now",

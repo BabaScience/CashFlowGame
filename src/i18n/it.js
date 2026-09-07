@@ -74,6 +74,13 @@ export default {
     lingua: "Lingua",
   },
 
+  roulette: {
+    estrazione: "Che lavoro ti tocca",
+    seiTu: "Questa volta sei",
+    stessaPerTutti: "La stessa scheda per tutti al tavolo: l'unica differenza sarà come giocate.",
+    comincia: "Comincia",
+  },
+
   arena: {
     sottotitolo: "Premi Gioca. Qualcuno arriva.",
     giocaOra: "Gioca ora",

@@ -9,8 +9,9 @@
 import { creaStanza, codiceStanza, applicaAzione } from "../src/game/motore.js";
 import { preparaMessaggio, accoda } from "../src/game/chat.js";
 import { incrementiPer } from "../src/game/metriche.js";
-import { pacchettoDi } from "../src/game/mercati/indice.js";
+import { pacchettoDi, getPacchetto } from "../src/game/mercati/indice.js";
 import { statoRivincita, puoChiederla } from "../api/_lib/rivincita.js";
+import { professioneACaso } from "../src/game/arena.js";
 import { PARTITE_PER_CLASSIFICA, chiaveCoda, formatoValido, valutazioniDopo, partitaValida, ordineFinale, VALUTAZIONE_ARENA_INIZIALE } from "../src/game/arena.js";
 import { redditoPassivo, speseTotali } from "../src/game/finanze.js";
 
@@ -110,9 +111,14 @@ export default function apiLocale() {
             if (op === "crea") {
               let codice;
               do { codice = codiceStanza(); } while (stanze.has(codice));
-              const r = applicaAzione(creaStanza(codice, giocatoreId, { mercatoId: b.mercatoId, livello: Number(b.livello) || undefined, formato: b.formato }), {
+              const stanzaVuota = creaStanza(codice, giocatoreId, { mercatoId: b.mercatoId, livello: Number(b.livello) || undefined, formato: b.formato });
+              /* Come in produzione: senza una scelta esplicita il mestiere
+                 lo pesca il server, e i computer prendono lo stesso. */
+              const professioneId = b.professioneId
+                || professioneACaso(getPacchetto(stanzaVuota.mercatoId, stanzaVuota.versioneDati));
+              const r = applicaAzione(stanzaVuota, {
                 tipo: "entra", giocatoreId, nome: b.nome,
-                professioneId: b.professioneId, sognoId: b.sognoId,
+                professioneId, sognoId: b.sognoId,
               });
               if (r.errore) return invia(res, 400, { errore: r.errore });
               /* Avversari automatici, come nell'API vera: giocatori normali
@@ -124,7 +130,7 @@ export default function apiLocale() {
                 const bb = applicaAzione(stato, {
                   tipo: "entra", giocatoreId: `bot${n + 1}`, bot: true,
                   nome: NOMI_BOT[n],
-                  professioneId: pac.professioni[(n + 1) % pac.professioni.length].id,
+                  professioneId,
                   sognoId: pac.sogni[(n + 1) % pac.sogni.length].id,
                 });
                 if (bb.errore) return invia(res, 400, { errore: bb.errore });
@@ -194,7 +200,7 @@ export default function apiLocale() {
             if (op === "guarda") {
               const riga = coda.get(giocatoreId);
               if (!riga) return invia(res, 200, { stato: "scaduta" });
-              if (riga.codice) { coda.delete(giocatoreId); return invia(res, 200, { stato: "trovato", codice: riga.codice }); }
+              if (riga.codice) { coda.delete(giocatoreId); return invia(res, 200, { stato: "trovato", codice: riga.codice, professioneId: riga.professioneId }); }
               const quanti = [...coda.values()].filter((r) => r.chiave === riga.chiave && !r.codice).length;
               return invia(res, 200, { stato: "attesa", inCoda: quanti });
             }
@@ -225,9 +231,11 @@ export default function apiLocale() {
             let codice;
             do { codice = codiceStanza(); } while (stanze.has(codice));
             let stato = creaStanza(codice, avversario.giocatoreId, { mercatoId, livello, formato });
-            for (const g of [avversario, { giocatoreId, nome, professioneId: b.professioneId, sognoId: b.sognoId }]) {
+            /* Una pesca sola per tutti e due: stessa scheda, stessa strada. */
+            const professioneId = professioneACaso(getPacchetto(mercatoId));
+            for (const g of [avversario, { giocatoreId, nome, sognoId: b.sognoId }]) {
               const r = applicaAzione(stato, { tipo: "entra", giocatoreId: g.giocatoreId, nome: g.nome,
-                professioneId: g.professioneId, sognoId: g.sognoId });
+                professioneId, sognoId: g.sognoId });
               if (r.errore) return invia(res, 400, { errore: r.errore });
               stato = r.stato;
             }
@@ -235,10 +243,10 @@ export default function apiLocale() {
             if (av.errore) return invia(res, 400, { errore: av.errore });
             salva(av.stato);
             coda.set(avversario.giocatoreId, {
-              giocatoreId: avversario.giocatoreId, chiave, codice,
+              giocatoreId: avversario.giocatoreId, chiave, codice, professioneId,
               creataIl: Date.now(), scadeIl: Date.now() + TTL_CODA,
             });
-            return invia(res, 200, { stato: "trovato", codice });
+            return invia(res, 200, { stato: "trovato", codice, professioneId });
           }
 
           /* ── classifica ── */

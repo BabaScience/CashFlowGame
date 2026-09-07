@@ -158,6 +158,32 @@ export const FORMATI = ["lampo", "lunga"];
 export const formatoValido = (f) => (FORMATI.includes(f) ? f : "lunga");
 
 /**
+ * UNA PROFESSIONE A CASO — E LA STESSA PER TUTTI AL TAVOLO.
+ *
+ * Chi entra dalla coda o gioca contro il computer non sceglie il mestiere:
+ * finora gliene toccava sempre uno solo — il primo dell'elenco — e chi ha
+ * giocato tre partite di fila si è convinto che nel gioco esista un
+ * mestiere solo. Ce ne sono tredici, con stipendi da 1.500 a 4.200 euro e
+ * traguardi molto diversi, ed è metà di quello che c'è da capire.
+ *
+ * **La stessa per tutti al tavolo**, però. Se a me tocca l'operatore
+ * ecologico e a te il pilota di linea, la partita l'abbiamo già giocata
+ * prima di tirare: le due schede non hanno la stessa strada da fare. Con
+ * la stessa scheda per entrambi, l'unica differenza fra noi diventa come
+ * abbiamo giocato — che è l'unica differenza che una classifica dovrebbe
+ * misurare.
+ *
+ * Chi apre una stanza a mano continua a scegliersela: lì il mestiere è
+ * parte del gioco, e chi invita gli amici sa cosa sta facendo.
+ */
+export function professioneACaso(pacchetto, sorteggio = Math.random) {
+  const elenco = pacchetto?.professioni || [];
+  if (!elenco.length) return undefined;
+  const i = Math.min(elenco.length - 1, Math.floor(sorteggio() * elenco.length));
+  return elenco[i].id;
+}
+
+/**
  * La chiave della coda.
  *
  * Due persone si possono appaiare solo se giocano allo stesso gioco: stesso
