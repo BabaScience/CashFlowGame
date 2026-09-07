@@ -4,6 +4,7 @@ import { KV, Bottone, Barra, Denaro } from "./Base.jsx";
 import { soldi, riepilogo } from "../game/finanze.js";
 import { useMercato } from "../Mercato.jsx";
 import { useLingua } from "../Lingua.jsx";
+import Glossa from "./Glossa.jsx";
 
 /**
  * La scheda finanziaria: Conto Economico e Stato Patrimoniale,
@@ -55,7 +56,9 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
         </div>
 
         <div className="flex tra f13 mb4">
-          <span className="tenue">{t("scheda.redditoVersoSpese")}</span>
+          <span className="tenue">
+            <Glossa termine="redditoPassivo">{t("scheda.redditoVersoSpese")}</Glossa>
+          </span>
           <span className="numeri grassetto">
             {soldi(r.redditoPassivo)} / {soldi(r.soglia)}
           </span>
@@ -69,7 +72,9 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
 
         <div className="flex tra mt12" style={{ gap: 10 }}>
           <div style={{ flex: 1 }}>
-            <div className="maiusc tenue">{t("scheda.giornoDiPaga")}</div>
+            <div className="maiusc tenue">
+              <Glossa termine="giornoDiPaga">{t("scheda.giornoDiPaga")}</Glossa>
+            </div>
             <div className="numeri f18 grassetto"><Denaro v={r.flussoMensile} segno /></div>
           </div>
           <div style={{ flex: 1 }}>
@@ -168,7 +173,8 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
           <KV k={t("scheda.dividendi")} v={soldi(r.dividendi)} colore={r.dividendi ? "pos" : ""} />
           <KV k={t("scheda.immobili")} v={soldi(r.flussoImmobili)} colore={r.flussoImmobili ? "pos" : ""} />
           <KV k={t("scheda.attivita")} v={soldi(r.flussoAttivita)} colore={r.flussoAttivita ? "pos" : ""} />
-          <KV k={t("scheda.redditoPassivo")} v={soldi(r.redditoPassivo)} forte colore="pos" />
+          <KV k={<Glossa termine="redditoPassivo">{t("scheda.redditoPassivo")}</Glossa>}
+            v={soldi(r.redditoPassivo)} forte colore="pos" />
           <KV k={t("scheda.redditoTotale")} v={soldi(r.redditoTotale)} forte />
 
           <div className="sezione-tit mt16">{t("scheda.uscite")}</div>

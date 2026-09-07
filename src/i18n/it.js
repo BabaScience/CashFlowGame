@@ -81,6 +81,35 @@ export default {
     comincia: "Comincia",
   },
 
+  glossario: {
+    cosaSignifica: "Che cosa vuol dire",
+    cosaVuolDire: "Che cosa vuol dire {parola}",
+    redditoPassivo: {
+      titolo: "Reddito passivo",
+      testo: "Il denaro che ti arriva ogni mese senza che tu debba lavorarci: l'affitto di una casa, l'utile di un'attività, il dividendo di un titolo. Uno stipendio si ferma quando ti fermi tu; questo no. È il numero che devi far salire, ed è l'unico che il gioco misura per decidere chi vince.",
+    },
+    giornoDiPaga: {
+      titolo: "Giorno di paga",
+      testo: "Quello che ti resta ogni mese: tutto quello che entra meno tutto quello che esce. È il denaro con cui compri le cose che poi ti pagheranno da sole. Se è negativo stai consumando i risparmi, e prima o poi la banca se ne accorge.",
+    },
+    acconto: {
+      titolo: "Acconto",
+      testo: "La parte del prezzo che paghi subito, di tasca tua. Il resto lo mette la banca, e te lo fa ripagare con una rata ogni mese. Quello che conta non è il prezzo: è quanto acconto ti serve per entrare, e quanto ti rende ogni mese quello che hai comprato.",
+    },
+    flusso: {
+      titolo: "Flusso mensile",
+      testo: "Quanto ti mette in tasca una cosa, ogni mese, dopo aver pagato tutto quello che quella cosa costa — la rata, le tasse, i mesi in cui resta vuota. Può essere negativo: allora quella cosa non ti paga, la paghi tu.",
+    },
+    contoEconomico: {
+      titolo: "Conto economico",
+      testo: "L'elenco di tutto quello che entra e tutto quello che esce in un mese. Non dice quanto sei ricco — quello è il patrimonio — dice se ogni mese ti avvicini o ti allontani. Ed è la sola cosa che il gioco guarda.",
+    },
+    ruota: {
+      titolo: "La Ruota",
+      testo: "Il giro in cui si vive quando le spese si pagano solo lavorando: lo stipendio arriva, se ne va, e si ricomincia. Se ne esce quando il reddito passivo copre le spese con un margine — e quel giorno, in questo gioco, si vince.",
+    },
+  },
+
   guida: {
     titolo: "Prima partita",
     chiSei: "Fai l'operatore ecologico. Ogni mese ti restano {importo} dopo aver pagato tutto: è da lì che si comincia. Tira il dado — ogni casella su cui passi è un mese della tua vita.",

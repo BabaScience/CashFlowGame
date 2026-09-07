@@ -73,7 +73,7 @@ const Vittoria = (await import("../src/components/Vittoria.jsx")).default;
 const Decisione = (await import("../src/components/Decisione.jsx")).default;
 const PrimaPartita = (await import("../src/screens/PrimaPartita.jsx")).default;
 const Roulette = (await import("../src/components/Roulette.jsx")).default;
-const { LINGUE } = await import("../src/i18n/index.js");
+const { LINGUE, dizionari } = await import("../src/i18n/index.js");
 const Chat = (await import("../src/components/Chat.jsx")).default;
 const Scheda = (await import("../src/components/Scheda.jsx")).default;
 const Giocatori = (await import("../src/components/Giocatori.jsx")).default;
@@ -660,6 +660,26 @@ for (const lingua of LINGUE.map((l) => l.id).filter((id) => id !== "it")) {
     });
   }
 }
+
+console.log("\n── Le parole che si possono chiedere ──");
+
+prova("Ogni parola glossata ha titolo e testo in ogni lingua", () => {
+  /* Una glossa senza testo mostrerebbe la chiave: "glossario.acconto.testo"
+     scritto in mezzo a una frase. */
+  const usate = new Set();
+  for (const f of ["src/components/Scheda.jsx", "src/components/CartaGioco.jsx", "src/screens/Ingresso.jsx"]) {
+    const src = readFileSync(join(process.cwd(), f), "utf8");
+    for (const m of src.matchAll(/<Glossa\s+termine="(\w+)"/g)) usate.add(m[1]);
+  }
+  vero(usate.size > 0, "nessuna parola glossata: il componente non è usato da nessuna parte");
+  for (const [lingua, dizionario] of Object.entries(dizionari)) {
+    for (const termine of usate) {
+      const voce = dizionario.glossario?.[termine];
+      vero(voce?.titolo && voce?.testo, `${lingua}: manca la glossa di "${termine}"`);
+      vero(voce.testo.length > 60, `${lingua}/${termine}: la spiegazione è troppo corta per spiegare qualcosa`);
+    }
+  }
+});
 
 console.log("\n── La carta aspetta la pedina ──");
 

@@ -87,6 +87,35 @@ export default {
     comincia: "Commencer",
   },
 
+  glossario: {
+    cosaSignifica: "Ce que cela veut dire",
+    cosaVuolDire: "Ce que veut dire {parola}",
+    redditoPassivo: {
+      titolo: "Revenu passif",
+      testo: "L'argent qui vous arrive chaque mois sans que vous ayez à y travailler : le loyer d'un logement, le bénéfice d'une activité, le dividende d'un titre. Un salaire s'arrête quand vous vous arrêtez ; celui-ci non. C'est le chiffre que vous devez faire monter, et le seul que le jeu regarde pour désigner le gagnant.",
+    },
+    giornoDiPaga: {
+      titolo: "Jour de paie",
+      testo: "Ce qu'il vous reste chaque mois : tout ce qui rentre moins tout ce qui sort. C'est l'argent avec lequel vous achetez les choses qui vous paieront ensuite toutes seules. S'il est négatif, vous mangez votre épargne, et la banque finit par s'en apercevoir.",
+    },
+    acconto: {
+      titolo: "Apport",
+      testo: "La part du prix que vous payez tout de suite, de votre poche. La banque met le reste et vous le fait rembourser par mensualités. Ce qui compte n'est pas le prix : c'est l'apport qu'il faut pour entrer, et ce que le bien vous rapporte chaque mois.",
+    },
+    flusso: {
+      titolo: "Flux mensuel",
+      testo: "Ce qu'une chose vous met en poche chaque mois, une fois payé tout ce qu'elle coûte — la mensualité, les impôts, les mois où elle reste vide. Il peut être négatif : alors ce n'est pas elle qui vous paie, c'est vous qui la payez.",
+    },
+    contoEconomico: {
+      titolo: "Compte de résultat",
+      testo: "La liste de tout ce qui rentre et de tout ce qui sort en un mois. Il ne dit pas si vous êtes riche — cela, c'est le patrimoine — il dit si chaque mois vous rapproche ou vous éloigne. Et c'est la seule chose que ce jeu regarde.",
+    },
+    ruota: {
+      titolo: "La Roue",
+      testo: "La boucle dans laquelle on vit quand les dépenses ne se paient qu'en travaillant : le salaire arrive, il s'en va, et on recommence. On en sort quand le revenu passif couvre les dépenses avec une marge — et ce jour-là, dans ce jeu, on gagne.",
+    },
+  },
+
   guida: {
     titolo: "Première partie",
     chiSei: "Vous êtes éboueur. Chaque mois il vous reste {importo} une fois tout payé : c'est de là qu'on part. Lancez le dé — chaque case que vous passez est un mois de votre vie.",

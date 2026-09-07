@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { Bottone } from "../components/Base.jsx";
 import Scelta from "../components/Scelta.jsx";
+import Glossa from "../components/Glossa.jsx";
 import Logo from "../components/Logo.jsx";
 import Icona from "../components/Icona.jsx";
 import { MercatoProvider, useMercato } from "../Mercato.jsx";
@@ -585,6 +586,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, mercat
                     terzo più basso di quello vero — e da oggi quel numero
                     è la condizione di vittoria. */}
                 {t("ingresso.perUscire", { importo: soldi(Math.round(speseProf * margine)) })}
+                {" "}<Glossa termine="redditoPassivo" />
               </p>
             </div>
           </div>

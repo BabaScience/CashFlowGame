@@ -87,6 +87,35 @@ export default {
     comincia: "Start",
   },
 
+  glossario: {
+    cosaSignifica: "What it means",
+    cosaVuolDire: "What {parola} means",
+    redditoPassivo: {
+      titolo: "Passive income",
+      testo: "Money that reaches you every month without you working for it: rent from a flat, profit from a business, a dividend from a share. A salary stops when you stop; this does not. It is the number you have to raise, and the only one the game measures to decide who wins.",
+    },
+    giornoDiPaga: {
+      titolo: "Payday",
+      testo: "What is left each month: everything coming in minus everything going out. It is the money you buy with — the things that will later pay you on their own. If it is negative you are eating your savings, and sooner or later the bank notices.",
+    },
+    acconto: {
+      titolo: "Deposit",
+      testo: "The part of the price you pay now, out of your own pocket. The bank puts up the rest and makes you pay it back monthly. What matters is not the price: it is how big a deposit gets you in, and how much what you bought pays you every month.",
+    },
+    flusso: {
+      titolo: "Monthly cash flow",
+      testo: "What something puts in your pocket each month, after everything that thing costs — the loan payment, the tax, the months it sits empty. It can be negative: then it does not pay you, you pay it.",
+    },
+    contoEconomico: {
+      titolo: "Income statement",
+      testo: "The list of everything coming in and everything going out in a month. It does not say how rich you are — that is net worth — it says whether each month brings you closer or further away. And it is the only thing this game looks at.",
+    },
+    ruota: {
+      titolo: "The Wheel",
+      testo: "The loop you live in when your expenses are only paid by working: the salary arrives, it goes, and it starts again. You get off it when your passive income covers your expenses with a margin — and that day, in this game, you win.",
+    },
+  },
+
   guida: {
     titolo: "First game",
     chiSei: "You are a refuse collector. Every month {importo} is left after paying for everything: that is what you start with. Roll the die — every square you pass is a month of your life.",

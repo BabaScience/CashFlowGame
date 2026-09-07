@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { soldi } from "../game/finanze.js";
 import { useMercato } from "../Mercato.jsx";
 import { useLingua } from "../Lingua.jsx";
+import Glossa from "./Glossa.jsx";
 
 /**
  * Contenitore di una carta pescata: parte coperta e si gira.
@@ -113,9 +114,10 @@ export function CorpoAffare({ carta }) {
         <div className="tag tag-verde mb8">{categorie[carta.categoria]}</div>
       )}
       <Voce k={t("carta.costoTotale")} v={soldi(carta.costo)} />
-      <Voce k={t("carta.accontoRichiesto")} v={soldi(carta.acconto)} />
+      <Voce k={<Glossa termine="acconto">{t("carta.accontoRichiesto")}</Glossa>} v={soldi(carta.acconto)} />
       <Voce k={t(carta.tipo === "immobile" ? "carta.mutuo" : "carta.debito")} v={soldi(carta.mutuo ?? carta.passivita ?? 0)} />
-      <Voce k={t("carta.flussoMensile")} v={flusso ? `${flusso > 0 ? "+" : ""}${soldi(flusso)}` : t("carta.nessuno")} forte />
+      <Voce k={<Glossa termine="flusso">{t("carta.flussoMensile")}</Glossa>}
+        v={flusso ? `${flusso > 0 ? "+" : ""}${soldi(flusso)}` : t("carta.nessuno")} forte />
       {r !== null && flusso > 0 && (
         <p className="f12 tenue" style={{ margin: "10px 0 0" }}>
           {t("carta.rendimento", {
