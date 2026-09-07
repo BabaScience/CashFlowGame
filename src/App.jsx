@@ -4,6 +4,7 @@ import { Avviso, Bottone } from "./components/Base.jsx";
 import Ingresso from "./screens/Ingresso.jsx";
 import Sfida from "./screens/Sfida.jsx";
 import Arena from "./screens/Arena.jsx";
+import PrimaPartita from "./screens/PrimaPartita.jsx";
 import Impara from "./screens/Impara.jsx";
 import Attesa from "./screens/Attesa.jsx";
 import Partita from "./screens/Partita.jsx";
@@ -51,6 +52,7 @@ function Applicazione() {
   const [avviso, setAvviso] = useState("");
   const [sfida, setSfida] = useState(false);
   const [arena, setArena] = useState(false);
+  const [prima, setPrima] = useState(false);
   const [impara, setImpara] = useState(null); // null | "lezioni" | "quesiti"
 
   const avvisa = useCallback((t) => {
@@ -127,6 +129,14 @@ function Applicazione() {
   /* ── Nessuna stanza: schermata d'ingresso ── */
   /* Sfida e lezioni non hanno stanza: girano tutte nel browser. */
   if (sfida) return <Sfida suEsci={() => setSfida(false)} />;
+  if (prima) {
+    return (
+      <PrimaPartita
+        suEsci={() => setPrima(false)}
+        suGiocaDavvero={() => { setPrima(false); setArena(true); }}
+      />
+    );
+  }
   if (arena) {
     return (
       <>
@@ -144,6 +154,7 @@ function Applicazione() {
         <div className="schermo" style={{ paddingBottom: 24 }}>
           <Ingresso suEntrato={setCodice} avvisa={avvisa}
             suSfida={() => setSfida(true)} suArena={() => setArena(true)}
+            suPrima={() => setPrima(true)}
             suImpara={(dove) => setImpara(dove || "lezioni")} />
           <Avviso testo={avviso} />
         </div>

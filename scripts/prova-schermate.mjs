@@ -71,6 +71,8 @@ const Impara = (await import("../src/screens/Impara.jsx")).default;
 const Sfida = (await import("../src/screens/Sfida.jsx")).default;
 const Vittoria = (await import("../src/components/Vittoria.jsx")).default;
 const Decisione = (await import("../src/components/Decisione.jsx")).default;
+const PrimaPartita = (await import("../src/screens/PrimaPartita.jsx")).default;
+const Roulette = (await import("../src/components/Roulette.jsx")).default;
 const { LINGUE } = await import("../src/i18n/index.js");
 const Chat = (await import("../src/components/Chat.jsx")).default;
 const Scheda = (await import("../src/components/Scheda.jsx")).default;
@@ -641,6 +643,12 @@ function schermate() {
       stato: finita, mioId: "a", suNuovaPartita: nulla, suChiudi: nulla, sonoHost: true,
     }))],
     ["sfida del giorno", () => disegna(React.createElement(Sfida, { suEsci: nulla }))],
+    ["prima partita", () => disegna(React.createElement(PrimaPartita, {
+      suEsci: nulla, suGiocaDavvero: nulla,
+    }))],
+    ["rullo del mestiere", () => conMercato(s, React.createElement(Roulette, {
+      professioneId: require_pacchetto(s.mercatoId).professioni[2].id, suContinua: nulla,
+    }))],
   ];
 }
 

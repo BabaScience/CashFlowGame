@@ -11,11 +11,7 @@ import {
   riferimentoDelGiorno, registraValutazione, storicoValutazione, fasciaValutazione,
 } from "../game/valutazione.js";
 import { Bottone, Barra } from "../components/Base.jsx";
-import Tabellone from "../components/Tabellone.jsx";
-import Dadi from "../components/Dadi.jsx";
-import Scheda from "../components/Scheda.jsx";
-import Decisione from "../components/Decisione.jsx";
-import Registro from "../components/Registro.jsx";
+import TavoloSolitario from "../components/TavoloSolitario.jsx";
 import { riepilogo } from "../game/finanze.js";
 import { traccia } from "../lib/traccia.js";
 import { useSuoni } from "../hooks/useSuoni.js";
@@ -162,65 +158,40 @@ function Tavolo({ partita, setPartita, giorno, suEsci }) {
 
   if (esito) return <Esito stato={stato} esito={esito} giorno={giorno} suEsci={suEsci} />;
 
-  const r = riepilogo(io);
   const p = punteggio(stato);
 
   return (
-    <div className="schermo schermo-partita">
-      <div className="flex tra cen g12" style={{
-        padding: "12px 14px", background: "rgba(0,0,0,.24)",
-        borderBottom: "1px solid rgba(255,255,255,.07)", flex: "none",
-      }}>
-        <button onClick={suEsci} className="f11 tenue" style={{ textAlign: "left", background: "none" }}>
-          <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("sfida.sfida")}</div>
-          <div className="numeri grassetto f16">{giorno.slice(5)}</div>
-        </button>
-        <div className="ta-c" style={{ flex: 1 }}>
-          <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("sfida.turno")}</div>
-          <div className="numeri grassetto f16">{Math.min(stato.numeroTurno, TURNI_SFIDA)} / {TURNI_SFIDA}</div>
-        </div>
-        <div className="ta-r">
-          <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("sfida.contanti")}</div>
-          <div className="numeri grassetto f16">{soldi(io.contanti)}</div>
-        </div>
-      </div>
-
-      <div className="corpo">
-        <div className="colonna-tavolo">
-          <div className="zona-tavolo">
-            <Tabellone stato={stato} mioId="io" />
-            <Dadi tiro={stato.ultimoTiro} mioId="io" />
+    <TavoloSolitario
+      stato={stato} invia={invia} errore={errore} finita={finita}
+      intestazione={(
+        <div className="flex tra cen g12" style={{
+          padding: "12px 14px", background: "rgba(0,0,0,.24)",
+          borderBottom: "1px solid rgba(255,255,255,.07)", flex: "none",
+        }}>
+          <button onClick={suEsci} className="f11 tenue" style={{ textAlign: "left", background: "none" }}>
+            <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("sfida.sfida")}</div>
+            <div className="numeri grassetto f16">{giorno.slice(5)}</div>
+          </button>
+          <div className="ta-c" style={{ flex: 1 }}>
+            <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("sfida.turno")}</div>
+            <div className="numeri grassetto f16">{Math.min(stato.numeroTurno, TURNI_SFIDA)} / {TURNI_SFIDA}</div>
           </div>
-          <div className="zona-progresso">
-            <div className="flex tra f12 mb4">
-              <span className="tenue">{t("sfida.punteggio")}</span>
-              <span className="numeri grassetto">{p}/100</span>
-            </div>
-            <Barra scura valore={Math.min(1, p / 100)} />
-          </div>
-          <div className="zona-azioni">
-            {!finita && !stato.pending && !stato.dado && (
-              <Bottone variante="btn-oro" onClick={() => invia({ tipo: "tira", nDadi: 2 })}>
-                Tira il dado
-              </Bottone>
-            )}
-            {io.tracciato === "topi" && r.redditoPassivo > r.speseTotali && (
-              <Bottone variante="btn-verde mt12" onClick={() => invia({ tipo: "esciDallaCorsa" })}>
-                Prendi il largo
-              </Bottone>
-            )}
-            {errore && <p className="f12 neg mt8" style={{ margin: "8px 0 0" }}>{errore}</p>}
+          <div className="ta-r">
+            <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("sfida.contanti")}</div>
+            <div className="numeri grassetto f16">{soldi(io.contanti)}</div>
           </div>
         </div>
-
-        <div className="zona-pannello">
-          <Scheda giocatore={io} invia={invia} inAzione={false} mio />
-          <div className="mt12"><Registro stato={stato} limite={12} /></div>
-        </div>
-      </div>
-
-      <Decisione stato={stato} mioId="io" invia={invia} inAzione={false} />
-    </div>
+      )}
+      progresso={(
+        <>
+          <div className="flex tra f12 mb4">
+            <span className="tenue">{t("sfida.punteggio")}</span>
+            <span className="numeri grassetto">{p}/100</span>
+          </div>
+          <Barra scura valore={Math.min(1, p / 100)} />
+        </>
+      )}
+    />
   );
 }
 

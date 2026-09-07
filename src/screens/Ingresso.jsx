@@ -10,6 +10,7 @@ import { LIVELLI, LIVELLO_PREDEFINITO } from "../game/regole/livelli.js";
 import { soldi } from "../game/finanze.js";
 import { MAX_GIOCATORI } from "../game/tabellone.js";
 import { TURNI_LAMPO } from "../game/motore.js";
+import { primaPartitaFatta } from "../game/prima-partita.js";
 import * as api from "../lib/api.js";
 import { traccia } from "../lib/traccia.js";
 import { partiteAperte, dimenticaPartita, daQuanto } from "../lib/partite.js";
@@ -24,13 +25,13 @@ import { useLingua } from "../Lingua.jsx";
  * piedi a chi l'ha appena letta. Chi entra con un codice non sceglie nulla:
  * il mercato è quello della stanza, uno per tavolo.
  */
-export default function Ingresso({ suEntrato, avvisa, suSfida, suArena, suImpara, vistaIniziale, modoIniziale, stanzaIniziale }) {
+export default function Ingresso({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, vistaIniziale, modoIniziale, stanzaIniziale }) {
   const [mercatoId, setMercato] = useState(
     () => localStorage.getItem("quotazero:mercato") || MERCATO_PREDEFINITO
   );
   return (
     <MercatoProvider mercatoId={mercatoId}>
-      <Modulo suEntrato={suEntrato} avvisa={avvisa} suSfida={suSfida} suArena={suArena} suImpara={suImpara}
+      <Modulo suEntrato={suEntrato} avvisa={avvisa} suSfida={suSfida} suArena={suArena} suPrima={suPrima} suImpara={suImpara}
         mercatoId={mercatoId} setMercato={setMercato} vistaIniziale={vistaIniziale} modoIniziale={modoIniziale} stanzaIniziale={stanzaIniziale} />
     </MercatoProvider>
   );
@@ -115,7 +116,7 @@ function SceltaDIngresso({ stanza, professioneId, setProfessione, sognoId, setSo
   );
 }
 
-function Modulo({ suEntrato, avvisa, suSfida, suArena, suImpara, mercatoId, setMercato, vistaIniziale = "casa", modoIniziale = "crea", stanzaIniziale = null }) {
+function Modulo({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, mercatoId, setMercato, vistaIniziale = "casa", modoIniziale = "crea", stanzaIniziale = null }) {
   /* Le partite lasciate a metà. Il gioco a turni distanziati serve a poco
      se poi non si ritrova la strada per tornarci. */
   const [aperte, setAperte] = useState(() => partiteAperte());
@@ -168,6 +169,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suImpara, mercatoId, setM
     return () => { vivo = false; };
   }, []);
 
+  const giaGiocato = primaPartitaFatta();
   const [stanza, setStanza] = useState(stanzaIniziale);
   const [cercando, setCercando] = useState(false);
 
@@ -312,12 +314,35 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suImpara, mercatoId, setM
             {/* Le destinazioni. Ognuna dice cosa succede se la scegli e
                 quanto dura: sono le due cose che si vogliono sapere prima
                 di cliccare. */}
+            {/* Il patto, prima di qualunque pulsante. Prima la promessa
+                era scritta in una parola che il gioco inventa — «Esci dalla
+                Ruota» — e la spiegazione stava in fondo, dopo i cinque
+                pulsanti. Chi arrivava non sapeva che cosa gli si stesse
+                proponendo. */}
+            <div className="carta patto">
+              <p>{t("casa.ilPatto")}</p>
+            </div>
+
             <div className="destinazioni">
+              {/* Per chi non ha mai giocato è questa la porta, e sta prima
+                  di tutto: cinque minuti da solo, con una voce che spiega
+                  mentre succede. Chi l'ha già fatta la ritrova in fondo. */}
+              {suPrima && !giaGiocato && (
+                <button className="destinazione destinazione-prima" onClick={suPrima}>
+                  <span className="dest-icona"><Icona nome="libro" dim={24} /></span>
+                  <span className="dest-testo">
+                    <span className="dest-titolo">{t("casa.prima")}</span>
+                    <span className="dest-nota">{t("casa.primaNota")}</span>
+                  </span>
+                  <span className="dest-freccia"><Icona nome="frecciaDestra" dim={18} /></span>
+                </button>
+              )}
               {/* Prima di tutto il resto: qui non serve conoscere nessuno.
                   È la differenza fra un gioco che si gioca fra amici e un
                   posto dove si va. */}
               {suArena && (
-                <button className="destinazione destinazione-prima" onClick={suArena}>
+                <button className={giaGiocato ? "destinazione destinazione-prima" : "destinazione"}
+                  onClick={suArena}>
                   <span className="dest-icona"><Icona nome="fulmine" dim={24} /></span>
                   <span className="dest-testo">
                     <span className="dest-titolo">{t("casa.arena")}</span>
@@ -327,8 +352,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suImpara, mercatoId, setM
                 </button>
               )}
 
-              <button className={suArena ? "destinazione" : "destinazione destinazione-prima"}
-                onClick={() => setVista("modulo")}>
+              <button className="destinazione" onClick={() => setVista("modulo")}>
                 <span className="dest-icona"><Icona nome="dado" dim={24} /></span>
                 <span className="dest-testo">
                   <span className="dest-titolo">{t("casa.tavolo")}</span>
@@ -371,8 +395,18 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suImpara, mercatoId, setM
               )}
             </div>
 
-            {/* Cos'è, per chi non l'ha mai visto. Prima non lo diceva
-                nessuno: si arrivava su un modulo e basta. */}
+            {suPrima && giaGiocato && (
+              <button className="destinazione destinazione-minuta" onClick={suPrima}>
+                <span className="dest-icona"><Icona nome="libro" dim={20} /></span>
+                <span className="dest-testo">
+                  <span className="dest-titolo">{t("casa.primaRifai")}</span>
+                </span>
+                <span className="dest-freccia"><Icona nome="frecciaDestra" dim={16} /></span>
+              </button>
+            )}
+
+            {/* Come funziona, in tre righe. Il patto in cima dice a che
+                serve; questo dice come si fa. */}
             <div className="carta spiegazione">
               <div className="etichetta">{t("casa.comeFunziona")}</div>
               <ol>

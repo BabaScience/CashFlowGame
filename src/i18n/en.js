@@ -87,6 +87,23 @@ export default {
     comincia: "Start",
   },
 
+  guida: {
+    titolo: "First game",
+    chiSei: "You are a refuse collector. Every month {importo} is left after paying for everything: that is what you start with. Roll the die — every square you pass is a month of your life.",
+    paga: "Payday: you collected {importo}. That is your savings — they are for buying, not for sitting on.",
+    taglia: "An opportunity. First choose how big a one to look at: small deals cost little, big ones pay more.",
+    carta: "Look at two numbers and nothing else: it costs {acconto} now, and it would pay you {flusso} every month, forever.",
+    primaRendita: "There. You now earn {rendita} a month without working. You need to reach {traguardo}.",
+    extra: "This one you cannot refuse: it is life costing money. Extra Expenses are what slow you down, not bad deals.",
+    barra: "The bar at the bottom is the whole game: {rendita} of income against {traguardo} to reach. Fill it and you stop working.",
+    prestito: "You are short of cash. The bank will lend, but the payment is another expense: it is worth it only if what you buy earns more than the payment costs.",
+    fineTitolo: "What you built",
+    fineRendita: "a month, without working",
+    fineSpiegazione: "In {tempo} you started from nothing and got here. Leaving work takes {traguardo} a month: a real game gives you four times the turns you just had.",
+    giocaDavvero: "Now play for real",
+    tornaACasa: "Back to the home page",
+  },
+
   arena: {
     sottotitolo: "Press Play. Someone shows up.",
     giocaOra: "Play now",
@@ -536,6 +553,10 @@ export default {
     haLavorato: "worked {durata}",
   },
   casa: {
+    prima: "Your first game",
+    primaNota: "Five minutes, on your own, with a voice explaining as you play.",
+    primaRifai: "Play the first game again",
+    ilPatto: "You have a salary and bills, like everyone. The game is buying things that pay you every month — a flat you rent out, a business, a share — until what comes in covers what goes out. That day work becomes a choice: that is the Wheel you get off, and the game tells you how many months it took.",
     arena: "Play now",
     arenaNota: "We find you an opponent. Even if you know nobody.",
     tavolo: "Play at a table",

@@ -81,6 +81,23 @@ export default {
     comincia: "Comincia",
   },
 
+  guida: {
+    titolo: "Prima partita",
+    chiSei: "Fai l'operatore ecologico. Ogni mese ti restano {importo} dopo aver pagato tutto: è da lì che si comincia. Tira il dado — ogni casella su cui passi è un mese della tua vita.",
+    paga: "Giorno di Paga: hai incassato {importo}. Sono i tuoi soldi da parte — servono a comprare, non a stare fermi.",
+    taglia: "Un'occasione. Prima scegli quanto grande guardarla: i piccoli affari costano poco, i grandi rendono di più.",
+    carta: "Guarda due numeri e basta: costa {acconto} adesso, e ti darebbe {flusso} ogni mese per sempre.",
+    primaRendita: "Ecco. Adesso guadagni {rendita} al mese senza lavorare. Ti serve arrivare a {traguardo}.",
+    extra: "Questa non si può rifiutare: è la vita che costa. Sono le Spese Extra a rallentarti, non gli affari sbagliati.",
+    barra: "La barra in basso è tutto il gioco: {rendita} di rendita contro {traguardo} da raggiungere. Quando la riempi, smetti di lavorare.",
+    prestito: "Non ti bastano i contanti. La banca presta, ma la rata è una spesa in più: conviene solo se quello che compri rende più di quanto costa la rata.",
+    fineTitolo: "Quello che ti sei costruito",
+    fineRendita: "al mese, senza lavorare",
+    fineSpiegazione: "In {tempo} sei partito da zero e sei arrivato qui. Per lasciare il lavoro servono {traguardo} al mese: in una partita vera hai quattro volte i turni che hai avuto adesso.",
+    giocaDavvero: "Adesso gioca sul serio",
+    tornaACasa: "Torna alla home",
+  },
+
   arena: {
     sottotitolo: "Premi Gioca. Qualcuno arriva.",
     giocaOra: "Gioca ora",
@@ -530,6 +547,13 @@ export default {
     haLavorato: "ha lavorato {durata}",
   },
   casa: {
+    prima: "La tua prima partita",
+    primaNota: "Cinque minuti, da solo, con una voce che spiega mentre giochi.",
+    primaRifai: "Rifai la prima partita",
+    /* Il patto, prima di qualunque pulsante. La parola «Ruota» finora si
+       usava come se tutti sapessero cos'è: qui viene introdotta da una
+       frase che si capisce senza saperla. */
+    ilPatto: "Hai uno stipendio e delle bollette, come tutti. Il gioco è comprare cose che ti pagano ogni mese — una casa affittata, un'attività, un titolo — finché quello che incassi copre quello che spendi. Quel giorno il lavoro diventa una scelta: è quella la Ruota da cui si esce, e il gioco ti dice quanti mesi ci hai messo.",
     arena: "Gioca ora",
     arenaNota: "Ti troviamo un avversario. Anche se non conosci nessuno.",
     tavolo: "Gioca al tavolo",

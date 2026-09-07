@@ -87,6 +87,23 @@ export default {
     comincia: "Commencer",
   },
 
+  guida: {
+    titolo: "Première partie",
+    chiSei: "Vous êtes éboueur. Chaque mois il vous reste {importo} une fois tout payé : c'est de là qu'on part. Lancez le dé — chaque case que vous passez est un mois de votre vie.",
+    paga: "Jour de paie : vous avez encaissé {importo}. C'est votre épargne — elle sert à acheter, pas à dormir.",
+    taglia: "Une occasion. Choisissez d'abord sa taille : les petites affaires coûtent peu, les grandes rapportent plus.",
+    carta: "Regardez deux chiffres, pas un de plus : elle coûte {acconto} maintenant, et vous rapporterait {flusso} chaque mois, pour toujours.",
+    primaRendita: "Voilà. Vous gagnez maintenant {rendita} par mois sans travailler. Il vous faut atteindre {traguardo}.",
+    extra: "Celle-ci ne se refuse pas : c'est la vie qui coûte. Ce sont les dépenses imprévues qui vous ralentissent, pas les mauvaises affaires.",
+    barra: "La barre en bas, c'est tout le jeu : {rendita} de rente contre {traguardo} à atteindre. Remplissez-la et vous arrêtez de travailler.",
+    prestito: "Vous n'avez pas assez de liquide. La banque prête, mais la mensualité est une dépense de plus : cela ne vaut le coup que si ce que vous achetez rapporte plus qu'elle ne coûte.",
+    fineTitolo: "Ce que vous avez bâti",
+    fineRendita: "par mois, sans travailler",
+    fineSpiegazione: "En {tempo} vous êtes parti de zéro et vous voilà ici. Pour quitter le travail il faut {traguardo} par mois : une vraie partie vous donne quatre fois les tours que vous venez d'avoir.",
+    giocaDavvero: "Maintenant, jouez pour de vrai",
+    tornaACasa: "Retour à l'accueil",
+  },
+
   arena: {
     sottotitolo: "Appuyez sur Jouer. Quelqu'un arrive.",
     giocaOra: "Jouer maintenant",
@@ -535,6 +552,10 @@ export default {
     haLavorato: "a travaillé {durata}",
   },
   casa: {
+    prima: "Votre première partie",
+    primaNota: "Cinq minutes, en solo, avec une voix qui explique pendant que vous jouez.",
+    primaRifai: "Refaire la première partie",
+    ilPatto: "Vous avez un salaire et des factures, comme tout le monde. Le jeu consiste à acheter des choses qui vous paient chaque mois — un logement loué, une activité, un titre — jusqu'à ce que ce qui rentre couvre ce qui sort. Ce jour-là, travailler devient un choix : c'est la Roue dont on sort, et le jeu vous dit combien de mois il vous a fallu.",
     arena: "Jouer maintenant",
     arenaNota: "On vous trouve un adversaire. Même si vous ne connaissez personne.",
     tavolo: "Jouer à table",

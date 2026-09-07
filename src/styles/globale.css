@@ -1308,3 +1308,36 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 }
 .rullo-emoji { font-size: 40px; line-height: 1.1; }
 .rullo-nome { font-size: 21px; margin-top: 4px; }
+
+/* ══ la voce della prima partita ══
+   Sta sopra il tabellone e non sopra la partita: una finestrella che copre
+   il gioco si chiude senza leggerla. Questa resta lì mentre si gioca. ══ */
+.guida-voce {
+  display: flex; align-items: flex-start; gap: 10px;
+  margin: 0 0 10px;
+  padding: 12px 14px;
+  background: linear-gradient(160deg, rgba(201,162,39,.16), rgba(201,162,39,.07));
+  border: 1px solid rgba(201,162,39,.34);
+  border-radius: 14px;
+}
+.guida-voce p {
+  margin: 0; flex: 1;
+  font-size: 13.5px; line-height: 1.5;
+  color: var(--carta);
+}
+.guida-becco { flex: none; color: var(--oro); font-size: 15px; line-height: 1.4; }
+
+/* ══ il patto ══
+   Cosa promette il gioco, prima di qualunque pulsante. Prima la promessa
+   stava in una parola che il gioco inventa («Esci dalla Ruota») e la
+   spiegazione era in fondo, dopo cinque pulsanti. ══ */
+.patto { margin-bottom: 14px; }
+.patto p {
+  margin: 0;
+  font-size: 14px; line-height: 1.6;
+  color: var(--inchiostro);
+}
+
+/* La riga per rifare la prima partita: c'è, ma non compete con le altre. */
+.destinazione-minuta { padding: 12px 14px; margin-top: 10px; opacity: .82; }
+.destinazione-minuta .dest-titolo { font-size: 14px; }
