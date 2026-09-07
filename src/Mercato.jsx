@@ -77,6 +77,11 @@ export function MercatoProvider({ stato, mercatoId, children }) {
       mazzi: Object.fromEntries(
         Object.entries(grezzo.mazzi).map(([k, m]) => [k, carteTradotte(m, tav.carte)])
       ),
+      /* Le categorie sono l'etichetta verde su ogni carta immobiliare: la
+         stringa più vista del gioco, ed era rimasta in italiano in tutte le
+         lingue. Non c'era un motivo, solo una dimenticanza — il layer le
+         saltava e nessun test guardava. */
+      categorie: { ...grezzo.categorie, ...(tav.categorie || {}) },
       etichetteSpese: { ...grezzo.etichetteSpese, ...(tav.etichetteSpese || {}) },
       etichettePassivita: { ...grezzo.etichettePassivita, ...(tav.etichettePassivita || {}) },
       debitiEstinguibili: (grezzo.debitiEstinguibili || []).map((d) => ({

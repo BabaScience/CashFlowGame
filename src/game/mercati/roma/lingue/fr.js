@@ -12,6 +12,17 @@
  * un garage fermé, un *stabile* est un immeuble de rapport.
  */
 export default {
+  categorie: {
+    posto: "Place de parking ou box",
+    bilocale: "Deux-pièces",
+    trilocale: "Trois-pièces",
+    quadrilocale: "Quatre-pièces",
+    palazzina: "Petit immeuble",
+    stabile: "Immeuble",
+    terreno: "Terrain",
+    attivita: "Activité",
+  },
+
   professioni: {
     "dirigente-medico": { nome: "Médecin hospitalier" },
     pilota: { nome: "Pilote de ligne" },

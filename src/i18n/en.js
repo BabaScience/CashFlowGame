@@ -503,6 +503,10 @@ export default {
     divorzio: { nome: "Divorce", breve: "DIVORCE" },
   },
 
+  giocatori: {
+    spiegazioneBarra: "The bar shows how much of the expenses the passive income covers. When it fills up, that player leaves work and wins.",
+  },
+
   comune: {
     tornaInizio: "Back to the start",
     tabelloneDiGioco: "Game board",

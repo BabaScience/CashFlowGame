@@ -497,6 +497,10 @@ export default {
     divorzio: { nome: "Divorzio", breve: "DIVORZIO" },
   },
 
+  giocatori: {
+    spiegazioneBarra: "La barra mostra quanto il reddito passivo copre le spese. Quando arriva in fondo, quel giocatore lascia il lavoro e vince.",
+  },
+
   comune: {
     tornaInizio: "Torna all'inizio",
     tabelloneDiGioco: "Tabellone di gioco",

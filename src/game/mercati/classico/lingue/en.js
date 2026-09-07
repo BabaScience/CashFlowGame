@@ -3,6 +3,18 @@
  * Only the words change: the figures stay in dollars, as they are.
  */
 export default {
+  categorie: {
+    casa2: "One-bedroom house",
+    casa3: "Two-bedroom house",
+    casa4: "Three-bedroom house",
+    duplex: "Duplex",
+    quadri: "4-plex",
+    otto: "8-unit block",
+    appartamenti: "Apartment building",
+    terreno: "Land",
+    attivita: "Business",
+  },
+
   professioni: {
     medico: { nome: "Doctor" }, pilota: { nome: "Airline pilot" },
     avvocato: { nome: "Lawyer" }, ingegnere: { nome: "Engineer" },

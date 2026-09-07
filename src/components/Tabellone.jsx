@@ -6,6 +6,7 @@ import {
 } from "../game/tabellone.js";
 import { useLingua } from "../Lingua.jsx";
 import { MARCHIO } from "../marchio.js";
+import { msDiCammino } from "../lib/ritmo.js";
 
 /* ── geometria ─────────────────────────────────────────────── */
 const L = 400, CX = L / 2, CY = L / 2;
@@ -98,7 +99,7 @@ function Gettone({ giocatore, n, raggio, ordine, totale, èTurno, mio, indice })
       xs.push(px); ys.push(py);
     }
     setFrames({ xs, ys, passi });
-    const t = setTimeout(() => setFrames(null), passi * 130 + 300);
+    const t = setTimeout(() => setFrames(null), msDiCammino(passi) + 300);
     return () => clearTimeout(t);
   }, [giocatore.posizione, n, raggio, ordine, totale]);
 
@@ -107,7 +108,7 @@ function Gettone({ giocatore, n, raggio, ordine, totale, èTurno, mio, indice })
   // scrivere "undefined" dentro l'attributo, rompendo il disegno.
   const anim = frames ? { x: frames.xs, y: frames.ys } : { x, y };
   const transizione = frames
-    ? { duration: Math.max(0.35, frames.passi * 0.13), ease: "easeInOut" }
+    ? { duration: msDiCammino(frames.passi) / 1000, ease: "easeInOut" }
     : { type: "spring", stiffness: 260, damping: 26 };
 
   return (

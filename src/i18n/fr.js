@@ -502,6 +502,10 @@ export default {
     divorzio: { nome: "Divorce", breve: "DIVORCE" },
   },
 
+  giocatori: {
+    spiegazioneBarra: "La barre montre à quel point le revenu passif couvre les dépenses. Quand elle est pleine, ce joueur quitte son travail et gagne.",
+  },
+
   comune: {
     tornaInizio: "Revenir au début",
     tabelloneDiGioco: "Plateau de jeu",

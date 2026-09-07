@@ -90,8 +90,7 @@ export default function Giocatori({ stato, mioId, compatto }) {
 
       {!compatto && (
         <p className="f11 tenue mt12" style={{ margin: "12px 0 0", lineHeight: 1.5 }}>
-          La barra mostra quanto il reddito passivo copre le spese. Quando arriva in
-          fondo, quel giocatore può uscire dalla Ruota.
+          {t("giocatori.spiegazioneBarra")}
         </p>
       )}
     </div>

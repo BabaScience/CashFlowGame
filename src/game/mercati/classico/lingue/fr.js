@@ -3,6 +3,18 @@
  * Seuls les mots changent : les montants restent en dollars.
  */
 export default {
+  categorie: {
+    casa2: "Maison deux-pièces",
+    casa3: "Maison trois-pièces",
+    casa4: "Maison quatre-pièces",
+    duplex: "Maison de deux logements",
+    quadri: "Immeuble de quatre logements",
+    otto: "Immeuble de huit logements",
+    appartamenti: "Immeuble d'appartements",
+    terreno: "Terrain",
+    attivita: "Activité",
+  },
+
   professioni: {
     medico: { nome: "Médecin" }, pilota: { nome: "Pilote de ligne" },
     avvocato: { nome: "Avocat" }, ingegnere: { nome: "Ingénieur" },

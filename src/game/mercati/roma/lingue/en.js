@@ -11,6 +11,17 @@
  * *stabile* is an apartment block.
  */
 export default {
+  categorie: {
+    posto: "Parking space or garage",
+    bilocale: "One-bedroom flat",
+    trilocale: "Two-bedroom flat",
+    quadrilocale: "Three-bedroom flat",
+    palazzina: "Small block",
+    stabile: "Apartment block",
+    terreno: "Land",
+    attivita: "Business",
+  },
+
   professioni: {
     "dirigente-medico": { nome: "Senior hospital doctor" },
     pilota: { nome: "Airline pilot" },

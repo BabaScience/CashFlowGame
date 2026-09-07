@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Foglio, Bottone, Denaro } from "./Base.jsx";
 import CartaGioco, { CorpoAffare, Voce } from "./CartaGioco.jsx";
 import { soldi, flussoMensile, riepilogo } from "../game/finanze.js";
 import { useMercato } from "../Mercato.jsx";
 import { useLingua } from "../Lingua.jsx";
+import { msPrimaDellaCarta } from "../lib/ritmo.js";
 import { nomiCaselle } from "../i18n/index.js";
 import { TASSO_PRESTITO } from "../game/finanze.js";
 
@@ -12,8 +13,48 @@ import { TASSO_PRESTITO } from "../game/finanze.js";
  * Il pannello si apre solo per chi deve davvero decidere: gli altri
  * vedono la stessa carta nel riquadro "sul tavolo" della schermata di gioco.
  */
+/**
+ * ASPETTARE CHE LA PEDINA ARRIVI.
+ *
+ * Il motore muove e pesca nella stessa mossa: lo stato che torna dal
+ * server ha già dentro la posizione nuova E la carta da decidere. Il
+ * risultato era che il foglio si apriva sopra il tabellone mentre la
+ * pedina stava ancora camminando, e non si vedeva su che casella si era
+ * finiti — la cosa che dà senso alla carta che si sta guardando.
+ *
+ * Qui il foglio aspetta esattamente quanto cammina la pedina, più un
+ * respiro perché si veda dove ci si è fermati. I due tempi vengono dallo
+ * stesso posto: `src/lib/ritmo.js`.
+ *
+ * Aspetta solo quando c'è stato un tiro nuovo. Una carta che arriva senza
+ * tiro — il Mercato a cui rispondono tutti, una bancarotta, una partita
+ * ripresa a metà — si apre subito, perché non c'è nessuna pedina da
+ * seguire.
+ */
+function attendiLaPedina(stato) {
+  const tiro = stato.ultimoTiro;
+  const [fermo, setFermo] = useState(true);
+  const visto = useRef(tiro?.n ?? 0);
+
+  useEffect(() => {
+    const n = tiro?.n ?? 0;
+    if (n === visto.current) return;
+    visto.current = n;
+    /* Scheda in secondo piano: la pedina non si anima, e aspettare
+       vorrebbe dire tornare e trovare il foglio ancora chiuso. */
+    if (typeof document !== "undefined" && document.hidden) return;
+    setFermo(false);
+    const durata = msPrimaDellaCarta(tiro?.totale);
+    const t = setTimeout(() => setFermo(true), durata);
+    return () => clearTimeout(t);
+  }, [tiro?.n, tiro?.totale]);
+
+  return fermo;
+}
+
 export default function Decisione({ stato, mioId, invia, inAzione }) {
   const { t, lingua } = useLingua();
+  const pedinaFerma = attendiLaPedina(stato);
   /* "Verifica fiscale" arriva dal motore, che parla italiano: il titolo
      della carta è l'unica cosa che il giocatore legge, e restava lì. */
   const nomeCasella = (n) => nomiCaselle(lingua)[n] || n;
@@ -45,6 +86,8 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
   }, [p, io, mioId]);
 
   if (!p || !io || !tocca) return null;
+  /* La carta aspetta che la pedina sia arrivata. Vedi `attendiLaPedina`. */
+  if (!pedinaFerma) return null;
 
   const fai = async (az) => {
     setErrore("");

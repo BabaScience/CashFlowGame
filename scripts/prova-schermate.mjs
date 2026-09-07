@@ -70,6 +70,8 @@ const Partita = (await import("../src/screens/Partita.jsx")).default;
 const Impara = (await import("../src/screens/Impara.jsx")).default;
 const Sfida = (await import("../src/screens/Sfida.jsx")).default;
 const Vittoria = (await import("../src/components/Vittoria.jsx")).default;
+const Decisione = (await import("../src/components/Decisione.jsx")).default;
+const { LINGUE } = await import("../src/i18n/index.js");
 const Chat = (await import("../src/components/Chat.jsx")).default;
 const Scheda = (await import("../src/components/Scheda.jsx")).default;
 const Giocatori = (await import("../src/components/Giocatori.jsx")).default;
@@ -526,78 +528,176 @@ prova("Sfida già giocata oggi", () => {
   memoria.delete("quotazero:sfida");
 });
 
-console.log("\n── Con l'interfaccia in inglese non resta italiano ──");
+console.log("\n── In nessun'altra lingua resta italiano ──");
 
 /* Il difetto che questa sezione insegue non è "una traduzione manca": è
    "una stringa non passa da t()". Non si vede leggendo il codice, perché
    una frase scritta a mano è indistinguibile da una tradotta finché non si
-   cambia lingua. Si vede disegnando le schermate in inglese e cercandoci
-   dentro parole che in inglese non esistono. */
-/* Solo parole dell'INTERFACCIA. I contenuti del mercato — "Mutuo o
-   affitto", "Prestito studi", i nomi delle professioni e dei sogni —
-   restano in italiano di proposito: sono circa 150 stringhe per mercato e
-   vanno tradotte da qualcuno che conosca il posto, non a macchina (vedi
-   TODO). Pretenderle qui renderebbe questo controllo impossibile da
-   passare, e un controllo impossibile da passare viene disattivato. */
+   cambia lingua. Si vede disegnando le schermate in un'altra lingua e
+   cercandoci dentro parole che in quella lingua non esistono.
+
+   ═══ PERCHÉ QUESTI DIFETTI REGGEVANO ═══
+
+   Questa sezione c'era già, e non li ha visti. Tre motivi, tutti e tre
+   corretti qui sotto.
+
+   Guardava **tre schermate su dieci**, e solo in inglese. La schermata
+   d'ingresso, i fogli di decisione, la sfida, le lezioni e la vittoria non
+   passavano di qui.
+
+   Cercava **una lista di ventidue parole scelte a mano**. Qualunque parola
+   italiana fuori da quella lista passava indisturbata.
+
+   E soprattutto **si escludeva da sola i contenuti del mercato**, con un
+   commento che diceva: sono centocinquanta stringhe per mercato, vanno
+   tradotte da qualcuno che conosce il posto, pretenderle qui renderebbe il
+   controllo impossibile da passare. Era vero quando è stato scritto. Poi i
+   contenuti sono stati tradotti — professioni, sogni, carte, voci del
+   conto — e il ritaglio è rimasto lì. Le categorie ("Bilocale",
+   "Trilocale": l'etichetta verde su ogni carta immobiliare, la stringa più
+   vista del gioco) sono passate inosservate per questo.
+
+   Adesso non c'è nessun ritaglio, e invece di una lista di parole c'è un
+   pugno di parole funzione italiane che in inglese e in francese non
+   esistono. Sono quelle che si trovano in qualunque frase italiana e in
+   nessun nome proprio: se ne compare una, qualcuno ha scritto una frase a
+   mano. */
+
+/* Parole funzione italiane. Non nomi di cose — quelli possono restare
+   (Primavalle è Primavalle) — ma le giunture della lingua: se compare
+   "della" in una schermata inglese, lì c'è una frase italiana. */
 const SPIE = [
-  "Contanti", "Entrate", "Uscite", "Passività", "Attivi", "Stipendio",
-  "Giorno di paga", "Tocca a", "Salterai", "Estingui", "Rimborsa",
-  "Patrimonio netto", "Spese totali", "Reddito", "Professione",
-  "Partirai", "Esci dalla stanza", "Il tuo sogno", "Conto economico",
-  "Stato patrimoniale", "Valore degli attivi", "Spese figli",
+  "della", "delle", "degli", "dello", "nella", "nelle", "sulla", "dalla",
+  "quello", "quella", "questo", "questa", "perché", "anche se", "quando",
+  "invece", "oppure", "soltanto", "adesso", "senza", "ogni ", "sono ",
+  "hai ", "puoi ", "tuo ", "tua ", "tuoi ", "è ",
 ];
 
-/** Le parole italiane rimaste dentro un markup disegnato in inglese. */
+/** Le parole italiane rimaste dentro un markup disegnato in un'altra lingua. */
 function spieIn(html) {
-  const nudo = html.replace(/<[^>]+>/g, " ").replace(/&#x27;/g, "'").replace(/&quot;/g, '"');
-  return SPIE.filter((w) => nudo.includes(w));
+  const nudo = html
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&#x27;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, "&")
+    .replace(/&#xE8;/gi, "è").replace(/&#xE9;/gi, "é")
+    .toLowerCase();
+  return SPIE.filter((w) => nudo.includes(w.toLowerCase()));
 }
 
-function inInglese(fn) {
-  memoria.set("quotazero:lingua", "en");
+function inLingua(lingua, fn) {
+  memoria.set("quotazero:lingua", lingua);
   try { return fn(); } finally { memoria.set("quotazero:lingua", "it"); }
 }
 
-prova("La scheda finanziaria", () => {
+/* Ogni schermata, in ogni lingua che non sia l'italiano.
+   Un elenco solo: aggiungere una schermata qui la mette sotto controllo in
+   tutte le lingue insieme, e aggiungere una lingua al gioco la mette sotto
+   controllo su tutte le schermate. */
+function schermate() {
   const s = tavolo();
+  const attesa = tavolo({ avviata: false });
+  const finita = tavolo({ finita: true });
   const io = s.giocatori[0];
-  const html = inInglese(() => conMercato(s, React.createElement(Scheda, {
-    giocatore: io, invia: nulla, inAzione: false, mio: true,
-  })));
-  const trovate = spieIn(html);
-  vero(trovate.length === 0, "rimaste in italiano: " + trovate.join(", "));
+
+  const conDebito = tavolo();
+  const g = conDebito.giocatori[0];
+  g.passivita.prestitoBanca = 9000;
+  g.contanti = 20000;
+
+  /* Una carta sul tavolo: i fogli di decisione non si disegnano mai senza
+     qualcosa da decidere, e sono metà delle parole della partita. */
+  const conCarta = tavolo();
+  conCarta.turno = 0;
+  conCarta.pending = {
+    tipo: "carta", giocatoreId: conCarta.giocatori[0].id, taglia: "piccoli",
+    carta: require_pacchetto(conCarta.mercatoId).mazzi.piccoli[0],
+  };
+
+  return [
+    ["ingresso · destinazioni", () => disegna(React.createElement(Ingresso, {
+      suEntrato: nulla, avvisa: nulla, suSfida: nulla, suImpara: nulla, suArena: nulla,
+    }))],
+    ["ingresso · modulo", () => disegna(React.createElement(Ingresso, {
+      suEntrato: nulla, avvisa: nulla, suSfida: nulla, suImpara: nulla,
+      vistaIniziale: "modulo", modoIniziale: "crea",
+    }))],
+    ["sala d'attesa", () => conMercato(attesa, React.createElement(Attesa, {
+      stato: attesa, mioId: "a", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
+    }))],
+    ["partita in corso", () => conMercato(s, React.createElement(Partita, {
+      stato: s, mioId: "b", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
+    }))],
+    ["foglio di decisione", () => conMercato(conCarta, React.createElement(Decisione, {
+      stato: conCarta, mioId: conCarta.giocatori[0].id, invia: nulla, inAzione: false,
+    }))],
+    ["scheda finanziaria", () => conMercato(s, React.createElement(Scheda, {
+      giocatore: io, invia: nulla, inAzione: false, mio: true,
+    }))],
+    ["scheda con un debito in banca", () => conMercato(conDebito, React.createElement(Scheda, {
+      giocatore: conDebito.giocatori[0], invia: nulla, inAzione: false, mio: true,
+    }))],
+    ["giocatori", () => conMercato(s, React.createElement(Giocatori, { stato: s, mioId: "a" }))],
+    ["registro", () => conMercato(s, React.createElement(Registro, { stato: s }))],
+    ["schermata finale", () => conMercato(finita, React.createElement(Vittoria, {
+      stato: finita, mioId: "a", suNuovaPartita: nulla, suChiudi: nulla, sonoHost: true,
+    }))],
+    ["sfida del giorno", () => disegna(React.createElement(Sfida, { suEsci: nulla }))],
+  ];
+}
+
+for (const lingua of LINGUE.map((l) => l.id).filter((id) => id !== "it")) {
+  for (const [nome, fai] of schermate()) {
+    prova(`In "${lingua}" non resta italiano · ${nome}`, () => {
+      const trovate = spieIn(inLingua(lingua, fai));
+      vero(trovate.length === 0, "parole italiane rimaste: " + trovate.join(", "));
+    });
+  }
+}
+
+console.log("\n── La carta aspetta la pedina ──");
+
+/* Il motore muove e pesca nella stessa mossa: lo stato che torna dal
+   server ha già dentro la posizione nuova E la carta. Il foglio si apriva
+   sopra il tabellone mentre la pedina camminava ancora, e non si vedeva su
+   che casella si fosse finiti. */
+const ritmo = await import("../src/lib/ritmo.js");
+
+prova("Il foglio aspetta più di quanto cammini la pedina", () => {
+  for (const passi of [1, 2, 5, 7, 12]) {
+    const cammino = ritmo.msDiCammino(passi);
+    const attesa = ritmo.msPrimaDellaCarta(passi);
+    vero(attesa > cammino, `con ${passi} passi il foglio (${attesa}ms) non aspetta la pedina (${cammino}ms)`);
+  }
 });
 
-prova("La scheda finanziaria con un debito in banca", () => {
-  /* Il riquadro del debito compare solo quando c'è un debito: senza uno
-     stato apposta non verrebbe mai disegnato, e quindi mai verificato. */
-  const s = tavolo();
-  const io = s.giocatori[0];
-  io.passivita.prestitoBanca = 9000;
-  io.contanti = 20000;
-  const html = inInglese(() => conMercato(s, React.createElement(Scheda, {
-    giocatore: io, invia: nulla, inAzione: false, mio: true,
-  })));
-  const trovate = spieIn(html);
-  vero(trovate.length === 0, "rimaste in italiano: " + trovate.join(", "));
+prova("Un tiro corto si vede lo stesso", () => {
+  /* Una casella animata in proporzione sarebbe uno scatto: sotto una
+     certa soglia la camminata dura comunque quanto basta a seguirla. */
+  vero(ritmo.msDiCammino(1) >= 300, "un passo solo passa troppo in fretta");
+  vero(ritmo.msDiCammino(1) === ritmo.msDiCammino(2), "sotto la soglia il tempo dovrebbe essere lo stesso");
 });
 
-prova("La sala d'attesa", () => {
-  const s = tavolo({ avviata: false });
-  const html = inInglese(() => conMercato(s, React.createElement(Attesa, {
-    stato: s, mioId: "a", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
-  })));
-  const trovate = spieIn(html);
-  vero(trovate.length === 0, "rimaste in italiano: " + trovate.join(", "));
+prova("Un tiro lungo dura più di uno corto", () => {
+  vero(ritmo.msDiCammino(12) > ritmo.msDiCammino(3), "dodici caselle devono durare più di tre");
+  vero(ritmo.msPrimaDellaCarta(12) > ritmo.msPrimaDellaCarta(3));
 });
 
-prova("La partita in corso", () => {
-  const s = tavolo();
-  const html = inInglese(() => conMercato(s, React.createElement(Partita, {
-    stato: s, mioId: "b", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
-  })));
-  const trovate = spieIn(html);
-  vero(trovate.length === 0, "rimaste in italiano: " + trovate.join(", "));
+prova("Numeri assurdi non rompono niente", () => {
+  for (const v of [0, -3, undefined, null, NaN]) {
+    const ms = ritmo.msDiCammino(v);
+    vero(Number.isFinite(ms) && ms > 0, `msDiCammino(${v}) = ${ms}`);
+  }
+});
+
+prova("Il tempo della pedina e quello della carta vengono dallo stesso posto", () => {
+  /* Erano due copie del numero 130 in due file diversi. */
+  const guai = [];
+  const nudo = (t) => t.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
+  for (const f of ["src/components/Tabellone.jsx", "src/components/Decisione.jsx"]) {
+    const src = nudo(readFileSync(join(process.cwd(), f), "utf8"));
+    if (!/lib\/ritmo\.js/.test(src)) guai.push(f + ": non importa il ritmo condiviso");
+    if (/\b130\b/.test(src)) guai.push(f + ": ha ancora il numero scritto a mano");
+  }
+  vero(guai.length === 0, guai.join(" · "));
 });
 
 console.log("\n── Copiare negli appunti ──");
