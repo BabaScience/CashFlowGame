@@ -73,6 +73,7 @@ const Vittoria = (await import("../src/components/Vittoria.jsx")).default;
 const Decisione = (await import("../src/components/Decisione.jsx")).default;
 const PrimaPartita = (await import("../src/screens/PrimaPartita.jsx")).default;
 const Roulette = (await import("../src/components/Roulette.jsx")).default;
+const SulTavolo = (await import("../src/components/SulTavolo.jsx")).default;
 const { lezioniIn, avvertenzaIn } = await import("../src/contenuti/lezioni.js");
 const { quesitiIn, testoDi } = await import("../src/contenuti/quesiti.js");
 const { LINGUE, dizionari } = await import("../src/i18n/index.js");
@@ -342,11 +343,23 @@ prova("Partita con una decisione in sospeso: chi decide vede la carta", () => {
   vero(html.includes(carta.nome), "chi deve decidere non vede la carta");
 });
 
-prova("Chi guarda lo legge nel tabellone, non in un riquadro sotto", () => {
-  /* Il riquadro «sul tavolo» e poi quello del turno stavano nella colonna
-     del tavolo, che dà al tabellone lo spazio che avanza: comparivano e il
-     tabellone si rimpiccioliva sotto gli occhi di chi lo guardava. Il
-     centro del tabellone è spazio già speso e non costa niente a nessuno. */
+prova("Chi guarda lo legge nel tabellone, e la fascia sotto non lo muove", () => {
+  /* ═══ COS'ERA IL DIFETTO, E PERCHÉ QUESTA PROVA È CAMBIATA ═══
+   *
+   * Il riquadro «sul tavolo» stava nella colonna del tavolo, che dà al
+   * tabellone lo spazio che avanza: compariva a ogni carta pescata e il
+   * tabellone si rimpiccioliva sotto gli occhi di chi lo guardava. Fu
+   * tolto, e questa prova pretendeva che non tornasse mai.
+   *
+   * È tornato, ma il difetto no: la fascia adesso c'è **sempre**, con
+   * un'altezza fissa, quindi il tabellone non cambia mai misura. Serve a
+   * mostrare la carta che sta guardando un altro — al tavolo vero la si
+   * vede, online no.
+   *
+   * Quindi la prova non vieta più il riquadro: pretende l'invariante vera,
+   * cioè che la fascia ci sia con carta e senza. Se un giorno tornasse a
+   * comparire e sparire, il tabellone ricomincerebbe a ballare e questa
+   * prova lo direbbe. */
   const s = tavolo();
   const pacchetto = s.mercatoId === "roma" ? "roma" : "classico";
   const carta = (require_pacchetto(pacchetto)).mazzi.piccoli.find((c) => c.tipo === "immobile");
@@ -358,7 +371,31 @@ prova("Chi guarda lo legge nel tabellone, non in un riquadro sotto", () => {
   }));
   vero(/TURNO DI ADA/i.test(html), "il tabellone non dice di chi è il turno");
   vero(html.includes("Ada sta valutando"), "il tabellone non dice cosa sta facendo");
-  vero(!/Sul tavolo|On the table/.test(html), "il riquadro è tornato");
+  vero(html.includes("sul-tavolo"), "manca la fascia della carta");
+
+  /* Lo stesso tavolo senza nessuna carta: la fascia deve esserci uguale,
+     altrimenti il tabellone cambia altezza fra un momento e l'altro. */
+  const senza = tavolo();
+  senza.turno = senza.giocatori.findIndex((g) => g.id === "a");
+  const htmlSenza = conMercato(senza, React.createElement(Partita, {
+    stato: senza, mioId: "b", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
+  }));
+  vero(htmlSenza.includes("sul-tavolo"),
+    "senza carta la fascia sparisce: il tabellone si rimpicciolisce e si ringrandisce");
+  vero(!htmlSenza.includes(carta.nome), "senza carta in tavola ne compare una lo stesso");
+});
+
+prova("La carta sul tavolo la vede chi guarda, non chi deve deciderla", () => {
+  /* Chi decide ha già il foglio davanti: nella fascia vedrebbe due volte
+     la stessa carta, e la fascia esiste per chi *non* sta decidendo. */
+  const s = tavolo();
+  const pacchetto = s.mercatoId === "roma" ? "roma" : "classico";
+  const carta = (require_pacchetto(pacchetto)).mazzi.piccoli.find((c) => c.tipo === "immobile");
+  s.pending = { tipo: "carta", giocatoreId: "a", carta };
+  const guarda = conMercato(s, React.createElement(SulTavolo, { stato: s, mioId: "b" }));
+  vero(guarda.includes(carta.nome), "chi guarda non vede la carta dell'altro");
+  const decide = conMercato(s, React.createElement(SulTavolo, { stato: s, mioId: "a" }));
+  vero(!decide.includes(carta.nome), "chi decide vede la propria carta due volte");
 });
 
 prova("La nota nel tabellone non supera mai la larghezza del centro", () => {
@@ -663,6 +700,14 @@ function schermate() {
     /* Impara è entrata qui solo adesso, quando le lezioni e i quesiti sono
        stati tradotti: metterci prima un controllo impossibile da passare
        avrebbe voluto dire spegnerlo, ed è così che i controlli muoiono. */
+    /* La fascia "sul tavolo" da entrambi i lati: chi guarda la carta di un
+       altro, e chi non ha nessuna carta da guardare. */
+    ["sul tavolo · carta di un altro", () => conMercato(conCarta, React.createElement(SulTavolo, {
+      stato: conCarta, mioId: conCarta.giocatori[1].id, nota: "",
+    }))],
+    ["sul tavolo · nessuna carta", () => conMercato(s, React.createElement(SulTavolo, {
+      stato: s, mioId: s.giocatori[0].id, nota: "",
+    }))],
     ["impara · lezioni", () => disegna(React.createElement(Impara, { suEsci: nulla }))],
     ["impara · quesiti", () => disegna(React.createElement(Impara, {
       suEsci: nulla, modoIniziale: "quesiti",
@@ -769,13 +814,33 @@ prova("Numeri assurdi non rompono niente", () => {
 });
 
 prova("Il tempo della pedina e quello della carta vengono dallo stesso posto", () => {
-  /* Erano due copie del numero 130 in due file diversi. */
+  /* Erano due copie del numero 130 in due file diversi.
+     Adesso chi aspetta la pedina sono in tre — il tabellone che la muove,
+     il foglio di chi decide e la fascia di chi guarda — e i due che
+     aspettano lo fanno con lo stesso gancio: se i tempi si scollassero,
+     chi guarda vedrebbe la carta prima di chi deve deciderla. */
   const guai = [];
   const nudo = (t) => t.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/(^|[^:])\/\/[^\n]*/g, "$1 ");
-  for (const f of ["src/components/Tabellone.jsx", "src/components/Decisione.jsx"]) {
+  const daControllare = [
+    "src/components/Tabellone.jsx",
+    "src/components/Decisione.jsx",
+    "src/components/SulTavolo.jsx",
+    "src/hooks/useAttesaPedina.js",
+  ];
+  for (const f of daControllare) {
     const src = nudo(readFileSync(join(process.cwd(), f), "utf8"));
-    if (!/lib\/ritmo\.js/.test(src)) guai.push(f + ": non importa il ritmo condiviso");
+    /* La fonte condivisa va bene sia presa di persona sia attraverso il
+       gancio, che a sua volta la prende da lì: quello che non va bene è
+       misurare il tempo per conto proprio. */
+    const condivisa = /lib\/ritmo\.js/.test(src) || /hooks\/useAttesaPedina\.js/.test(src);
+    if (!condivisa) guai.push(f + ": non prende il ritmo da lib/ritmo.js");
     if (/\b130\b/.test(src)) guai.push(f + ": ha ancora il numero scritto a mano");
+    /* Chi aspetta, aspetta una durata che viene da lì: non un numero
+       scelto a occhio dentro il setTimeout. */
+    if (/setTimeout/.test(src)
+        && !/msDiCammino|msPrimaDellaCarta|useAttesaPedina/.test(src)) {
+      guai.push(f + ": aspetta una durata che non viene dal ritmo condiviso");
+    }
   }
   vero(guai.length === 0, guai.join(" · "));
 });

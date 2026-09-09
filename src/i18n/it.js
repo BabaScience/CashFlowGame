@@ -185,6 +185,7 @@ export default {
   },
 
   partita: {
+    alMeseBreve: "/mese",
     seiLiberoSpiegazione: "Il tuo reddito passivo ({rendita}) supera le spese ({spese}). Puoi smettere di lavorare: la partita è tua.",
     nonGiocaDa: "{nome} non gioca da qualche minuto.",
     mettiFuori: "Vai avanti senza di lui",
@@ -610,6 +611,8 @@ export default {
     effetto: "Rimborsando, la rata sparisce dalle uscite e il Giorno di Paga risale.",
   },
   sulTavolo: {
+    nessuna: "Nessuna carta sul tavolo.",
+    staGuardando: "{nome} sta guardando",
     taglia: "{nome} sceglie fra Piccolo e Grande Affare",
     carta: "{nome} sta valutando «{carta}»",
     mercato: "Mercato «{carta}» · si aspettano {n} giocatori",

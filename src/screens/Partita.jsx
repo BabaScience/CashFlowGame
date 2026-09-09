@@ -8,6 +8,7 @@ import Registro from "../components/Registro.jsx";
 import Manuale from "../components/Manuale.jsx";
 import Chat from "../components/Chat.jsx";
 import Decisione from "../components/Decisione.jsx";
+import SulTavolo from "../components/SulTavolo.jsx";
 import { Bottone, NumeroAnimato, Barra } from "../components/Base.jsx";
 import { soldi, riepilogo, fuoriDallaCorsa } from "../game/finanze.js";
 import { PERCORSO_RUOTA, CASELLE_RUOTA, PERCORSO_LARGO, CASELLE_LARGO } from "../game/tabellone.js";
@@ -473,6 +474,12 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
                 }} />
             )}
           </div>
+
+          {/* La carta che sta guardando un altro giocatore. Non ripete la
+              riga del tabellone — quella dice *cosa* sta succedendo, questa
+              mostra la carta e i suoi numeri, che nel centro della ruota non
+              ci starebbero. Vedi SulTavolo.jsx per l'altezza fissa. */}
+          <SulTavolo stato={stato} mioId={mioId} />
 
           {/* Il tempo passato. Sta qui e non nella barra in alto perché la
               domanda "da quanto lavoro" è la stessa a cui risponde la barra

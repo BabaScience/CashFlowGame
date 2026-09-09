@@ -4,7 +4,7 @@ import CartaGioco, { CorpoAffare, Voce } from "./CartaGioco.jsx";
 import { soldi, flussoMensile, riepilogo } from "../game/finanze.js";
 import { useMercato } from "../Mercato.jsx";
 import { useLingua } from "../Lingua.jsx";
-import { msPrimaDellaCarta } from "../lib/ritmo.js";
+import { useAttesaPedina } from "../hooks/useAttesaPedina.js";
 import { nomiCaselle } from "../i18n/index.js";
 import { TASSO_PRESTITO } from "../game/finanze.js";
 
@@ -31,30 +31,10 @@ import { TASSO_PRESTITO } from "../game/finanze.js";
  * ripresa a metà — si apre subito, perché non c'è nessuna pedina da
  * seguire.
  */
-function attendiLaPedina(stato) {
-  const tiro = stato.ultimoTiro;
-  const [fermo, setFermo] = useState(true);
-  const visto = useRef(tiro?.n ?? 0);
-
-  useEffect(() => {
-    const n = tiro?.n ?? 0;
-    if (n === visto.current) return;
-    visto.current = n;
-    /* Scheda in secondo piano: la pedina non si anima, e aspettare
-       vorrebbe dire tornare e trovare il foglio ancora chiuso. */
-    if (typeof document !== "undefined" && document.hidden) return;
-    setFermo(false);
-    const durata = msPrimaDellaCarta(tiro?.totale);
-    const t = setTimeout(() => setFermo(true), durata);
-    return () => clearTimeout(t);
-  }, [tiro?.n, tiro?.totale]);
-
-  return fermo;
-}
 
 export default function Decisione({ stato, mioId, invia, inAzione }) {
   const { t, lingua } = useLingua();
-  const pedinaFerma = attendiLaPedina(stato);
+  const pedinaFerma = useAttesaPedina(stato);
   /* "Verifica fiscale" arriva dal motore, che parla italiano: il titolo
      della carta è l'unica cosa che il giocatore legge, e restava lì. */
   const nomeCasella = (n) => nomiCaselle(lingua)[n] || n;
@@ -86,7 +66,7 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
   }, [p, io, mioId]);
 
   if (!p || !io || !tocca) return null;
-  /* La carta aspetta che la pedina sia arrivata. Vedi `attendiLaPedina`. */
+  /* La carta aspetta che la pedina sia arrivata. Vedi `useAttesaPedina`. */
   if (!pedinaFerma) return null;
 
   const fai = async (az) => {

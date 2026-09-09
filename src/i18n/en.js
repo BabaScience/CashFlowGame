@@ -191,6 +191,7 @@ export default {
   },
 
   partita: {
+    alMeseBreve: "/mo",
     seiLiberoSpiegazione: "Your passive income ({rendita}) is above your expenses ({spese}). You can stop working: the game is yours.",
     nonGiocaDa: "{nome} has not played for a few minutes.",
     mettiFuori: "Carry on without them",
@@ -613,6 +614,8 @@ export default {
     effetto: "Once repaid, the payment leaves your expenses and your Payday goes back up.",
   },
   sulTavolo: {
+    nessuna: "No card on the table.",
+    staGuardando: "{nome} is looking at",
     taglia: "{nome} is choosing between a Small and a Big Deal",
     carta: "{nome} is weighing up “{carta}”",
     mercato: "Market “{carta}” · waiting on {n} players",
