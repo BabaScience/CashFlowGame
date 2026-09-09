@@ -276,6 +276,47 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       nominato, e dove si parla di ETF si spiega il meccanismo e ci si ferma
       dichiarando perché.
 
+## 5bis · Un mercato per paese
+
+- [x] **5bis.1 Il mercato sta nell'indirizzo** — `/roma`, `/beirut`, e `/` che
+      porta all'ultimo scelto. Serviva a tre cose che prima non si potevano
+      fare: mandare a qualcuno il link di un mercato, tornarci col tasto
+      indietro, e dare a ogni mercato una pagina vera invece di uno stato
+      dentro al browser. `vercel.json` riscriveva già ogni percorso non-API
+      su `index.html`, quindi non è servita nessuna configurazione nuova.
+
+      **Nel percorso, non in un sottodominio.** `beirut.…` e `roma.…` sono
+      due origini diverse e l'identità di chi gioca vive in `localStorage`
+      (`quotazero:id`): due sottodomini avrebbero dato due identità alla
+      stessa persona, azzerando punteggio e storico a ogni cambio di
+      mercato. Per la stessa ragione niente deployment separati per paese:
+      la coda, la classifica e l'Elo hanno bisogno di un archivio solo, e
+      questo progetto ha già pagato tre volte il prezzo di due copie della
+      stessa cosa.
+
+      Nel farlo sono spariti **due stati indipendenti** che tenevano la
+      stessa cosa — uno in `Ingresso`, uno in `ArenaConMercato` — che
+      leggevano la stessa chiave di `localStorage` e la riscrivevano ognuno
+      per conto suo, con ripieghi diversi (`classico` di qua, `roma` di là).
+      Adesso c'è `useMercatoScelto`, e l'autorità è l'indirizzo.
+
+- [-] **5bis.2 Caricare i pacchetti su richiesta** — rimandato di proposito,
+      con una sveglia che suona da sola.
+
+      Oggi `indice.js` importa staticamente ogni pacchetto: tutti i mercati
+      viaggiano verso chiunque apra il sito. Con due mercati non si misura.
+      Renderli asincroni costa invece parecchio: `getPacchetto` è sincrono
+      perché il motore è una funzione pura, quindi il pacchetto va caricato
+      **prima** di entrare nel motore in ventitré punti fra `api/`, gli
+      script e le schermate, e `Ingresso` — che oggi chiama `getPacchetto`
+      mentre disegna — dovrebbe imparare ad aspettare. Lavoro vero, un modo
+      nuovo di rompersi (motore chiamato prima del caricamento), zero
+      guadagno adesso.
+
+      Quindi non è stato fatto, ed è stato messo un allarme al posto di un
+      promemoria: `prova-mercati.mjs` fallisce all'ottavo mercato e dice
+      cosa spostare. Verificato che suoni davvero, abbassando la soglia.
+
 ## 6 · Prima di incassare un euro
 
 - [x] **6.1 Licenza e proprietà** — `LICENSE` con dichiarazione di opera

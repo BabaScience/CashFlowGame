@@ -11,6 +11,8 @@ import Partita from "./screens/Partita.jsx";
 import Vittoria from "./components/Vittoria.jsx";
 import * as api from "./lib/api.js";
 import { useAvversari } from "./hooks/useAvversari.js";
+import { useMercatoScelto } from "./hooks/useMercatoScelto.js";
+import { percorsoDi } from "./lib/percorso.js";
 import { traccia, tracciaSessione } from "./lib/traccia.js";
 import { MercatoProvider } from "./Mercato.jsx";
 import { LinguaProvider, useLingua } from "./Lingua.jsx";
@@ -30,9 +32,10 @@ export default function App() {
  * componente non può consumare il contesto che apre lui stesso.
  */
 function ArenaConMercato({ suEntrato, suEsci, avvisa }) {
-  const [mercatoId, setMercato] = useState(
-    () => localStorage.getItem("quotazero:mercato") || "roma"
-  );
+  /* Il mercato lo decide l'indirizzo, non un secondo stato locale: vedi
+     hooks/useMercatoScelto.js. Qui il ripiego era "roma" e dentro Ingresso
+     era MERCATO_PREDEFINITO, e nessuno dei due sapeva dell'altro. */
+  const [mercatoId, setMercato] = useMercatoScelto();
   return (
     <MercatoProvider mercatoId={mercatoId}>
       <Arena suEntrato={suEntrato} suEsci={suEsci} avvisa={avvisa}
@@ -111,6 +114,19 @@ function Applicazione() {
       history.replaceState(null, "", location.pathname);
     }
   }, [codice]);
+
+  /* Dentro una stanza comanda la stanza, non l'ultima scelta fatta
+     all'ingresso: il percorso la segue, così l'indirizzo non mente mai su
+     che mercato si sta giocando. `replaceState` e non `pushState`, perché
+     entrare in una stanza non è un posto in cui tornare indietro. */
+  useEffect(() => {
+    const m = stato?.mercatoId;
+    if (!m || typeof history === "undefined") return;
+    const atteso = percorsoDi(m);
+    if (atteso !== "/" && location.pathname !== atteso) {
+      history.replaceState(null, "", atteso + location.search);
+    }
+  }, [stato?.mercatoId]);
 
   const esci = useCallback(async () => {
     if (stato && stato.fase === "attesa") {
@@ -191,7 +207,7 @@ function Applicazione() {
         <div className="schermo" style={{ justifyContent: "center", alignItems: "center", paddingBottom: 0 }}>
           <div className="ta-c">
             <div style={{ fontSize: 28, color: "var(--oro-chiaro)" }}>◆</div>
-            <p className="f14 tenue mt12">Carico la stanza {codice}…</p>
+            <p className="f14 tenue mt12">{t("app.caricoStanza", { codice })}</p>
           </div>
         </div>
       </MercatoProvider>

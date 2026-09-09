@@ -13,6 +13,7 @@
  */
 export default {
   app: {
+    caricoStanza: "Loading room {codice}…",
     stanzaChiusa: "Room closed, data erased.",
     stanzaScaduta: "Rooms left idle are deleted after 48 hours, so they do not take up space for nothing.",
     nome: "Quota Zero",

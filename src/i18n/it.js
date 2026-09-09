@@ -7,6 +7,7 @@
  */
 export default {
   app: {
+    caricoStanza: "Carico la stanza {codice}…",
     stanzaChiusa: "Stanza chiusa, dati cancellati.",
     stanzaScaduta: "Le stanze inattive vengono cancellate dopo 48 ore per non occupare spazio inutilmente.",
     nome: "Quota Zero",

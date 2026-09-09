@@ -13,6 +13,7 @@
  */
 export default {
   app: {
+    caricoStanza: "Chargement du salon {codice}…",
     stanzaChiusa: "Salon fermé, données effacées.",
     stanzaScaduta: "Les salons inactifs sont supprimés au bout de 48 heures, pour ne pas occuper de place inutilement.",
     nome: "Quota Zero",

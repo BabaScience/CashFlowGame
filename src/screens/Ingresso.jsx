@@ -6,7 +6,7 @@ import Glossa from "../components/Glossa.jsx";
 import Logo from "../components/Logo.jsx";
 import Icona from "../components/Icona.jsx";
 import { MercatoProvider, useMercato } from "../Mercato.jsx";
-import { MERCATI, MERCATO_PREDEFINITO, getPacchetto } from "../game/mercati/indice.js";
+import { MERCATI, getPacchetto } from "../game/mercati/indice.js";
 import { LIVELLI, LIVELLO_PREDEFINITO } from "../game/regole/livelli.js";
 import { soldi } from "../game/finanze.js";
 import { MAX_GIOCATORI } from "../game/tabellone.js";
@@ -16,6 +16,7 @@ import * as api from "../lib/api.js";
 import { traccia } from "../lib/traccia.js";
 import { partiteAperte, dimenticaPartita, daQuanto } from "../lib/partite.js";
 import { useLingua } from "../Lingua.jsx";
+import { useMercatoScelto } from "../hooks/useMercatoScelto.js";
 import { testoErrore } from "../lib/errori.js";
 
 /**
@@ -28,9 +29,7 @@ import { testoErrore } from "../lib/errori.js";
  * il mercato è quello della stanza, uno per tavolo.
  */
 export default function Ingresso({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, vistaIniziale, modoIniziale, stanzaIniziale }) {
-  const [mercatoId, setMercato] = useState(
-    () => localStorage.getItem("quotazero:mercato") || MERCATO_PREDEFINITO
-  );
+  const [mercatoId, setMercato] = useMercatoScelto();
   return (
     <MercatoProvider mercatoId={mercatoId}>
       <Modulo suEntrato={suEntrato} avvisa={avvisa} suSfida={suSfida} suArena={suArena} suPrima={suPrima} suImpara={suImpara}
@@ -532,7 +531,6 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, mercat
               valore={mercatoId}
               onCambia={(v) => {
                 setMercato(v);
-                localStorage.setItem("quotazero:mercato", v);
               }}
               opzioni={MERCATI.map((m) => ({
                 valore: m.id,

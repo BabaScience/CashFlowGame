@@ -17,6 +17,7 @@ import {
   MERCATI, MERCATO_PREDEFINITO,
 } from "../src/game/mercati/indice.js";
 import { soldi, VALUTA_PREDEFINITA } from "../src/game/finanze.js";
+import { readFileSync } from "node:fs";
 
 let passati = 0, falliti = 0;
 const prova = (nome, fn) => {
@@ -134,6 +135,40 @@ prova("Una versione sconosciuta non fa esplodere la partita", () => {
 prova("Un mercato sconosciuto ripiega sul predefinito", () => {
   const p = getPacchetto("atlantide", "2026.08");
   eq(p.id, MERCATO_PREDEFINITO);
+});
+
+console.log("\n── Quando i mercati diventano tanti ──");
+
+prova("Oltre la soglia i pacchetti non possono più viaggiare tutti insieme", () => {
+  /* ═══ UN ALLARME, NON UNA REGOLA ═══
+   *
+   * Oggi `indice.js` importa staticamente ogni pacchetto: tutti i mercati
+   * finiscono nel pacco che scarica chiunque apra il sito, anche quelli
+   * che non giocherà mai. Con due mercati è invisibile — Roma pesa 128 KB
+   * di sorgente — e renderli asincroni costerebbe caro: `getPacchetto` è
+   * sincrono perché il motore è una funzione pura, quindi bisognerebbe
+   * caricare il pacchetto *prima* di entrare nel motore in ventitré punti
+   * fra API, script e schermate, e `Ingresso` dovrebbe imparare ad
+   * aspettare. Tanto lavoro e un modo nuovo di rompersi, per non risparmiare
+   * niente.
+   *
+   * Il piano però è arrivare a molti paesi, e allora la stessa scelta
+   * diventa sbagliata. Questo test è la sveglia: al mercato numero otto
+   * fallisce e dice cosa fare, invece di lasciare che il primo caricamento
+   * si allunghi di mezzo secondo alla volta senza che nessuno se ne accorga.
+   */
+  const SOGLIA = 8;
+  if (MERCATI.length < SOGLIA) return;
+
+  const sorgente = readFileSync(
+    new URL("../src/game/mercati/indice.js", import.meta.url).pathname, "utf8");
+  const statici = [...sorgente.matchAll(/^import\s+\w+\s+from\s+"\.\/[^"]+\/v[^"]+";/gm)];
+  vero(statici.length === 0,
+    `${MERCATI.length} mercati e ancora ${statici.length} pacchetti importati staticamente.\n` +
+    "       Ora conviene caricarli su richiesta: lasciare in indice.js solo il\n" +
+    "       catalogo (id, nome, luogo, valuta), spostare i pacchetti dietro un\n" +
+    "       import() e attendere il caricamento prima di chiamare il motore —\n" +
+    "       nelle funzioni api/, in scripts/api-locale.js e in Mercato.jsx.");
 });
 
 console.log("\n── La valuta arriva dal mercato ──");
