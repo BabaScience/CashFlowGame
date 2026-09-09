@@ -55,7 +55,7 @@ const SCHEDE = [
  * sa perché il turno non avanza. Quindi resta, ma dentro il riquadro del
  * turno che c'è già: una riga sola, che non cambia l'altezza di niente.
  */
-function cheStaFacendo(stato, t, tc, trovaSogno) {
+function cheStaFacendo(stato, t, tc) {
   const p = stato.pending;
   if (!p) return null;
   const chi = stato.giocatori.find((g) => g.id === p.giocatoreId);
@@ -79,7 +79,6 @@ function cheStaFacendo(stato, t, tc, trovaSogno) {
     case "licenziamento": return t("sulTavolo.licenziamento", { nome });
     case "bancarotta": return t("sulTavolo.bancarotta", { nome });
     case "affareVeloce": return t("sulTavolo.affare", { nome, carta: tc(p.affare)?.nome || "" });
-    case "sogno": return t("sulTavolo.sogno", { nome, carta: (trovaSogno(p.sogno?.id) || p.sogno)?.nome || "" });
     case "penalitaVeloce": return `${nome}: ${p.nome}`;
     default: return t("sulTavolo.decide", { nome });
   }
@@ -254,7 +253,7 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa, tiroAltrove = false }) 
 
 export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci, schedaIniziale = null }) {
   const { t } = useLingua();
-  const { traduciCarta, trovaSogno } = useMercato();
+  const { traduciCarta } = useMercato();
   /* Sul telefono nessuna scheda è aperta all'inizio: lo schermo è il
      tabellone e basta. `null` vuol dire "nessun foglio aperto". */
   const [scheda, setScheda] = useState(schedaIniziale);
@@ -464,7 +463,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
         <div className="colonna-tavolo">
           <div className="zona-tavolo">
             <Tabellone stato={stato} mioId={mioId}
-              nota={cheStaFacendo(stato, t, traduciCarta, trovaSogno)} centroLibero={tiroAlCentro} />
+              nota={cheStaFacendo(stato, t, traduciCarta)} centroLibero={tiroAlCentro} />
             <Dadi tiro={stato.ultimoTiro} mioId={mioId} />
             {tiroAlCentro && (
               <TiraAlCentro io={io} inAzione={inAzione}

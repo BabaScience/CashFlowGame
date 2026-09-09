@@ -41,7 +41,7 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
   /* Il tasso del fido viaggia col giocatore, come lo stipendio: scriverlo a
      mano significava mostrare il tasso di un altro mercato. */
   const rataDi = (importo) => Math.round(importo * (io?.tassoPrestito ?? TASSO_PRESTITO));
-  const { categorie, debitiEstinguibili, pacchetto, flussoDi, traduciCarta, trovaSogno } = useMercato();
+  const { categorie, debitiEstinguibili, pacchetto, flussoDi, traduciCarta } = useMercato();
   /* Le due taglie non sono separate da una soglia netta: su Roma i mazzi
      si sovrappongono nei prezzi e si distinguono per tipo, non per cifra.
      Annunciare una soglia produceva una frase falsa ("i piccoli costano al
@@ -527,57 +527,6 @@ export default function Decisione({ stato, mioId, invia, inAzione }) {
     );
   }
 
-  /* ── Largo: sogno ── */
-  if (p.tipo === "sogno") {
-    return (
-      <Foglio aperto>
-        <CartaGioco chiave={chiave} classe="c-sogno"
-          etichetta={t(p.mio ? "decisione.ilTuoSogno" : "decisione.sognoDiUnAltro")}
-          titolo={`${p.sogno.emoji || "★"} ${(trovaSogno(p.sogno.id) || p.sogno).nome}`}>
-          {p.mio ? (
-            <>
-              <p className="f14" style={{ margin: 0, lineHeight: 1.5 }}>
-                {t("decisione.sognoMioSpiegazione")}
-              </p>
-              <div className="mt12">
-                <Voce k={t("decisione.costoDiListino")} v={soldi(p.sogno.costo)} />
-                {io.segnaliniSogno > 0 && (
-                  <Voce k={io.segnaliniSogno === 1
-                    ? t("decisione.rincaroUno")
-                    : t("decisione.rincaroMolti", { n: io.segnaliniSogno })}
-                    v={`+${soldi(p.sogno.costo * io.segnaliniSogno)}`} />
-                )}
-                <Voce k={t("decisione.daPagare")} v={soldi(p.costo)} forte />
-              </div>
-            </>
-          ) : (
-            <>
-              <p className="f14" style={{ margin: 0, lineHeight: 1.5 }}>
-                {t("decisione.sognoAltruiSpiegazione")}
-                {p.vittime?.length > 0 && t("decisione.sognoRaddoppiato", { nomi: p.vittime.join(", ") })}
-              </p>
-            </>
-          )}
-        </CartaGioco>
-        {p.mio ? (
-          <div className="riga-btn">
-            <Bottone variante="btn-fantasma" disabled={inAzione}
-              onClick={() => fai({ tipo: "passaSogno" })}>{t("decisione.nonOra")}</Bottone>
-            <Bottone variante="btn-oro" disabled={inAzione || io.contanti < p.costo}
-              onClick={() => fai({ tipo: "compraSogno" })}>
-              {io.contanti >= p.costo
-                ? t("decisione.realizzaSogno", { importo: soldi(p.costo) })
-                : t("decisione.tiMancanoImporto", { importo: soldi(p.costo - io.contanti) })}
-            </Bottone>
-          </div>
-        ) : (
-          <Bottone variante="btn-fantasma" disabled={inAzione}
-            onClick={() => fai({ tipo: "passaSogno" })}>{t("comune.avanti")}</Bottone>
-        )}
-        {errore && <p className="f13 neg mt12" style={{ margin: "12px 0 0" }}>{errore}</p>}
-      </Foglio>
-    );
-  }
 
   /* ── Largo: beneficenza ── */
   if (p.tipo === "beneficenzaVeloce") {

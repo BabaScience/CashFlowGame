@@ -16,8 +16,6 @@
  * rende intorno al 50% l'anno sul capitale versato: acconti da 55.000 a
  * 110.000 e rese intorno al 40%.
  *
- * SOGNI (caselle rosa): l'obiettivo personale scelto a inizio partita.
- * Comprare il proprio sogno fa vincere la partita all'istante.
  */
 
 export const AFFARI_LARGO = [
@@ -43,20 +41,5 @@ export const AFFARI_LARGO = [
   { id: "av20", nome: "Piattaforma logistica dell'ultimo miglio", acconto: 51000, flusso: 1700, testo: "Magazzini automatizzati in sei città." },
 ];
 
-export const SOGNI = [
-  { id: "sg01", nome: "Fare il giro del mondo in prima classe", costo: 150000, emoji: "🌍" },
-  { id: "sg02", nome: "Costruire una scuola nel tuo paese d'origine", costo: 200000, emoji: "🏫" },
-  { id: "sg03", nome: "Casa sulla spiaggia ai Caraibi", costo: 300000, emoji: "🏝️" },
-  { id: "sg04", nome: "Cenare con il capo di Stato", costo: 100000, emoji: "🍽️" },
-  { id: "sg05", nome: "Fondare una organizzazione non profit", costo: 250000, emoji: "🤝" },
-  { id: "sg06", nome: "Scalare l'Everest con una spedizione privata", costo: 120000, emoji: "🏔️" },
-  { id: "sg07", nome: "Yacht di 30 metri", costo: 500000, emoji: "🛥️" },
-  { id: "sg08", nome: "Un anno sabbatico per tutta la famiglia", costo: 100000, emoji: "🧳" },
-  { id: "sg09", nome: "Finanziare dieci giovani imprese", costo: 400000, emoji: "🚀" },
-  { id: "sg10", nome: "Correre la 24 Ore di Le Mans", costo: 350000, emoji: "🏎️" },
-  { id: "sg11", nome: "Volo suborbitale nello spazio", costo: 600000, emoji: "🚀" },
-  { id: "sg12", nome: "Rifugio privato sulle Alpi", costo: 180000, emoji: "🏂" },
-];
 
-export const getSogno = (id) => SOGNI.find((s) => s.id === id) || SOGNI[0];
 export const getAffareVeloce = (id) => AFFARI_LARGO.find((a) => a.id === id);

@@ -62,7 +62,7 @@ CORSA_TOPI = [ARANCIO, VERDE, ROSSO, VERDE, VIOLA, VERDE, BLU, VERDE,
               ARANCIO, VERDE, ROSSO, VERDE, ACQUA, VERDE, BLU, VERDE,
               ARANCIO, VERDE, ROSSO, VERDE, (107, 68, 35), VERDE, BLU, VERDE]
 
-# Le 48 della Corsia Veloce: cashflow, affare, sogno, affare, penalità...
+# Le caselle del Largo: rendita, affare, affare, penalità...
 CORSIA_VELOCE = []
 for i in range(48):
     if i % 12 == 0:      CORSIA_VELOCE.append(ARANCIO)

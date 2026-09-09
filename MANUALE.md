@@ -67,10 +67,11 @@ vicino. Nel formato **Lampo** — quaranta turni a testa — è così che finisc
 quasi sempre, e va benissimo: la domanda è la stessa, cambia solo che si
 risponde in dieci minuti.
 
-**E il sogno?** Lo scegli prima del primo tiro e non si compra: è quello per
-cui giochi. Alla fine il gioco ti dice a quanti mesi di rendita sei
-arrivato — *«il giro del mondo: a cinque anni e otto mesi»*. È una misura
-onesta, ed è confrontabile con quella degli altri al tavolo.
+**E i sogni?** C'erano, e non ci sono più. Si sceglieva un sogno prima del
+primo tiro e alla fine il gioco diceva a quanti mesi di rendita fosse.
+Era una seconda cosa da spiegare, una seconda scelta da fare prima di
+sapere cosa si stesse scegliendo, e una seconda risposta alla domanda «ho
+vinto?». L'obiettivo è uno solo: **uscire dalla Ruota**.
 
 > **C'era una seconda metà, e non c'è più.** Fino a poco fa uscire dalla
 > Ruota portava a un secondo tabellone, il Largo, dove si giocava a
@@ -130,11 +131,8 @@ dispositivo, e l'ingresso smette di proporla.
 
 1. Uno dei giocatori **crea la stanza** e riceve un codice di 4 lettere.
 2. Gli altri **entrano col codice**. Massimo 6 giocatori.
-3. Ognuno sceglie:
-   - una **professione** fra le dodici disponibili (dal Custode al Medico);
-   - un **sogno** fra i dodici disponibili: non si compra, è quello per
-     cui giochi, e alla fine il gioco ti dice a quanti mesi di rendita sei
-     arrivato.
+3. Ognuno sceglie una **professione** fra le dodici disponibili (dal
+   Custode al Medico).
 
    **Chi non crea la stanza non sceglie il mestiere: glielo pesca il
    server.** Vale per chi entra dalla coda e per chi gioca contro il
@@ -394,10 +392,9 @@ La schermata finale dice, per ognuno:
 
 - quanti **mesi hai lavorato** per arrivarci — *«otto anni e otto mesi»*;
 - il conto economico completo: rendita, spese, Giorno di Paga, patrimonio;
-- **a quanti mesi di rendita sta il tuo sogno.**
 
-Quell'ultima riga è la più interessante da confrontare, perché due persone
-possono uscire lo stesso mese con sogni a distanze molto diverse.
+Il numero da confrontare è il primo: quanti mesi hai lavorato per smettere
+di doverlo fare.
 
 > **Perché non c'è un premio d'uscita.** Nelle prime versioni uscire
 > moltiplicava tutto per cento: chi lasciava il lavoro con 1.739 € di rendita
@@ -409,8 +406,8 @@ possono uscire lo stesso mese con sogni a distanze molto diverse.
 
 ## 10. Il Largo — il secondo tempo, spento
 
-C'è un secondo tabellone nel codice: 48 caselle, venti grandi affari, i
-sogni, quattro penalità. Oggi non si gioca. Ogni mercato pubblicato dichiara
+C'è un secondo tabellone nel codice: 34 caselle, venti grandi affari,
+otto Giorni di Rendita, quattro penalità. Oggi non si gioca. Ogni mercato pubblicato dichiara
 `secondoTempo: false`, e uscire dalla Ruota chiude la partita.
 
 **Perché.** Misurato su trenta partite a tre giocatori:
@@ -452,11 +449,9 @@ giocatore:
 - contanti finali e patrimonio netto;
 - reddito passivo, spese totali e Giorno di Paga;
 - valore degli attivi e totale delle passività;
-- numero di figli;
-- **a quanti mesi di rendita sta il suo sogno.**
+- numero di figli.
 
-Serve a capire *perché* qualcuno ha vinto — che è la parte più utile — e
-l'ultima riga serve a ricordare per cosa si giocava.
+Serve a capire *perché* qualcuno ha vinto, che è la parte più utile.
 
 ## 12. Strategia: cosa insegna davvero
 
@@ -620,7 +615,7 @@ nascosta (linguetta cambiata, telefono in tasca) non aspetta: la carta è già
 lì quando torna.
 
 **Le lingue.** Italiano, inglese e francese, e non solo le etichette:
-professioni, sogni, carte, categorie, quindici lezioni e dieci quesiti. Gli
+professioni, carte, categorie, quindici lezioni e dieci quesiti. Gli
 importi restano in euro col formato romano, perché un mercato è il suo
 mercato in qualunque lingua lo si legga, e le regole fiscali descritte sono
 italiane — il gioco si svolge a Roma, e tradurle in equivalenti stranieri

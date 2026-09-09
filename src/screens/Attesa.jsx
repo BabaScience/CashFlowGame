@@ -12,7 +12,7 @@ import { useLingua } from "../Lingua.jsx";
 /** Sala d'attesa: si vede chi è entrato e si può ancora cambiare scelta. */
 export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }) {
   const { t } = useLingua();
-  const { professioni, sogni, trovaProfessione, trovaSogno } = useMercato();
+  const { professioni, trovaProfessione } = useMercato();
   const io = stato.giocatori.find((g) => g.id === mioId);
   const sonoHost = stato.hostId === mioId;
   const [modifica, setModifica] = useState(false);
@@ -34,12 +34,11 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
     copia();
   };
 
-  const cambia = async (campo, valore) => {
+  const cambia = async (valore) => {
     const r = await invia({
       tipo: "entra",
       nome: io.nome,
-      professioneId: campo === "prof" ? valore : io.professioneId,
-      sognoId: campo === "sogno" ? valore : io.sognoId,
+      professioneId: valore,
     });
     if (r.errore) avvisa(r.errore);
   };
@@ -72,7 +71,6 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
           </div>
           {stato.giocatori.map((g, i) => {
             const p = trovaProfessione(g.professioneId);
-            const s = trovaSogno(g.sognoId);
             return (
               // initial={false}: il contenuto deve essere visibile SUBITO. Se la riga
               // comparisse mentre la scheda è in secondo piano, un'animazione d'ingresso
@@ -89,7 +87,7 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
                   <div className="f12 tenue">
                     {t("attesa.rigaGiocatore", {
                       emoji: p.emoji, professione: p.nome,
-                      importo: soldi(p.stipendio), sogno: s.emoji,
+                      importo: soldi(p.stipendio),
                     })}
                   </div>
                 </div>
@@ -114,7 +112,6 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
               {t("attesa.sceltaCorrente", {
                 emoji: trovaProfessione(io.professioneId).emoji,
                 professione: trovaProfessione(io.professioneId).nome,
-                sogno: trovaSogno(io.sognoId).nome,
               })}
             </p>
           )}
@@ -129,20 +126,10 @@ export default function Attesa({ stato, mioId, invia, inAzione, avvisa, suEsci }
                 etichetta={t("attesa.professione")}
                 valore={io.professioneId}
                 disabilitato={inAzione}
-                onCambia={(v) => cambia("prof", v)}
+                onCambia={(v) => cambia(v)}
                 opzioni={professioni.map((p) => ({
                   valore: p.id, emoji: p.emoji, etichetta: p.nome,
                   dettaglio: t("ingresso.alMese", { importo: soldi(p.stipendio) }),
-                }))}
-              />
-              <Scelta
-                id="attesa-sogno"
-                etichetta={t("attesa.sogno")}
-                valore={io.sognoId}
-                disabilitato={inAzione}
-                onCambia={(v) => cambia("sogno", v)}
-                opzioni={sogni.map((s) => ({
-                  valore: s.id, emoji: s.emoji, etichetta: s.nome, dettaglio: soldi(s.costo),
                 }))}
               />
               {io && (

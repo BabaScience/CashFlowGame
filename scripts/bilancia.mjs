@@ -181,10 +181,6 @@ function mossa(s) {
           ? { tipo: "compraAffareVeloce", giocatoreId: id }
           : { tipo: "passaAffareVeloce", giocatoreId: id };
 
-      case "sogno":
-        return p.mio && g.contanti >= p.costo
-          ? { tipo: "compraSogno", giocatoreId: id }
-          : { tipo: "passaSogno", giocatoreId: id };
 
       default:
         throw new Error("pending non gestito: " + p.tipo);
@@ -205,7 +201,6 @@ function partita({ mercatoId, livello, professioneId, giocatori = 3, seme, maxAz
     const r = applicaAzione(s, {
       tipo: "entra", giocatoreId: "p" + i, nome: "Bot" + i,
       professioneId,                                   // stessa scheda per tutti:
-      sognoId: getPacchetto(mercatoId).sogni[i % getPacchetto(mercatoId).sogni.length].id,
     });
     if (r.errore) throw new Error("entra: " + r.errore);
     s = r.stato;
@@ -338,8 +333,8 @@ for (const { mercatoId, livello } of COMBINAZIONI) {
       }
       azioniViste.push(azioni);
       /* `liberta` è la vittoria normale da quando il secondo tempo è
-         spento; `sogno` e `rendita` restano per i mercati che lo accendono. */
-      if (["liberta", "sogno", "rendita"].includes(s.motivoVittoria)) { vinte++; vittorieVere++; }
+         spento; `rendita` resta per i mercati che lo accendono. */
+      if (["liberta", "rendita"].includes(s.motivoVittoria)) { vinte++; vittorieVere++; }
       else if (s.motivoVittoria === "tempo") aTempo++;
     }
 
@@ -436,7 +431,6 @@ function lampoContro(mercatoId, seme, scarsoPrimo) {
     const r = applicaAzione(s, {
       tipo: "entra", giocatoreId: "p" + i, nome: "Bot" + i,
       professioneId: pac.professioni[3 % pac.professioni.length].id,
-      sognoId: pac.sogni[i].id,
     });
     if (r.errore) throw new Error(r.errore);
     s = r.stato;

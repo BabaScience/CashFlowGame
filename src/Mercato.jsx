@@ -8,7 +8,7 @@ import { useLingua } from "./Lingua.jsx";
  * IL MERCATO CORRENTE, A DISPOSIZIONE DI TUTTA L'INTERFACCIA.
  *
  * Prima ogni componente importava direttamente i dati — le professioni, i
- * sogni, le categorie — da moduli globali. Funziona finché il gioco ha una
+ * le categorie — da moduli globali. Funziona finché il gioco ha una
  * sola economia, e smette di funzionare al secondo mercato: due tavoli
  * aperti su città diverse leggerebbero gli stessi numeri.
  *
@@ -23,7 +23,7 @@ const Contesto = createContext(null);
 /**
  * TRADURRE I CONTENUTI DEL MERCATO.
  *
- * Le carte, le professioni e i sogni sono dati del pacchetto, scritti in
+ * Le carte e le professioni sono dati del pacchetto, scritti in
  * italiano. Tradurli qui — una volta, all'ingresso del contesto — significa
  * che tutto quello che sta sotto riceve già i nomi giusti senza saperne
  * niente: nessun componente deve ricordarsi di chiamare una funzione.
@@ -72,7 +72,6 @@ export function MercatoProvider({ stato, mercatoId, children }) {
     const pacchetto = tav ? {
       ...grezzo,
       professioni: tradotto(grezzo.professioni, tav.professioni),
-      sogni: tradotto(grezzo.sogni, tav.sogni),
       affariLargo: carteTradotte(grezzo.affariLargo, tav.carte),
       mazzi: Object.fromEntries(
         Object.entries(grezzo.mazzi).map(([k, m]) => [k, carteTradotte(m, tav.carte)])
@@ -98,7 +97,6 @@ export function MercatoProvider({ stato, mercatoId, children }) {
       /** Un importo nella valuta di questo mercato. */
       soldi: (n) => formatta(n, valuta),
       professioni: pacchetto.professioni,
-      sogni: pacchetto.sogni,
       categorie: pacchetto.categorie,
       etichetteSpese: pacchetto.etichetteSpese,
       etichettePassivita: pacchetto.etichettePassivita,
@@ -120,7 +118,6 @@ export function MercatoProvider({ stato, mercatoId, children }) {
       vociDi: (carta) => vociFlusso(carta, livello, pacchetto.fisco),
       trovaProfessione: (id) =>
         pacchetto.professioni.find((p) => p.id === id) || pacchetto.professioni[0],
-      trovaSogno: (id) => pacchetto.sogni.find((x) => x.id === id) || pacchetto.sogni[0],
       trovaAffare: (id) => pacchetto.affariLargo.find((a) => a.id === id),
     };
   }, [stato, mercatoId, lingua]);
@@ -143,7 +140,6 @@ export function useMercato() {
     valuta: pacchetto.valuta,
     soldi: (n) => formatta(n, pacchetto.valuta),
     professioni: pacchetto.professioni,
-    sogni: pacchetto.sogni,
     categorie: pacchetto.categorie,
     etichetteSpese: pacchetto.etichetteSpese,
     etichettePassivita: pacchetto.etichettePassivita,
@@ -151,7 +147,6 @@ export function useMercato() {
     obiettivo: pacchetto.obiettivoRendita,
     obiettivoLargo: pacchetto.obiettivoLargo,
     trovaProfessione: (id) => pacchetto.professioni.find((p) => p.id === id) || pacchetto.professioni[0],
-    trovaSogno: (id) => pacchetto.sogni.find((x) => x.id === id) || pacchetto.sogni[0],
     trovaAffare: (id) => pacchetto.affariLargo.find((a) => a.id === id),
   };
 }

@@ -9,7 +9,7 @@ const COLORI = {
   paga: "#D98324", carta: "#4E8B3D", mercato: "#2E6FA8", extra: "#B23A2E",
   beneficenza: "#7B4FA8", figlio: "#2F8F86", licenziamento: "#6B4423",
   bancarotta: "#B23A2E", liberta: "#C9A227", vittoria: "#C9A227",
-  veloce: "#C9A227", sogno: "#C2557A", prestito: "#2E6FA8", dado: "#6E7B74",
+  veloce: "#C9A227", prestito: "#2E6FA8", dado: "#6E7B74",
   turno: "#6E7B74", lobby: "#6E7B74", sistema: "#6E7B74", salto: "#6E7B74",
   penalita: "#B23A2E", info: "#6E7B74",
 };

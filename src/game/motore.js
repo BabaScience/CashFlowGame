@@ -24,8 +24,6 @@ const professioniDi = (s) => pacchettoDi(s).professioni;
 const getProfessione = (s, id) =>
   professioniDi(s).find((p) => p.id === id) || professioniDi(s)[0];
 const mazziDi = (s) => pacchettoDi(s).mazzi;
-const sogniDi = (s) => pacchettoDi(s).sogni;
-const getSogno = (s, id) => sogniDi(s).find((x) => x.id === id) || sogniDi(s)[0];
 const affariLargoDi = (s) => pacchettoDi(s).affariLargo;
 const getAffareVeloce = (s, id) => affariLargoDi(s).find((a) => a.id === id);
 const obiettivoDi = (s) => pacchettoDi(s).obiettivoRendita;
@@ -102,7 +100,7 @@ function pesca(s, nomeMazzo) {
 
 /* ═══════════════ creazione ═══════════════ */
 
-export function creaGiocatore(s, id, nome, professioneId, sognoId, indice, bot = false) {
+export function creaGiocatore(s, id, nome, professioneId, indice, bot = false) {
   const p = getProfessione(s, professioneId);
   return {
     id,
@@ -112,7 +110,6 @@ export function creaGiocatore(s, id, nome, professioneId, sognoId, indice, bot =
     bot: Boolean(bot),
     colore: COLORI[indice % COLORI.length],
     professioneId: p.id,
-    sognoId: sognoId || sogniDi(s)[0].id,
     pronto: false,
 
     // Ruota
@@ -144,8 +141,6 @@ export function creaGiocatore(s, id, nome, professioneId, sognoId, indice, bot =
     redditoInizialeVeloce: 0,
     affariVeloci: [],       // id degli affari comprati
     beneficenzaVeloce: false,
-    segnaliniSogno: 0,      // ogni segnalino raddoppia il costo del proprio sogno
-    sognoComprato: false,
 
     // statistiche
     turniGiocati: 0,
@@ -623,31 +618,6 @@ function risolviVeloce(s, g) {
     return;
   }
 
-  if (casella.tipo === "sogno") {
-    const sogno = getSogno(s, casella.rif);
-    const mio = g.sognoId === casella.rif;
-
-    if (mio) {
-      const costo = sogno.costo * (1 + g.segnaliniSogno);
-      s.pending = { tipo: "sogno", giocatoreId: g.id, sogno, costo, mio: true };
-      return;
-    }
-
-    // Atterrare sul sogno di un altro ne raddoppia il costo per quel giocatore.
-    const vittime = s.giocatori.filter(
-      (p) => p.id !== g.id && p.sognoId === casella.rif && !p.eliminato && !p.sognoComprato
-    );
-    for (const v of vittime) {
-      v.segnaliniSogno += 1;
-      nota(
-        s,
-        `${g.nome} atterra sul sogno di ${v.nome}: ora costa ${den(s, sogno.costo * (1 + v.segnaliniSogno))}.`, "r14", { nome: g.nome, vNome: v.nome, v: den(s, sogno.costo * (1 + v.segnaliniSogno)) },
-        "sogno", v.id
-      );
-    }
-    s.pending = { tipo: "sogno", giocatoreId: g.id, sogno, costo: sogno.costo, mio: false, vittime: vittime.map((v) => v.nome) };
-    return;
-  }
 
   if (casella.tipo === "beneficenza") {
     s.pending = { tipo: "beneficenzaVeloce", giocatoreId: g.id, gia: g.beneficenzaVeloce };
@@ -700,13 +670,6 @@ function risolviVeloce(s, g) {
 /* ═══════════════ vittoria ═══════════════ */
 
 function controllaVittoria(s, g) {
-  if (g.sognoComprato) {
-    s.fase = "finita";
-    s.vincitore = g.id;
-    s.motivoVittoria = "sogno";
-    nota(s, `🏆 ${g.nome} ha comprato il proprio sogno e vince la partita!`, "r17", { nome: g.nome }, "vittoria", g.id);
-    return true;
-  }
   if (
     g.tracciato === "veloce" &&
     redditoPassivo(g) >= traguardoLargo(s, g)
@@ -751,7 +714,6 @@ export function applicaAzione(stato, azione) {
     if (g) {
       g.nome = (azione.nome || g.nome).slice(0, 18);
       g.professioneId = azione.professioneId || g.professioneId;
-      g.sognoId = azione.sognoId || g.sognoId;
       const p = getProfessione(s, g.professioneId);
       g.stipendio = p.stipendio;
       g.perFiglio = p.perFiglio;
@@ -760,7 +722,7 @@ export function applicaAzione(stato, azione) {
       return ok();
     }
     if (s.giocatori.length >= MAX_GIOCATORI) return err(`Massimo ${MAX_GIOCATORI} giocatori.`, "errori.tavoloPieno", { n: MAX_GIOCATORI });
-    const nuovo = creaGiocatore(s, giocatoreId, azione.nome, azione.professioneId, azione.sognoId, s.giocatori.length, azione.bot);
+    const nuovo = creaGiocatore(s, giocatoreId, azione.nome, azione.professioneId, s.giocatori.length, azione.bot);
     s.giocatori.push(nuovo);
     nota(s, `${nuovo.nome} entra nella stanza.`, "r19", { nuovoNome: nuovo.nome }, "lobby", nuovo.id);
     return ok();
@@ -1240,20 +1202,6 @@ export function applicaAzione(stato, azione) {
     return ok();
   }
 
-  if (tipo === "compraSogno" || tipo === "passaSogno") {
-    if (s.pending.tipo !== "sogno") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
-    if (tipo === "compraSogno") {
-      if (!s.pending.mio) return err("Puoi comprare solo il sogno che hai scelto.", "errori.soloIlSognoScelto");
-      const costo = s.pending.costo;
-      if (g.contanti < costo) return err("Contanti insufficienti per il tuo sogno.", "errori.contantiPerIlSogno");
-      g.contanti -= costo;
-      g.sognoComprato = true;
-      nota(s, `⭐ ${g.nome} compra il proprio sogno "${s.pending.sogno.nome}" per ${den(s, costo)}!`, "r47", { nome: g.nome, nome2: s.pending.sogno.nome, importo: den(s, costo) }, "sogno", g.id);
-      if (controllaVittoria(s, g)) return ok();
-    }
-    prossimoTurno(s);
-    return ok();
-  }
 
   if (tipo === "beneficenzaVeloce") {
     if (s.pending.tipo !== "beneficenzaVeloce") return err("Azione non valida ora.", "errori.azioneNonValidaOra");
@@ -1473,7 +1421,7 @@ export function classifica(s) {
       const r = riepilogo(g);
       return {
         id: g.id, nome: g.nome, colore: g.colore,
-        professioneId: g.professioneId, sognoId: g.sognoId,
+        professioneId: g.professioneId,
         tracciato: g.tracciato, eliminato: g.eliminato,
         contanti: g.contanti,
         redditoPassivo: r.redditoPassivo,
@@ -1485,7 +1433,6 @@ export function classifica(s) {
         redditoRendita: redditoPassivo(g),
         guadagnoVeloce: redditoPassivo(g) - g.redditoInizialeVeloce,
         affariVeloci: g.affariVeloci.length,
-        sognoComprato: g.sognoComprato,
         figli: g.figli,
         /* I mesi lavorati sono la tesi del gioco: la schermata finale li
            deve avere sottomano come ha i soldi. */

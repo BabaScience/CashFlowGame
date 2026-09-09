@@ -147,8 +147,8 @@ prova("All'acquisto vale il livello della stanza, non la carta", () => {
   const carta = affitti.find((c) => c.canone && c.acconto < 60000);
   const flussi = [1, 2].map((liv) => {
     let s = creaStanza("CCCC", "a", { seme: 3, mercatoId: "roma", livello: liv });
-    s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "A", professioneId: "quadro", sognoId: "sg01" }).stato;
-    s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "B", professioneId: "meccanico", sognoId: "sg02" }).stato;
+    s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "A", professioneId: "quadro" }).stato;
+    s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "B", professioneId: "meccanico" }).stato;
     s = applicaAzione(s, { tipo: "avvia", giocatoreId: "a" }).stato;
     const chi = s.giocatori[s.turno];
     chi.contanti = 500000;

@@ -1,7 +1,7 @@
 /**
  * POST /api/coda
  *
- *   { op: "entra",  giocatoreId, nome, professioneId, sognoId,
+ *   { op: "entra",  giocatoreId, nome, professioneId,
  *     mercatoId, formato, livello }
  *   { op: "guarda", giocatoreId }
  *   { op: "esci",   giocatoreId }
@@ -93,7 +93,7 @@ export default async function handler(req, res) {
       const ora = Date.now();
       await col.insertOne({
         giocatoreId, chiave, nome,
-        professioneId: body.professioneId, sognoId: body.sognoId,
+        professioneId: body.professioneId,
         mercatoId, formato, livello,
         creataIl: new Date(ora),
         scadeIl: new Date(ora + TTL_CODA_MS),
@@ -117,12 +117,12 @@ export default async function handler(req, res) {
       const professioneId = professioneACaso(getPacchetto(mercatoId));
       const entra = (g) => applicaAzione(stato, {
         tipo: "entra", giocatoreId: g.giocatoreId, nome: g.nome,
-        professioneId, sognoId: g.sognoId,
+        professioneId,
       });
       let r = entra(avversario);
       if (r.errore) return errore(res, 400, r.errore, r.chiaveErrore, r.valoriErrore);
       stato = r.stato;
-      r = entra({ giocatoreId, nome, professioneId: body.professioneId, sognoId: body.sognoId });
+      r = entra({ giocatoreId, nome, professioneId: body.professioneId });
       if (r.errore) return errore(res, 400, r.errore, r.chiaveErrore, r.valoriErrore);
       stato = r.stato;
 

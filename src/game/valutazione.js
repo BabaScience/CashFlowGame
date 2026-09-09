@@ -72,7 +72,6 @@ function riferimento(giorno, mercatoId) {
       else if (p.tipo === "bancarotta") az = { tipo: "concludiBancarotta", giocatoreId: id };
       else if (p.tipo === "beneficenza") az = { tipo: "beneficenza", giocatoreId: id, accetta: false };
       else if (p.tipo === "beneficenzaVeloce") az = { tipo: "beneficenzaVeloce", giocatoreId: id, accetta: false };
-      else if (p.tipo === "sogno") az = { tipo: "passaSogno", giocatoreId: id };
       else if (p.tipo === "affareVeloce") {
         az = g.contanti >= p.affare.acconto
           ? { tipo: "compraAffareVeloce", giocatoreId: id }

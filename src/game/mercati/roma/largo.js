@@ -1,13 +1,11 @@
 /**
- * IL LARGO DI ROMA — gli affari e i sogni di chi è già uscito.
+ * IL LARGO DI ROMA — gli affari di chi è già uscito.
  *
  * Fuori dalla Ruota gli importi cambiano scala: non si comprano più
  * bilocali, si comprano aziende e portafogli. Restano però ancorati a
  * un'idea di realtà italiana ed europea — niente miniere d'oro e squadre
  * sportive, che sono il vocabolario di un altro gioco.
  *
- * I sogni sono in euro e volutamente concreti: la maggior parte costa meno
- * di quanto la gente immagini, ed è metà del punto.
  */
 
 export const AFFARI_LARGO = [
@@ -53,17 +51,3 @@ export const AFFARI_LARGO = [
     testo: "Contratti pluriennali con consorzi di filiera." },
 ];
 
-export const SOGNI = [
-  { id: "sg01", nome: "Fare il giro del mondo, senza fretta", costo: 90000, emoji: "🌍" },
-  { id: "sg02", nome: "Costruire una scuola nel paese dei tuoi", costo: 180000, emoji: "🏫" },
-  { id: "sg03", nome: "Casa con vista sul mare in Sardegna", costo: 420000, emoji: "🏝️" },
-  { id: "sg04", nome: "Aprire il ristorante che hai in testa da anni", costo: 250000, emoji: "🍽️" },
-  { id: "sg05", nome: "Fondare una associazione e finanziarla per dieci anni", costo: 300000, emoji: "🤝" },
-  { id: "sg06", nome: "Una spedizione in Himalaya", costo: 70000, emoji: "🏔️" },
-  { id: "sg07", nome: "Barca a vela di quindici metri", costo: 380000, emoji: "⛵" },
-  { id: "sg08", nome: "Un anno sabbatico per tutta la famiglia", costo: 120000, emoji: "🧳" },
-  { id: "sg09", nome: "Finanziare dieci giovani imprese", costo: 500000, emoji: "🚀" },
-  { id: "sg10", nome: "Comprare e restaurare un casale in Umbria", costo: 340000, emoji: "🏡" },
-  { id: "sg11", nome: "Pagare gli studi a tutti i nipoti", costo: 200000, emoji: "🎓" },
-  { id: "sg12", nome: "Rifugio in montagna, tutto per te", costo: 160000, emoji: "🏂" },
-];

@@ -57,7 +57,7 @@ console.log("\n── Che cosa deve contenere un pacchetto ──");
 
 prova("Nessun pacchetto è incompleto", () => {
   const richiesti = ["id", "versione", "nome", "valuta", "obiettivoRendita",
-                     "professioni", "mazzi", "conteggi", "affariLargo", "sogni",
+                     "professioni", "mazzi", "conteggi", "affariLargo",
                      "etichetteSpese", "debitiEstinguibili"];
   for (const chiave of tutteLeVersioni()) {
     const [id, v] = chiave.split(":");
@@ -66,7 +66,6 @@ prova("Nessun pacchetto è incompleto", () => {
       vero(p[campo] !== undefined, `${chiave} non ha "${campo}"`);
     }
     vero(p.professioni.length >= 2, `${chiave}: servono almeno due professioni`);
-    vero(p.sogni.length >= 1, `${chiave}: serve almeno un sogno`);
   }
 });
 
@@ -197,7 +196,7 @@ prova("Le professioni del giocatore vengono dal pacchetto della stanza", () => {
   const prima = p.professioni[0];
   s = applicaAzione(s, {
     tipo: "entra", giocatoreId: "h", nome: "Tizio",
-    professioneId: prima.id, sognoId: p.sogni[0].id,
+    professioneId: prima.id,
   }).stato;
   eq(s.giocatori[0].stipendio, prima.stipendio, "stipendio dal pacchetto:");
 });

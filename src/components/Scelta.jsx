@@ -10,7 +10,7 @@
  *
  * Ma il motivo vero non è l'aspetto: è che dentro un `<option>` ci va solo
  * testo. Le nostre scelte hanno tre pezzi — emoji, nome, e un numero che
- * conta (lo stipendio, il costo del sogno, il sommario del livello) — e nel
+ * conta (lo stipendio, il sommario del livello) — e nel
  * nativo finivano schiacciati in una riga sola separata da trattini:
  *
  *     👩‍🏫 Insegnante — 1.850 €/mese

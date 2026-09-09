@@ -12,7 +12,7 @@ import { useLingua } from "../Lingua.jsx";
  */
 export default function Giocatori({ stato, mioId, compatto }) {
   const { t } = useLingua();
-  const { trovaProfessione, trovaSogno, obiettivo } = useMercato();
+  const { trovaProfessione, obiettivo } = useMercato();
   const diTurno = stato.giocatori[stato.turno]?.id;
 
   return (
@@ -21,7 +21,6 @@ export default function Giocatori({ stato, mioId, compatto }) {
       {stato.giocatori.map((g, i) => {
         const r = riepilogo(g);
         const prof = trovaProfessione(g.professioneId);
-        const sogno = trovaSogno(g.sognoId);
         const veloce = g.tracciato === "veloce";
         const progressoVeloce = veloce
           ? (g.redditoRendita - g.redditoInizialeVeloce) / obiettivo
@@ -83,7 +82,6 @@ export default function Giocatori({ stato, mioId, compatto }) {
               </div>
             </div>
 
-            <span style={{ fontSize: 17, flex: "none" }} title={sogno.nome}>{sogno.emoji}</span>
           </motion.div>
         );
       })}

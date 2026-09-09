@@ -423,7 +423,6 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .c-figlio   { background: linear-gradient(165deg, #EAF6F4, #D6EDE9); border-top: 5px solid var(--acqua); }
 .c-licenz   { background: linear-gradient(165deg, #F5F0E9, #E8DCCB); border-top: 5px solid #6B4423; }
 .c-veloce   { background: linear-gradient(165deg, #FBF4E4, #F3E6C6); border-top: 5px solid var(--oro); }
-.c-sogno    { background: linear-gradient(165deg, #FBEDF2, #F4D9E3); border-top: 5px solid var(--rosa); }
 .c-banca    { background: linear-gradient(165deg, #FBEDEB, #F2D6D1); border-top: 5px solid var(--rosso); }
 
 /* ══ il tiro, mostrato sopra al tabellone ══ */
@@ -1074,7 +1073,7 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 
 /* ══ creare o entrare ══
    Stava in fondo, dopo i campi che decide: si compilavano mercato,
-   livello, professione e sogno, e solo allora si scopriva che entrando con
+   livello e professione, e solo allora si scopriva che entrando con
    un codice non servivano. ══ */
 .scelta-modo { display: grid; gap: 8px; margin-bottom: 18px; }
 @media (min-width: 560px) { .scelta-modo { grid-template-columns: 1fr 1fr; } }

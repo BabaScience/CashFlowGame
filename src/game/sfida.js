@@ -73,7 +73,6 @@ export function creaSfida({ giorno = giornoSfida(), mercatoId = "roma", nome = "
   const seme = semeDelGiorno(giorno, mercatoId);
   const pacchetto = getPacchetto(mercatoId);
   const prof = professioneDelGiorno(giorno, mercatoId);
-  const sogno = pacchetto.sogni[seme % pacchetto.sogni.length];
 
   let s = creaStanza(codiceStanza(), "io", {
     seme,
@@ -83,11 +82,11 @@ export function creaSfida({ giorno = giornoSfida(), mercatoId = "roma", nome = "
   });
   s = applicaAzione(s, {
     tipo: "entra", giocatoreId: "io", nome,
-    professioneId: prof.id, sognoId: sogno.id,
+    professioneId: prof.id,
   }).stato;
   s = applicaAzione(s, { tipo: "avvia", giocatoreId: "io" }).stato;
   s.giocatori[0].contanti += BONUS_PARTENZA;
-  return { stato: s, giorno, mercatoId, professione: prof, sogno };
+  return { stato: s, giorno, mercatoId, professione: prof };
 }
 
 /**

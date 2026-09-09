@@ -249,7 +249,7 @@ export default function Tabellone({ stato, mioId, nota, centroLibero }) {
       {conLargo && PERCORSO_LARGO.map((c, i) => {
         const a = ang(i, N_LARGO);
         const [tx, ty] = punto(a, R_EST);
-        const simbolo = { rendita: "€", affare: "◆", sogno: "★", beneficenza: "♥",
+        const simbolo = { rendita: "€", affare: "◆", beneficenza: "♥",
           verificaFiscale: "!", causa: "§", divorzio: "×" }[c.tipo];
         return (
           <text key={"lv" + i} x={tx} y={ty} textAnchor="middle" dominantBaseline="central"

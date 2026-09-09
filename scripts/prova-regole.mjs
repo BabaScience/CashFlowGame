@@ -41,7 +41,7 @@ const appErr = (s, az) => applicaAzione(s, az).errore;
 function tavolo(prof = ["medico", "custode"], opzioni = {}) {
   let s = creaStanza(codiceStanza(), "p0", opzioni);
   prof.forEach((pid, i) => {
-    s = app(s, { tipo: "entra", giocatoreId: "p" + i, nome: "G" + i, professioneId: pid, sognoId: "sg0" + (i + 1) });
+    s = app(s, { tipo: "entra", giocatoreId: "p" + i, nome: "G" + i, professioneId: pid });
   });
   return app(s, { tipo: "avvia", giocatoreId: "p0" });
 }
@@ -77,14 +77,14 @@ test("Si parte con 0 figli e nessun prestito", () => {
 
 test("Servono almeno 2 giocatori per avviare", () => {
   let s = creaStanza(codiceStanza(), "p0");
-  s = app(s, { tipo: "entra", giocatoreId: "p0", nome: "Solo", professioneId: "medico", sognoId: "sg01" });
+  s = app(s, { tipo: "entra", giocatoreId: "p0", nome: "Solo", professioneId: "medico" });
   vero(appErr(s, { tipo: "avvia", giocatoreId: "p0" }), "avvio con 1 giocatore doveva fallire");
 });
 
 test("Massimo 6 giocatori", () => {
   let s = creaStanza(codiceStanza(), "p0");
-  for (let i = 0; i < 6; i++) s = app(s, { tipo: "entra", giocatoreId: "p" + i, nome: "G" + i, professioneId: "medico", sognoId: "sg01" });
-  vero(appErr(s, { tipo: "entra", giocatoreId: "p6", nome: "Settimo", professioneId: "medico", sognoId: "sg01" }), "il settimo doveva essere rifiutato");
+  for (let i = 0; i < 6; i++) s = app(s, { tipo: "entra", giocatoreId: "p" + i, nome: "G" + i, professioneId: "medico" });
+  vero(appErr(s, { tipo: "entra", giocatoreId: "p6", nome: "Settimo", professioneId: "medico" }), "il settimo doveva essere rifiutato");
 });
 
 console.log("\n── Prestito bancario ──");
@@ -298,59 +298,8 @@ test("Vittoria col flusso: rendita all'uscita + l'obiettivo", () => {
   eq(s.motivoVittoria, "rendita");
 });
 
-test("Vittoria col sogno: comprare il proprio sogno chiude la partita", () => {
-  let s = tavolo();
-  s = turnoDi(s, "p0");
-  const g = G(s, 0);
-  g.tracciato = "veloce";
-  g.contanti = 1000000;
-  s.pending = { tipo: "sogno", giocatoreId: "p0", mio: true, costo: 150000,
-    sogno: { id: "sg01", nome: "Giro del mondo", costo: 150000 } };
-  s = app(s, { tipo: "compraSogno", giocatoreId: "p0" });
-  eq(s.fase, "finita");
-  eq(s.motivoVittoria, "sogno");
-  eq(G(s, 0).contanti, 850000);
-});
 
-test("Non puoi comprare il sogno di un altro", () => {
-  let s = tavolo();
-  s = turnoDi(s, "p0");
-  G(s, 0).tracciato = "veloce";
-  G(s, 0).contanti = 1000000;
-  s.pending = { tipo: "sogno", giocatoreId: "p0", mio: false, costo: 150000, sogno: { id: "sg02", nome: "Scuola", costo: 150000 } };
-  vero(appErr(s, { tipo: "compraSogno", giocatoreId: "p0" }), "doveva rifiutare il sogno altrui");
-});
 
-test("Atterrare sul sogno di un altro ne raddoppia il costo", () => {
-  let s = tavolo(["medico", "custode"]);
-  G(s, 1).sognoId = "sg02";          // il sogno di p1 sta sulla casella 6
-  s = turnoDi(s, "p0");
-  const g = G(s, 0);
-  g.tracciato = "veloce";
-  g.sognoId = "sg01";
-  g.posizione = 6;                   // atterriamo direttamente sulla casella
-  s.pending = null;
-  s.dado = null;
-  // risolviamo la casella come farebbe il motore dopo il movimento
-  const r = applicaAzione(s, { tipo: "tira", giocatoreId: "p0" });
-  vero(!r.errore, "tiro valido");
-
-  // caso deterministico: p0 in posizione 4, tira e finisce su 6 solo con un 2.
-  // Verifichiamo invece l'effetto diretto tramite una seconda partita controllata.
-  let t = tavolo(["medico", "custode"]);
-  G(t, 1).sognoId = "sg02";
-  t = turnoDi(t, "p0");
-  G(t, 0).tracciato = "veloce";
-  G(t, 0).sognoId = "sg01";
-  eq(G(t, 1).segnaliniSogno, 0, "nessun segnalino all'inizio");
-
-  // simuliamo l'atterraggio applicando la stessa regola del motore
-  const sogno = { costo: 200000 };
-  G(t, 1).segnaliniSogno += 1;
-  eq(sogno.costo * (1 + G(t, 1).segnaliniSogno), 400000, "il costo deve raddoppiare");
-  G(t, 1).segnaliniSogno += 1;
-  eq(sogno.costo * (1 + G(t, 1).segnaliniSogno), 600000, "col secondo segnalino triplica");
-});
 
 test("Verifica fiscale e causa costano metà dei contanti, il divorzio tutto", () => {
   let s = tavolo();
@@ -474,8 +423,8 @@ console.log("\n── La banca guarda il reddito ──");
 
 function tavoloRoma(professioneId = "insegnante", opzioni = {}) {
   let s = creaStanza("REAL", "a", { seme: 21, mercatoId: "roma", livello: 2, ...opzioni });
-  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "A", professioneId, sognoId: "sg01" }).stato;
-  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "B", professioneId: "meccanico", sognoId: "sg02" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "A", professioneId }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "B", professioneId: "meccanico" }).stato;
   s = applicaAzione(s, { tipo: "avvia", giocatoreId: "a" }).stato;
   s.turno = s.giocatori.findIndex((x) => x.id === "a");
   return s;
@@ -595,8 +544,8 @@ test("Il mercato classico resta all'1×", () => {
   /* È l'impianto astratto da tavolo: cambiarlo lì cambierebbe il gioco che
      la gente conosce. */
   let s = creaStanza("CLAS", "a", { seme: 3, mercatoId: "classico" });
-  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "A", professioneId: "medico", sognoId: "sg01" }).stato;
-  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "B", professioneId: "meccanico", sognoId: "sg02" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "A", professioneId: "medico" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "B", professioneId: "meccanico" }).stato;
   s = applicaAzione(s, { tipo: "avvia", giocatoreId: "a" }).stato;
   eq(riepilogo(s.giocatori[0]).margineUscita, 1);
 });
@@ -785,8 +734,8 @@ console.log("\n── Giocare contro il computer ──");
 
 test("Un avversario automatico è un giocatore come gli altri", () => {
   let s = creaStanza(codiceStanza(), "io");
-  s = app(s, { tipo: "entra", giocatoreId: "io", nome: "Io", professioneId: "medico", sognoId: "sg01" });
-  s = app(s, { tipo: "entra", giocatoreId: "bot1", bot: true, nome: "Bea", professioneId: "meccanico", sognoId: "sg02" });
+  s = app(s, { tipo: "entra", giocatoreId: "io", nome: "Io", professioneId: "medico" });
+  s = app(s, { tipo: "entra", giocatoreId: "bot1", bot: true, nome: "Bea", professioneId: "meccanico" });
   const bot = s.giocatori.find((g) => g.id === "bot1");
   eq(bot.bot, true, "il flag non è arrivato");
   eq(bot.tracciato, "topi", "parte come tutti");
@@ -799,8 +748,8 @@ test("Il computer trova sempre una mossa", () => {
   /* È l'unica cosa che gli si chiede: se resta senza, la partita si pianta
      e chi gioca da solo non ha modo di sbloccarla. */
   let s = creaStanza(codiceStanza(), "io");
-  s = app(s, { tipo: "entra", giocatoreId: "io", nome: "Io", professioneId: "medico", sognoId: "sg01" });
-  s = app(s, { tipo: "entra", giocatoreId: "bot1", bot: true, nome: "Bea", professioneId: "meccanico", sognoId: "sg02" });
+  s = app(s, { tipo: "entra", giocatoreId: "io", nome: "Io", professioneId: "medico" });
+  s = app(s, { tipo: "entra", giocatoreId: "bot1", bot: true, nome: "Bea", professioneId: "meccanico" });
   s = app(s, { tipo: "avvia", giocatoreId: "io" });
   for (let i = 0; i < 200 && s.fase === "inCorso"; i++) {
     const az = mossaBot(s);

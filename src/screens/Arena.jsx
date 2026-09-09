@@ -43,7 +43,6 @@ const OGNI = 2000;
 
 export default function Arena({ suEntrato, suEsci, avvisa, mercatoId, setMercato }) {
   const { t, lingua } = useLingua();
-  const { sogni } = useMercato();
   const [nome, setNome] = useState(localStorage.getItem("quotazero:nome") || "");
   const [formato, setFormato] = useState("lampo");
   const [attesa, setAttesa] = useState(null);   // { secondi, inCoda }
@@ -75,9 +74,8 @@ export default function Arena({ suEntrato, suEsci, avvisa, mercatoId, setMercato
      prima di tirare. */
   const dati = useCallback(() => ({
     nome: nome.trim() || t("arena.ospite"),
-    sognoId: sogni[0].id,
     mercatoId, livello: 1, formato,
-  }), [nome, sogni, mercatoId, formato, t]);
+  }), [nome, mercatoId, formato, t]);
 
   const annulla = useCallback(async () => {
     fermato.current = true;
@@ -135,7 +133,7 @@ export default function Arena({ suEntrato, suEsci, avvisa, mercatoId, setMercato
     await annulla();
     try {
       const d = dati();
-      const r = await api.creaStanza(d.nome, undefined, d.sognoId, mercatoId, 1, 1, formato);
+      const r = await api.creaStanza(d.nome, undefined, mercatoId, 1, 1, formato);
       /* Si comincia subito, come nella coda. Chi ha appena aspettato venti
          secondi non deve trovare una sala d'attesa e un altro pulsante:
          l'avversario è già lì, sono io. */

@@ -27,7 +27,7 @@
  */
 import { PROFESSIONI, ETICHETTE_SPESE, ETICHETTE_PASSIVITA, DEBITI_ESTINGUIBILI } from "./professioni.js";
 import { MAZZI, PICCOLI_AFFARI, GRANDI_AFFARI, MERCATO, EXTRA, CATEGORIE } from "./mazzi.js";
-import { AFFARI_LARGO, SOGNI } from "./largo.js";
+import { AFFARI_LARGO } from "./largo.js";
 import { FONTI, CREDITO_CONSUMO, COSTI_VENDITA } from "./fonti.js";
 import en from "./lingue/en.js";
 import fr from "./lingue/fr.js";
@@ -81,7 +81,7 @@ export default Object.freeze({
   /**
    * IL SECONDO TEMPO È SPENTO.
    *
-   * Il Largo esiste ancora — tabellone, venti affari, sogni, penalità — ma
+   * Il Largo esiste ancora — tabellone, venti affari, penalità — ma
    * non ci si arriva più. La misura, su trenta partite a tre giocatori:
    *
    *   · due partite su trenta si vincevano davvero al Largo; le altre
@@ -136,6 +136,5 @@ export default Object.freeze({
   },
 
   affariLargo: AFFARI_LARGO,
-  sogni: SOGNI,
   fonti: FONTI,
 });

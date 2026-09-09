@@ -178,7 +178,7 @@ prova("I due tracciati hanno un nome in ogni lingua, e sono diversi fra loro", (
 });
 
 prova("L'inglese non ha lasciato dentro l'italiano", () => {
-  const sospette = ["Stanza", "Giocatori", "Registro", "Contanti", "Sogno"];
+  const sospette = ["Stanza", "Giocatori", "Registro", "Contanti"];
   for (const chiave of foglie(dizionari.en)) {
     const v = traduci("en", chiave);
     for (const parola of sospette) {
@@ -224,8 +224,8 @@ prova("I segnaposto coincidono fra le lingue", () => {
 
 prova("Il motore salva chiave e valori, non solo il testo", () => {
   let s = creaStanza("REGI", "a", { seme: 4, mercatoId: "roma" });
-  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "Ada", professioneId: "quadro", sognoId: "sg01" }).stato;
-  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "Bo", professioneId: "meccanico", sognoId: "sg02" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "Ada", professioneId: "quadro" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "Bo", professioneId: "meccanico" }).stato;
   s = applicaAzione(s, { tipo: "avvia", giocatoreId: "a" }).stato;
   const conChiave = s.registro.filter((r) => r.k);
   vero(conChiave.length === s.registro.length,
@@ -419,8 +419,8 @@ prova("Ogni mercato dichiara le stesse lingue del gioco", () => {
   }
 });
 
-prova("Professioni e sogni sono tradotti in ogni lingua", () => {
-  /* Sono le due cose che si leggono prima di cominciare: se restano in
+prova("Le professioni sono tradotte in ogni lingua", () => {
+  /* È la prima cosa che si legge prima di cominciare: se resta in
      italiano, l'interfaccia tradotta non serve a niente. */
   for (const m of MERCATI) {
     const p = getPacchetto(m.id);
@@ -428,9 +428,6 @@ prova("Professioni e sogni sono tradotti in ogni lingua", () => {
       for (const prof of p.professioni) {
         vero(tav.professioni?.[prof.id]?.nome,
           `${m.id}/${id}: manca la professione "${prof.id}"`);
-      }
-      for (const s of p.sogni) {
-        vero(tav.sogni?.[s.id]?.nome, `${m.id}/${id}: manca il sogno "${s.id}"`);
       }
     }
   }

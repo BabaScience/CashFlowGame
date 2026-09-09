@@ -51,7 +51,6 @@ export function creaPrimaPartita({ nome } = {}) {
   const pacchetto = getPacchetto(mercatoId);
   const prof = pacchetto.professioni.find((p) => p.id === PROFESSIONE_PRIMA_PARTITA)
     || pacchetto.professioni[pacchetto.professioni.length - 1];
-  const sogno = pacchetto.sogni[0];
 
   let s = creaStanza(codiceStanza(), "io", {
     seme: SEME_PRIMA_PARTITA,
@@ -61,11 +60,11 @@ export function creaPrimaPartita({ nome } = {}) {
   });
   s = applicaAzione(s, {
     tipo: "entra", giocatoreId: "io", nome: comeTiChiami,
-    professioneId: prof.id, sognoId: sogno.id,
+    professioneId: prof.id,
   }).stato;
   s = applicaAzione(s, { tipo: "avvia", giocatoreId: "io" }).stato;
   s.giocatori[0].contanti += BONUS_PRIMA_PARTITA;
-  return { stato: s, professione: prof, sogno };
+  return { stato: s, professione: prof };
 }
 
 /* ── Ricordarsi che è stata giocata ──────────────────────────

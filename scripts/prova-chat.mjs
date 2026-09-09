@@ -27,7 +27,7 @@ const vero = (v, m) => { if (!v) throw new Error(m || "atteso vero"); };
 function tavolo() {
   let s = creaStanza("PROV", "a", { seme: 7 });
   for (const [id, nome, prof] of [["a", "Ada", "medico"], ["b", "Bo", "insegnante"], ["c", "Cy", "meccanico"]]) {
-    s = applicaAzione(s, { tipo: "entra", giocatoreId: id, nome, professioneId: prof, sognoId: "sg01" }).stato;
+    s = applicaAzione(s, { tipo: "entra", giocatoreId: id, nome, professioneId: prof }).stato;
   }
   return applicaAzione(s, { tipo: "avvia", giocatoreId: "a" }).stato;
 }

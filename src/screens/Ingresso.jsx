@@ -46,9 +46,9 @@ export default function Ingresso({ suEntrato, avvisa, suSfida, suArena, suPrima,
  * Sta in un componente suo perché deve leggere il mercato DELLA STANZA, e
  * un componente non può consumare un contesto che apre lui stesso.
  */
-function SceltaDIngresso({ stanza, professioneId, setProfessione, sognoId, setSogno, suCambiaCodice }) {
+function SceltaDIngresso({ stanza, professioneId, setProfessione, suCambiaCodice }) {
   const { t } = useLingua();
-  const { professioni, sogni, soldi: money } = useMercato();
+  const { professioni, soldi: money } = useMercato();
   const prof = professioni.find((p) => p.id === professioneId) || professioni[0];
   const speseProf = Object.values(prof.spese).reduce((a, b) => a + b, 0);
   const liv = LIVELLI.find((l) => l.id === stanza.livello);
@@ -102,17 +102,6 @@ function SceltaDIngresso({ stanza, professioneId, setProfessione, sognoId, setSo
         </div>
       </div>
 
-      <div className="gruppo-campo">
-        <Scelta
-          id="campo-sogno"
-          etichetta={t("ingresso.sogno")}
-          valore={sognoId}
-          onCambia={setSogno}
-          opzioni={sogni.map((x) => ({
-            valore: x.id, emoji: x.emoji, etichetta: x.nome, dettaglio: money(x.costo),
-          }))}
-        />
-      </div>
     </>
   );
 }
@@ -131,17 +120,15 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, mercat
   const [livello, setLivello] = useState(LIVELLO_PREDEFINITO);
   const haFisco = Boolean(getPacchetto(mercatoId).fisco);
   const { t, lingua, cambiaLingua, lingue } = useLingua();
-  const { professioni, sogni } = useMercato();
+  const { professioni } = useMercato();
   const [nome, setNome] = useState(localStorage.getItem("quotazero:nome") || "");
   const [professioneId, setProfessione] = useState(professioni[0].id);
-  const [sognoId, setSogno] = useState(sogni[0].id);
 
   /* Cambiando mercato le professioni cambiano: si riporta la scelta su una
      che esiste, altrimenti la scheda mostrata non è quella che si gioca. */
   useEffect(() => {
     if (!professioni.some((p) => p.id === professioneId)) setProfessione(professioni[0].id);
-    if (!sogni.some((x) => x.id === sognoId)) setSogno(sogni[0].id);
-  }, [professioni, sogni, professioneId, sognoId]);
+  }, [professioni, professioneId]);
   const [codice, setCodice] = useState("");
   const [occupato, setOccupato] = useState(false);
   const [modo, setModo] = useState(modoIniziale);
@@ -155,7 +142,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, mercat
   /* Quanto dura. Vedi arena: senza un formato corto non esiste "ancora una". */
   const [formato, setFormato] = useState("lunga");
   /* Entrare è in due passi. Il primo trova la stanza, il secondo fa
-     scegliere professione e sogno — ma del mercato GIUSTO, che è quello
+     scegliere la professione — ma del mercato GIUSTO, che è quello
      della stanza e si conosce solo dopo averla trovata. Prima il modulo
      offriva le professioni del mercato scelto in locale e il motore le
      sostituiva in silenzio; poi non le ho più chieste affatto, e chi
@@ -191,7 +178,7 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, mercat
     setOccupato(true);
     try {
       ricorda();
-      const r = await api.creaStanza(nome.trim(), professioneId, sognoId, mercatoId, haFisco ? livello : 1, avversari, formato);
+      const r = await api.creaStanza(nome.trim(), professioneId, mercatoId, haFisco ? livello : 1, avversari, formato);
       traccia("stanzaCreata", { mercato: mercatoId, formato });
       suEntrato(r.stato.codice);
     } catch (e) { avvisa(testoErrore(lingua, e)); }
@@ -211,7 +198,6 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, mercat
          quelle che esistono davvero in questa stanza. */
       const pac = getPacchetto(stato.mercatoId, stato.versioneDati);
       setProfessione(pac.professioni[0].id);
-      setSogno(pac.sogni[0].id);
       setStanza({
         codice: c,
         mercatoId: stato.mercatoId,
@@ -229,10 +215,10 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, mercat
     setOccupato(true);
     try {
       ricorda();
-      /* Professione e sogno vengono dal mercato della stanza, non da
+      /* La professione viene dal mercato della stanza, non da
          quello scelto in locale: è il secondo passo che li ha raccolti,
          dopo aver saputo su che mercato si gioca. */
-      await api.azione(c, { tipo: "entra", nome: nome.trim(), professioneId, sognoId });
+      await api.azione(c, { tipo: "entra", nome: nome.trim(), professioneId });
       traccia("stanzaRaggiunta");
       suEntrato(c);
     } catch (e) { avvisa(testoErrore(lingua, e)); }
@@ -425,10 +411,10 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, mercat
           </button>
 
           {/* La scelta stava in fondo, dopo i campi che decide: si
-              compilavano mercato, livello, professione e sogno, e solo
+              compilavano mercato, livello e professione, e solo
               allora si scopriva che entrando con un codice non servivano.
               Nessuno dei quattro vale per chi entra — il mercato lo decide
-              la stanza, e professione e sogno si scelgono nella sala
+              la stanza, e la professione si sceglie nella sala
               d'attesa, dove l'elenco è finalmente quello giusto. */}
           <div className="scelta-modo" role="group" aria-label={t("ingresso.cosaVuoiFare")}>
             <button data-attivo={modo === "crea"} onClick={() => setModo("crea")}>
@@ -483,7 +469,6 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, mercat
               <SceltaDIngresso
                 stanza={stanza}
                 professioneId={professioneId} setProfessione={setProfessione}
-                sognoId={sognoId} setSogno={setSogno}
                 suCambiaCodice={() => setStanza(null)}
               />
             </MercatoProvider>
@@ -590,20 +575,6 @@ function Modulo({ suEntrato, avvisa, suSfida, suArena, suPrima, suImpara, mercat
             </div>
           </div>
 
-          <div className="gruppo-campo">
-            <Scelta
-              id="campo-sogno"
-              etichetta={t("ingresso.sogno")}
-              valore={sognoId}
-              onCambia={setSogno}
-              opzioni={sogni.map((s) => ({
-                valore: s.id, emoji: s.emoji, etichetta: s.nome, dettaglio: soldi(s.costo),
-              }))}
-            />
-            <p className="f12 tenue mt8" style={{ margin: "8px 0 0", lineHeight: 1.45 }}>
-              {t("ingresso.sognoNota")}
-            </p>
-          </div>
           </>)}
         </div>
 

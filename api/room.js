@@ -2,7 +2,7 @@
  * POST /api/room
  *
  * Unico punto di scrittura. Corpo:
- *   { op: "crea",   giocatoreId, nome, professioneId, sognoId }
+ *   { op: "crea",   giocatoreId, nome, professioneId }
  *   { op: "azione", codice, giocatoreId, azione: { tipo, ... } }
  *   { op: "chiudi", codice, giocatoreId }        cancella subito la stanza
  *
@@ -58,7 +58,7 @@ export default async function handler(req, res) {
           || professioneACaso(getPacchetto(body.mercatoId, stato.versioneDati));
         const r = applicaAzione(stato, {
           tipo: "entra", giocatoreId,
-          nome: body.nome, professioneId, sognoId: body.sognoId,
+          nome: body.nome, professioneId,
         });
         if (r.errore) return errore(res, 400, r.errore, r.chiaveErrore, r.valoriErrore);
         stato = r.stato;
@@ -73,7 +73,6 @@ export default async function handler(req, res) {
             tipo: "entra", giocatoreId: `bot${n + 1}`, bot: true,
             nome: NOMI_BOT[n],
             professioneId,
-            sognoId: pac.sogni[(n + 1) % pac.sogni.length].id,
           });
           if (b.errore) return errore(res, 400, b.errore, b.chiaveErrore, b.valoriErrore);
           stato = b.stato;

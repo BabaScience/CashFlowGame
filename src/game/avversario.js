@@ -86,10 +86,6 @@ export function mossaBot(s) {
         return g.contanti >= p.affare.acconto
           ? { tipo: "compraAffareVeloce", giocatoreId: id }
           : { tipo: "passaAffareVeloce", giocatoreId: id };
-      case "sogno":
-        return p.mio && g.contanti >= p.costo
-          ? { tipo: "compraSogno", giocatoreId: id }
-          : { tipo: "passaSogno", giocatoreId: id };
       case "beneficenzaVeloce":
         return { tipo: "beneficenzaVeloce", giocatoreId: id, accetta: g.contanti > p.gia ? false : g.contanti > 100000 };
       case "penalitaVeloce": return { tipo: "confermaPenalita", giocatoreId: id };

@@ -53,7 +53,7 @@ export function statoRivincita(vecchia, codiceNuovo, chiediChi) {
     formato: vecchia.formato,
   });
 
-  /* Stessi giocatori, stesse professioni, stessi sogni: la rivincita è la
+  /* Stessi giocatori, stesse professioni: la rivincita è la
      stessa partita, altrimenti è un'altra partita.
      Chi tira per primo NON lo decidiamo qui: `avvia` fa tirare i dadi
      come in qualunque altra partita. Dare il primo turno a chi chiede la
@@ -62,7 +62,7 @@ export function statoRivincita(vecchia, codiceNuovo, chiediChi) {
   for (const g of vecchia.giocatori) {
     const r = applicaAzione(stato, {
       tipo: "entra", giocatoreId: g.id, bot: Boolean(g.bot), nome: g.nome,
-      professioneId: g.professioneId, sognoId: g.sognoId,
+      professioneId: g.professioneId,
     });
     if (r.errore) return { errore: r.errore, chiaveErrore: r.chiaveErrore, valoriErrore: r.valoriErrore };
     stato = r.stato;

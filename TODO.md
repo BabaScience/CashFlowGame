@@ -348,6 +348,35 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       anche una riga che spieghi **perché** il pulsante per uscire non c'è,
       altrimenti chi ha la rendita che copre le spese non capisce.
 
+## 5quater · Un obiettivo solo
+
+- [x] **I sogni sono usciti dal gioco** — c'erano dall'inizio: si sceglieva
+      un sogno prima del primo tiro e alla fine il gioco diceva a quanti
+      mesi di rendita fosse. Erano una seconda cosa da spiegare, una
+      seconda scelta da fare prima di sapere cosa si stesse scegliendo, e
+      una seconda risposta alla domanda «ho vinto?». L'obiettivo adesso è
+      uno solo: uscire dalla Ruota.
+
+      Tolti da tutte e tre le parti, non solo dallo schermo: i dati (le
+      dodici voci per mercato e le loro traduzioni), il motore (la casella,
+      le azioni `compraSogno`/`passaSogno`, la vittoria comprando il sogno,
+      i segnalini che ne raddoppiavano il costo) e l'interfaccia (i due
+      selettori, la scheda, la sala d'attesa, la schermata finale).
+
+      **Il tabellone del Largo si è accorciato**: quattordici delle
+      quarantasei caselle erano sogni. Non potevano diventare affari — i
+      venti affari hanno già una casella a testa — quindi sono sparite, e i
+      Giorni di Rendita sono stati ridistribuiti perché restassero
+      uniformi: adesso sono 34 caselle con le rendite a distanza quattro o
+      cinque. Se ne è accorta la prova che pretende quell'uniformità, non
+      io.
+
+      Una regex troppo avida ha rotto una riga di `prova-regole.mjs`
+      (`professioneId: pid + (i + 1)`): l'ha trovata la prova sui contanti
+      iniziali. E il banco usciva con errore mentre `❌` non compariva da
+      nessuna parte, perché `prova-arena.mjs` non compilava più: da lì in
+      poi si guarda il codice d'uscita, non le faccine.
+
 ## 6 · Prima di incassare un euro
 
 - [x] **6.1 Licenza e proprietà** — `LICENSE` con dichiarazione di opera

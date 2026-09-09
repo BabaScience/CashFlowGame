@@ -158,7 +158,7 @@ prova("Nessun componente usa il mercato senza useMercato()", () => {
      certi momenti della partita, quindi il difetto non si vedeva
      all'apertura. */
   const NOMI = ["categorie", "debitiEstinguibili", "etichetteSpese", "etichettePassivita",
-                "obiettivo", "trovaProfessione", "trovaSogno", "trovaAffare", "professioni", "sogni"];
+                "obiettivo", "trovaProfessione", "trovaAffare", "professioni"];
   const guai = [];
   for (const f of JSX) {
     const src = readFileSync(f, "utf8");

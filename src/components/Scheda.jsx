@@ -13,14 +13,13 @@ import Glossa from "./Glossa.jsx";
 export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
   const { t } = useLingua();
   const { etichetteSpese, etichettePassivita, debitiEstinguibili, trovaProfessione,
-    trovaSogno, trovaAffare, obiettivo, obiettivoLargo } = useMercato();
+    trovaAffare, obiettivo, obiettivoLargo } = useMercato();
   const alLargo = g.tracciato === "veloce";
   const [apri, setApri] = useState("conto");
   const [prestito, setPrestito] = useState(5000);
   const [errore, setErrore] = useState("");
   const r = riepilogo(g);
   const prof = trovaProfessione(g.professioneId);
-  const sogno = trovaSogno(g.sognoId);
 
   const fai = async (az) => {
     setErrore("");
@@ -80,10 +79,6 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
           <div style={{ flex: 1 }}>
             <div className="maiusc tenue">{t("scheda.passivo")}</div>
             <div className="numeri f18 grassetto pos">{soldi(r.redditoPassivo)}</div>
-          </div>
-          <div style={{ flex: 1 }}>
-            <div className="maiusc tenue">{t("scheda.sogno")}</div>
-            <div className="f13 grassetto" style={{ lineHeight: 1.2 }}>{sogno.emoji}</div>
           </div>
         </div>
       </div>
@@ -235,22 +230,6 @@ export default function Scheda({ giocatore: g, invia, inAzione, mio }) {
       {/* Banca — solo per la propria scheda */}
       {alLargo && (
         <>
-          <div className="carta">
-            <div className="sezione-tit">{t("scheda.ilTuoSogno")}</div>
-            <div className="flex cen g12">
-              <span style={{ fontSize: 30 }}>{sogno.emoji}</span>
-              <div>
-                <div className="grassetto f16">{sogno.nome}</div>
-                <div className="f13 tenue numeri">
-                  {soldi(sogno.costo * (1 + g.segnaliniSogno))}
-                  {g.segnaliniSogno > 0 && " " + t("scheda.rincarato", { n: g.segnaliniSogno })}
-                </div>
-              </div>
-            </div>
-            <p className="f12 tenue mt12" style={{ margin: "12px 0 0", lineHeight: 1.5 }}>
-              {t("scheda.sognoSpiegazione")}
-            </p>
-          </div>
 
           <div className="carta">
             <div className="sezione-tit">{t("scheda.affariAcquistati", { n: g.affariVeloci.length })}</div>

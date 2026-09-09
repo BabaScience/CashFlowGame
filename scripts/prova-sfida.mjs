@@ -52,7 +52,6 @@ function gioca(giorno, strategia) {
       }
       else if (p.tipo === "bancarotta") az = { tipo: "concludiBancarotta", giocatoreId: id };
       else if (p.tipo === "beneficenza") az = { tipo: "beneficenza", giocatoreId: id, accetta: false };
-      else if (p.tipo === "sogno") az = { tipo: "passaSogno", giocatoreId: id };
       else if (p.tipo === "affareVeloce") az = { tipo: "passaAffareVeloce", giocatoreId: id };
       else az = { tipo: { extra: "confermaExtra", figlio: "confermaFiglio", licenziamento: "confermaLicenziamento", penalitaVeloce: "confermaPenalita" }[p.tipo], giocatoreId: id };
     } else if (g.tracciato === "topi" && fuoriDallaCorsa(g)) {
@@ -92,11 +91,10 @@ prova("Due giocatori ricevono mazzi identici", () => {
   }
 });
 
-prova("Anche la professione e il sogno del giorno sono uguali per tutti", () => {
+prova("Anche la professione del giorno è uguale per tutti", () => {
   const a = creaSfida({ giorno: "2026-08-21" });
   const b = creaSfida({ giorno: "2026-08-21" });
   eq(a.professione.id, b.professione.id);
-  eq(a.sogno.id, b.sogno.id);
   eq(professioneDelGiorno("2026-08-21", "roma").id, a.professione.id);
 });
 

@@ -104,8 +104,8 @@ const vero = (v, m) => { if (!v) throw new Error(m || "atteso vero"); };
 /** Una partita vera da dare in pasto ai componenti. */
 function tavolo({ mercatoId = "roma", livello = 1, avviata = true, finita = false } = {}) {
   let s = creaStanza("PROV", "a", { seme: 7, mercatoId, livello });
-  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "Ada", professioneId: mercatoId === "roma" ? "insegnante" : "medico", sognoId: "sg01" }).stato;
-  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "Bo", professioneId: mercatoId === "roma" ? "quadro" : "meccanico", sognoId: "sg03" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "Ada", professioneId: mercatoId === "roma" ? "insegnante" : "medico" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "Bo", professioneId: mercatoId === "roma" ? "quadro" : "meccanico" }).stato;
   if (!avviata) return s;
   s = applicaAzione(s, { tipo: "avvia", giocatoreId: "a" }).stato;
   if (finita) { s.fase = "finita"; s.vincitore = "a"; s.motivoVittoria = "rendita"; }
@@ -157,7 +157,7 @@ prova("Ingresso, chi ha scelto di giocare trova il modulo", () => {
 });
 
 prova("Chi entra con un codice non vede la configurazione", () => {
-  /* Mercato, livello, professione e sogno non riguardano chi entra: il
+  /* Mercato, livello e professione non riguardano chi entra: il
      mercato lo decide la stanza, e gli altri due si scelgono nella sala
      d'attesa, dove l'elenco è quello giusto. Prima si compilavano tutti e
      quattro e solo in fondo si scopriva che non servivano. */
@@ -167,7 +167,7 @@ prova("Chi entra con un codice non vede la configurazione", () => {
   }));
   vero(html.includes('id="campo-codice"'), "manca il campo del codice");
   vero(html.includes('id="campo-nome"'), "manca il nome");
-  for (const campo of ["campo-mercato", "campo-professione", "campo-sogno", "campo-livello"]) {
+  for (const campo of ["campo-mercato", "campo-professione", "campo-livello"]) {
     vero(!html.includes(`id="${campo}"`), `"${campo}" non riguarda chi entra`);
   }
 });
@@ -177,7 +177,7 @@ prova("Chi crea vede tutto quello che gli serve, e nessun codice", () => {
     suEntrato: nulla, avvisa: nulla, suSfida: nulla, suImpara: nulla,
     vistaIniziale: "modulo", modoIniziale: "crea",
   }));
-  for (const campo of ["campo-nome", "campo-mercato", "campo-professione", "campo-sogno"]) {
+  for (const campo of ["campo-nome", "campo-mercato", "campo-professione"]) {
     vero(html.includes(`id="${campo}"`), `manca "${campo}"`);
   }
   vero(!html.includes('id="campo-codice"'), "chi crea non ha un codice da inserire");
@@ -213,8 +213,8 @@ prova("La professione mandata è quella del mercato della stanza", () => {
   vero(/leggiStato/.test(trova), "non legge lo stato della stanza prima di entrare");
   vero(/getPacchetto\(stato\.mercatoId/.test(trova),
     "non riparte dalle professioni del mercato della stanza");
-  vero(/setProfessione\(/.test(trova) && /setSogno\(/.test(trova),
-    "non azzera le scelte fatte su un altro mercato");
+  vero(/setProfessione\(/.test(trova),
+    "non azzera la professione scelta su un altro mercato");
 });
 
 prova("Trovata la stanza, si sceglie dal mercato di QUELLA stanza", () => {
@@ -614,7 +614,7 @@ console.log("\n── In nessun'altra lingua resta italiano ──");
    commento che diceva: sono centocinquanta stringhe per mercato, vanno
    tradotte da qualcuno che conosce il posto, pretenderle qui renderebbe il
    controllo impossibile da passare. Era vero quando è stato scritto. Poi i
-   contenuti sono stati tradotti — professioni, sogni, carte, voci del
+   contenuti sono stati tradotti — professioni, carte, voci del
    conto — e il ritaglio è rimasto lì. Le categorie ("Bilocale",
    "Trilocale": l'etichetta verde su ogni carta immobiliare, la stringa più
    vista del gioco) sono passate inosservate per questo.

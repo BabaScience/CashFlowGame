@@ -18,7 +18,6 @@ import { statoRivincita, puoChiederla } from "../api/_lib/rivincita.js";
 import { mossaBot } from "../src/game/avversario.js";
 import { getPacchetto } from "../src/game/mercati/indice.js";
 import { PERCORSO_LARGO, N_LARGO } from "../src/game/tabellone.js";
-import { mesiAlSogno } from "../src/game/tempo.js";
 
 let passati = 0, falliti = 0;
 const prova = (nome, fn) => {
@@ -43,7 +42,6 @@ function tavolo({ formato = "lunga", quanti = 2, bot = [], mercatoId = "roma", s
     const r = applicaAzione(s, {
       tipo: "entra", giocatoreId: `g${i}`, bot: bot.includes(i),
       nome: `G${i}`, professioneId: p.professioni[i % p.professioni.length].id,
-      sognoId: p.sogni[i % p.sogni.length].id,
     });
     if (r.errore) throw new Error(r.errore);
     s = r.stato;
@@ -161,7 +159,7 @@ prova("Al tavolo la scheda è la stessa per tutti", () => {
   let s = creaStanza(codiceStanza(), "g0", { mercatoId: "roma", seme: 3 });
   for (let i = 0; i < 3; i++) {
     s = applicaAzione(s, { tipo: "entra", giocatoreId: "g" + i, nome: "G" + i,
-      professioneId, sognoId: p.sogni[i].id }).stato;
+      professioneId}).stato;
   }
   const schede = new Set(s.giocatori.map((g) => g.professioneId));
   eq(schede.size, 1, "professioni diverse al tavolo:");
@@ -322,7 +320,7 @@ prova("I Giorni di Rendita del Largo sono distribuiti uniformemente", () => {
 });
 
 prova("Nel Largo non c'è un tratto lungo senza affari", () => {
-  /* Le ultime otto caselle erano un blocco di rendite e sogni: chi ci
+  /* Le ultime otto caselle erano un blocco di sole rendite: chi ci
      capitava non poteva comprare niente per un giro intero. */
   let peggio = 0, corrente = 0;
   for (let i = 0; i < N_LARGO * 2; i++) {
@@ -338,18 +336,7 @@ prova("Ogni affare del Largo compare una volta sola", () => {
   eq(rif.length, getPacchetto("roma").affariLargo.length, "affari sul tabellone contro affari nel mazzo:");
 });
 
-console.log("\n── Il sogno, che si misura invece di comprarsi ──");
 
-prova("Il sogno si misura in mesi di rendita", () => {
-  /* Non si compra quasi mai: costa da 70.000 a mezzo milione e il picco di
-     contanti nella Ruota sta sui 46.000. Dirlo in mesi è l'unica cosa
-     onesta, ed è l'unità che il gioco usa per tutto il resto. */
-  eq(mesiAlSogno(90000, 3000), 30);
-  eq(mesiAlSogno(90000, 4000), 23, "si arrotonda per eccesso:");
-  eq(mesiAlSogno(90000, 0), null, "senza rendita la distanza non è un numero:");
-  eq(mesiAlSogno(90000, -500), null, "con la rendita sotto le spese nemmeno:");
-  eq(mesiAlSogno(0, 3000), null, "un sogno che non costa niente non ha distanza:");
-});
 
 console.log("\n── Chi chiude la scheda e non torna ──");
 

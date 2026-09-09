@@ -16,7 +16,7 @@
  * non si può colorare. Per il guscio dell'interfaccia — suoni, uscita,
  * sezioni — servono forme che si comportino come testo.
  *
- * Restano emoji i CONTENUTI: professioni, sogni, categorie delle carte.
+ * Restano emoji i CONTENUTI: professioni, categorie delle carte.
  * Quelle vengono dai pacchetti dei mercati, sono centocinquanta per
  * mercato, e lì l'emoji è informazione — un aereo dice "pilota" più in
  * fretta di qualunque icona disegnata da noi.

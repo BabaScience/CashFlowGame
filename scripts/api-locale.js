@@ -118,7 +118,7 @@ export default function apiLocale() {
                 || professioneACaso(getPacchetto(stanzaVuota.mercatoId, stanzaVuota.versioneDati));
               const r = applicaAzione(stanzaVuota, {
                 tipo: "entra", giocatoreId, nome: b.nome,
-                professioneId, sognoId: b.sognoId,
+                professioneId,
               });
               if (r.errore) return invia(res, 400, { errore: r.errore, chiaveErrore: r.chiaveErrore, valoriErrore: r.valoriErrore });
               /* Avversari automatici, come nell'API vera: giocatori normali
@@ -131,7 +131,6 @@ export default function apiLocale() {
                   tipo: "entra", giocatoreId: `bot${n + 1}`, bot: true,
                   nome: NOMI_BOT[n],
                   professioneId,
-                  sognoId: pac.sogni[(n + 1) % pac.sogni.length].id,
                 });
                 if (bb.errore) return invia(res, 400, { errore: bb.errore, chiaveErrore: bb.chiaveErrore, valoriErrore: bb.valoriErrore });
                 stato = bb.stato;
@@ -221,7 +220,7 @@ export default function apiLocale() {
             if (!avversario) {
               coda.set(giocatoreId, {
                 giocatoreId, chiave, nome, mercatoId, formato, livello,
-                professioneId: b.professioneId, sognoId: b.sognoId,
+                professioneId: b.professioneId,
                 creataIl: Date.now(), scadeIl: Date.now() + TTL_CODA,
               });
               return invia(res, 200, { stato: "attesa", inCoda: 1 });
@@ -233,9 +232,9 @@ export default function apiLocale() {
             let stato = creaStanza(codice, avversario.giocatoreId, { mercatoId, livello, formato });
             /* Una pesca sola per tutti e due: stessa scheda, stessa strada. */
             const professioneId = professioneACaso(getPacchetto(mercatoId));
-            for (const g of [avversario, { giocatoreId, nome, sognoId: b.sognoId }]) {
+            for (const g of [avversario, { giocatoreId, nome }]) {
               const r = applicaAzione(stato, { tipo: "entra", giocatoreId: g.giocatoreId, nome: g.nome,
-                professioneId, sognoId: g.sognoId });
+                professioneId });
               if (r.errore) return invia(res, 400, { errore: r.errore, chiaveErrore: r.chiaveErrore, valoriErrore: r.valoriErrore });
               stato = r.stato;
             }

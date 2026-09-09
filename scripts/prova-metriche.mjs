@@ -105,7 +105,7 @@ console.log("\n── Nessun dato personale, per costruzione ──");
 prova("Nessun incremento può contenere un identificativo", () => {
   const casi = [
     { evento: "sessione", giorniDallaPrima: 3 },
-    { evento: "partitaFinita", turni: 62, motivo: "sogno" },
+    { evento: "partitaFinita", turni: 62, motivo: "liberta" },
     { evento: "stanzaCreata", giocatori: 4 },
     { evento: "uscitaDallaRuota", turni: 41 },
   ];

@@ -8,7 +8,6 @@ import { getPacchetto } from "../src/game/mercati/indice.js";
 
 const PACCHETTO = getPacchetto();
 const PROFESSIONI = PACCHETTO.professioni;
-const SOGNI = PACCHETTO.sogni;
 import { riepilogo } from "../src/game/finanze.js";
 
 import { mossaBot, scegli } from "./bot.mjs";
@@ -25,7 +24,7 @@ function partita(maxAzioni = 8000) {
   for (let i = 0; i < n; i++) {
     const r = applicaAzione(s, {
       tipo: "entra", giocatoreId: "p" + i, nome: "Bot" + i,
-      professioneId: scegli(PROFESSIONI).id, sognoId: scegli(SOGNI).id,
+      professioneId: scegli(PROFESSIONI).id,
     });
     if (r.errore) throw new Error("entra: " + r.errore);
     s = r.stato;
@@ -57,7 +56,7 @@ function partita(maxAzioni = 8000) {
 }
 
 const N = Number(process.argv[2] || 40);
-let finite = 0, sogno = 0, cash = 0, ultimo = 0, timeout = 0;
+let finite = 0, cash = 0, ultimo = 0, timeout = 0;
 let sommaAzioni = 0, sommaTurni = 0, usciti = 0, totGiocatori = 0, eliminati = 0;
 const t0 = Date.now();
 
@@ -70,15 +69,13 @@ for (let i = 0; i < N; i++) {
   eliminati += s.giocatori.filter((g) => g.eliminato).length;
   if (finita) {
     finite++;
-    if (s.motivoVittoria === "sogno") sogno++;
-    else if (s.motivoVittoria === "rendita") cash++;
+    if (s.motivoVittoria === "rendita") cash++;
     else ultimo++;
   } else timeout++;
 }
 
 console.log(`\n${N} partite simulate in ${((Date.now() - t0) / 1000).toFixed(1)}s\n`);
 console.log(`  concluse regolarmente : ${finite}/${N}`);
-console.log(`    - vinte col sogno   : ${sogno}`);
 console.log(`    - vinte col flusso  : ${cash}`);
 console.log(`    - ultimo rimasto    : ${ultimo}`);
 console.log(`  non concluse (limite) : ${timeout}`);

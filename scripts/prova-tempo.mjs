@@ -90,8 +90,8 @@ console.log("\n── Il motore conta i mesi ──");
 /** Una partita pronta a giocare. */
 function tavolo(mercatoId = "roma") {
   let s = creaStanza("TEMP", "a", { seme: 11, mercatoId });
-  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "Ada", professioneId: mercatoId === "roma" ? "quadro" : "medico", sognoId: "sg01" }).stato;
-  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "Bo", professioneId: mercatoId === "roma" ? "meccanico" : "meccanico", sognoId: "sg02" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "Ada", professioneId: mercatoId === "roma" ? "quadro" : "medico" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "Bo", professioneId: mercatoId === "roma" ? "meccanico" : "meccanico" }).stato;
   return applicaAzione(s, { tipo: "avvia", giocatoreId: "a" }).stato;
 }
 
@@ -166,7 +166,7 @@ function partitaLampo(quanti) {
   for (let i = 0; i < quanti; i++) {
     s = applicaAzione(s, {
       tipo: "entra", giocatoreId: `g${i}`, nome: `G${i}`,
-      professioneId: "custode", sognoId: "viaggio",
+      professioneId: "custode",
     }).stato;
   }
   return applicaAzione(s, { tipo: "avvia", giocatoreId: "g0" }).stato;
@@ -212,8 +212,8 @@ prova("Fuori dal Lampo non si mostra nessun tetto", () => {
   /* Una partita lunga ha un tetto di sicurezza (700 turni) che non
      significa niente per chi gioca: mostrarlo sarebbe rumore. */
   let s = creaStanza("LUNG", "a", { mercatoId: "roma" });
-  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "A", professioneId: "custode", sognoId: "viaggio" }).stato;
-  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "B", professioneId: "custode", sognoId: "viaggio" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "A", professioneId: "custode" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "B", professioneId: "custode" }).stato;
   s = applicaAzione(s, { tipo: "avvia", giocatoreId: "a" }).stato;
   vero(tettoMostrato(s) === 0, `una partita lunga mostrerebbe un tetto di ${tettoMostrato(s)}`);
 });

@@ -39,20 +39,6 @@ export default {
     operatore: { nome: "Éboueur" },
   },
 
-  sogni: {
-    sg01: { nome: "Faire le tour du monde, sans se presser" },
-    sg02: { nome: "Construire une école au village de vos parents" },
-    sg03: { nome: "Une maison face à la mer en Sardaigne" },
-    sg04: { nome: "Ouvrir le restaurant dont vous rêvez depuis des années" },
-    sg05: { nome: "Créer une association et la financer dix ans" },
-    sg06: { nome: "Une expédition dans l'Himalaya" },
-    sg07: { nome: "Un voilier de quinze mètres" },
-    sg08: { nome: "Une année sabbatique pour toute la famille" },
-    sg09: { nome: "Financer dix jeunes entreprises" },
-    sg10: { nome: "Acheter et restaurer une ferme en Ombrie" },
-    sg11: { nome: "Payer les études de tous vos petits-enfants" },
-    sg12: { nome: "Un refuge en montagne, rien qu'à vous" },
-  },
 
   etichetteSpese: {
     casa: "Prêt ou loyer",
