@@ -8,9 +8,10 @@
  * plausibile: se una partita raccontasse quarant'anni di lavoro non
  * sarebbe più una simulazione ma una condanna.
  */
-import { creaStanza, applicaAzione } from "../src/game/motore.js";
+import { creaStanza, applicaAzione, limiteTurni, TURNI_LAMPO } from "../src/game/motore.js";
 import { orologio, durata, MESI_ANNO } from "../src/game/tempo.js";
 import { traduci } from "../src/i18n/index.js";
+import { readFileSync } from "node:fs";
 import { gioca } from "./bot.mjs";
 
 let passati = 0, falliti = 0;
@@ -141,6 +142,94 @@ prova("Una stanza vecchia senza il campo non fa esplodere niente", () => {
   const o = orologio(s.giocatori[0].mesi);
   vero(Number.isFinite(o.anno), "l'orologio si rompe su una stanza vecchia");
   vero(durata(s.giocatori[0].mesi, it).length > 0, "la durata si rompe");
+});
+
+console.log("\n── Il contatore del Lampo ──");
+
+/* IL DIFETTO CHE QUESTA SEZIONE SORVEGLIA.
+ *
+ * Il contatore mostrava «40 / 40» a metà partita e ci restava inchiodato
+ * fino alla fine, mentre si giocava ancora per altri quaranta turni. Il
+ * numeratore contava le giocate di tutti (`numeroTurno`), il denominatore
+ * ne contava quaranta a testa (`turniPerGiocatore`): due unità diverse
+ * nella stessa frazione, e un `Math.min` che nascondeva lo sfondamento
+ * invece di farlo notare.
+ *
+ * Non l'ha visto nessun test perché entrambi i numeri, presi da soli,
+ * erano giusti. È il loro accostamento a mentire — quindi si prova quello:
+ * si gioca una partita Lampo vera e si guarda la frazione. */
+
+const tettoMostrato = (s) => (s.turniPerGiocatore ? limiteTurni(s) : 0);
+
+function partitaLampo(quanti) {
+  let s = creaStanza("LAMP", "g0", { mercatoId: "roma", formato: "lampo" });
+  for (let i = 0; i < quanti; i++) {
+    s = applicaAzione(s, {
+      tipo: "entra", giocatoreId: `g${i}`, nome: `G${i}`,
+      professioneId: "custode", sognoId: "viaggio",
+    }).stato;
+  }
+  return applicaAzione(s, { tipo: "avvia", giocatoreId: "g0" }).stato;
+}
+
+prova("Il tetto mostrato è quello che ferma davvero la partita", () => {
+  for (const quanti of [2, 3, 4]) {
+    const s = partitaLampo(quanti);
+    vero(tettoMostrato(s) === limiteTurni(s),
+      `in ${quanti}: si mostra ${tettoMostrato(s)} ma la partita chiude a ${limiteTurni(s)}`);
+    vero(limiteTurni(s) === TURNI_LAMPO * quanti,
+      `in ${quanti}: il tetto vero è ${limiteTurni(s)}, atteso ${TURNI_LAMPO * quanti}`);
+  }
+});
+
+prova("La frazione arriva al fondo esattamente quando finisce la partita", () => {
+  /* Il difetto vero: la frazione toccava il fondo a metà strada. */
+  const { stato: finita } = gioca(partitaLampo(2));
+  vero(finita.fase === "finita", `la partita non è finita da sola (${finita.fase})`);
+  const tetto = tettoMostrato(finita);
+  vero(finita.numeroTurno === tetto,
+    `finita a ${finita.numeroTurno} turni ma il contatore mostrava su ${tetto}`);
+});
+
+prova("Il contatore non sfonda mai il proprio tetto", () => {
+  /* Contare i turni di uno solo sfonderebbe: non si dividono in parti
+     uguali, perché si salta il turno. Una partita reale ha dato 38 e 42. */
+  const { stato: finita } = gioca(partitaLampo(2));
+  const tetto = tettoMostrato(finita);
+  vero(finita.numeroTurno <= tetto,
+    `mostrati ${finita.numeroTurno} su ${tetto}`);
+  const sbilancio = Math.max(...finita.giocatori.map((g) => g.turniGiocati));
+  vero(sbilancio > 0, "nessuno ha giocato");
+  /* Non è un difetto che uno giochi più turni dell'altro: è il motivo per
+     cui il contatore non può essere personale. */
+  if (sbilancio > TURNI_LAMPO) {
+    console.log(`     (uno dei due ha giocato ${sbilancio} turni sui ${TURNI_LAMPO} nominali: `
+      + "ecco perché il conto è del tavolo)");
+  }
+});
+
+prova("Fuori dal Lampo non si mostra nessun tetto", () => {
+  /* Una partita lunga ha un tetto di sicurezza (700 turni) che non
+     significa niente per chi gioca: mostrarlo sarebbe rumore. */
+  let s = creaStanza("LUNG", "a", { mercatoId: "roma" });
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "a", nome: "A", professioneId: "custode", sognoId: "viaggio" }).stato;
+  s = applicaAzione(s, { tipo: "entra", giocatoreId: "b", nome: "B", professioneId: "custode", sognoId: "viaggio" }).stato;
+  s = applicaAzione(s, { tipo: "avvia", giocatoreId: "a" }).stato;
+  vero(tettoMostrato(s) === 0, `una partita lunga mostrerebbe un tetto di ${tettoMostrato(s)}`);
+});
+
+prova("La schermata prende il tetto da limiteTurni, non da turniPerGiocatore", () => {
+  /* Le prove qui sopra controllano la regola, non chi la usa: riscrivendo
+     la riga dentro Partita.jsx tornerebbero verdi mentre il contatore
+     ricomincia a mentire. Quindi si guarda anche il sorgente. */
+  const src = readFileSync(
+    new URL("../src/screens/Partita.jsx", import.meta.url).pathname, "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/\/\/[^\n]*/g, " ");
+  const riga = src.split("\n").find((l) => /const\s+tetto\s*=/.test(l));
+  vero(riga, "in Partita.jsx non c'è più una riga che calcola `tetto`");
+  vero(/limiteTurni\(/.test(riga),
+    `il tetto mostrato non viene da limiteTurni(): ${riga.trim()}`);
 });
 
 console.log("\n── I numeri restano credibili ──");

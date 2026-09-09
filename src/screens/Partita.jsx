@@ -18,7 +18,7 @@ import { copiaTesto } from "../lib/appunti.js";
 import { useSuoni } from "../hooks/useSuoni.js";
 import { avvisaTurno, chiediAvvisi, ricordaPartita, statoAvvisi } from "../lib/partite.js";
 import { audioAcceso, impostaAudio, sbloccaAudio } from "../lib/suoni.js";
-import { fermoDa, ATTESA_MASSIMA_MS } from "../game/motore.js";
+import { fermoDa, ATTESA_MASSIMA_MS, limiteTurni } from "../game/motore.js";
 import { useLingua } from "../Lingua.jsx";
 import { useMercato } from "../Mercato.jsx";
 
@@ -372,10 +372,18 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
   }
 
   const r = riepilogo(io);
-  /* Il tetto della partita, se ce n'è uno. `limiteTurni` conta i turni di
-     tutti; qui si mostra il numero che interessa a chi gioca, cioè i
-     propri: quanti ne restano a me, non al tavolo. */
-  const tetto = stato.turniPerGiocatore || 0;
+  /* IL TETTO DELLA PARTITA, NELLA STESSA UNITÀ DEL CONTATORE.
+     Qui prima si mescolavano due misure: il numeratore era `numeroTurno`,
+     che conta le giocate di TUTTI, e il denominatore `turniPerGiocatore`,
+     che ne conta 40 A TESTA. In due, il tetto vero è 80: il contatore
+     arrivava a «40 / 40» a metà partita e ci restava inchiodato — per via
+     del `Math.min` — mentre si giocava ancora per quaranta turni.
+     Mostrare invece i propri turni non basterebbe: i turni non si dividono
+     in parti uguali (si salta il turno), e nella stessa partita si è visto
+     38 contro 42, cioè uno dei due che sfonda il proprio quaranta. Il
+     numero che decide davvero quando si finisce è il totale del tavolo, e
+     quello si mostra. */
+  const tetto = stato.turniPerGiocatore ? limiteTurni(stato) : 0;
 
   const tipoCasella = io.tracciato === "topi"
     ? PERCORSO_RUOTA[io.posizione]
