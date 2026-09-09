@@ -74,6 +74,7 @@ const Decisione = (await import("../src/components/Decisione.jsx")).default;
 const PrimaPartita = (await import("../src/screens/PrimaPartita.jsx")).default;
 const Roulette = (await import("../src/components/Roulette.jsx")).default;
 const SulTavolo = (await import("../src/components/SulTavolo.jsx")).default;
+const { esitoDi } = await import("../src/components/SulTavolo.jsx");
 const { lezioniIn, avvertenzaIn } = await import("../src/contenuti/lezioni.js");
 const { quesitiIn, testoDi } = await import("../src/contenuti/quesiti.js");
 const { LINGUE, dizionari } = await import("../src/i18n/index.js");
@@ -371,18 +372,32 @@ prova("Chi guarda lo legge nel tabellone, e la fascia sotto non lo muove", () =>
   }));
   vero(/TURNO DI ADA/i.test(html), "il tabellone non dice di chi è il turno");
   vero(html.includes("Ada sta valutando"), "il tabellone non dice cosa sta facendo");
-  vero(html.includes("sul-tavolo"), "manca la fascia della carta");
+  vero(html.includes(carta.nome), "chi guarda non vede la carta dell'altro");
 
-  /* Lo stesso tavolo senza nessuna carta: la fascia deve esserci uguale,
-     altrimenti il tabellone cambia altezza fra un momento e l'altro. */
-  const senza = tavolo();
-  senza.turno = senza.giocatori.findIndex((g) => g.id === "a");
-  const htmlSenza = conMercato(senza, React.createElement(Partita, {
-    stato: senza, mioId: "b", invia: nulla, inAzione: false, avvisa: nulla, suEsci: nulla,
-  }));
-  vero(htmlSenza.includes("sul-tavolo"),
-    "senza carta la fascia sparisce: il tabellone si rimpicciolisce e si ringrandisce");
-  vero(!htmlSenza.includes(carta.nome), "senza carta in tavola ne compare una lo stesso");
+  /* La carta di un altro si mostra SOPRA, non dentro la colonna del
+     tavolo: lì rimpicciolirebbe il tabellone ogni volta che compare, che
+     è il difetto per cui il vecchio riquadro «sul tavolo» era stato tolto.
+     Si controlla dove finisce nel markup, non che esista: esiste eccome. */
+  const colonna = html.slice(html.indexOf("colonna-tavolo"), html.indexOf("zona-pannello"));
+  vero(!colonna.includes("sul-tavolo"),
+    "la carta di un altro è tornata dentro la colonna del tavolo");
+  vero(html.includes("velo-sul-tavolo"), "non è una finestra sopra il tavolo");
+});
+
+prova("L'esito si legge dal registro, e solo quello del giocatore giusto", () => {
+  /* La finestra resta aperta un attimo per dire com'è andata. Se leggesse
+     la riga sbagliata annuncerebbe una scelta che non è stata fatta —
+     e in una partita a due è un'informazione falsa su un avversario. */
+  const nota = (k, chi) => ({ id: "n", k, giocatoreId: chi, t: Date.now() });
+  vero(esitoDi(nota("r50", "a"), "a") === "comprato", "comprare un immobile");
+  vero(esitoDi(nota("r51", "a"), "a") === "comprato", "comprare un'attività");
+  vero(esitoDi(nota("r49", "a"), "a") === "comprato", "comprare titoli");
+  vero(esitoDi(nota("r35", "a"), "a") === "lasciato", "lasciare perdere");
+  vero(esitoDi(nota("r46", "a"), "a") === "lasciato", "lasciare un affare al Largo");
+  vero(esitoDi(nota("r50", "b"), "a") === null, "la riga di un altro conta come propria");
+  vero(esitoDi(nota("r25", "a"), "a") === null, "una riga qualunque diventa un esito");
+  vero(esitoDi(null, "a") === null, "senza registro");
+  vero(esitoDi(nota("r50", "a"), null) === null, "senza giocatore");
 });
 
 prova("La carta sul tavolo la vede chi guarda, non chi deve deciderla", () => {
@@ -396,6 +411,12 @@ prova("La carta sul tavolo la vede chi guarda, non chi deve deciderla", () => {
   vero(guarda.includes(carta.nome), "chi guarda non vede la carta dell'altro");
   const decide = conMercato(s, React.createElement(SulTavolo, { stato: s, mioId: "a" }));
   vero(!decide.includes(carta.nome), "chi decide vede la propria carta due volte");
+
+  /* Senza niente in sospeso non si disegna nulla: una finestra che resta
+     aperta a vuoto è una finestra che si impara a chiudere senza leggere. */
+  const fermo = tavolo();
+  const vuoto = conMercato(fermo, React.createElement(SulTavolo, { stato: fermo, mioId: "b" }));
+  vero(vuoto.trim() === "", "la finestra resta aperta anche senza carta");
 });
 
 prova("La nota nel tabellone non supera mai la larghezza del centro", () => {
@@ -703,10 +724,7 @@ function schermate() {
     /* La fascia "sul tavolo" da entrambi i lati: chi guarda la carta di un
        altro, e chi non ha nessuna carta da guardare. */
     ["sul tavolo · carta di un altro", () => conMercato(conCarta, React.createElement(SulTavolo, {
-      stato: conCarta, mioId: conCarta.giocatori[1].id, nota: "",
-    }))],
-    ["sul tavolo · nessuna carta", () => conMercato(s, React.createElement(SulTavolo, {
-      stato: s, mioId: s.giocatori[0].id, nota: "",
+      stato: conCarta, mioId: conCarta.giocatori[1].id,
     }))],
     ["impara · lezioni", () => disegna(React.createElement(Impara, { suEsci: nulla }))],
     ["impara · quesiti", () => disegna(React.createElement(Impara, {

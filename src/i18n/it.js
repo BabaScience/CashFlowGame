@@ -611,8 +611,10 @@ export default {
     effetto: "Rimborsando, la rata sparisce dalle uscite e il Giorno di Paga risale.",
   },
   sulTavolo: {
-    nessuna: "Nessuna carta sul tavolo.",
-    staGuardando: "{nome} sta guardando",
+    staDecidendo: "{nome} sta decidendo",
+    haScelto: "{nome} ha scelto",
+    comprato: "Comprata",
+    lasciato: "Lasciata",
     taglia: "{nome} sceglie fra Piccolo e Grande Affare",
     carta: "{nome} sta valutando «{carta}»",
     mercato: "Mercato «{carta}» · si aspettano {n} giocatori",

@@ -1365,32 +1365,33 @@ button { cursor: pointer; border: none; background: none; color: inherit; }
 .chat-riga.in-volo { opacity: .55; }
 .chat-riga.in-volo .chat-ora::after { content: " ·"; }
 
-/* ── Sul tavolo ──────────────────────────────────────────────────────
-   La carta che sta guardando un altro giocatore.
-
-   L'altezza è FISSA e la fascia c'è sempre. `.zona-tavolo` prende lo
-   spazio che avanza, quindi una fascia che compare e sparisce
-   rimpicciolisce e ringrandisce il tabellone a ogni carta pescata: chi lo
-   sta guardando se lo vede muovere sotto gli occhi, per la durata della
-   decisione di un altro. Meglio spendere questi pixel una volta sola. */
-.sul-tavolo {
-  flex: none;
-  height: 76px;
-  padding: 6px 16px 0;
-  display: flex;
-  flex-direction: column;
+/* ── Sul tavolo: la carta di un altro giocatore ──────────────────────
+   Una finestra che si apre da sola e si chiude da sola. Non sta nella
+   colonna del tavolo — lì rimpicciolirebbe il tabellone a ogni carta — ma
+   sopra, come il foglio di decisione. Più stretta e più in basso di
+   quello, perché non è una cosa da fare: è una cosa da guardare. */
+.velo-sul-tavolo {
+  align-items: flex-end;
   justify-content: center;
-  overflow: hidden;
+  pointer-events: none;   /* non ruba il clic: non c'è niente da premere */
+  padding-bottom: 12vh;
+  /* Niente velo scuro. Quello del foglio di decisione dice «fermati e
+     scegli»; questa finestra si apre a ogni turno altrui e non chiede
+     niente, quindi non deve spegnere il tavolo dietro. */
+  background: none;
 }
-.sul-tavolo-etichetta { font-size: 10px; letter-spacing: .08em; }
-.sul-tavolo-riga { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.sul-tavolo-chi { font-size: 12px; opacity: .75; }
-.sul-tavolo-nome {
-  font-weight: 700; font-size: 14px; line-height: 1.25;
-  /* Un nome lungo non deve spingere via i numeri sotto: l'altezza è fissa. */
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+.sul-tavolo-foglio {
+  width: min(340px, 88vw);
+  padding: 14px 16px 16px;
 }
-.sul-tavolo-numeri { font-size: 12.5px; display: flex; gap: 12px; }
-.sul-tavolo-attesa { font-size: 12.5px; opacity: .65; line-height: 1.35; }
-
-@media (min-width: 1000px) { .sul-tavolo { height: 84px; } }
+.sul-tavolo-esito {
+  margin-top: 12px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 13px;
+  letter-spacing: .04em;
+  text-align: center;
+}
+.sul-tavolo-esito.comprato { background: rgba(78,139,61,.18); color: #35662A; }
+.sul-tavolo-esito.lasciato { background: rgba(110,123,116,.18); color: #4A554F; }

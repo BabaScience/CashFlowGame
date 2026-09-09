@@ -614,8 +614,10 @@ export default {
     effetto: "Once repaid, the payment leaves your expenses and your Payday goes back up.",
   },
   sulTavolo: {
-    nessuna: "No card on the table.",
-    staGuardando: "{nome} is looking at",
+    staDecidendo: "{nome} is deciding",
+    haScelto: "{nome} chose",
+    comprato: "Bought it",
+    lasciato: "Passed",
     taglia: "{nome} is choosing between a Small and a Big Deal",
     carta: "{nome} is weighing up “{carta}”",
     mercato: "Market “{carta}” · waiting on {n} players",

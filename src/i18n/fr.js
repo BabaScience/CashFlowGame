@@ -613,8 +613,10 @@ export default {
     effetto: "Une fois remboursée, la mensualité disparaît des dépenses et le Jour de paie remonte.",
   },
   sulTavolo: {
-    nessuna: "Aucune carte sur la table.",
-    staGuardando: "{nome} regarde",
+    staDecidendo: "{nome} est en train de décider",
+    haScelto: "{nome} a choisi",
+    comprato: "Achetée",
+    lasciato: "Laissée",
     taglia: "{nome} choisit entre Petite et Grande Affaire",
     carta: "{nome} examine « {carta} »",
     mercato: "Marché « {carta} » · on attend {n} joueurs",

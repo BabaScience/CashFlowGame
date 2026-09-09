@@ -475,12 +475,6 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
             )}
           </div>
 
-          {/* La carta che sta guardando un altro giocatore. Non ripete la
-              riga del tabellone — quella dice *cosa* sta succedendo, questa
-              mostra la carta e i suoi numeri, che nel centro della ruota non
-              ci starebbero. Vedi SulTavolo.jsx per l'altezza fissa. */}
-          <SulTavolo stato={stato} mioId={mioId} />
-
           {/* Il tempo passato. Sta qui e non nella barra in alto perché la
               domanda "da quanto lavoro" è la stessa a cui risponde la barra
               del progresso: quanto manca, e quanto è costato finora. */}
@@ -568,6 +562,10 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
       </div>
 
       <Decisione stato={stato} mioId={mioId} invia={invia} inAzione={inAzione} />
+      {/* La carta di un altro: si apre da sola, mostra cosa ha scelto e se
+          ne va. Fuori dalla colonna del tavolo, quindi non tocca la misura
+          del tabellone. */}
+      <SulTavolo stato={stato} mioId={mioId} />
 
       {/* Uscire non distrugge niente — si rientra col codice — ma sparire
           dal tavolo senza preavviso è comunque una sorpresa. La conferma
