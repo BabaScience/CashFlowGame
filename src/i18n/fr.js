@@ -570,7 +570,7 @@ export default {
   },
   casa: {
     prima: "Votre première partie",
-    primaNota: "Cinq minutes, en solo, avec une voix qui explique pendant que vous jouez.",
+    primaNota: "Cinq minutes contre l'ordinateur, avec une voix qui explique pendant que vous jouez.",
     primaRifai: "Refaire la première partie",
     ilPatto: "Vous avez un salaire et des factures, comme tout le monde. Le jeu consiste à acheter des choses qui vous paient chaque mois — un logement loué, une activité, un titre — jusqu'à ce que ce qui rentre couvre ce qui sort. Ce jour-là, travailler devient un choix : c'est la Roue dont on sort, et le jeu vous dit combien de mois il vous a fallu.",
     arena: "Jouer maintenant",

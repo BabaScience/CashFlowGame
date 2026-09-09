@@ -565,7 +565,7 @@ export default {
   },
   casa: {
     prima: "La tua prima partita",
-    primaNota: "Cinque minuti, da solo, con una voce che spiega mentre giochi.",
+    primaNota: "Cinque minuti contro il computer, con una voce che spiega mentre giochi.",
     primaRifai: "Rifai la prima partita",
     /* Il patto, prima di qualunque pulsante. La parola «Ruota» finora si
        usava come se tutti sapessero cos'è: qui viene introdotta da una

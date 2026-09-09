@@ -571,7 +571,7 @@ export default {
   },
   casa: {
     prima: "Your first game",
-    primaNota: "Five minutes, on your own, with a voice explaining as you play.",
+    primaNota: "Five minutes against the computer, with a voice explaining as you play.",
     primaRifai: "Play the first game again",
     ilPatto: "You have a salary and bills, like everyone. The game is buying things that pay you every month — a flat you rent out, a business, a share — until what comes in covers what goes out. That day work becomes a choice: that is the Wheel you get off, and the game tells you how many months it took.",
     arena: "Play now",
