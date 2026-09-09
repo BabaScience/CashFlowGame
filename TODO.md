@@ -317,6 +317,37 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       promemoria: `prova-mercati.mjs` fallisce all'ottavo mercato e dice
       cosa spostare. Verificato che suoni davvero, abbassando la soglia.
 
+## 5ter · Deciso e rimandato
+
+- [-] **Saldare la banca prima di vincere** — proposto, misurato, rimandato
+      (decisione del 9 settembre 2026: per ora si lascia com'è).
+
+      L'idea: non si esce dalla Ruota finché si deve qualcosa alla banca, e
+      nelle partite a tempo si vendono immobili per saldare prima di
+      stabilire chi ha vinto.
+
+      **Misurato prima di scrivere una riga**, su tredici professioni, al
+      momento in cui la rendita supera le spese:
+
+      | Cosa si chiede di saldare | Ce l'ha | Debito medio | Può saldare |
+      |---|---|---|---|
+      | Solo il prestito banca | 97% | 6.972 € | 35% |
+      | + carta e auto | 100% | 17.991 € | 10% |
+      | + prestito studi | 100% | 25.286 € | 3% |
+      | Tutto, mutuo casa incluso | 100% | ~200.000 € | **0 su 88** |
+
+      Quindi la lettura larga **rende il gioco invincibile**: nessuno esce
+      più, mai. La lettura stretta invece regge, e coincide con le parole:
+      `prestitoBanca` è l'unico debito davvero verso *la banca* — gli altri
+      sono un mutuo, un prestito studi, un finanziamento auto e una carta.
+
+      Se un giorno si fa: la condizione va dentro `fuoriDallaCorsa()` in
+      `finanze.js` e non nei chiamanti, perché quella funzione la
+      consultano il motore, il bot, la valutazione e i pulsanti — e sono
+      già stati trovati due punti che facevano il confronto a mano. Serve
+      anche una riga che spieghi **perché** il pulsante per uscire non c'è,
+      altrimenti chi ha la rendita che copre le spese non capisce.
+
 ## 6 · Prima di incassare un euro
 
 - [x] **6.1 Licenza e proprietà** — `LICENSE` con dichiarazione di opera
