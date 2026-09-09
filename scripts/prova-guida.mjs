@@ -11,7 +11,7 @@ import { applicaAzione } from "../src/game/motore.js";
 import { mossaBot } from "../src/game/avversario.js";
 import { prossimoPasso, PASSI } from "../src/game/guida.js";
 import {
-  creaPrimaPartita, TURNI_PRIMA_PARTITA, SEME_PRIMA_PARTITA,
+  creaPrimaPartita, TURNI_PRIMA_PARTITA, turniPrimaPartita, SEME_PRIMA_PARTITA,
   PROFESSIONE_PRIMA_PARTITA, MERCATO_PRIMA_PARTITA,
 } from "../src/game/prima-partita.js";
 import { getPacchetto } from "../src/game/mercati/indice.js";
@@ -45,10 +45,13 @@ function giocata(seme) {
   };
   let prima = null, n = 0;
   dì(null, s);
-  while (s.fase === "inCorso" && s.numeroTurno <= TURNI_PRIMA_PARTITA && n < 900) {
+  /* `mossaBot` sceglie da sé di chi è il turno: riscrivere ogni mossa come
+     "io" faceva rifiutare i turni dell'avversario dal motore, e la partita
+     si fermava al primo. */
+  while (s.fase === "inCorso" && s.numeroTurno <= turniPrimaPartita(s) && n < 2000) {
     const az = mossaBot(s);
     if (!az) break;
-    const r = applicaAzione(s, { ...az, giocatoreId: "io" });
+    const r = applicaAzione(s, az);
     if (r.errore) break;
     prima = s; s = r.stato; n++;
     dì(prima, s);
@@ -67,7 +70,10 @@ prova("Si gioca sempre la stessa, e con la scheda giusta", () => {
   eq(b.stato.seme, a.stato.seme, "due prime partite hanno mazzi diversi:");
   eq(a.stato.mercatoId, MERCATO_PRIMA_PARTITA);
   eq(a.professione.id, PROFESSIONE_PRIMA_PARTITA, "professione:");
-  eq(a.stato.giocatori.length, 1, "si gioca da soli:");
+  eq(a.stato.giocatori.length, 2, "si impara a un tavolo, non da soli:");
+  eq(a.stato.giocatori.filter((g) => g.bot).length, 1, "manca l'avversario automatico:");
+  eq(a.stato.giocatori[0].professioneId, a.stato.giocatori[1].professioneId,
+    "al tavolo la scheda è la stessa per tutti:");
   eq(a.stato.fase, "inCorso", "comincia già avviata:");
 });
 
@@ -173,8 +179,8 @@ prova("Nessuna frase promette numeri che il passo non prepara", () => {
 
 prova("La partita finisce entro i turni dichiarati", () => {
   const { stato } = giocata();
-  vero(stato.numeroTurno <= TURNI_PRIMA_PARTITA + 1,
-    `è arrivata al turno ${stato.numeroTurno} su ${TURNI_PRIMA_PARTITA}`);
+  vero(stato.numeroTurno <= turniPrimaPartita(stato) + 1,
+    `è arrivata al turno ${stato.numeroTurno} su ${turniPrimaPartita(stato)}`);
 });
 
 prova("Chi gioca arriva a costruirsi una rendita vera", () => {

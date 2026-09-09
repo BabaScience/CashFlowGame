@@ -30,6 +30,16 @@ import { redditoPassivo, speseTotali, sogliaUscita, flussoMensile } from "./fina
  */
 
 const g0 = (s) => s?.giocatori?.[0];
+
+/**
+ * La decisione in sospeso è di chi sta imparando?
+ *
+ * Da quando al tavolo c'è un avversario, `pending` può essere suo. Senza
+ * questo controllo la guida spiegherebbe la carta del computer come se
+ * fosse la tua — «guarda due numeri: costa 12.000 e rende 260» mentre tu
+ * non hai niente da decidere — che è peggio del silenzio.
+ */
+const mia = (s) => Boolean(s?.pending) && s.pending.giocatoreId === g0(s)?.id;
 const rendita = (s) => { const g = g0(s); return g ? redditoPassivo(g) : 0; };
 const mesi = (s) => g0(s)?.mesi ?? 0;
 
@@ -53,6 +63,14 @@ export const PASSI = [
     valori: (s, inValuta) => ({ importo: inValuta(flussoMensile(g0(s))) }),
   },
   {
+    /* C'è qualcuno dall'altra parte, e ha la tua stessa scheda. Si dice
+       appena si muove: vedere una pedina che non è la tua muoversi da
+       sola, senza sapere di chi sia, è la prima cosa che confonde. */
+    id: "avversario",
+    quando: (prima, dopo) => (dopo.giocatori?.[1]?.turniGiocati ?? 0) > 0,
+    valori: (s) => ({ nome: s.giocatori[1]?.nome || "" }),
+  },
+  {
     /* La prima paga incassata: è la cosa che finanzia tutto. */
     id: "paga",
     quando: (prima, dopo) => prima && mesi(dopo) > mesi(prima),
@@ -60,7 +78,7 @@ export const PASSI = [
   },
   {
     id: "taglia",
-    quando: (prima, dopo) => dopo.pending?.tipo === "sceltaTaglia",
+    quando: (prima, dopo) => mia(dopo) && dopo.pending.tipo === "sceltaTaglia",
   },
   {
     /* Una carta con una rendita dentro: qui si spiega cosa guardare. Non
@@ -70,7 +88,7 @@ export const PASSI = [
        affare davanti a uno che costa quattro volte i contanti non insegna
        a scegliere: non c'è niente da scegliere. Di quello parla il passo
        sul prestito. */
-    quando: (prima, dopo) => dopo.pending?.tipo === "carta"
+    quando: (prima, dopo) => mia(dopo) && dopo.pending.tipo === "carta"
       && dopo.pending.carta?.flusso > 0
       && dopo.pending.carta?.acconto > 0
       && dopo.pending.carta.acconto <= (g0(dopo)?.contanti ?? 0),
@@ -91,7 +109,14 @@ export const PASSI = [
   {
     /* Le Spese Extra: non si rifiutano, e sono quello che rallenta. */
     id: "extra",
-    quando: (prima, dopo) => dopo.pending?.tipo === "extra",
+    quando: (prima, dopo) => mia(dopo) && dopo.pending.tipo === "extra",
+  },
+  {
+    /* La chat. Si nomina dopo che si è capito il gioco: prima non c'è
+       niente da dirsi. */
+    id: "chat",
+    quando: (prima, dopo) => (dopo.giocatori?.[1]?.turniGiocati ?? 0) >= 3,
+    valori: (s) => ({ nome: s.giocatori[1]?.nome || "" }),
   },
   {
     /* A metà strada si guarda la barra e si dice cosa misura. */
@@ -104,11 +129,23 @@ export const PASSI = [
     }),
   },
   {
+    /* Il registro: si nomina quando ha qualcosa dentro da leggere. */
+    id: "registro",
+    quando: (prima, dopo) => (dopo.registro?.length ?? 0) >= 10,
+    valori: (s) => ({ nome: s.giocatori[1]?.nome || "" }),
+  },
+  {
     /* La banca: compare solo se si è davvero a corto, altrimenti è una
        nozione in cerca di un momento. */
     id: "prestito",
-    quando: (prima, dopo) => dopo.pending?.tipo === "carta"
+    quando: (prima, dopo) => mia(dopo) && dopo.pending.tipo === "carta"
       && dopo.pending.carta?.acconto > (g0(dopo)?.contanti ?? 0),
+  },
+  {
+    /* Le regole, per ultime: sono lì per chi le vuole, e nominarle
+       all'inizio suona come «prima studia». */
+    id: "regole",
+    quando: (prima, dopo) => mesi(dopo) >= 4,
   },
 ];
 

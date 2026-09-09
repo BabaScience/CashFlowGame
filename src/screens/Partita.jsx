@@ -251,7 +251,13 @@ function Azioni({ stato, mioId, invia, inAzione, avvisa, tiroAltrove = false }) 
   );
 }
 
-export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci, schedaIniziale = null }) {
+export default function Partita({
+  stato, mioId, invia, inAzione, avvisa, suEsci,
+  schedaIniziale = null,
+  /* La prima partita passa di qui: la voce che spiega, e una chat che non
+     ha un server dietro. Nelle partite vere sono tutti e due assenti. */
+  guida = null, canaleChat = null,
+}) {
   const { t } = useLingua();
   const { traduciCarta } = useMercato();
   /* Sul telefono nessuna scheda è aperta all'inizio: lo schermo è il
@@ -461,6 +467,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
       <div className="corpo">
         {/* Colonna del tavolo: non scorre mai. */}
         <div className="colonna-tavolo">
+          {guida}
           <div className="zona-tavolo">
             <Tabellone stato={stato} mioId={mioId}
               nota={cheStaFacendo(stato, t, traduciCarta)} centroLibero={tiroAlCentro} />
@@ -551,7 +558,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
               <>
                 {sezione === "scheda" && <Scheda giocatore={io} invia={invia} inAzione={inAzione} mio />}
                 {sezione === "gioc" && <Giocatori stato={stato} mioId={mioId} />}
-                {sezione === "chat" && <Chat stato={stato} mioId={mioId} suLetto={segnaLetti} />}
+                {sezione === "chat" && <Chat stato={stato} mioId={mioId} suLetto={segnaLetti} canale={canaleChat} />}
                 {sezione === "log" && <Registro stato={stato} />}
                 {sezione === "regole" && <Manuale />}
               </>
@@ -625,7 +632,7 @@ export default function Partita({ stato, mioId, invia, inAzione, avvisa, suEsci,
             <div className={`foglio-corpo ${scheda === "chat" ? "foglio-corpo-pieno" : ""}`}>
               {scheda === "scheda" && <Scheda giocatore={io} invia={invia} inAzione={inAzione} mio />}
               {scheda === "gioc" && <Giocatori stato={stato} mioId={mioId} />}
-              {scheda === "chat" && <Chat stato={stato} mioId={mioId} suLetto={segnaLetti} />}
+              {scheda === "chat" && <Chat stato={stato} mioId={mioId} suLetto={segnaLetti} canale={canaleChat} />}
               {scheda === "log" && <Registro stato={stato} />}
               {scheda === "regole" && <Manuale />}
             </div>

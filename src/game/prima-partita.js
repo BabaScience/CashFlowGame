@@ -24,8 +24,24 @@
 import { creaStanza, applicaAzione, codiceStanza } from "./motore.js";
 import { getPacchetto, versioneCorrente } from "./mercati/indice.js";
 
-/** Quanto dura. Corta: deve stare in cinque minuti e finire, non vincersi. */
+/**
+ * Quanto dura, IN TURNI A TESTA. Corta: deve stare in cinque minuti e
+ * finire, non vincersi.
+ *
+ * A testa, non in tutto. Al tavolo ci sono due giocatori, e il motore
+ * conta un turno per giocata: contarli in tutto vorrebbe dire dare a chi
+ * impara la metà dei turni — e la metà delle occasioni in cui la guida ha
+ * qualcosa da dire. È lo stesso inciampo che il contatore del Lampo aveva
+ * a schermo: due misure diverse chiamate con lo stesso nome.
+ */
 export const TURNI_PRIMA_PARTITA = 25;
+
+/** Il tetto vero del tavolo: quello che si confronta con `numeroTurno`. */
+export const turniPrimaPartita = (stato) =>
+  TURNI_PRIMA_PARTITA * Math.max(1, stato?.giocatori?.length || 1);
+
+/** Chi gioca contro di te la prima volta. */
+export const AVVERSARIO_PRIMA_PARTITA = "Bea";
 
 /** Con quanto si comincia, oltre ai risparmi della scheda. */
 export const BONUS_PRIMA_PARTITA = 9000;
@@ -56,11 +72,29 @@ export function creaPrimaPartita({ nome } = {}) {
     seme: SEME_PRIMA_PARTITA,
     mercatoId,
     versioneDati: versioneCorrente(mercatoId),
-    solitaria: true,
+    /* Niente `solitaria`: adesso al tavolo si è in due, e il motore
+       pretende — giustamente — che una stanza solitaria abbia un
+       giocatore solo. */
   });
   s = applicaAzione(s, {
     tipo: "entra", giocatoreId: "io", nome: comeTiChiami,
     professioneId: prof.id,
+  }).stato;
+  /* ═══ SI IMPARA A UN TAVOLO, NON DA SOLI ═══
+   *
+   * Prima la partita guidata era in solitaria, con una impaginazione tutta
+   * sua: si imparava a giocare a un gioco che poi non si ritrovava. Alla
+   * prima partita vera comparivano di colpo gli avversari, la chat, il
+   * registro e le regole — cioè metà dell'interfaccia — e bisognava
+   * ricominciare a orientarsi.
+   *
+   * Adesso al tavolo c'è qualcuno: stessa professione (come in coda: si
+   * confrontano le scelte, non le schede), e la guida può indicare le
+   * sezioni mentre servono davvero.
+   */
+  s = applicaAzione(s, {
+    tipo: "entra", giocatoreId: "bea", nome: AVVERSARIO_PRIMA_PARTITA,
+    professioneId: prof.id, bot: true,
   }).stato;
   s = applicaAzione(s, { tipo: "avvia", giocatoreId: "io" }).stato;
   s.giocatori[0].contanti += BONUS_PRIMA_PARTITA;

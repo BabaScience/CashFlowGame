@@ -1,16 +1,18 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
 import { applicaAzione } from "../game/motore.js";
 import { MercatoProvider, useMercato } from "../Mercato.jsx";
 import { Bottone, Barra } from "../components/Base.jsx";
-import TavoloSolitario from "../components/TavoloSolitario.jsx";
+import Partita from "./Partita.jsx";
 import Logo from "../components/Logo.jsx";
 import { redditoPassivo, speseTotali, sogliaUscita, progressoLiberta } from "../game/finanze.js";
 import { durata } from "../game/tempo.js";
 import { prossimoPasso } from "../game/guida.js";
 import {
-  creaPrimaPartita, segnaPrimaPartita, TURNI_PRIMA_PARTITA,
+  creaPrimaPartita, segnaPrimaPartita, turniPrimaPartita,
 } from "../game/prima-partita.js";
+import { preparaMessaggio, accoda } from "../game/chat.js";
+import { useAvversari } from "../hooks/useAvversari.js";
 import { traccia } from "../lib/traccia.js";
 import { useSuoni } from "../hooks/useSuoni.js";
 import { useLingua } from "../Lingua.jsx";
@@ -56,7 +58,20 @@ function Dentro({ partita, setPartita, suEsci, suGiocaDavvero }) {
   /* La voce. `detti` è un riferimento e non uno stato perché non deve far
      ridisegnare niente da solo: cambia insieme al messaggio. */
   const detti = useRef(new Set());
-  const [voce, setVoce] = useState(null);
+
+  /* La prima frase si calcola disegnando, non in un effetto.
+     In un effetto arrivava un istante dopo — il primo fotogramma della
+     prima partita era senza la voce — e non c'era affatto quando la
+     schermata viene disegnata sul server, dove gli effetti non girano.
+     Così sparisce anche la guardia contro il doppio montaggio di
+     sviluppo: l'inizializzatore di `useState` e il riferimento `detti`
+     nascono insieme, quindi restano d'accordo comunque. */
+  const [voce, setVoce] = useState(() => {
+    const passo = prossimoPasso(null, stato, detti.current);
+    if (!passo) return null;
+    detti.current.add(passo.id);
+    return { id: passo.id, testo: t(`guida.${passo.id}`, passo.valori ? passo.valori(stato, soldi) : {}) };
+  });
 
   const parla = useCallback((prima, dopo) => {
     const passo = prossimoPasso(prima, dopo, detti.current);
@@ -66,20 +81,13 @@ function Dentro({ partita, setPartita, suEsci, suGiocaDavvero }) {
     setVoce({ id: passo.id, testo: t(`guida.${passo.id}`, valori) });
   }, [soldi, t]);
 
-  /* Il primo messaggio, prima di qualunque mossa.
-     Con la guardia: in sviluppo React monta due volte, e senza questa il
-     primo messaggio veniva detto e subito scavalcato dal secondo — chi
-     apriva la prima partita non leggeva mai chi era. */
-  const avviato = useRef(false);
-  useEffect(() => {
-    if (avviato.current) return;
-    avviato.current = true;
-    parla(null, stato);
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, []);
 
+  /* `giocatoreId` non si forza più: le mosse dell'avversario automatico
+     arrivano da `useAvversari` col proprio, e riscriverle come "io" le
+     faceva rifiutare dal motore — la partita si fermava al primo turno
+     di Bea. Quelle che arrivano dai pulsanti non ce l'hanno, e sono mie. */
   const invia = useCallback(async (az) => {
-    const r = applicaAzione(stato, { ...az, giocatoreId: "io" });
+    const r = applicaAzione(stato, { giocatoreId: "io", ...az });
     if (r.errore) {
       const msg = testoErrore(lingua, r);
       setErrore(msg);
@@ -90,7 +98,7 @@ function Dentro({ partita, setPartita, suEsci, suGiocaDavvero }) {
     setPartita({ ...partita, stato: nuovo });
     parla(stato, nuovo);
 
-    if (nuovo.fase === "finita" || nuovo.numeroTurno > TURNI_PRIMA_PARTITA) {
+    if (nuovo.fase === "finita" || nuovo.numeroTurno > turniPrimaPartita(nuovo)) {
       segnaPrimaPartita();
       traccia("primaPartitaFinita", { turni: nuovo.numeroTurno });
       setFinita(true);
@@ -98,43 +106,54 @@ function Dentro({ partita, setPartita, suEsci, suGiocaDavvero }) {
     return { errore: null };
   }, [stato, partita, setPartita, parla]);
 
+  /* L'avversario automatico gioca come in una partita vera: stessa
+     funzione, stesse regole, stessa pausa perché si veda cosa fa. */
+  useAvversari(stato, invia, true);
+
+  /* ═══ UNA CHAT CHE FUNZIONA DAVVERO ═══
+   *
+   * Qui la stanza non esiste da nessuna parte: non c'è un codice, non c'è
+   * un server. La chat però deve funzionare lo stesso, perché una chat
+   * spenta alla prima partita insegna che la chat non serve — e invece è
+   * metà del motivo per cui si gioca con qualcuno.
+   *
+   * Passa dalle stesse funzioni del server (`preparaMessaggio`, `accoda`),
+   * quindi valgono gli stessi limiti: lunghezza, pausa fra due messaggi,
+   * tetto della cronologia. */
+  const scrivi = useCallback((chi, testo) => {
+    setPartita((p) => {
+      const r = preparaMessaggio(p.stato, chi, testo);
+      if (!r.messaggio) return p;
+      return { ...p, stato: accoda(structuredClone(p.stato), r.messaggio) };
+    });
+    return { errore: null };
+  }, [setPartita]);
+
+  const canaleChat = useMemo(() => ({
+    manda: async (testo) => scrivi("io", testo),
+    interruttore: async () => ({ errore: null }),
+  }), [scrivi]);
+
+  /* Bea dice qualcosa, una volta sola, quando la partita è avviata: una
+     chat vuota si legge come una chat rotta. */
+  const salutato = useRef(false);
+  useEffect(() => {
+    if (salutato.current || stato.fase !== "inCorso") return;
+    salutato.current = true;
+    const quando = setTimeout(() => scrivi("bea", t("guida.beaSaluta")), 1800);
+    return () => clearTimeout(quando);
+  }, [stato.fase, scrivi, t]);
+
   if (finita) {
     return <Fine stato={stato} suEsci={suEsci} suGiocaDavvero={suGiocaDavvero} />;
   }
 
-  const rendita = redditoPassivo(io);
-  const traguardo = Math.round(sogliaUscita(io));
-
   return (
-    <TavoloSolitario
-      stato={stato} invia={invia} errore={errore}
-      intestazione={(
-        <div className="flex tra cen g12" style={{
-          padding: "12px 14px", background: "rgba(0,0,0,.24)",
-          borderBottom: "1px solid rgba(255,255,255,.07)", flex: "none",
-        }}>
-          <button onClick={suEsci} className="f11 tenue" style={{ textAlign: "left", background: "none" }}>
-            <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("guida.titolo")}</div>
-            <div className="numeri grassetto f16">
-              {Math.min(stato.numeroTurno, TURNI_PRIMA_PARTITA)} / {TURNI_PRIMA_PARTITA}
-            </div>
-          </button>
-          <div className="ta-r" style={{ flex: 1 }}>
-            <div className="maiusc" style={{ color: "rgba(244,241,230,.4)" }}>{t("sfida.contanti")}</div>
-            <div className="numeri grassetto f16">{soldi(io.contanti)}</div>
-          </div>
-        </div>
-      )}
-      sopraIlTabellone={<Voce voce={voce} />}
-      progresso={(
-        <>
-          <div className="flex tra f12 mb4">
-            <span className="tenue">{t("partita.renditaVersoSpese")}</span>
-            <span className="numeri grassetto">{soldi(rendita)} / {soldi(traguardo)}</span>
-          </div>
-          <Barra scura valore={progressoLiberta(io)} />
-        </>
-      )}
+    <Partita
+      stato={stato} mioId="io" invia={invia} inAzione={false}
+      avvisa={setErrore} suEsci={suEsci}
+      guida={<Voce voce={voce} />}
+      canaleChat={canaleChat}
     />
   );
 }

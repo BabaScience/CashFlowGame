@@ -377,6 +377,38 @@ Legenda: `[ ]` da fare · `[~]` in corso · `[x]` fatto · `[-]` rimandato
       nessuna parte, perché `prova-arena.mjs` non compilava più: da lì in
       poi si guarda il codice d'uscita, non le faccine.
 
+## 5quinquies · La prima partita è una partita vera
+
+- [x] **Si impara al tavolo, non da soli** — la partita guidata era in
+      solitaria e aveva un'impaginazione tutta sua (`TavoloSolitario`):
+      si imparava a giocare a un gioco che poi non si ritrovava. Alla prima
+      partita vera comparivano di colpo avversari, chat, registro e regole,
+      cioè metà dell'interfaccia, e bisognava ricominciare a orientarsi.
+
+      Adesso la prima partita **è** `Partita.jsx`, la schermata di sempre,
+      con un avversario automatico (Bea, stessa professione: si confrontano
+      le scelte, non le schede) mosso da `useAvversari` come in una partita
+      vera. Quattro passi nuovi della guida indicano le sezioni quando
+      servono: chi è l'avversario appena si muove, la chat dopo qualche suo
+      turno, il registro quando ha di che leggere, le regole dal quarto mese.
+
+      **La chat funziona davvero.** Qui la stanza non esiste da nessuna
+      parte, ma una chat spenta alla prima partita insegna che la chat non
+      serve: passa dalle stesse funzioni del server (`preparaMessaggio`,
+      `accoda`), quindi valgono gli stessi limiti, e Bea saluta una volta.
+
+      Tre cose che sarebbero passate inosservate, e che i test hanno preso:
+      la guida spiegava la carta **dell'avversario** come se fosse la tua
+      (ora ogni passo controlla di chi è il `pending`); il banco riscriveva
+      ogni mossa come `giocatoreId: "io"`, e col bot al tavolo il motore la
+      rifiutava fermando la partita al primo turno; e i venticinque turni
+      erano contati sul tavolo invece che a testa, che avrebbe dimezzato le
+      occasioni della guida — lo stesso inciampo del contatore del Lampo.
+
+      La prima frase ora si calcola disegnando e non in un effetto: prima
+      il primo fotogramma era senza voce, e sul server non compariva
+      affatto. Via anche la guardia contro il doppio montaggio.
+
 ## 6 · Prima di incassare un euro
 
 - [x] **6.1 Licenza e proprietà** — `LICENSE` con dichiarazione di opera

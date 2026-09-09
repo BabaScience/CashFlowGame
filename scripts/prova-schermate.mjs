@@ -72,6 +72,8 @@ const Sfida = (await import("../src/screens/Sfida.jsx")).default;
 const Vittoria = (await import("../src/components/Vittoria.jsx")).default;
 const Decisione = (await import("../src/components/Decisione.jsx")).default;
 const PrimaPartita = (await import("../src/screens/PrimaPartita.jsx")).default;
+const require_prima = await import("../src/game/prima-partita.js");
+const require_guida = await import("../src/game/guida.js");
 const Roulette = (await import("../src/components/Roulette.jsx")).default;
 const SulTavolo = (await import("../src/components/SulTavolo.jsx")).default;
 const { esitoDi } = await import("../src/components/SulTavolo.jsx");
@@ -775,6 +777,53 @@ for (const lingua of LINGUE.map((l) => l.id).filter((id) => id !== "it")) {
     }
   });
 }
+
+console.log("\n── La prima partita si gioca al tavolo vero ──");
+
+prova("La prima partita ha un avversario, e ha la sua stessa scheda", () => {
+  /* Era in solitaria, con un'impaginazione tutta sua: si imparava a
+     giocare a un gioco che poi non si ritrovava. Alla prima partita vera
+     comparivano di colpo avversari, chat, registro e regole. */
+  const { stato } = require_prima.creaPrimaPartita({ nome: "Ana" });
+  vero(stato.giocatori.length === 2, "si gioca ancora da soli");
+  const bot = stato.giocatori.filter((g) => g.bot);
+  vero(bot.length === 1, "manca l'avversario automatico");
+  vero(stato.giocatori[0].professioneId === stato.giocatori[1].professioneId,
+    "schede diverse: si confronterebbero le professioni, non le scelte");
+});
+
+prova("La prima partita disegna le stesse sezioni di una partita vera", () => {
+  const html = disegna(React.createElement(PrimaPartita, {
+    suEsci: nulla, suGiocaDavvero: nulla,
+  }));
+  /* Le linguette: è il motivo per cui la prima partita esiste. */
+  for (const chiave of ["schede.scheda", "schede.giocatori", "schede.chat",
+                        "schede.registro", "schede.regole"]) {
+    const etichetta = traduci("it", chiave);
+    vero(html.includes(etichetta), `manca la sezione "${etichetta}"`);
+  }
+  vero(html.includes("guida-voce"), "manca la voce che spiega");
+});
+
+prova("La voce parla solo delle decisioni di chi sta imparando", () => {
+  /* Con un avversario al tavolo `pending` può essere suo: senza il
+     controllo la guida spiegherebbe la carta del computer come se fosse
+     la tua, mentre non hai niente da decidere. */
+  const { stato } = require_prima.creaPrimaPartita({ nome: "Ana" });
+  const carta = require_pacchetto(stato.mercatoId).mazzi.piccoli
+    .find((c) => c.flusso > 0 && c.acconto > 0);
+  const sua = structuredClone(stato);
+  sua.pending = { tipo: "carta", giocatoreId: "bea", carta };
+  vero(require_guida.prossimoPasso(stato, sua, new Set(["chiSei"])) === null
+    || require_guida.prossimoPasso(stato, sua, new Set(["chiSei"])).id !== "carta",
+    "la guida spiega la carta dell'avversario come se fosse la tua");
+
+  const mia = structuredClone(stato);
+  mia.giocatori[0].contanti = 99999;
+  mia.pending = { tipo: "carta", giocatoreId: "io", carta };
+  const passo = require_guida.prossimoPasso(stato, mia, new Set(["chiSei"]));
+  vero(passo?.id === "carta", `sulla propria carta la guida dice "${passo?.id}"`);
+});
 
 console.log("\n── Le parole che si possono chiedere ──");
 

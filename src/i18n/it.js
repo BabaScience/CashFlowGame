@@ -110,6 +110,11 @@ export default {
   },
 
   guida: {
+    avversario: "Dall'altra parte c'è {nome}, e ha la tua stessa scheda: quello che cambia sono le scelte. La linguetta «Giocatori» dice a che punto è.",
+    chat: "Puoi scrivere a {nome}: la linguetta «Chat» è lì per quello. Al tavolo si parla, anche mentre si gioca.",
+    registro: "Tutto quello che succede finisce nel «Registro» — anche le mosse di {nome}. Se ti sei perso qualcosa, è scritto lì.",
+    regole: "Se ti serve una regola, sta tutta nella linguetta «Regole», dentro la partita. Non devi ricordartela.",
+    beaSaluta: "Ciao! Prima volta? Anch'io ho la stessa scheda, vediamo chi esce prima.",
     titolo: "Prima partita",
     chiSei: "Fai l'operatore ecologico. Ogni mese ti restano {importo} dopo aver pagato tutto: è da lì che si comincia. Tira il dado — ogni casella su cui passi è un mese della tua vita.",
     paga: "Giorno di Paga: hai incassato {importo}. Sono i tuoi soldi da parte — servono a comprare, non a stare fermi.",

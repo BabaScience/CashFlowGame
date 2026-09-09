@@ -93,10 +93,20 @@ diverse messe insieme — *a che serve*, *cosa vogliono dire queste parole*,
 *tocca a me e adesso che faccio* — e l'ultima non si può rispondere prima di
 cominciare: si risponde mentre uno sta decidendo.
 
-Per questo l'introduzione non è un giro di finestrelle. È **una partita vera,
-in solitaria**, con un seme fisso: la stessa a tutti, così si può descrivere
-e correggere. Dura venticinque turni e una voce in alto dice una cosa sola,
-nel momento in cui quella cosa succede davvero:
+Per questo l'introduzione non è un giro di finestrelle. È **una partita
+vera, a un tavolo vero**, con un seme fisso: la stessa a tutti, così si può
+descrivere e correggere. Dura venticinque turni a testa.
+
+Dall'altra parte c'è un avversario automatico, Bea, con **la tua stessa
+scheda** — quello che cambia sono le scelte. E si gioca sulla schermata di
+sempre: le stesse linguette (scheda, giocatori, chat, registro, regole),
+la stessa chat che funziona davvero, lo stesso registro. Prima la prima
+partita era in solitaria e aveva un'impaginazione tutta sua: si imparava a
+giocare a un gioco che poi non si ritrovava, e alla prima partita vera
+comparivano di colpo metà degli strumenti.
+
+Una voce in alto dice una cosa sola, nel momento in cui quella cosa
+succede davvero:
 
 | Quando | Cosa dice |
 |---|---|
@@ -108,6 +118,10 @@ nel momento in cui quella cosa succede davvero:
 | Alla prima Spesa Extra | che non si rifiuta, ed è quello che rallenta |
 | A metà strada | che cosa misura la barra in alto |
 | Su una carta fuori portata | che la banca esiste, e quanto costa |
+| Appena l'avversario si muove | chi è, e che la linguetta Giocatori dice a che punto sta |
+| Dopo qualche suo turno | che con lui ci si può parlare, dalla chat |
+| Quando il registro ha di che leggere | che lì è scritto tutto, anche le mosse dell'altro |
+| Dal quarto mese | che le regole stanno in una linguetta, dentro la partita |
 
 Ogni frase si dice **una volta sola** e poi tace per sempre, anche se la sua
 occasione ritorna. Meglio restare zitti che ripetersi.

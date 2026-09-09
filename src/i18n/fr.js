@@ -116,6 +116,11 @@ export default {
   },
 
   guida: {
+    avversario: "En face il y a {nome}, avec la même fiche que vous : ce qui change, ce sont les choix. L'onglet « Joueurs » dit où elle en est.",
+    chat: "Vous pouvez écrire à {nome} : l'onglet « Tchat » est là pour ça. À une table on se parle, même en jouant.",
+    registro: "Tout ce qui arrive va dans le « Journal » — les coups de {nome} aussi. Si vous avez raté quelque chose, c'est écrit là.",
+    regole: "S'il vous faut une règle, elles sont toutes dans l'onglet « Règles », dans la partie. Pas besoin de les retenir.",
+    beaSaluta: "Salut ! Première fois ? J'ai la même fiche que vous, on verra qui sort en premier.",
     titolo: "Première partie",
     chiSei: "Vous êtes éboueur. Chaque mois il vous reste {importo} une fois tout payé : c'est de là qu'on part. Lancez le dé — chaque case que vous passez est un mois de votre vie.",
     paga: "Jour de paie : vous avez encaissé {importo}. C'est votre épargne — elle sert à acheter, pas à dormir.",

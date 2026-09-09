@@ -15,7 +15,12 @@ const ora = (t, lingua) =>
  * sincronizzare a parte: quando qualcuno scrive, la versione della stanza
  * sale e il polling che c'è già li porta a bordo. Muoiono con la stanza.
  */
-export default function Chat({ stato, mioId, suLetto }) {
+/**
+ * `canale` è da dove passano i messaggi. Di norma è il server; nella prima
+ * partita è il browser, perché lì la stanza non esiste da nessuna parte —
+ * e una chat finta, spenta, insegnerebbe che la chat non serve.
+ */
+export default function Chat({ stato, mioId, suLetto, canale }) {
   const { t, lingua } = useLingua();
   const [testo, setTesto] = useState("");
   const [errore, setErrore] = useState("");
@@ -73,7 +78,7 @@ export default function Chat({ stato, mioId, suLetto }) {
     setInVolo((v) => [...v, mio]);
     setTesto("");
     try {
-      await api.inviaMessaggio(stato.codice, pulito);
+      await (canale ? canale.manda(pulito) : api.inviaMessaggio(stato.codice, pulito));
     } catch (err) {
       /* Fallito: si toglie e si restituisce il testo, invece di lasciare a
          schermo un messaggio che nessuno ha ricevuto. */
@@ -87,7 +92,9 @@ export default function Chat({ stato, mioId, suLetto }) {
 
   const cambiaInterruttore = async () => {
     setErrore("");
-    const r = await api.azione(stato.codice, { tipo: "impostaChat", aperta: spenta })
+    const r = await (canale
+      ? canale.interruttore(spenta)
+      : api.azione(stato.codice, { tipo: "impostaChat", aperta: spenta }))
       .catch((e) => ({ errore: testoErrore(lingua, e) }));
     if (r?.errore) setErrore(r.errore);
   };

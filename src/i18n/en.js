@@ -116,6 +116,11 @@ export default {
   },
 
   guida: {
+    avversario: "{nome} is playing too, with the same sheet as you: what differs is the choices. The Players tab shows how far along she is.",
+    chat: "You can write to {nome}: that is what the Chat tab is for. People talk at a table, even mid-game.",
+    registro: "Everything that happens goes into the Journal — {nome}'s moves too. If you missed something, it is written there.",
+    regole: "If you need a rule, all of them are in the Rules tab, inside the game. You do not have to remember them.",
+    beaSaluta: "Hi! First time? I have the same sheet as you — let's see who gets out first.",
     titolo: "First game",
     chiSei: "You are a refuse collector. Every month {importo} is left after paying for everything: that is what you start with. Roll the die — every square you pass is a month of your life.",
     paga: "Payday: you collected {importo}. That is your savings — they are for buying, not for sitting on.",
