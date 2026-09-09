@@ -10,6 +10,7 @@ import { creaStanza, applicaAzione } from "../src/game/motore.js";
 import {
   preparaMessaggio, accoda, ripulisci,
   MAX_MESSAGGI, LUNGHEZZA_MAX, PAUSA_MS,
+  uniscilnVolo, TOLLERANZA_OROLOGI_MS,
 } from "../src/game/chat.js";
 
 let passati = 0, falliti = 0;
@@ -141,6 +142,62 @@ prova("La chat vive dentro la stanza, quindi muore con lei", () => {
   const s = tavolo();
   vero(Array.isArray(s.chat), "la chat deve stare nel documento della stanza");
   vero(!("chatId" in s), "nessun riferimento a una collezione esterna: niente da cancellare a parte");
+});
+
+console.log("\n── Il messaggio si vede appena si preme invio ──");
+
+/* Il difetto: fra «invia» e il proprio messaggio a schermo passava un giro
+   di lettura dello stato — uno o due secondi — che in una chat si legge
+   come «non è partito», e infatti si riscriveva. */
+
+prova("Un messaggio in volo si vede subito", () => {
+  const dalServer = [{ id: "s1", di: "b", testo: "ciao", t: 1000 }];
+  const inVolo = [{ id: "v1", di: "a", testo: "eccomi", t: 2000, inVolo: true }];
+  const out = uniscilnVolo(dalServer, inVolo, "a");
+  vero(out.length === 2, `mostrati ${out.length} messaggi invece di 2`);
+  vero(out[1].inVolo, "il messaggio in volo non è in coda");
+});
+
+prova("Quando torna dal server, quello in volo sparisce", () => {
+  const inVolo = [{ id: "v1", di: "a", testo: "eccomi", t: 2000, inVolo: true }];
+  const dalServer = [{ id: "s2", di: "a", testo: "eccomi", t: 2050 }];
+  const out = uniscilnVolo(dalServer, inVolo, "a");
+  vero(out.length === 1, `il messaggio compare ${out.length} volte invece di una`);
+  vero(!out[0].inVolo, "è rimasta la copia in volo invece di quella del server");
+});
+
+prova("Un orologio indietro non fa comparire il messaggio due volte", () => {
+  /* L'ora la scrive il server: i due orologi non sono lo stesso orologio.
+     Senza tolleranza il gemello non veniva riconosciuto. */
+  const inVolo = [{ id: "v1", di: "a", testo: "eccomi", t: 3000, inVolo: true }];
+  const dalServer = [{ id: "s3", di: "a", testo: "eccomi", t: 3000 - TOLLERANZA_OROLOGI_MS + 1 }];
+  vero(uniscilnVolo(dalServer, inVolo, "a").length === 1, "doppione per colpa dell'orologio");
+});
+
+prova("Lo stesso testo due volte consuma un gemello per volta", () => {
+  /* Chi scrive «ok» due volte non deve vedere sparire tutti e due quando
+     ne torna indietro uno solo. */
+  const inVolo = [
+    { id: "v1", di: "a", testo: "ok", t: 4000, inVolo: true },
+    { id: "v2", di: "a", testo: "ok", t: 4100, inVolo: true },
+  ];
+  const dalServer = [{ id: "s4", di: "a", testo: "ok", t: 4050 }];
+  const out = uniscilnVolo(dalServer, inVolo, "a");
+  vero(out.length === 2, `mostrati ${out.length} invece di 2 (uno arrivato, uno ancora in volo)`);
+  vero(out.filter((m) => m.inVolo).length === 1, "sono spariti tutti e due");
+});
+
+prova("Il messaggio di un altro non consuma il mio", () => {
+  const inVolo = [{ id: "v1", di: "a", testo: "ok", t: 5000, inVolo: true }];
+  const dalServer = [{ id: "s5", di: "b", testo: "ok", t: 5050 }];
+  vero(uniscilnVolo(dalServer, inVolo, "a").length === 2,
+    "il messaggio di un altro ha fatto sparire il mio");
+});
+
+prova("Senza niente in volo si restituisce esattamente la lista del server", () => {
+  const dalServer = [{ id: "s6", di: "b", testo: "ciao", t: 6000 }];
+  vero(uniscilnVolo(dalServer, [], "a") === dalServer,
+    "si ricostruisce una lista nuova a ogni disegno anche quando non serve");
 });
 
 console.log(`\n${passati} test superati, ${falliti} falliti\n`);

@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Bottone } from "./Base.jsx";
-import { LUNGHEZZA_MAX } from "../game/chat.js";
+import { LUNGHEZZA_MAX, uniscilnVolo } from "../game/chat.js";
 import * as api from "../lib/api.js";
 import { useLingua } from "../Lingua.jsx";
 import { testoErrore } from "../lib/errori.js";
@@ -21,9 +21,35 @@ export default function Chat({ stato, mioId, suLetto }) {
   const [errore, setErrore] = useState("");
   const [invio, setInvio] = useState(false);
   const fondo = useRef(null);
-  const messaggi = stato.chat || [];
+  /* I messaggi appena mandati, finché il server non li rimanda indietro.
+     Vedi `messaggi` qui sotto. */
+  const [inVolo, setInVolo] = useState([]);
   const spenta = stato.chatAperta === false;
   const sonoHost = stato.hostId === mioId;
+
+  /* IL MESSAGGIO SI VEDE APPENA SI PREME INVIO.
+   *
+   * I messaggi arrivano col resto dello stato, e lo stato si rilegge ogni
+   * uno-due secondi: fra «invia» e il proprio messaggio a schermo passava
+   * tutto quel tempo, che in una chat si legge come «non è partito» — e
+   * infatti si riscriveva. Quindi il messaggio compare subito, in grigio,
+   * e resta lì finché non torna dal server.
+   *
+   * Non è una bugia: se l'invio fallisce sparisce e il testo torna nella
+   * casella, dove chi scrive può correggerlo e riprovare. La chat non è il
+   * motore — i messaggi non cambiano la partita — quindi mostrarne uno un
+   * secondo prima che sia sicuro non può far divergere niente.
+   */
+  const messaggi = useMemo(
+    () => uniscilnVolo(stato.chat || [], inVolo, mioId),
+    [stato.chat, inVolo, mioId]);
+
+  /* Ripulire la coda è un effetto, non parte del disegno: `messaggi` deve
+     restare una funzione pura dello stato. */
+  useEffect(() => {
+    setInVolo((v) => (v.length && v.some((x) => !messaggi.includes(x))
+      ? v.filter((x) => messaggi.includes(x)) : v));
+  }, [messaggi]);
 
   // Si resta incollati in fondo: è una chat, non un archivio.
   useEffect(() => {
@@ -37,10 +63,22 @@ export default function Chat({ stato, mioId, suLetto }) {
     if (!pulito || invio) return;
     setInvio(true);
     setErrore("");
+    /* La casella si svuota adesso, non dopo: chi scrive veloce deve poter
+       cominciare la frase dopo senza aspettare la rete. */
+    const mio = {
+      id: `volo-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      di: mioId, nome: t("chat.tu"), colore: undefined,
+      testo: pulito, t: Date.now(), inVolo: true,
+    };
+    setInVolo((v) => [...v, mio]);
+    setTesto("");
     try {
       await api.inviaMessaggio(stato.codice, pulito);
-      setTesto("");
     } catch (err) {
+      /* Fallito: si toglie e si restituisce il testo, invece di lasciare a
+         schermo un messaggio che nessuno ha ricevuto. */
+      setInVolo((v) => v.filter((x) => x.id !== mio.id));
+      setTesto((attuale) => attuale || pulito);
       setErrore(testoErrore(lingua, err));
     } finally {
       setInvio(false);
@@ -81,7 +119,8 @@ export default function Chat({ stato, mioId, suLetto }) {
               </p>
             )}
             {messaggi.map((m) => (
-              <div key={m.id} className={`chat-riga${m.di === mioId ? " mio" : ""}`}>
+              <div key={m.id}
+                className={`chat-riga${m.di === mioId ? " mio" : ""}${m.inVolo ? " in-volo" : ""}`}>
                 <div className="chat-testa">
                   <span className="chat-nome" style={{ color: m.colore }}>
                     {m.di === mioId ? t("chat.tu") : m.nome}

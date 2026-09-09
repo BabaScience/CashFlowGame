@@ -72,3 +72,35 @@ export function accoda(stato, messaggio) {
   stato.versione += 1;
   return stato;
 }
+
+/**
+ * I MESSAGGI DA MOSTRARE: QUELLI DEL SERVER PIÙ I PROPRI ANCORA IN VOLO.
+ *
+ * Serve solo al browser, ma sta qui perché è una regola della chat e le
+ * regole della chat stanno in un posto solo.
+ *
+ * Un messaggio appena mandato si vede subito, in grigio; sparisce dalla
+ * coda quando il suo gemello torna dal server. «Gemello» vuol dire stesso
+ * autore e stesso testo, con un margine sull'orario: l'ora la scrive il
+ * server, e i due orologi non sono lo stesso orologio. Senza il margine
+ * il messaggio comparirebbe due volte per un giro di lettura.
+ *
+ * Il testo uguale non è un rischio: se qualcuno scrive due volte «ok», il
+ * secondo resta in volo finché non arriva il suo, perché ne è già stato
+ * consumato uno solo per volta.
+ */
+export const TOLLERANZA_OROLOGI_MS = 2000;
+
+export function uniscilnVolo(dalServer = [], inVolo = [], mioId = null) {
+  if (!inVolo.length) return dalServer;
+  const disponibili = dalServer.filter((m) => m.di === mioId);
+  const usati = new Set();
+  const restano = inVolo.filter((v) => {
+    const i = disponibili.findIndex((m, k) => !usati.has(k)
+      && m.testo === v.testo && m.t >= v.t - TOLLERANZA_OROLOGI_MS);
+    if (i === -1) return true;
+    usati.add(i);
+    return false;
+  });
+  return restano.length ? [...dalServer, ...restano] : dalServer;
+}
